@@ -6,7 +6,9 @@ import java.util.Properties;
 import se.sics.hop.metadata.persistence.DALStorageFactory;
 import se.sics.hop.metadata.persistence.StorageConnector;
 import se.sics.hop.metadata.persistence.dal.EntityDataAccess;
+import se.sics.hop.metadata.persistence.dal.LeaderDataAccess;
 import se.sics.hop.metadata.persistence.dal.LeaseDataAccess;
+import se.sics.hop.metadata.persistence.ndb.dalimpl.LeaderClusterj;
 import se.sics.hop.metadata.persistence.ndb.dalimpl.LeaseClusterj;
 import se.sics.hop.metadata.persistence.ndb.mysqlserver.MysqlServerConnector;
 
@@ -26,6 +28,7 @@ public class NdbStorageFactory implements DALStorageFactory {
 
   private void initDataAccessMap() {
     dataAccessMap.put(LeaseDataAccess.class, new LeaseClusterj());
+    dataAccessMap.put(LeaderDataAccess.class, new LeaderClusterj());
   }
 
   public StorageConnector getConnector() {

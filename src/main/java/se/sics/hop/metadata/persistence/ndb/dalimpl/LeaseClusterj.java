@@ -169,7 +169,7 @@ public class LeaseClusterj extends LeaseDataAccess {
       throw new StorageException(e);
     }
   }
-    
+
   private HopLease createLease(LeaseDTO lTable) {
     return new HopLease(lTable.getHolder(), lTable.getHolderId(), lTable.getLastUpdate());
   }
