@@ -5,10 +5,12 @@ import java.util.Map;
 import java.util.Properties;
 import se.sics.hop.metadata.persistence.DALStorageFactory;
 import se.sics.hop.metadata.persistence.StorageConnector;
+import se.sics.hop.metadata.persistence.dal.BlockInfoDataAccess;
 import se.sics.hop.metadata.persistence.dal.BlockTokenKeyDataAccess;
 import se.sics.hop.metadata.persistence.dal.CorruptReplicaDataAccess;
 import se.sics.hop.metadata.persistence.dal.EntityDataAccess;
 import se.sics.hop.metadata.persistence.dal.ExcessReplicaDataAccess;
+import se.sics.hop.metadata.persistence.dal.INodeDataAccess;
 import se.sics.hop.metadata.persistence.dal.InvalidateBlockDataAccess;
 import se.sics.hop.metadata.persistence.dal.LeaderDataAccess;
 import se.sics.hop.metadata.persistence.dal.LeaseDataAccess;
@@ -17,9 +19,11 @@ import se.sics.hop.metadata.persistence.dal.ReplicaDataAccess;
 import se.sics.hop.metadata.persistence.dal.StorageInfoDataAccess;
 import se.sics.hop.metadata.persistence.dal.UnderReplicatedBlockDataAccess;
 import se.sics.hop.metadata.persistence.dal.VariableDataAccess;
+import se.sics.hop.metadata.persistence.ndb.dalimpl.BlockInfoClusterj;
 import se.sics.hop.metadata.persistence.ndb.dalimpl.BlockTokenKeyClusterj;
 import se.sics.hop.metadata.persistence.ndb.dalimpl.CorruptReplicaClusterj;
 import se.sics.hop.metadata.persistence.ndb.dalimpl.ExcessReplicaClusterj;
+import se.sics.hop.metadata.persistence.ndb.dalimpl.INodeClusterj;
 import se.sics.hop.metadata.persistence.ndb.dalimpl.InvalidatedBlockClusterj;
 import se.sics.hop.metadata.persistence.ndb.dalimpl.LeaderClusterj;
 import se.sics.hop.metadata.persistence.ndb.dalimpl.LeaseClusterj;
@@ -45,6 +49,8 @@ public class NdbStorageFactory implements DALStorageFactory {
   }
 
   private void initDataAccessMap() {
+    dataAccessMap.put(BlockInfoDataAccess.class, new BlockInfoClusterj());
+    dataAccessMap.put(INodeDataAccess.class, new INodeClusterj());
     dataAccessMap.put(LeaseDataAccess.class, new LeaseClusterj());
     dataAccessMap.put(LeasePathDataAccess.class, new LeasePathClusterj());
     dataAccessMap.put(LeaderDataAccess.class, new LeaderClusterj());

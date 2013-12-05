@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package se.sics.hop.metadata.persistence.ndb.dalimpl;
 
 import com.mysql.clusterj.Query;
@@ -16,6 +12,16 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import se.sics.hop.metadata.persistence.dal.BlockInfoDataAccess;
+import static se.sics.hop.metadata.persistence.dal.BlockInfoDataAccess.BLOCK_ID;
+import static se.sics.hop.metadata.persistence.dal.BlockInfoDataAccess.BLOCK_INDEX;
+import static se.sics.hop.metadata.persistence.dal.BlockInfoDataAccess.BLOCK_RECOVERY_ID;
+import static se.sics.hop.metadata.persistence.dal.BlockInfoDataAccess.BLOCK_UNDER_CONSTRUCTION_STATE;
+import static se.sics.hop.metadata.persistence.dal.BlockInfoDataAccess.GENERATION_STAMP;
+import static se.sics.hop.metadata.persistence.dal.BlockInfoDataAccess.INODE_ID;
+import static se.sics.hop.metadata.persistence.dal.BlockInfoDataAccess.NUM_BYTES;
+import static se.sics.hop.metadata.persistence.dal.BlockInfoDataAccess.PRIMARY_NODE_INDEX;
+import static se.sics.hop.metadata.persistence.dal.BlockInfoDataAccess.TABLE_NAME;
+import static se.sics.hop.metadata.persistence.dal.BlockInfoDataAccess.TIME_STAMP;
 import se.sics.hop.metadata.persistence.entity.hdfs.HopBlockInfo;
 import se.sics.hop.metadata.persistence.exceptions.StorageException;
 import se.sics.hop.metadata.persistence.ndb.ClusterjConnector;
@@ -89,18 +95,18 @@ public class BlockInfoClusterj extends BlockInfoDataAccess {
         try {
             Session session = connector.obtainSession();
             for (HopBlockInfo block : removed) {
-                BlockInfoDTO bTable = session.newInstance(BlockInfoDTO.class, block.getBlockId());
+                BlockInfoClusterj.BlockInfoDTO bTable = session.newInstance(BlockInfoClusterj.BlockInfoDTO.class, block.getBlockId());
                 session.deletePersistent(bTable);
             }
 
             for (HopBlockInfo block : news) {
-                BlockInfoDTO bTable = session.newInstance(BlockInfoDTO.class);
+                BlockInfoClusterj.BlockInfoDTO bTable = session.newInstance(BlockInfoClusterj.BlockInfoDTO.class);
                 createPersistable(block, bTable);
                 session.savePersistent(bTable);
             }
 
             for (HopBlockInfo block : modified) {
-                BlockInfoDTO bTable = session.newInstance(BlockInfoDTO.class);
+                BlockInfoClusterj.BlockInfoDTO bTable = session.newInstance(BlockInfoClusterj.BlockInfoDTO.class);
                 createPersistable(block, bTable);
                 session.savePersistent(bTable);
             }
@@ -113,7 +119,7 @@ public class BlockInfoClusterj extends BlockInfoDataAccess {
     public HopBlockInfo findById(long blockId) throws StorageException {
         try {
             Session session = connector.obtainSession();
-            BlockInfoDTO bit = session.find(BlockInfoDTO.class, blockId);
+            BlockInfoClusterj.BlockInfoDTO bit = session.find(BlockInfoClusterj.BlockInfoDTO.class, blockId);
             if (bit == null) {
                 return null;
             }
@@ -134,9 +140,9 @@ public class BlockInfoClusterj extends BlockInfoDataAccess {
         try {
             Session session = connector.obtainSession();
             QueryBuilder qb = session.getQueryBuilder();
-            QueryDomainType<BlockInfoDTO> dobj = qb.createQueryDefinition(BlockInfoDTO.class);
+            QueryDomainType<BlockInfoClusterj.BlockInfoDTO> dobj = qb.createQueryDefinition(BlockInfoClusterj.BlockInfoDTO.class);
             dobj.where(dobj.get("iNodeId").equal(dobj.param("param")));
-            Query<BlockInfoDTO> query = session.createQuery(dobj);
+            Query<BlockInfoClusterj.BlockInfoDTO> query = session.createQuery(dobj);
             query.setParameter("param", id);
             return createBlockInfoList(query.getResultList());
         } catch (Exception e) {
@@ -149,8 +155,8 @@ public class BlockInfoClusterj extends BlockInfoDataAccess {
         try {
             Session session = connector.obtainSession();
             QueryBuilder qb = session.getQueryBuilder();
-            QueryDomainType<BlockInfoDTO> dobj = qb.createQueryDefinition(BlockInfoDTO.class);
-            Query<BlockInfoDTO> query = session.createQuery(dobj);
+            QueryDomainType<BlockInfoClusterj.BlockInfoDTO> dobj = qb.createQueryDefinition(BlockInfoClusterj.BlockInfoDTO.class);
+            Query<BlockInfoClusterj.BlockInfoDTO> query = session.createQuery(dobj);
             return createBlockInfoList(query.getResultList());
         } catch (Exception e) {
             throw new StorageException(e);
@@ -179,17 +185,17 @@ public class BlockInfoClusterj extends BlockInfoDataAccess {
         }
     }
 
-    private List<HopBlockInfo> createBlockInfoList(List<BlockInfoDTO> bitList) {
+    private List<HopBlockInfo> createBlockInfoList(List<BlockInfoClusterj.BlockInfoDTO> bitList) {
         List<HopBlockInfo> list = new ArrayList<HopBlockInfo>();
 
-        for (BlockInfoDTO blockInfoDTO : bitList) {
+        for (BlockInfoClusterj.BlockInfoDTO blockInfoDTO : bitList) {
             list.add(createBlockInfo(blockInfoDTO));
         }
 
         return list;
     }
 
-    private HopBlockInfo createBlockInfo(BlockInfoDTO bDTO) {
+    private HopBlockInfo createBlockInfo(BlockInfoClusterj.BlockInfoDTO bDTO) {
         HopBlockInfo hopBlockInfo = new HopBlockInfo(
                 bDTO.getBlockId(),
                 bDTO.getBlockIndex(),
@@ -203,14 +209,14 @@ public class BlockInfoClusterj extends BlockInfoDataAccess {
         return hopBlockInfo;
     }
 
-    private void createPersistable(HopBlockInfo block, BlockInfoDTO persistable) {
+    private void createPersistable(HopBlockInfo block, BlockInfoClusterj.BlockInfoDTO persistable) {
         persistable.setBlockId(block.getBlockId());
         persistable.setNumBytes(block.getNumBytes());
         persistable.setGenerationStamp(block.getGenerationStamp());
         persistable.setINodeId(block.getInodeId());
         persistable.setTimestamp(block.getTimeStamp());
         persistable.setBlockIndex(block.getBlockIndex());
-        persistable.setBlockUCState(block.getBlockUnderConstructionState());
+        persistable.setBlockUCState(block.getBlockUCState());
         persistable.setPrimaryNodeIndex(block.getPrimaryNodeIndex());
         persistable.setBlockRecoveryId(block.getBlockRecoveryId());
     }
