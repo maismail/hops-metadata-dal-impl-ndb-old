@@ -15,6 +15,7 @@ import se.sics.hop.metadata.persistence.dal.InvalidateBlockDataAccess;
 import se.sics.hop.metadata.persistence.dal.LeaderDataAccess;
 import se.sics.hop.metadata.persistence.dal.LeaseDataAccess;
 import se.sics.hop.metadata.persistence.dal.LeasePathDataAccess;
+import se.sics.hop.metadata.persistence.dal.PendingBlockDataAccess;
 import se.sics.hop.metadata.persistence.dal.ReplicaDataAccess;
 import se.sics.hop.metadata.persistence.dal.StorageInfoDataAccess;
 import se.sics.hop.metadata.persistence.dal.UnderReplicatedBlockDataAccess;
@@ -28,6 +29,7 @@ import se.sics.hop.metadata.persistence.ndb.dalimpl.InvalidatedBlockClusterj;
 import se.sics.hop.metadata.persistence.ndb.dalimpl.LeaderClusterj;
 import se.sics.hop.metadata.persistence.ndb.dalimpl.LeaseClusterj;
 import se.sics.hop.metadata.persistence.ndb.dalimpl.LeasePathClusterj;
+import se.sics.hop.metadata.persistence.ndb.dalimpl.PendingBlockClusterj;
 import se.sics.hop.metadata.persistence.ndb.dalimpl.ReplicaClusterj;
 import se.sics.hop.metadata.persistence.ndb.dalimpl.StorageInfoClusterj;
 import se.sics.hop.metadata.persistence.ndb.dalimpl.UnderReplicatedBlockClusterj;
@@ -50,6 +52,7 @@ public class NdbStorageFactory implements DALStorageFactory {
 
   private void initDataAccessMap() {
     dataAccessMap.put(BlockInfoDataAccess.class, new BlockInfoClusterj());
+    dataAccessMap.put(PendingBlockDataAccess.class, new PendingBlockClusterj());
     dataAccessMap.put(INodeDataAccess.class, new INodeClusterj());
     dataAccessMap.put(LeaseDataAccess.class, new LeaseClusterj());
     dataAccessMap.put(LeasePathDataAccess.class, new LeasePathClusterj());
