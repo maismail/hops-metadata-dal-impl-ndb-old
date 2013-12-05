@@ -5,11 +5,13 @@ import java.util.Map;
 import java.util.Properties;
 import se.sics.hop.metadata.persistence.DALStorageFactory;
 import se.sics.hop.metadata.persistence.StorageConnector;
+import se.sics.hop.metadata.persistence.dal.CorruptReplicaDataAccess;
 import se.sics.hop.metadata.persistence.dal.EntityDataAccess;
 import se.sics.hop.metadata.persistence.dal.LeaderDataAccess;
 import se.sics.hop.metadata.persistence.dal.LeaseDataAccess;
 import se.sics.hop.metadata.persistence.dal.LeasePathDataAccess;
 import se.sics.hop.metadata.persistence.dal.ReplicaDataAccess;
+import se.sics.hop.metadata.persistence.ndb.dalimpl.CorruptReplicaClusterj;
 import se.sics.hop.metadata.persistence.ndb.dalimpl.LeaderClusterj;
 import se.sics.hop.metadata.persistence.ndb.dalimpl.LeaseClusterj;
 import se.sics.hop.metadata.persistence.ndb.dalimpl.LeasePathClusterj;
@@ -35,6 +37,7 @@ public class NdbStorageFactory implements DALStorageFactory {
     dataAccessMap.put(LeasePathDataAccess.class, new LeasePathClusterj());
     dataAccessMap.put(LeaderDataAccess.class, new LeaderClusterj());
     dataAccessMap.put(ReplicaDataAccess.class, new ReplicaClusterj());
+    dataAccessMap.put(CorruptReplicaDataAccess.class, new CorruptReplicaClusterj());
   }
 
   public StorageConnector getConnector() {
