@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import se.sics.hop.metadata.persistence.dal.INodeDataAccess;
-import se.sics.hop.metadata.persistence.entity.HopINode;
+import se.sics.hop.metadata.persistence.entity.hdfs.HopINode;
 import se.sics.hop.metadata.persistence.exceptions.StorageException;
 import se.sics.hop.metadata.persistence.ndb.ClusterjConnector;
 import se.sics.hop.metadata.persistence.ndb.mysqlserver.CountHelper;
