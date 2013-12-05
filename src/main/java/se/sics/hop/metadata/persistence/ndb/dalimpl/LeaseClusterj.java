@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import se.sics.hop.metadata.persistence.dal.LeaseDataAccess;
-import se.sics.hop.metadata.persistence.entity.HopLease;
+import se.sics.hop.metadata.persistence.entity.hdfs.HopLease;
 import se.sics.hop.metadata.persistence.exceptions.StorageException;
 import se.sics.hop.metadata.persistence.ndb.ClusterjConnector;
 import se.sics.hop.metadata.persistence.ndb.mysqlserver.CountHelper;
