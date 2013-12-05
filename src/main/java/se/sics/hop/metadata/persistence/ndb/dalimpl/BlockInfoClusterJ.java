@@ -4,7 +4,6 @@
  */
 package se.sics.hop.metadata.persistence.ndb.dalimpl;
 
-import se.sics.hop.metadata.persistence.ndb.dalimpl.ReplicaClusterj;
 import com.mysql.clusterj.Query;
 import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
