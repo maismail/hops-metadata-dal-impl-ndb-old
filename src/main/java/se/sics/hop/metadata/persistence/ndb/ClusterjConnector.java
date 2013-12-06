@@ -11,7 +11,40 @@ import java.util.Properties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import se.sics.hop.metadata.persistence.StorageConnector;
+import se.sics.hop.metadata.persistence.dal.BlockInfoDataAccess;
+import se.sics.hop.metadata.persistence.dal.BlockTokenKeyDataAccess;
+import se.sics.hop.metadata.persistence.dal.CorruptReplicaDataAccess;
+import se.sics.hop.metadata.persistence.dal.EntityDataAccess;
+import se.sics.hop.metadata.persistence.dal.ExcessReplicaDataAccess;
+import se.sics.hop.metadata.persistence.dal.INodeAttributesDataAccess;
+import se.sics.hop.metadata.persistence.dal.INodeDataAccess;
+import se.sics.hop.metadata.persistence.dal.InvalidateBlockDataAccess;
+import se.sics.hop.metadata.persistence.dal.LeaderDataAccess;
+import se.sics.hop.metadata.persistence.dal.LeaseDataAccess;
+import se.sics.hop.metadata.persistence.dal.LeasePathDataAccess;
+import se.sics.hop.metadata.persistence.dal.PendingBlockDataAccess;
+import se.sics.hop.metadata.persistence.dal.ReplicaDataAccess;
+import se.sics.hop.metadata.persistence.dal.ReplicaUnderConstructionDataAccess;
+import se.sics.hop.metadata.persistence.dal.StorageInfoDataAccess;
+import se.sics.hop.metadata.persistence.dal.UnderReplicatedBlockDataAccess;
+import se.sics.hop.metadata.persistence.dal.VariableDataAccess;
+import se.sics.hop.metadata.persistence.entity.hop.HopVariable;
 import se.sics.hop.metadata.persistence.exceptions.StorageException;
+import se.sics.hop.metadata.persistence.ndb.dalimpl.BlockInfoClusterj;
+import se.sics.hop.metadata.persistence.ndb.dalimpl.BlockTokenKeyClusterj;
+import se.sics.hop.metadata.persistence.ndb.dalimpl.CorruptReplicaClusterj;
+import se.sics.hop.metadata.persistence.ndb.dalimpl.ExcessReplicaClusterj;
+import se.sics.hop.metadata.persistence.ndb.dalimpl.INodeAttributesClusterj;
+import se.sics.hop.metadata.persistence.ndb.dalimpl.INodeClusterj;
+import se.sics.hop.metadata.persistence.ndb.dalimpl.InvalidatedBlockClusterj;
+import se.sics.hop.metadata.persistence.ndb.dalimpl.LeaderClusterj;
+import se.sics.hop.metadata.persistence.ndb.dalimpl.LeasePathClusterj;
+import se.sics.hop.metadata.persistence.ndb.dalimpl.PendingBlockClusterj;
+import se.sics.hop.metadata.persistence.ndb.dalimpl.ReplicaClusterj;
+import se.sics.hop.metadata.persistence.ndb.dalimpl.ReplicaUnderConstructionClusterj;
+import se.sics.hop.metadata.persistence.ndb.dalimpl.StorageInfoClusterj;
+import se.sics.hop.metadata.persistence.ndb.dalimpl.UnderReplicatedBlockClusterj;
+import se.sics.hop.metadata.persistence.ndb.dalimpl.VariableClusterj;
 
 public class ClusterjConnector implements StorageConnector<Session> {
 
@@ -112,7 +145,17 @@ public class ClusterjConnector implements StorageConnector<Session> {
    * This is called only when MiniDFSCluster wants to format the Namenode.
    */
   @Override
-  public boolean formatStorage() {
+  public boolean formatStorage() throws StorageException {
+    return formatStorage(INodeDataAccess.class, BlockInfoDataAccess.class,
+            LeaseDataAccess.class, LeasePathDataAccess.class, ReplicaDataAccess.class,
+            ReplicaUnderConstructionDataAccess.class, InvalidateBlockDataAccess.class,
+            ExcessReplicaDataAccess.class, PendingBlockDataAccess.class, CorruptReplicaDataAccess.class,
+            UnderReplicatedBlockDataAccess.class, LeaderDataAccess.class, BlockTokenKeyDataAccess.class,
+            StorageInfoDataAccess.class, INodeAttributesDataAccess.class, VariableDataAccess.class);
+  }
+
+  @Override
+  public boolean formatStorage(Class<? extends EntityDataAccess>... das) throws StorageException {
     Session session = obtainSession();
     Transaction tx = session.currentTransaction();
     session.setLockMode(LockMode.READ_COMMITTED);
@@ -120,28 +163,62 @@ public class ClusterjConnector implements StorageConnector<Session> {
     for (int i = 0; i < RETRIES; i++) {
       try {
         tx.begin();
-//        session.deletePersistentAll(InodeClusterj.InodeDTO.class);
-//        session.deletePersistentAll(BlockInfoClusterj.BlockInfoDTO.class);
-        session.deletePersistentAll(LeaseClusterj.LeaseDTO.class);
-//        session.deletePersistentAll(LeasePathClusterj.LeasePathsDTO.class);
-//        session.deletePersistentAll(ReplicaClusterj.ReplicaDTO.class);
-//        session.deletePersistentAll(ReplicaUnderConstructionClusterj.ReplicaUcDTO.class);
-//        session.deletePersistentAll(InvalidatedBlockClusterj.InvalidateBlocksDTO.class);
-//        session.deletePersistentAll(ExcessReplicaClusterj.ExcessReplicaDTO.class);
-//        session.deletePersistentAll(PendingBlockClusterj.PendingBlockDTO.class);
-//        session.deletePersistentAll(CorruptReplicaClusterj.CorruptReplicaDTO.class);
-//        session.deletePersistentAll(UnderReplicatedBlockClusterj.UnderReplicatedBlocksDTO.class);
-//        session.deletePersistentAll(LeaderClusterj.LeaderDTO.class);
-//        session.deletePersistentAll(BlockTokenKeyClusterj.BlockKeyDTO.class);
-//        session.deletePersistentAll(StorageInfoClusterj.StorageInfoDTO.class);
-//        session.deletePersistentAll(INodeAttributesClusterj.INodeAttributesDTO.class);
-//        session.deletePersistentAll(VariablesClusterj.VariableDTO.class);
-//        for (Variable.Finder varType : Variable.Finder.values()) {
-//          VariablesClusterj.VariableDTO vd = session.newInstance(VariablesClusterj.VariableDTO.class);
-//          vd.setId(varType.getId());
-//          vd.setValue(varType.getDefaultValue());
-//          session.savePersistent(vd);
-//        }
+        for (Class e : das) {
+          if (e == INodeDataAccess.class) {
+            session.deletePersistentAll(INodeClusterj.InodeDTO.class);
+
+          } else if (e == BlockInfoDataAccess.class) {
+            session.deletePersistentAll(BlockInfoClusterj.BlockInfoDTO.class);
+
+          } else if (e == LeaseDataAccess.class) {
+            session.deletePersistentAll(LeaseClusterj.LeaseDTO.class);
+
+          } else if (e == LeasePathDataAccess.class) {
+            session.deletePersistentAll(LeasePathClusterj.LeasePathsDTO.class);
+
+          } else if (e == ReplicaDataAccess.class) {
+            session.deletePersistentAll(ReplicaClusterj.ReplicaDTO.class);
+
+          } else if (e == ReplicaUnderConstructionDataAccess.class) {
+            session.deletePersistentAll(ReplicaUnderConstructionClusterj.ReplicaUcDTO.class);
+
+          } else if (e == InvalidateBlockDataAccess.class) {
+            session.deletePersistentAll(InvalidatedBlockClusterj.InvalidateBlocksDTO.class);
+
+          } else if (e == ExcessReplicaDataAccess.class) {
+            session.deletePersistentAll(ExcessReplicaClusterj.ExcessReplicaDTO.class);
+
+          } else if (e == PendingBlockDataAccess.class) {
+            session.deletePersistentAll(PendingBlockClusterj.PendingBlockDTO.class);
+
+          } else if (e == CorruptReplicaDataAccess.class) {
+            session.deletePersistentAll(CorruptReplicaClusterj.CorruptReplicaDTO.class);
+
+          } else if (e == UnderReplicatedBlockDataAccess.class) {
+            session.deletePersistentAll(UnderReplicatedBlockClusterj.UnderReplicatedBlocksDTO.class);
+
+          } else if (e == LeaderDataAccess.class) {
+            session.deletePersistentAll(LeaderClusterj.LeaderDTO.class);
+
+          } else if (e == BlockTokenKeyDataAccess.class) {
+            session.deletePersistentAll(BlockTokenKeyClusterj.BlockKeyDTO.class);
+
+          } else if (e == StorageInfoDataAccess.class) {
+            session.deletePersistentAll(StorageInfoClusterj.StorageInfoDTO.class);
+
+          } else if (e == INodeAttributesDataAccess.class) {
+            session.deletePersistentAll(INodeAttributesClusterj.INodeAttributesDTO.class);
+
+          } else if (e == VariableDataAccess.class) {
+            session.deletePersistentAll(VariableClusterj.VariableDTO.class);
+            for (HopVariable.Finder varType : HopVariable.Finder.values()) {
+              VariableClusterj.VariableDTO vd = session.newInstance(VariableClusterj.VariableDTO.class);
+              vd.setId(varType.getId());
+              vd.setValue(varType.getDefaultValue());
+              session.savePersistent(vd);
+            }
+          }
+        }
         tx.commit();
         session.flush();
         return true;
@@ -153,7 +230,7 @@ public class ClusterjConnector implements StorageConnector<Session> {
     } // end retry loop
     return false;
   }
-
+  
   @Override
   public boolean isTransactionActive() {
     return obtainSession().currentTransaction().isActive();
