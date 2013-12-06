@@ -12,26 +12,17 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import se.sics.hop.metadata.persistence.dal.BlockInfoDataAccess;
-import static se.sics.hop.metadata.persistence.dal.BlockInfoDataAccess.BLOCK_ID;
-import static se.sics.hop.metadata.persistence.dal.BlockInfoDataAccess.BLOCK_INDEX;
-import static se.sics.hop.metadata.persistence.dal.BlockInfoDataAccess.BLOCK_RECOVERY_ID;
-import static se.sics.hop.metadata.persistence.dal.BlockInfoDataAccess.BLOCK_UNDER_CONSTRUCTION_STATE;
-import static se.sics.hop.metadata.persistence.dal.BlockInfoDataAccess.GENERATION_STAMP;
-import static se.sics.hop.metadata.persistence.dal.BlockInfoDataAccess.INODE_ID;
-import static se.sics.hop.metadata.persistence.dal.BlockInfoDataAccess.NUM_BYTES;
-import static se.sics.hop.metadata.persistence.dal.BlockInfoDataAccess.PRIMARY_NODE_INDEX;
-import static se.sics.hop.metadata.persistence.dal.BlockInfoDataAccess.TABLE_NAME;
-import static se.sics.hop.metadata.persistence.dal.BlockInfoDataAccess.TIME_STAMP;
 import se.sics.hop.metadata.persistence.entity.hdfs.HopBlockInfo;
 import se.sics.hop.metadata.persistence.exceptions.StorageException;
 import se.sics.hop.metadata.persistence.ndb.ClusterjConnector;
 import se.sics.hop.metadata.persistence.ndb.mysqlserver.CountHelper;
+import se.sics.hop.metadata.persistence.tabledef.BlockInfoTableDef;
 
 /**
  *
  * @author Hooman <hooman@sics.se>
  */
-public class BlockInfoClusterj extends BlockInfoDataAccess {
+public class BlockInfoClusterj implements BlockInfoTableDef, BlockInfoDataAccess<HopBlockInfo> {
 
     @PersistenceCapable(table = TABLE_NAME)
     public interface BlockInfoDTO {

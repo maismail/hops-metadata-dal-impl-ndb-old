@@ -15,13 +15,13 @@ import se.sics.hop.metadata.persistence.dal.InvalidateBlockDataAccess;
 import se.sics.hop.metadata.persistence.exceptions.StorageException;
 import se.sics.hop.metadata.persistence.ndb.ClusterjConnector;
 import se.sics.hop.metadata.persistence.ndb.mysqlserver.CountHelper;
+import se.sics.hop.metadata.persistence.tabledef.InvalidatedBlockTableDef;
 
 /**
  *
  * @author Hooman <hooman@sics.se>
  */
-public class InvalidatedBlockClusterj extends InvalidateBlockDataAccess {
-
+public class InvalidatedBlockClusterj implements InvalidatedBlockTableDef, InvalidateBlockDataAccess<HopInvalidatedBlock> {
 
   @PersistenceCapable(table = TABLE_NAME)
   public interface InvalidateBlocksDTO {
@@ -81,7 +81,7 @@ public class InvalidatedBlockClusterj extends InvalidateBlockDataAccess {
       throw new StorageException(e);
     }
   }
-  
+
   @Override
   public Collection<HopInvalidatedBlock> findInvalidatedBlocksByBlockId(long bid) throws StorageException {
     try {
@@ -124,9 +124,8 @@ public class InvalidatedBlockClusterj extends InvalidateBlockDataAccess {
       for (HopInvalidatedBlock invBlock : removed) {
         remove(invBlock);
       }
-      
-      if(!modified.isEmpty())
-      {
+
+      if (!modified.isEmpty()) {
         throw new UnsupportedOperationException("Not yet Implemented");
       }
     } catch (Exception e) {
@@ -134,16 +133,16 @@ public class InvalidatedBlockClusterj extends InvalidateBlockDataAccess {
     }
   }
 
-   @Override
+  @Override
   public void removeAll() throws StorageException {
-     try {
+    try {
       Session session = connector.obtainSession();
       session.deletePersistentAll(InvalidateBlocksDTO.class);
     } catch (Exception e) {
       throw new StorageException(e);
     }
   }
-   
+
   @Override
   public void remove(HopInvalidatedBlock invBlock) {
     Session session = connector.obtainSession();
@@ -152,7 +151,7 @@ public class InvalidatedBlockClusterj extends InvalidateBlockDataAccess {
     pk[1] = invBlock.getStorageId();
     session.deletePersistent(InvalidateBlocksDTO.class, pk);
   }
-   
+
   private List<HopInvalidatedBlock> createList(List<InvalidateBlocksDTO> dtoList) {
     List<HopInvalidatedBlock> list = new ArrayList<HopInvalidatedBlock>();
     for (InvalidateBlocksDTO dto : dtoList) {

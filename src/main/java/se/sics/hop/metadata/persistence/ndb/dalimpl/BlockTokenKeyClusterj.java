@@ -9,8 +9,6 @@ import com.mysql.clusterj.query.Predicate;
 import com.mysql.clusterj.query.PredicateOperand;
 import com.mysql.clusterj.query.QueryBuilder;
 import com.mysql.clusterj.query.QueryDomainType;
-import java.io.ByteArrayInputStream;
-import java.io.DataInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -19,13 +17,14 @@ import se.sics.hop.metadata.persistence.dal.BlockTokenKeyDataAccess;
 import se.sics.hop.metadata.persistence.exceptions.StorageException;
 import se.sics.hop.metadata.persistence.entity.hdfs.HopBlockKey;
 import se.sics.hop.metadata.persistence.ndb.ClusterjConnector;
+import se.sics.hop.metadata.persistence.tabledef.BlockTokenTableDef;
 
 /**
  *
  * @author Hooman <hooman@sics.se>
  */
-public class BlockTokenKeyClusterj extends BlockTokenKeyDataAccess {
-
+public class BlockTokenKeyClusterj implements BlockTokenTableDef, BlockTokenKeyDataAccess<HopBlockKey> {
+  
   @Override
   public HopBlockKey findByKeyType(short keyType) throws StorageException {
     Session session = connector.obtainSession();
@@ -50,33 +49,33 @@ public class BlockTokenKeyClusterj extends BlockTokenKeyDataAccess {
       }
     }
   }
-
+  
   @PersistenceCapable(table = TABLE_NAME)
   public interface BlockKeyDTO {
-
+    
     @PrimaryKey
     @Column(name = KEY_ID)
     int getKeyId();
-
+    
     void setKeyId(int keyId);
-
+    
     @Column(name = EXPIRY_DATE)
     long getExpiryDate();
-
+    
     void setExpiryDate(long expiryDate);
-
+    
     @Column(name = KEY_BYTES)
     byte[] getKeyBytes();
-
+    
     void setKeyBytes(byte[] keyBytes);
-
+    
     @Column(name = KEY_TYPE)
     short getKeyType();
-
+    
     void setKeyType(short keyType);
   }
   private ClusterjConnector connector = ClusterjConnector.getInstance();
-
+  
   @Override
   public HopBlockKey findByKeyId(int keyId) throws StorageException {
     try {
@@ -90,7 +89,7 @@ public class BlockTokenKeyClusterj extends BlockTokenKeyDataAccess {
       throw new StorageException(e);
     }
   }
-
+  
   @Override
   public List<HopBlockKey> findAll() throws StorageException {
     List<HopBlockKey> blockKeys = new ArrayList<HopBlockKey>();
@@ -108,7 +107,7 @@ public class BlockTokenKeyClusterj extends BlockTokenKeyDataAccess {
     }
     return blockKeys;
   }
-
+  
   @Override
   public void prepare(Collection<HopBlockKey> removed, Collection<HopBlockKey> newed, Collection<HopBlockKey> modified) throws StorageException {
     try {
@@ -117,13 +116,13 @@ public class BlockTokenKeyClusterj extends BlockTokenKeyDataAccess {
         BlockKeyDTO kTable = session.newInstance(BlockKeyDTO.class, key.getKeyId());
         session.deletePersistent(kTable);
       }
-
+      
       for (HopBlockKey key : newed) {
         BlockKeyDTO kTable = session.newInstance(BlockKeyDTO.class);
         createPersistable(key, kTable);
         session.savePersistent(kTable);
       }
-
+      
       for (HopBlockKey key : modified) {
         BlockKeyDTO kTable = session.newInstance(BlockKeyDTO.class);
         createPersistable(key, kTable);
@@ -133,19 +132,19 @@ public class BlockTokenKeyClusterj extends BlockTokenKeyDataAccess {
       throw new StorageException(e);
     }
   }
-
+  
   private HopBlockKey createBlockKey(BlockKeyDTO dk) throws IOException {
     HopBlockKey bKey = new HopBlockKey(dk.getKeyId(), dk.getExpiryDate(), dk.getKeyBytes(), dk.getKeyType());
     return bKey;
   }
-
+  
   private void createPersistable(HopBlockKey key, BlockKeyDTO kTable) throws IOException {
     kTable.setExpiryDate(key.getExpiryDate());
     kTable.setKeyId(key.getKeyId());
     kTable.setKeyType(key.getKeyType());
     kTable.setKeyBytes(key.getKeyBytes());
   }
-
+  
   @Override
   public void removeAll() throws StorageException {
     Session session = connector.obtainSession();

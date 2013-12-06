@@ -13,17 +13,20 @@ import java.util.Collection;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import se.sics.hop.metadata.persistence.dal.LeaseDataAccess;
 import se.sics.hop.metadata.persistence.entity.hdfs.HopLease;
 import se.sics.hop.metadata.persistence.exceptions.StorageException;
 import se.sics.hop.metadata.persistence.ndb.ClusterjConnector;
 import se.sics.hop.metadata.persistence.ndb.mysqlserver.CountHelper;
+import se.sics.hop.metadata.persistence.tabledef.LeaseTableDef;
 
 /**
  *
  * @author Hooman <hooman@sics.se>
  */
-public class LeaseClusterj extends LeaseDataAccess {
+public class LeaseClusterj implements LeaseTableDef, LeaseDataAccess<HopLease> {
 
   @PersistenceCapable(table = TABLE_NAME)
   public interface LeaseDTO {
@@ -45,6 +48,7 @@ public class LeaseClusterj extends LeaseDataAccess {
     void setHolderId(int holder_id);
   }
   private ClusterjConnector connector = ClusterjConnector.getInstance();
+  private static Log log = LogFactory.getLog(LeaseDataAccess.class);
 
   @Override
   public int countAll() throws StorageException {

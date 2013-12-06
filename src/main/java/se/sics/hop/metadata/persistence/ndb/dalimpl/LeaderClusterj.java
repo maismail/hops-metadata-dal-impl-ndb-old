@@ -17,12 +17,13 @@ import se.sics.hop.metadata.persistence.entity.hop.HopLeader;
 import se.sics.hop.metadata.persistence.dal.LeaderDataAccess;
 import se.sics.hop.metadata.persistence.exceptions.StorageException;
 import se.sics.hop.metadata.persistence.ndb.ClusterjConnector;
+import se.sics.hop.metadata.persistence.tabledef.LeaderTableDef;
 
 /**
  *
  * @author Salman <salman@sics.se>
  */
-public class LeaderClusterj extends LeaderDataAccess {
+public class LeaderClusterj implements LeaderTableDef, LeaderDataAccess<HopLeader> {
 
   @PersistenceCapable(table = TABLE_NAME)
   public interface LeaderDTO {

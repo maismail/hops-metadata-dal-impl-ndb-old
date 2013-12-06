@@ -16,12 +16,13 @@ import se.sics.hop.metadata.persistence.dal.UnderReplicatedBlockDataAccess;
 import se.sics.hop.metadata.persistence.exceptions.StorageException;
 import se.sics.hop.metadata.persistence.ndb.ClusterjConnector;
 import se.sics.hop.metadata.persistence.ndb.mysqlserver.CountHelper;
+import se.sics.hop.metadata.persistence.tabledef.UnderReplicatedBlockTableDef;
 
 /**
  *
  * @author kamal hakimzadeh <kamal@sics.se>
  */
-public class UnderReplicatedBlockClusterj extends UnderReplicatedBlockDataAccess {
+public class UnderReplicatedBlockClusterj implements UnderReplicatedBlockTableDef, UnderReplicatedBlockDataAccess<HopUnderReplicatedBlock> {
 
   @Override
   public int countByLevel(int level) throws StorageException {

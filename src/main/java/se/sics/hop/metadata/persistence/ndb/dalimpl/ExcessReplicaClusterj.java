@@ -15,12 +15,13 @@ import se.sics.hop.metadata.persistence.dal.ExcessReplicaDataAccess;
 import se.sics.hop.metadata.persistence.exceptions.StorageException;
 import se.sics.hop.metadata.persistence.ndb.ClusterjConnector;
 import se.sics.hop.metadata.persistence.ndb.mysqlserver.CountHelper;
+import se.sics.hop.metadata.persistence.tabledef.ExcessReplicaTableDef;
 
 /**
  *
  * @author Hooman <hooman@sics.se>
  */
-public class ExcessReplicaClusterj extends ExcessReplicaDataAccess {
+public class ExcessReplicaClusterj implements ExcessReplicaTableDef, ExcessReplicaDataAccess<HopExcessReplica> {
 
   @PersistenceCapable(table = TABLE_NAME)
   public interface ExcessReplicaDTO {

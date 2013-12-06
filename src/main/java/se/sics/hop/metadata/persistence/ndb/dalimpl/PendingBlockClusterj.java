@@ -17,12 +17,13 @@ import se.sics.hop.metadata.persistence.exceptions.StorageException;
 import se.sics.hop.metadata.persistence.entity.hdfs.HopPendingBlockInfo;
 import se.sics.hop.metadata.persistence.ndb.ClusterjConnector;
 import se.sics.hop.metadata.persistence.ndb.mysqlserver.CountHelper;
+import se.sics.hop.metadata.persistence.tabledef.PendingBlockTableDef;
 
 /**
  *
  * @author Hooman <hooman@sics.se>
  */
-public class PendingBlockClusterj extends PendingBlockDataAccess {
+public class PendingBlockClusterj implements PendingBlockTableDef, PendingBlockDataAccess<HopPendingBlockInfo> {
 
   @Override
   public int countValidPendingBlocks(long timeLimit) throws StorageException {
@@ -120,7 +121,7 @@ public class PendingBlockClusterj extends PendingBlockDataAccess {
 
   @Override
   public void removeAll() throws StorageException {
-     try {
+    try {
       Session session = connector.obtainSession();
       session.deletePersistentAll(PendingBlockDTO.class);
     } catch (Exception e) {
@@ -128,7 +129,6 @@ public class PendingBlockClusterj extends PendingBlockDataAccess {
     }
   }
 
-   
   private List<HopPendingBlockInfo> createList(Collection<PendingBlockDTO> dtos) {
     List<HopPendingBlockInfo> list = new ArrayList<HopPendingBlockInfo>();
     for (PendingBlockDTO dto : dtos) {

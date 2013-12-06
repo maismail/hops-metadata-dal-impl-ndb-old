@@ -16,12 +16,13 @@ import se.sics.hop.metadata.persistence.entity.hop.HopLeasePath;
 import se.sics.hop.metadata.persistence.dal.LeasePathDataAccess;
 import se.sics.hop.metadata.persistence.exceptions.StorageException;
 import se.sics.hop.metadata.persistence.ndb.ClusterjConnector;
+import se.sics.hop.metadata.persistence.tabledef.LeasePathTableDef;
 
 /**
  *
  * @author Hooman <hooman@sics.se>
  */
-public class LeasePathClusterj extends LeasePathDataAccess {
+public class LeasePathClusterj implements LeasePathTableDef, LeasePathDataAccess<HopLeasePath> {
 
   @PersistenceCapable(table = TABLE_NAME)
   public interface LeasePathsDTO {

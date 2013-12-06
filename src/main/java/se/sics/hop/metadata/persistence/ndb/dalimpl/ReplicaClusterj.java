@@ -15,12 +15,13 @@ import se.sics.hop.metadata.persistence.entity.hop.HopIndexedReplica;
 import se.sics.hop.metadata.persistence.dal.ReplicaDataAccess;
 import se.sics.hop.metadata.persistence.exceptions.StorageException;
 import se.sics.hop.metadata.persistence.ndb.ClusterjConnector;
+import se.sics.hop.metadata.persistence.tabledef.ReplicaTableDef;
 
 /**
  *
  * @author Hooman <hooman@sics.se>
  */
-public class ReplicaClusterj extends ReplicaDataAccess {
+public class ReplicaClusterj implements ReplicaTableDef, ReplicaDataAccess<HopIndexedReplica> {
 
   @PersistenceCapable(table = TABLE_NAME)
   public interface ReplicaDTO {

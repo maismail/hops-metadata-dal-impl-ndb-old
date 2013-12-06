@@ -15,12 +15,13 @@ import se.sics.hop.metadata.persistence.dal.ReplicaUnderConstructionDataAccess;
 import se.sics.hop.metadata.persistence.entity.hdfs.HopReplicaUnderConstruction;
 import se.sics.hop.metadata.persistence.exceptions.StorageException;
 import se.sics.hop.metadata.persistence.ndb.ClusterjConnector;
+import se.sics.hop.metadata.persistence.tabledef.ReplicaUnderConstructionTableDef;
 
 /**
  *
  * @author Hooman <hooman@sics.se>
  */
-public class ReplicaUnderConstructionClusterj extends ReplicaUnderConstructionDataAccess {
+public class ReplicaUnderConstructionClusterj implements ReplicaUnderConstructionTableDef, ReplicaUnderConstructionDataAccess<HopReplicaUnderConstruction> {
 
   @PersistenceCapable(table = TABLE_NAME)
   public interface ReplicaUcDTO {

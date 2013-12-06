@@ -9,12 +9,13 @@ import se.sics.hop.metadata.persistence.entity.hop.HopVariable;
 import se.sics.hop.metadata.persistence.dal.VariableDataAccess;
 import se.sics.hop.metadata.persistence.exceptions.StorageException;
 import se.sics.hop.metadata.persistence.ndb.ClusterjConnector;
+import se.sics.hop.metadata.persistence.tabledef.VariableTableDef;
 
 /**
  *
  * @author Mahmoud Ismail <maism@sics.se>
  */
-public class VariableClusterj extends VariableDataAccess {
+public class VariableClusterj implements VariableTableDef, VariableDataAccess<HopVariable, HopVariable.Finder> {
 
   @PersistenceCapable(table = TABLE_NAME)
   public interface VariableDTO {

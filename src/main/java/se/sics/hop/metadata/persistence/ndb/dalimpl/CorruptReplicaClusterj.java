@@ -16,12 +16,13 @@ import se.sics.hop.metadata.persistence.dal.CorruptReplicaDataAccess;
 import se.sics.hop.metadata.persistence.exceptions.StorageException;
 import se.sics.hop.metadata.persistence.ndb.ClusterjConnector;
 import se.sics.hop.metadata.persistence.ndb.mysqlserver.CountHelper;
+import se.sics.hop.metadata.persistence.tabledef.CorruptReplicaTableDef;
 
 /**
  *
  * @author kamal hakimzadeh <kamal@sics.se>
  */
-public class CorruptReplicaClusterj extends CorruptReplicaDataAccess {
+public class CorruptReplicaClusterj implements CorruptReplicaTableDef, CorruptReplicaDataAccess<HopCorruptReplica> {
 
   @PersistenceCapable(table = TABLE_NAME)
   public interface CorruptReplicaDTO {
