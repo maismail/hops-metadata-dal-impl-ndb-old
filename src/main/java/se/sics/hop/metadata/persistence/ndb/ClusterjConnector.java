@@ -82,7 +82,7 @@ public class ClusterjConnector implements StorageConnector<Session> {
     p.setProperty("com.mysql.clusterj.database", "hop_salman");
     p.setProperty("com.mysql.clusterj.connection.pool.size", "3");
     p.setProperty(Constants.PROPERTY_CLUSTER_MAX_TRANSACTIONS, "4");
-    sessionFactory = ClusterJHelper.getSessionFactory(conf);
+    sessionFactory = ClusterJHelper.getSessionFactory(p);
   }
 
   /*
