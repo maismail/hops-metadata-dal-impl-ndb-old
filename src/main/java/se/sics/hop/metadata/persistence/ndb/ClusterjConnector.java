@@ -3,6 +3,7 @@ package se.sics.hop.metadata.persistence.ndb;
 import se.sics.hop.metadata.persistence.ndb.dalimpl.LeaseClusterj;
 import com.mysql.clusterj.ClusterJException;
 import com.mysql.clusterj.ClusterJHelper;
+import com.mysql.clusterj.Constants;
 import com.mysql.clusterj.LockMode;
 import com.mysql.clusterj.Session;
 import com.mysql.clusterj.SessionFactory;
@@ -76,11 +77,11 @@ public class ClusterjConnector implements StorageConnector<Session> {
 //    NUM_SESSION_FACTORIES = conf.getInt(DFS_DB_NUM_SESSION_FACTORIES_KEY, DFSConfigKeys.DFS_DB_NUM_SESSION_FACTORIES_DEFAULT);
 //    LOG.info("Database connect string: " + conf.get(DFS_DB_CONNECTOR_STRING_KEY, DFS_DB_CONNECTOR_STRING_DEFAULT));
 //    LOG.info("Database name: " + conf.get(DFS_DB_DATABASE_NAME_KEY, DFS_DB_DATABASE_NAME_DEFAULT));
-//    Properties p = new Properties();
-//    p.setProperty("com.mysql.clusterj.connectstring", conf.get(DFS_DB_CONNECTOR_STRING_KEY, DFS_DB_CONNECTOR_STRING_DEFAULT));
-//    p.setProperty("com.mysql.clusterj.database", conf.get(DFS_DB_DATABASE_NAME_KEY, DFS_DB_DATABASE_NAME_DEFAULT));
-//    p.setProperty("com.mysql.clusterj.connection.pool.size", String.valueOf(NUM_SESSION_FACTORIES));
-//    p.setProperty(Constants.PROPERTY_CLUSTER_MAX_TRANSACTIONS, "4");
+    Properties p = new Properties();
+    p.setProperty("com.mysql.clusterj.connectstring", "cloud1.sics.se");
+    p.setProperty("com.mysql.clusterj.database", "hop_salman");
+    p.setProperty("com.mysql.clusterj.connection.pool.size", "3");
+    p.setProperty(Constants.PROPERTY_CLUSTER_MAX_TRANSACTIONS, "4");
     sessionFactory = ClusterJHelper.getSessionFactory(conf);
   }
 
