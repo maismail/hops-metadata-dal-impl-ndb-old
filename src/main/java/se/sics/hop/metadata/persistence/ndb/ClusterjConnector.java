@@ -51,7 +51,6 @@ public class ClusterjConnector implements StorageConnector<Session> {
 
   private static ClusterjConnector instance;
   
-  private int NUM_SESSION_FACTORIES;
   static SessionFactory sessionFactory;
   static ThreadLocal<Session> sessionPool = new ThreadLocal<Session>();
   static final Log LOG = LogFactory.getLog(ClusterjConnector.class);
@@ -74,15 +73,9 @@ public class ClusterjConnector implements StorageConnector<Session> {
       LOG.warn("SessionFactory is already initialized");
       return;
     }
-//    NUM_SESSION_FACTORIES = conf.getInt(DFS_DB_NUM_SESSION_FACTORIES_KEY, DFSConfigKeys.DFS_DB_NUM_SESSION_FACTORIES_DEFAULT);
-//    LOG.info("Database connect string: " + conf.get(DFS_DB_CONNECTOR_STRING_KEY, DFS_DB_CONNECTOR_STRING_DEFAULT));
-//    LOG.info("Database name: " + conf.get(DFS_DB_DATABASE_NAME_KEY, DFS_DB_DATABASE_NAME_DEFAULT));
-    Properties p = new Properties();
-    p.setProperty("com.mysql.clusterj.connectstring", "cloud1.sics.se");
-    p.setProperty("com.mysql.clusterj.database", "hop_salman");
-    p.setProperty("com.mysql.clusterj.connection.pool.size", "3");
-    p.setProperty(Constants.PROPERTY_CLUSTER_MAX_TRANSACTIONS, "4");
-    sessionFactory = ClusterJHelper.getSessionFactory(p);
+    LOG.info("Database connect string: " + conf.get(Constants.PROPERTY_CLUSTER_CONNECTSTRING));
+    LOG.info("Database name: " + conf.get(Constants.PROPERTY_CLUSTER_DATABASE));
+    sessionFactory = ClusterJHelper.getSessionFactory(conf);
   }
 
   /*

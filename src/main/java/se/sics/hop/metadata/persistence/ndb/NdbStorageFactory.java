@@ -1,5 +1,7 @@
 package se.sics.hop.metadata.persistence.ndb;
 
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -22,6 +24,7 @@ import se.sics.hop.metadata.persistence.dal.ReplicaUnderConstructionDataAccess;
 import se.sics.hop.metadata.persistence.dal.StorageInfoDataAccess;
 import se.sics.hop.metadata.persistence.dal.UnderReplicatedBlockDataAccess;
 import se.sics.hop.metadata.persistence.dal.VariableDataAccess;
+import se.sics.hop.metadata.persistence.exceptions.StorageInitializtionException;
 import se.sics.hop.metadata.persistence.ndb.dalimpl.BlockInfoClusterj;
 import se.sics.hop.metadata.persistence.ndb.dalimpl.BlockTokenKeyClusterj;
 import se.sics.hop.metadata.persistence.ndb.dalimpl.CorruptReplicaClusterj;
@@ -48,10 +51,18 @@ public class NdbStorageFactory implements DALStorageFactory {
 
   private Map<Class, EntityDataAccess> dataAccessMap = new HashMap<Class, EntityDataAccess>();
 
-  public void setConfiguration(Properties conf) {
-    ClusterjConnector.getInstance().setConfiguration(conf);
-    MysqlServerConnector.getInstance().setConfiguration(conf);
-    initDataAccessMap();
+  //FIXME: file should be loaded to the class path
+  @Override
+  public void setConfiguration(String configFile) throws StorageInitializtionException{
+    try {
+      Properties conf = new Properties();
+      conf.load(new FileInputStream(configFile));
+      ClusterjConnector.getInstance().setConfiguration(conf);
+      MysqlServerConnector.getInstance().setConfiguration(conf);
+      initDataAccessMap();
+    } catch (IOException ex) {
+     throw new StorageInitializtionException(ex);
+    }
   }
 
   private void initDataAccessMap() {
@@ -73,10 +84,12 @@ public class NdbStorageFactory implements DALStorageFactory {
     dataAccessMap.put(StorageInfoDataAccess.class, new StorageInfoClusterj());
   }
 
+  @Override
   public StorageConnector getConnector() {
     return ClusterjConnector.getInstance();
   }
 
+  @Override
   public EntityDataAccess getDataAccess(Class type) {
     return dataAccessMap.get(type);
   }

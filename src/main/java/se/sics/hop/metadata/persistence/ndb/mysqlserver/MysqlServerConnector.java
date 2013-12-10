@@ -1,5 +1,6 @@
 package se.sics.hop.metadata.persistence.ndb.mysqlserver;
 
+import com.mysql.clusterj.Constants;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -39,12 +40,9 @@ public class MysqlServerConnector implements StorageConnector<Connection> {
   
   @Override
   public void setConfiguration(Properties conf) {
-    String host = "cloud1.sics.se";//conf.get(DFSConfigKeys.DFS_DB_CONNECTOR_STRING_KEY, DFSConfigKeys.DFS_DB_CONNECTOR_STRING_DEFAULT);
-    String database = "hop_salman";//conf.get(DFSConfigKeys.DFS_DB_DATABASE_NAME_KEY,DFSConfigKeys.DFS_DB_DATABASE_NAME_DEFAULT);
-    String port = "3307";//conf.get(DFSConfigKeys.DFS_STORAGE_MYSQL_PORT_KEY, DFSConfigKeys.DFS_STORAGE_MYSQL_PORT_DEFAULT);
-    this.protocol = "jdbc:mysql://"+ host + ":"+port+"/" + database;
-    this.user = "hop";//conf.get(DFSConfigKeys.DFS_STORAGE_MYSQL_USER_KEY, DFSConfigKeys.DFS_STORAGE_MYSQL_USER_DEFAULT);
-    this.password ="hop";//conf.get(DFSConfigKeys.DFS_STORAGE_MYSQL_USER_PASSWORD_KEY, DFSConfigKeys.DFS_STORAGE_MYSQL_USER_PASSWORD_DEFAULT);
+    this.protocol = conf.getProperty(Constants.PROPERTY_JDBC_URL);
+    this.user = conf.getProperty(Constants.PROPERTY_JDBC_USERNAME);
+    this.password = conf.getProperty(Constants.PROPERTY_JDBC_PASSWORD);
     loadDriver();
   }
 
