@@ -9,10 +9,9 @@ import com.mysql.clusterj.query.Predicate;
 import com.mysql.clusterj.query.PredicateOperand;
 import com.mysql.clusterj.query.QueryBuilder;
 import com.mysql.clusterj.query.QueryDomainType;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.SortedSet;
-import java.util.TreeSet;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import se.sics.hop.metadata.persistence.dal.LeaseDataAccess;
@@ -155,8 +154,8 @@ public class LeaseClusterj implements LeaseTableDef, LeaseDataAccess<HopLease> {
     }
   }
 
-  private SortedSet<HopLease> createList(List<LeaseDTO> list) {
-    SortedSet<HopLease> finalSet = new TreeSet<HopLease>();
+  private Collection<HopLease> createList(List<LeaseDTO> list) {
+    Collection<HopLease> finalSet = new ArrayList<HopLease>();
     for (LeaseDTO dto : list) {
       finalSet.add(createLease(dto));
     }
