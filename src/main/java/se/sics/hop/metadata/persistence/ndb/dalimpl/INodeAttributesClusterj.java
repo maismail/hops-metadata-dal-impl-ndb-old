@@ -72,7 +72,7 @@ public class INodeAttributesClusterj implements INodeAttributesTableDef, INodeAt
       }
       if (modified != null) {
         for (HopINodeAttributes attr : modified) {
-          INodeAttributesDTO persistable = persistable = createPersistable(attr, session);
+          INodeAttributesDTO persistable = createPersistable(attr, session);
           session.savePersistent(persistable);
         }
       }
