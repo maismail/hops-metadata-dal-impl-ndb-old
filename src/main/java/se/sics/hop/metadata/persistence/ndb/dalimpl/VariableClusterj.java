@@ -52,6 +52,9 @@ public class VariableClusterj implements VariableTableDef, VariableDataAccess<Ho
     try {
       Session session = connector.obtainSession();
       for (HopVariable var : updatedVariables) {
+        if(var.getValue().length > MAX_VARIABLE_SIZE){
+          throw new StorageException("wrong variable size" + var.getValue().length + ", variable size should be less or equal to " + MAX_VARIABLE_SIZE);
+        }
         VariableDTO vd = session.newInstance(VariableDTO.class);
         vd.setValue(var.getValue());
         vd.setId(var.getType().getId());
