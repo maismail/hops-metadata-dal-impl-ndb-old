@@ -27,9 +27,9 @@ public class VariableClusterj implements VariableTableDef, VariableDataAccess<Ho
     void setId(int id);
 
     @Column(name = VARIABLE_VALUE)
-    long getValue();
+    byte[] getValue();
 
-    void setValue(long value);
+    void setValue(byte[] value);
   }
   private ClusterjConnector connector = ClusterjConnector.getInstance();
 
