@@ -39,24 +39,26 @@ public class MysqlServerConnector implements StorageConnector<Connection> {
   }
   
   @Override
-  public void setConfiguration(Properties conf) {
+  public void setConfiguration(Properties conf) throws StorageException {
     this.protocol = conf.getProperty(Constants.PROPERTY_JDBC_URL);
     this.user = conf.getProperty(Constants.PROPERTY_JDBC_USERNAME);
     this.password = conf.getProperty(Constants.PROPERTY_JDBC_PASSWORD);
     loadDriver();
   }
 
-  private void loadDriver() {
+  private void loadDriver() throws StorageException {
     try {
-      // TODO: [H] throw StorageException, do not catch them here.
       Class.forName(DRIVER).newInstance();
       log.info("Loaded Mysql driver.");
     } catch (ClassNotFoundException cnfe) {
       log.error("\nUnable to load the JDBC driver " + DRIVER, cnfe);
+      throw new StorageException(cnfe);
     } catch (InstantiationException ie) {
       log.error("\nUnable to instantiate the JDBC driver " + DRIVER, ie);
+      throw new StorageException(ie);
     } catch (IllegalAccessException iae) {
       log.error("\nNot allowed to access the JDBC driver " + DRIVER, iae);
+      throw new StorageException(iae);
     }
   }
 

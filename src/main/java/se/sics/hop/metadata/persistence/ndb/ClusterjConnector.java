@@ -67,15 +67,18 @@ public class ClusterjConnector implements StorageConnector<Session> {
   }
   
   @Override
-  public void setConfiguration(Properties conf) {
-    // TODO [H]: This could raise exception. Throw it as a storage exception tot he higher layer
+  public void setConfiguration(Properties conf) throws StorageException {
     if (sessionFactory != null) {
       LOG.warn("SessionFactory is already initialized");
       return;
     }
     LOG.info("Database connect string: " + conf.get(Constants.PROPERTY_CLUSTER_CONNECTSTRING));
     LOG.info("Database name: " + conf.get(Constants.PROPERTY_CLUSTER_DATABASE));
-    sessionFactory = ClusterJHelper.getSessionFactory(conf);
+    try {
+      sessionFactory = ClusterJHelper.getSessionFactory(conf);
+    } catch (ClusterJException ex) {
+      throw new StorageException(ex);
+    }
   }
 
   /*
