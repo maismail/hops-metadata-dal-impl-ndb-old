@@ -2,6 +2,7 @@ package se.sics.hop.metadata.persistence.ndb;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -51,12 +52,12 @@ public class NdbStorageFactory implements DALStorageFactory {
 
   private Map<Class, EntityDataAccess> dataAccessMap = new HashMap<Class, EntityDataAccess>();
 
-  //FIXME: file should be loaded to the class path
   @Override
   public void setConfiguration(String configFile) throws StorageInitializtionException{
     try {
       Properties conf = new Properties();
-      conf.load(new FileInputStream(configFile));
+      InputStream inStream = this.getClass().getClassLoader().getResourceAsStream(configFile);
+      conf.load(inStream);
       ClusterjConnector.getInstance().setConfiguration(conf);
       MysqlServerConnector.getInstance().setConfiguration(conf);
       initDataAccessMap();
