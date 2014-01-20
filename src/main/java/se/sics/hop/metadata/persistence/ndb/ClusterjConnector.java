@@ -29,7 +29,7 @@ import se.sics.hop.metadata.persistence.dal.ReplicaUnderConstructionDataAccess;
 import se.sics.hop.metadata.persistence.dal.StorageInfoDataAccess;
 import se.sics.hop.metadata.persistence.dal.UnderReplicatedBlockDataAccess;
 import se.sics.hop.metadata.persistence.dal.VariableDataAccess;
-import se.sics.hop.metadata.persistence.entity.hop.HopVariable;
+import se.sics.hop.metadata.persistence.entity.hop.var.HopVariable;
 import se.sics.hop.metadata.persistence.exceptions.StorageException;
 import se.sics.hop.metadata.persistence.ndb.dalimpl.BlockInfoClusterj;
 import se.sics.hop.metadata.persistence.ndb.dalimpl.BlockTokenKeyClusterj;

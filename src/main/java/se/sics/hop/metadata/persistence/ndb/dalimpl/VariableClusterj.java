@@ -5,7 +5,7 @@ import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
 import java.util.Collection;
-import se.sics.hop.metadata.persistence.entity.hop.HopVariable;
+import se.sics.hop.metadata.persistence.entity.hop.var.HopVariable;
 import se.sics.hop.metadata.persistence.dal.VariableDataAccess;
 import se.sics.hop.metadata.persistence.exceptions.StorageException;
 import se.sics.hop.metadata.persistence.ndb.ClusterjConnector;
@@ -41,27 +41,43 @@ public class VariableClusterj implements VariableTableDef, VariableDataAccess<Ho
       if (var == null) {
         throw new StorageException("There is no variable entry with id " + varType.getId());
       }
-      return new HopVariable(varType, var.getValue());
+      return HopVariable.initVariable(varType, var.getValue());
     } catch (Exception e) {
       throw new StorageException(e);
     }
   }
 
   @Override
-  public void prepare(Collection<HopVariable> updatedVariables) throws StorageException {
+  public void prepare(Collection<HopVariable> newVariables, Collection<HopVariable> updatedVariables, Collection<HopVariable> removedVariables) throws StorageException {
     try {
       Session session = connector.obtainSession();
-      for (HopVariable var : updatedVariables) {
-        if(var.getValue().length > MAX_VARIABLE_SIZE){
-          throw new StorageException("wrong variable size" + var.getValue().length + ", variable size should be less or equal to " + MAX_VARIABLE_SIZE);
-        }
-        VariableDTO vd = session.newInstance(VariableDTO.class);
-        vd.setValue(var.getValue());
-        vd.setId(var.getType().getId());
-        session.savePersistent(vd);
-      }
+      removeVariables(session, removedVariables);
+      updateVariables(session, newVariables);
+      updateVariables(session, updatedVariables);
     } catch (Exception e) {
       throw new StorageException(e);
+    }
+  }
+
+  private void removeVariables(Session session, Collection<HopVariable> vars) {
+    if (vars != null) {
+      for (HopVariable var : vars) {
+        VariableDTO vd = session.newInstance(VariableDTO.class, var.getType().getId());
+        session.deletePersistent(vd);
+      }
+    }
+  }
+
+  private void updateVariables(Session session, Collection<HopVariable> vars) throws StorageException {
+    for (HopVariable var : vars) {
+      byte[] varVal = var.getBytes();
+      if (varVal.length > MAX_VARIABLE_SIZE) {
+        throw new StorageException("wrong variable size" + varVal.length + ", variable size should be less or equal to " + MAX_VARIABLE_SIZE);
+      }
+      VariableDTO vd = session.newInstance(VariableDTO.class);
+      vd.setValue(var.getBytes());
+      vd.setId(var.getType().getId());
+      session.savePersistent(vd);
     }
   }
 }
