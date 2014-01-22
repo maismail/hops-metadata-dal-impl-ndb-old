@@ -26,7 +26,6 @@ import se.sics.hop.metadata.persistence.dal.LeasePathDataAccess;
 import se.sics.hop.metadata.persistence.dal.PendingBlockDataAccess;
 import se.sics.hop.metadata.persistence.dal.ReplicaDataAccess;
 import se.sics.hop.metadata.persistence.dal.ReplicaUnderConstructionDataAccess;
-import se.sics.hop.metadata.persistence.dal.StorageInfoDataAccess;
 import se.sics.hop.metadata.persistence.dal.UnderReplicatedBlockDataAccess;
 import se.sics.hop.metadata.persistence.dal.VariableDataAccess;
 import se.sics.hop.metadata.persistence.entity.hop.var.HopVariable;
@@ -43,7 +42,6 @@ import se.sics.hop.metadata.persistence.ndb.dalimpl.LeasePathClusterj;
 import se.sics.hop.metadata.persistence.ndb.dalimpl.PendingBlockClusterj;
 import se.sics.hop.metadata.persistence.ndb.dalimpl.ReplicaClusterj;
 import se.sics.hop.metadata.persistence.ndb.dalimpl.ReplicaUnderConstructionClusterj;
-import se.sics.hop.metadata.persistence.ndb.dalimpl.StorageInfoClusterj;
 import se.sics.hop.metadata.persistence.ndb.dalimpl.UnderReplicatedBlockClusterj;
 import se.sics.hop.metadata.persistence.ndb.dalimpl.VariableClusterj;
 
@@ -147,8 +145,8 @@ public class ClusterjConnector implements StorageConnector<Session> {
             LeaseDataAccess.class, LeasePathDataAccess.class, ReplicaDataAccess.class,
             ReplicaUnderConstructionDataAccess.class, InvalidateBlockDataAccess.class,
             ExcessReplicaDataAccess.class, PendingBlockDataAccess.class, CorruptReplicaDataAccess.class,
-            UnderReplicatedBlockDataAccess.class, LeaderDataAccess.class, BlockTokenKeyDataAccess.class,
-            StorageInfoDataAccess.class, INodeAttributesDataAccess.class, VariableDataAccess.class);
+            UnderReplicatedBlockDataAccess.class, LeaderDataAccess.class, BlockTokenKeyDataAccess.class, 
+            INodeAttributesDataAccess.class, VariableDataAccess.class);
   }
 
   @Override
@@ -199,9 +197,6 @@ public class ClusterjConnector implements StorageConnector<Session> {
 
           } else if (e == BlockTokenKeyDataAccess.class) {
             session.deletePersistentAll(BlockTokenKeyClusterj.BlockKeyDTO.class);
-
-          } else if (e == StorageInfoDataAccess.class) {
-            session.deletePersistentAll(StorageInfoClusterj.StorageInfoDTO.class);
 
           } else if (e == INodeAttributesDataAccess.class) {
             session.deletePersistentAll(INodeAttributesClusterj.INodeAttributesDTO.class);
