@@ -9,7 +9,6 @@ import java.util.Properties;
 import se.sics.hop.metadata.persistence.DALStorageFactory;
 import se.sics.hop.metadata.persistence.StorageConnector;
 import se.sics.hop.metadata.persistence.dal.BlockInfoDataAccess;
-import se.sics.hop.metadata.persistence.dal.BlockTokenKeyDataAccess;
 import se.sics.hop.metadata.persistence.dal.CorruptReplicaDataAccess;
 import se.sics.hop.metadata.persistence.dal.EntityDataAccess;
 import se.sics.hop.metadata.persistence.dal.ExcessReplicaDataAccess;
@@ -26,7 +25,6 @@ import se.sics.hop.metadata.persistence.dal.UnderReplicatedBlockDataAccess;
 import se.sics.hop.metadata.persistence.dal.VariableDataAccess;
 import se.sics.hop.metadata.persistence.exceptions.StorageInitializtionException;
 import se.sics.hop.metadata.persistence.ndb.dalimpl.BlockInfoClusterj;
-import se.sics.hop.metadata.persistence.ndb.dalimpl.BlockTokenKeyClusterj;
 import se.sics.hop.metadata.persistence.ndb.dalimpl.CorruptReplicaClusterj;
 import se.sics.hop.metadata.persistence.ndb.dalimpl.ExcessReplicaClusterj;
 import se.sics.hop.metadata.persistence.ndb.dalimpl.INodeAttributesClusterj;
@@ -79,7 +77,6 @@ public class NdbStorageFactory implements DALStorageFactory {
     dataAccessMap.put(InvalidateBlockDataAccess.class, new InvalidatedBlockClusterj());
     dataAccessMap.put(UnderReplicatedBlockDataAccess.class, new UnderReplicatedBlockClusterj());
     dataAccessMap.put(VariableDataAccess.class, new VariableClusterj());
-    dataAccessMap.put(BlockTokenKeyDataAccess.class, new BlockTokenKeyClusterj());
   }
 
   @Override
