@@ -247,7 +247,38 @@ public class ClusterjConnector implements StorageConnector<Session> {
   
   @Override
   public void setPartitionKey(Class className, Object key) {
+    Class cls = null;
+    if (className == BlockInfoDataAccess.class) {
+      cls = BlockInfoClusterj.BlockInfoDTO.class;
+    } else if (className == PendingBlockDataAccess.class) {
+      cls = PendingBlockClusterj.PendingBlockDTO.class;
+    } else if (className == ReplicaUnderConstructionDataAccess.class) {
+      cls = ReplicaUnderConstructionClusterj.ReplicaUcDTO.class;
+    } else if (className == INodeDataAccess.class) {
+      cls = INodeClusterj.InodeDTO.class;
+    } else if (className == INodeAttributesDataAccess.class) {
+      cls = INodeAttributesClusterj.INodeAttributesDTO.class;
+    } else if (className == LeaseDataAccess.class) {
+      cls = LeaseClusterj.LeaseDTO.class;
+    } else if (className == LeasePathDataAccess.class) {
+      cls = LeasePathClusterj.LeasePathsDTO.class;
+    } else if (className == LeaderDataAccess.class) {
+      cls = LeaderClusterj.LeaderDTO.class;
+    } else if (className == ReplicaDataAccess.class) {
+      cls = ReplicaClusterj.ReplicaDTO.class;
+    } else if (className == CorruptReplicaDataAccess.class) {
+      cls = CorruptReplicaClusterj.CorruptReplicaDTO.class;
+    } else if (className == ExcessReplicaDataAccess.class) {
+      cls = ExcessReplicaClusterj.ExcessReplicaDTO.class;
+    } else if (className == InvalidateBlockDataAccess.class) {
+      cls = InvalidatedBlockClusterj.InvalidateBlocksDTO.class;
+    } else if (className == UnderReplicatedBlockDataAccess.class) {
+      cls = UnderReplicatedBlockClusterj.UnderReplicatedBlocksDTO.class;
+    } else if (className == VariableDataAccess.class) {
+      cls = VariableClusterj.VariableDTO.class;
+    }
+
     Session session = obtainSession();
-    session.setPartitionKey(className, key);
+    session.setPartitionKey(cls, key);
   }
 }
