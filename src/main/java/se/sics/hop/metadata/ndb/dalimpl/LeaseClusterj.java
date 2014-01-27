@@ -1,4 +1,4 @@
-package se.sics.hop.metadata.persistence.ndb.dalimpl;
+package se.sics.hop.metadata.ndb.dalimpl;
 
 import com.mysql.clusterj.Query;
 import com.mysql.clusterj.Session;
@@ -14,12 +14,12 @@ import java.util.Collection;
 import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import se.sics.hop.metadata.persistence.dal.LeaseDataAccess;
-import se.sics.hop.metadata.persistence.entity.hdfs.HopLease;
-import se.sics.hop.metadata.persistence.exceptions.StorageException;
-import se.sics.hop.metadata.persistence.ndb.ClusterjConnector;
-import se.sics.hop.metadata.persistence.ndb.mysqlserver.CountHelper;
-import se.sics.hop.metadata.persistence.tabledef.LeaseTableDef;
+import se.sics.hop.metadata.dal.LeaseDataAccess;
+import se.sics.hop.metadata.entity.hdfs.HopLease;
+import se.sics.hop.exception.StorageException;
+import se.sics.hop.metadata.ndb.ClusterjConnector;
+import se.sics.hop.metadata.ndb.mysqlserver.CountHelper;
+import se.sics.hop.metadata.tabledef.LeaseTableDef;
 
 /**
  *

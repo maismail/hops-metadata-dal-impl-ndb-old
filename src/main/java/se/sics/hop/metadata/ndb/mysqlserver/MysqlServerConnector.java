@@ -1,4 +1,4 @@
-package se.sics.hop.metadata.persistence.ndb.mysqlserver;
+package se.sics.hop.metadata.ndb.mysqlserver;
 
 import com.mysql.clusterj.Constants;
 import java.sql.Connection;
@@ -7,9 +7,9 @@ import java.sql.SQLException;
 import java.util.Properties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import se.sics.hop.metadata.persistence.StorageConnector;
-import se.sics.hop.metadata.persistence.dal.EntityDataAccess;
-import se.sics.hop.metadata.persistence.exceptions.StorageException;
+import se.sics.hop.StorageConnector;
+import se.sics.hop.metadata.dal.EntityDataAccess;
+import se.sics.hop.exception.StorageException;
 
 /**
  * This class presents a singleton connector to Mysql Server.

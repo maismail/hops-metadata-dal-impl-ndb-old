@@ -1,10 +1,10 @@
-package se.sics.hop.metadata.persistence.ndb.mysqlserver;
+package se.sics.hop.metadata.ndb.mysqlserver;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import se.sics.hop.metadata.persistence.exceptions.StorageException;
+import se.sics.hop.exception.StorageException;
 
 /**
  * This class is to do count operations using Mysql Server.

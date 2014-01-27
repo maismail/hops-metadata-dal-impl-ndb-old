@@ -1,4 +1,4 @@
-package se.sics.hop.metadata.persistence.ndb.dalimpl;
+package se.sics.hop.metadata.ndb.dalimpl;
 
 import com.mysql.clusterj.Query;
 import com.mysql.clusterj.Session;
@@ -11,12 +11,12 @@ import com.mysql.clusterj.query.QueryDomainType;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import se.sics.hop.metadata.persistence.entity.hop.HopUnderReplicatedBlock;
-import se.sics.hop.metadata.persistence.dal.UnderReplicatedBlockDataAccess;
-import se.sics.hop.metadata.persistence.exceptions.StorageException;
-import se.sics.hop.metadata.persistence.ndb.ClusterjConnector;
-import se.sics.hop.metadata.persistence.ndb.mysqlserver.CountHelper;
-import se.sics.hop.metadata.persistence.tabledef.UnderReplicatedBlockTableDef;
+import se.sics.hop.metadata.entity.hop.HopUnderReplicatedBlock;
+import se.sics.hop.metadata.dal.UnderReplicatedBlockDataAccess;
+import se.sics.hop.exception.StorageException;
+import se.sics.hop.metadata.ndb.ClusterjConnector;
+import se.sics.hop.metadata.ndb.mysqlserver.CountHelper;
+import se.sics.hop.metadata.tabledef.UnderReplicatedBlockTableDef;
 
 /**
  *

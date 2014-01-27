@@ -1,4 +1,4 @@
-package se.sics.hop.metadata.persistence.ndb.dalimpl;
+package se.sics.hop.metadata.ndb.dalimpl;
 
 import com.mysql.clusterj.Query;
 import com.mysql.clusterj.Session;
@@ -13,11 +13,11 @@ import java.util.Collection;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import se.sics.hop.metadata.persistence.entity.hop.HopLeader;
-import se.sics.hop.metadata.persistence.dal.LeaderDataAccess;
-import se.sics.hop.metadata.persistence.exceptions.StorageException;
-import se.sics.hop.metadata.persistence.ndb.ClusterjConnector;
-import se.sics.hop.metadata.persistence.tabledef.LeaderTableDef;
+import se.sics.hop.metadata.entity.hop.HopLeader;
+import se.sics.hop.metadata.dal.LeaderDataAccess;
+import se.sics.hop.exception.StorageException;
+import se.sics.hop.metadata.ndb.ClusterjConnector;
+import se.sics.hop.metadata.tabledef.LeaderTableDef;
 
 /**
  *

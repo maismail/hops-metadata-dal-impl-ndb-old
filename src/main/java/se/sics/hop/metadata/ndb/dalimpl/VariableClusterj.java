@@ -1,15 +1,15 @@
-package se.sics.hop.metadata.persistence.ndb.dalimpl;
+package se.sics.hop.metadata.ndb.dalimpl;
 
 import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
 import java.util.Collection;
-import se.sics.hop.metadata.persistence.entity.hop.var.HopVariable;
-import se.sics.hop.metadata.persistence.dal.VariableDataAccess;
-import se.sics.hop.metadata.persistence.exceptions.StorageException;
-import se.sics.hop.metadata.persistence.ndb.ClusterjConnector;
-import se.sics.hop.metadata.persistence.tabledef.VariableTableDef;
+import se.sics.hop.metadata.entity.hop.var.HopVariable;
+import se.sics.hop.metadata.dal.VariableDataAccess;
+import se.sics.hop.exception.StorageException;
+import se.sics.hop.metadata.ndb.ClusterjConnector;
+import se.sics.hop.metadata.tabledef.VariableTableDef;
 
 /**
  *
