@@ -12,12 +12,12 @@ import com.mysql.clusterj.query.QueryDomainType;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import se.sics.hop.metadata.dal.PendingBlockDataAccess;
+import se.sics.hop.metadata.hdfs.dal.PendingBlockDataAccess;
 import se.sics.hop.exception.StorageException;
-import se.sics.hop.metadata.entity.hdfs.HopPendingBlockInfo;
+import se.sics.hop.metadata.hdfs.entity.hdfs.HopPendingBlockInfo;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
 import se.sics.hop.metadata.ndb.mysqlserver.CountHelper;
-import se.sics.hop.metadata.tabledef.PendingBlockTableDef;
+import se.sics.hop.metadata.hdfs.tabledef.PendingBlockTableDef;
 
 /**
  *

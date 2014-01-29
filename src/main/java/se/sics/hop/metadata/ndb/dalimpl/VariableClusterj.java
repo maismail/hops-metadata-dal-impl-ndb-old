@@ -5,11 +5,11 @@ import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
 import java.util.Collection;
-import se.sics.hop.metadata.entity.hop.var.HopVariable;
-import se.sics.hop.metadata.dal.VariableDataAccess;
+import se.sics.hop.metadata.hdfs.entity.hop.var.HopVariable;
+import se.sics.hop.metadata.hdfs.dal.VariableDataAccess;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
-import se.sics.hop.metadata.tabledef.VariableTableDef;
+import se.sics.hop.metadata.hdfs.tabledef.VariableTableDef;
 
 /**
  *

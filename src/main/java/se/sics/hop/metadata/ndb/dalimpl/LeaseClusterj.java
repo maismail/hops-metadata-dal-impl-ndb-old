@@ -14,12 +14,12 @@ import java.util.Collection;
 import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import se.sics.hop.metadata.dal.LeaseDataAccess;
-import se.sics.hop.metadata.entity.hdfs.HopLease;
+import se.sics.hop.metadata.hdfs.dal.LeaseDataAccess;
+import se.sics.hop.metadata.hdfs.entity.hdfs.HopLease;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
 import se.sics.hop.metadata.ndb.mysqlserver.CountHelper;
-import se.sics.hop.metadata.tabledef.LeaseTableDef;
+import se.sics.hop.metadata.hdfs.tabledef.LeaseTableDef;
 
 /**
  *

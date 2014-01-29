@@ -13,11 +13,11 @@ import java.util.Collection;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import se.sics.hop.metadata.entity.hop.HopLeader;
-import se.sics.hop.metadata.dal.LeaderDataAccess;
+import se.sics.hop.metadata.hdfs.entity.hop.HopLeader;
+import se.sics.hop.metadata.hdfs.dal.LeaderDataAccess;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
-import se.sics.hop.metadata.tabledef.LeaderTableDef;
+import se.sics.hop.metadata.hdfs.tabledef.LeaderTableDef;
 
 /**
  *

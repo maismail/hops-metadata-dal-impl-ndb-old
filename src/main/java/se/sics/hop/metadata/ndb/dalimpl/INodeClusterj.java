@@ -14,12 +14,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import se.sics.hop.metadata.dal.INodeDataAccess;
-import se.sics.hop.metadata.entity.hdfs.HopINode;
+import se.sics.hop.metadata.hdfs.dal.INodeDataAccess;
+import se.sics.hop.metadata.hdfs.entity.hdfs.HopINode;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
 import se.sics.hop.metadata.ndb.mysqlserver.CountHelper;
-import se.sics.hop.metadata.tabledef.INodeTableDef;
+import se.sics.hop.metadata.hdfs.tabledef.INodeTableDef;
 
 /**
  *

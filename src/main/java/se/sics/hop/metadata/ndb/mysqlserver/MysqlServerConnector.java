@@ -8,7 +8,7 @@ import java.util.Properties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import se.sics.hop.StorageConnector;
-import se.sics.hop.metadata.dal.EntityDataAccess;
+import se.sics.hop.metadata.hdfs.dal.EntityDataAccess;
 import se.sics.hop.exception.StorageException;
 
 /**

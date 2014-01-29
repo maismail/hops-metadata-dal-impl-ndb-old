@@ -11,11 +11,11 @@ import com.mysql.clusterj.query.QueryDomainType;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import se.sics.hop.metadata.dal.ReplicaUnderConstructionDataAccess;
-import se.sics.hop.metadata.entity.hdfs.HopReplicaUnderConstruction;
+import se.sics.hop.metadata.hdfs.dal.ReplicaUnderConstructionDataAccess;
+import se.sics.hop.metadata.hdfs.entity.hdfs.HopReplicaUnderConstruction;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
-import se.sics.hop.metadata.tabledef.ReplicaUnderConstructionTableDef;
+import se.sics.hop.metadata.hdfs.tabledef.ReplicaUnderConstructionTableDef;
 
 /**
  *
