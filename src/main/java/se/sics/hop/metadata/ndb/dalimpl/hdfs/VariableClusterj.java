@@ -1,4 +1,4 @@
-package se.sics.hop.metadata.ndb.dalimpl;
+package se.sics.hop.metadata.ndb.dalimpl.hdfs;
 
 import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;

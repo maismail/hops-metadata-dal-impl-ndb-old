@@ -1,6 +1,6 @@
 package se.sics.hop.metadata.ndb;
 
-import se.sics.hop.metadata.ndb.dalimpl.LeaseClusterj;
+import se.sics.hop.metadata.ndb.dalimpl.hdfs.LeaseClusterj;
 import com.mysql.clusterj.ClusterJException;
 import com.mysql.clusterj.ClusterJHelper;
 import com.mysql.clusterj.Constants;
@@ -29,19 +29,19 @@ import se.sics.hop.metadata.hdfs.dal.UnderReplicatedBlockDataAccess;
 import se.sics.hop.metadata.hdfs.dal.VariableDataAccess;
 import se.sics.hop.metadata.hdfs.entity.hop.var.HopVariable;
 import se.sics.hop.exception.StorageException;
-import se.sics.hop.metadata.ndb.dalimpl.BlockInfoClusterj;
-import se.sics.hop.metadata.ndb.dalimpl.CorruptReplicaClusterj;
-import se.sics.hop.metadata.ndb.dalimpl.ExcessReplicaClusterj;
-import se.sics.hop.metadata.ndb.dalimpl.INodeAttributesClusterj;
-import se.sics.hop.metadata.ndb.dalimpl.INodeClusterj;
-import se.sics.hop.metadata.ndb.dalimpl.InvalidatedBlockClusterj;
-import se.sics.hop.metadata.ndb.dalimpl.LeaderClusterj;
-import se.sics.hop.metadata.ndb.dalimpl.LeasePathClusterj;
-import se.sics.hop.metadata.ndb.dalimpl.PendingBlockClusterj;
-import se.sics.hop.metadata.ndb.dalimpl.ReplicaClusterj;
-import se.sics.hop.metadata.ndb.dalimpl.ReplicaUnderConstructionClusterj;
-import se.sics.hop.metadata.ndb.dalimpl.UnderReplicatedBlockClusterj;
-import se.sics.hop.metadata.ndb.dalimpl.VariableClusterj;
+import se.sics.hop.metadata.ndb.dalimpl.hdfs.BlockInfoClusterj;
+import se.sics.hop.metadata.ndb.dalimpl.hdfs.CorruptReplicaClusterj;
+import se.sics.hop.metadata.ndb.dalimpl.hdfs.ExcessReplicaClusterj;
+import se.sics.hop.metadata.ndb.dalimpl.hdfs.INodeAttributesClusterj;
+import se.sics.hop.metadata.ndb.dalimpl.hdfs.INodeClusterj;
+import se.sics.hop.metadata.ndb.dalimpl.hdfs.InvalidatedBlockClusterj;
+import se.sics.hop.metadata.ndb.dalimpl.hdfs.LeaderClusterj;
+import se.sics.hop.metadata.ndb.dalimpl.hdfs.LeasePathClusterj;
+import se.sics.hop.metadata.ndb.dalimpl.hdfs.PendingBlockClusterj;
+import se.sics.hop.metadata.ndb.dalimpl.hdfs.ReplicaClusterj;
+import se.sics.hop.metadata.ndb.dalimpl.hdfs.ReplicaUnderConstructionClusterj;
+import se.sics.hop.metadata.ndb.dalimpl.hdfs.UnderReplicatedBlockClusterj;
+import se.sics.hop.metadata.ndb.dalimpl.hdfs.VariableClusterj;
 
 public class ClusterjConnector implements StorageConnector<Session> {
 
