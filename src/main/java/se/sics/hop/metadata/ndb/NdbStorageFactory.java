@@ -37,7 +37,9 @@ import se.sics.hop.metadata.ndb.dalimpl.hdfs.ReplicaClusterj;
 import se.sics.hop.metadata.ndb.dalimpl.hdfs.ReplicaUnderConstructionClusterj;
 import se.sics.hop.metadata.ndb.dalimpl.hdfs.UnderReplicatedBlockClusterj;
 import se.sics.hop.metadata.ndb.dalimpl.hdfs.VariableClusterj;
+import se.sics.hop.metadata.ndb.dalimpl.yarn.RMNodeImplClusterJ;
 import se.sics.hop.metadata.ndb.mysqlserver.MysqlServerConnector;
+import se.sics.hop.metadata.yarn.dal.RMNodeImplDataAccess;
 
 /**
  *
@@ -76,6 +78,10 @@ public class NdbStorageFactory implements DALStorageFactory {
     dataAccessMap.put(InvalidateBlockDataAccess.class, new InvalidatedBlockClusterj());
     dataAccessMap.put(UnderReplicatedBlockDataAccess.class, new UnderReplicatedBlockClusterj());
     dataAccessMap.put(VariableDataAccess.class, new VariableClusterj());
+    
+    //HA_YARN
+    dataAccessMap.put(RMNodeImplDataAccess.class, new RMNodeImplClusterJ());
+            
   }
 
   @Override
