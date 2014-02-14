@@ -4,6 +4,7 @@ import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
+import java.util.List;
 import se.sics.hop.metadata.hdfs.entity.yarn.HopRMNodeImpl;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
 import se.sics.hop.metadata.yarn.dal.RMNodeImplDataAccess;
@@ -32,7 +33,7 @@ public class RMNodeImplClusterJ implements RMNodeImplTableDef, RMNodeImplDataAcc
 
         void setCommandPort(int port);
 
-        @PrimaryKey
+        //@PrimaryKey
         @Column(name = HTTP_PORT)
         int getHttpPort();
 
@@ -57,13 +58,48 @@ public class RMNodeImplClusterJ implements RMNodeImplTableDef, RMNodeImplDataAcc
         Object[] objarr = new Object[2];
         objarr[0] = hostName;
         objarr[1] = httpPort;
-        RMNodeImplDTO rmnodeDTP = session.find(RMNodeImplDTO.class, objarr);
-        return createHopRMNodeImpl(rmnodeDTP);
+        RMNodeImplDTO rmnodeDTO = session.find(RMNodeImplDTO.class, objarr);
+        if(rmnodeDTO == null){
+            System.out.println("test:");
+        }
+        int a = rmnodeDTO.getHttpPort();
+        System.out.println("test:"+rmnodeDTO.getHttpPort());
+        return createHopRMNodeImpl(rmnodeDTO);
 
+    }
+    @Override
+    public HopRMNodeImpl findByHostName(String hostName) {
+        System.out.println("findByHostName :: hostname="+hostName);
+        Session session = connector.obtainSession();
+        System.out.println("findByHostName :: session="+session.toString());
+        RMNodeImplDTO rmnodeDTO = session.find(RMNodeImplDTO.class, hostName);
+        if(rmnodeDTO == null){
+            System.out.println("findByHostName :: rmnodeDTO is null");
+            return null;
+        }
+        int a = rmnodeDTO.getHttpPort();
+        System.out.println("test:"+rmnodeDTO.getHttpPort());
+        return createHopRMNodeImpl(rmnodeDTO);
+    }
+    @Override
+    public List<HopRMNodeImpl> findByNodeAddress(String nodeAddress) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void setRMNodeImpl(HopRMNodeImpl hopRMNode) {
+        Session session = connector.obtainSession();
+        RMNodeImplDTO rmDTO = session.newInstance(RMNodeImplDTO.class);
+        rmDTO.setCommandPort(hopRMNode.getCommandPort());
+        rmDTO.setHostName(hopRMNode.getHostName());
+        rmDTO.setHttpAddress("ixixi");
+        rmDTO.setHttpPort(hopRMNode.getHttpPort());
+        rmDTO.setNodeAddress(hopRMNode.getNodeAddress());
+        session.savePersistent(rmDTO);
     }
 
     private HopRMNodeImpl createHopRMNodeImpl(RMNodeImplDTO rmDTO) {
-        return new HopRMNodeImpl(rmDTO.getHostName(), rmDTO.getHttpPort(), rmDTO.getCommandPort(), rmDTO.getHttpAddress(), rmDTO.getNodeAddress());
+        return new HopRMNodeImpl(rmDTO.getHostName(), rmDTO.getCommandPort(), rmDTO.getHttpPort(), rmDTO.getHttpAddress(), rmDTO.getNodeAddress());
     }
 
 }
