@@ -4,7 +4,9 @@ import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import se.sics.hop.metadata.hdfs.dal.INodeAttributesDataAccess;
 import se.sics.hop.metadata.hdfs.entity.hdfs.HopINodeAttributes;
 import se.sics.hop.exception.StorageException;
@@ -55,6 +57,32 @@ public class INodeAttributesClusterj implements INodeAttributesTableDef, INodeAt
       INodeAttributesDTO dto = session.find(INodeAttributesDTO.class, inodeId);
       HopINodeAttributes iNodeAttributes = makeINodeAttributes(dto);
       return iNodeAttributes;
+    } catch (Exception e) {
+      throw new StorageException(e);
+    }
+  }
+  
+  @Override
+  public Collection<HopINodeAttributes> findAttributesByPkList(Collection<Long> inodeIds) throws StorageException {
+    Session session = connector.obtainSession();
+    try {
+        List<Long> inodeIdList  = (List<Long>)inodeIds;
+        List<HopINodeAttributes> inodeAttributesBatchResponse = new ArrayList<HopINodeAttributes>();
+        List<INodeAttributesDTO> inodeAttributesBatchRequest = new ArrayList<INodeAttributesDTO>();
+        for(int i = 0; i < inodeIdList.size(); i++){
+          INodeAttributesDTO dto = session.newInstance(INodeAttributesDTO.class);
+          dto.setId(inodeIdList.get(i));
+          inodeAttributesBatchRequest.add(dto);
+          session.load(dto);
+        }
+        
+        session.flush();
+        
+        for(int i = 0; i < inodeAttributesBatchRequest.size();i++){
+          inodeAttributesBatchResponse.add(makeINodeAttributes(inodeAttributesBatchRequest.get(i)));
+        }
+        
+        return inodeAttributesBatchResponse;
     } catch (Exception e) {
       throw new StorageException(e);
     }
