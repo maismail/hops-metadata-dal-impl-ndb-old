@@ -70,6 +70,8 @@ public class ClusterjConnector implements StorageConnector<Session> {
     }
     LOG.info("Database connect string: " + conf.get(Constants.PROPERTY_CLUSTER_CONNECTSTRING));
     LOG.info("Database name: " + conf.get(Constants.PROPERTY_CLUSTER_DATABASE));
+    LOG.info("Max Transactions: " + conf.get(Constants.PROPERTY_CLUSTER_MAX_TRANSACTIONS));
+    
     try {
       sessionFactory = ClusterJHelper.getSessionFactory(conf);
     } catch (ClusterJException ex) {
@@ -86,7 +88,6 @@ public class ClusterjConnector implements StorageConnector<Session> {
   public Session obtainSession() {
     Session session = sessionPool.get();
     if (session == null) {
-      LOG.info("New session object being obtained.");
       session = sessionFactory.getSession();
       sessionPool.set(session);
     }
@@ -120,6 +121,8 @@ public class ClusterjConnector implements StorageConnector<Session> {
 
     tx.commit();
     session.flush();
+    sessionPool.remove();
+    session.close();
   }
 
   /**
@@ -132,6 +135,8 @@ public class ClusterjConnector implements StorageConnector<Session> {
     if (tx.isActive()) {
       tx.rollback();
     }
+    sessionPool.remove();
+    session.close();
   }
 
   /**
