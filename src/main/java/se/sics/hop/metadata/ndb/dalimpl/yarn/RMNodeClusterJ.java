@@ -189,13 +189,14 @@ public class RMNodeClusterJ implements RMNodeTableDef, RMNodeDataAccess<HopRMNod
         rmDTO.setHttpaddress(hopRMNode.getHttpAddress());
         rmDTO.setNextheartbeat(true);
         //TODO: Remove testing values
-        rmDTO.setResourceid(hopRMNode.getCommandPort());
-        rmDTO.setNodebaseid(99);
+        rmDTO.setResourceid(hopRMNode.getResourceId());
+        rmDTO.setNodebaseid(hopRMNode.getNodebaseId());
         rmDTO.setHealthreport("Healthy");
-        rmDTO.setRMContextid(99);
-        rmDTO.setLasthealthreporttime(99);
+        rmDTO.setRMContextid(hopRMNode.getRmcontextId());
+        rmDTO.setLasthealthreporttime(hopRMNode.getLastHealthReportTime());
         ////////////////////////////////////
         session.savePersistent(rmDTO);
+        session.close();
         return rmDTO;
     }
 

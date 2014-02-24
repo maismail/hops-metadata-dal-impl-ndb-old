@@ -2,6 +2,7 @@ package se.sics.hop.metadata.ndb.dalimpl.yarn;
 
 import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
+import com.mysql.clusterj.annotation.Lob;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
 import java.util.Collection;
@@ -37,6 +38,12 @@ public class NodeIdClusterJ implements NodeIdTableDef, NodeIdDataAccess<HopNodeI
         int getPort();
 
         void setPort(int port);
+
+        @Lob
+        @Column(name = "nodeser")
+        byte[] getNodeser();
+
+        void setNodeser(byte[] nodeser);
     }
     private ClusterjConnector connector = ClusterjConnector.getInstance();
 
@@ -46,12 +53,16 @@ public class NodeIdClusterJ implements NodeIdTableDef, NodeIdDataAccess<HopNodeI
         Object[] objarr = new Object[2];
         objarr[0] = host;
         objarr[1] = port;
-        NodeIdDTO nodeidDTO = session.find(NodeIdDTO.class, objarr);
-        if (nodeidDTO == null) {
+        NodeIdDTO nodeidDTO = null;
+        if (session != null) {
+            nodeidDTO = session.find(NodeIdDTO.class, objarr);
             session.flush();
             session.close();
+        }
+        if (nodeidDTO == null) {
             throw new StorageException("HOP :: Error while retrieving row");
         }
+
         return createHopNodeId(nodeidDTO);
     }
 
@@ -92,9 +103,11 @@ public class NodeIdClusterJ implements NodeIdTableDef, NodeIdDataAccess<HopNodeI
         nodeDTO.setId(hopRMNode.getId());
         nodeDTO.setHost(hopRMNode.getHost());
         nodeDTO.setPort(hopRMNode.getPort());
-       
+        nodeDTO.setNodeser(hopRMNode.getNodeser());
+        session.savePersistent(nodeDTO);
         return nodeDTO;
     }
+
     /**
      * Transforms a DTO to Hop object.
      *
@@ -102,6 +115,6 @@ public class NodeIdClusterJ implements NodeIdTableDef, NodeIdDataAccess<HopNodeI
      * @return HopRMNode
      */
     private HopNodeId createHopNodeId(NodeIdDTO nodeidDTO) {
-        return new HopNodeId(nodeidDTO.getId(), nodeidDTO.getHost(), nodeidDTO.getPort());
+        return new HopNodeId(nodeidDTO.getId(), nodeidDTO.getHost(), nodeidDTO.getPort(), nodeidDTO.getNodeser());
     }
 }
