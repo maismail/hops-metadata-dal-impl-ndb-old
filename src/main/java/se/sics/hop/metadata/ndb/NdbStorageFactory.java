@@ -23,6 +23,7 @@ import se.sics.hop.metadata.hdfs.dal.ReplicaUnderConstructionDataAccess;
 import se.sics.hop.metadata.hdfs.dal.UnderReplicatedBlockDataAccess;
 import se.sics.hop.metadata.hdfs.dal.VariableDataAccess;
 import se.sics.hop.exception.StorageInitializtionException;
+import se.sics.hop.metadata.hdfs.dal.StorageIdMapDataAccess;
 import se.sics.hop.metadata.ndb.dalimpl.hdfs.BlockInfoClusterj;
 import se.sics.hop.metadata.ndb.dalimpl.hdfs.CorruptReplicaClusterj;
 import se.sics.hop.metadata.ndb.dalimpl.hdfs.ExcessReplicaClusterj;
@@ -35,6 +36,7 @@ import se.sics.hop.metadata.ndb.dalimpl.hdfs.LeasePathClusterj;
 import se.sics.hop.metadata.ndb.dalimpl.hdfs.PendingBlockClusterj;
 import se.sics.hop.metadata.ndb.dalimpl.hdfs.ReplicaClusterj;
 import se.sics.hop.metadata.ndb.dalimpl.hdfs.ReplicaUnderConstructionClusterj;
+import se.sics.hop.metadata.ndb.dalimpl.hdfs.StorageIdMapClusterj;
 import se.sics.hop.metadata.ndb.dalimpl.hdfs.UnderReplicatedBlockClusterj;
 import se.sics.hop.metadata.ndb.dalimpl.hdfs.VariableClusterj;
 import se.sics.hop.metadata.ndb.mysqlserver.MysqlServerConnector;
@@ -76,6 +78,7 @@ public class NdbStorageFactory implements DALStorageFactory {
     dataAccessMap.put(InvalidateBlockDataAccess.class, new InvalidatedBlockClusterj());
     dataAccessMap.put(UnderReplicatedBlockDataAccess.class, new UnderReplicatedBlockClusterj());
     dataAccessMap.put(VariableDataAccess.class, new VariableClusterj());
+    dataAccessMap.put(StorageIdMapDataAccess.class, new StorageIdMapClusterj());
   }
 
   @Override

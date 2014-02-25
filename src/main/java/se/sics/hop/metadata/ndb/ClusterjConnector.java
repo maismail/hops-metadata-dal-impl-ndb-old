@@ -29,6 +29,7 @@ import se.sics.hop.metadata.hdfs.dal.UnderReplicatedBlockDataAccess;
 import se.sics.hop.metadata.hdfs.dal.VariableDataAccess;
 import se.sics.hop.metadata.hdfs.entity.hop.var.HopVariable;
 import se.sics.hop.exception.StorageException;
+import se.sics.hop.metadata.hdfs.dal.StorageIdMapDataAccess;
 import se.sics.hop.metadata.ndb.dalimpl.hdfs.BlockInfoClusterj;
 import se.sics.hop.metadata.ndb.dalimpl.hdfs.CorruptReplicaClusterj;
 import se.sics.hop.metadata.ndb.dalimpl.hdfs.ExcessReplicaClusterj;
@@ -40,6 +41,7 @@ import se.sics.hop.metadata.ndb.dalimpl.hdfs.LeasePathClusterj;
 import se.sics.hop.metadata.ndb.dalimpl.hdfs.PendingBlockClusterj;
 import se.sics.hop.metadata.ndb.dalimpl.hdfs.ReplicaClusterj;
 import se.sics.hop.metadata.ndb.dalimpl.hdfs.ReplicaUnderConstructionClusterj;
+import se.sics.hop.metadata.ndb.dalimpl.hdfs.StorageIdMapClusterj;
 import se.sics.hop.metadata.ndb.dalimpl.hdfs.UnderReplicatedBlockClusterj;
 import se.sics.hop.metadata.ndb.dalimpl.hdfs.VariableClusterj;
 
@@ -149,7 +151,7 @@ public class ClusterjConnector implements StorageConnector<Session> {
             ReplicaUnderConstructionDataAccess.class, InvalidateBlockDataAccess.class,
             ExcessReplicaDataAccess.class, PendingBlockDataAccess.class, CorruptReplicaDataAccess.class,
             UnderReplicatedBlockDataAccess.class, LeaderDataAccess.class, 
-            INodeAttributesDataAccess.class, VariableDataAccess.class);
+            INodeAttributesDataAccess.class, VariableDataAccess.class, StorageIdMapDataAccess.class);
   }
 
   @Override
@@ -209,6 +211,8 @@ public class ClusterjConnector implements StorageConnector<Session> {
               vd.setValue(varType.getDefaultValue());
               session.savePersistent(vd);
             }
+          }else if(e == StorageIdMapDataAccess.class){
+            session.deletePersistentAll(StorageIdMapClusterj.StorageIdDTO.class);
           }
         }
         tx.commit();
