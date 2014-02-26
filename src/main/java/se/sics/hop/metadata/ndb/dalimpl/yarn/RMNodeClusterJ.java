@@ -89,6 +89,7 @@ public class RMNodeClusterJ implements RMNodeTableDef, RMNodeDataAccess<HopRMNod
 
     @Override
     public HopRMNode findByNodeId(int nodeid) throws StorageException {
+        connector = ClusterjConnector.getInstance();
         Session session = null;
         RMNodeDTO rmnodeDTO = null;
         try {
@@ -100,8 +101,8 @@ public class RMNodeClusterJ implements RMNodeTableDef, RMNodeDataAccess<HopRMNod
             }
         } finally {
             if (session != null) {
-                session.flush();
-                session.close();
+                //session.flush();
+                //session.close();
             }
         }
         return createHopRMNode(rmnodeDTO);
@@ -115,8 +116,8 @@ public class RMNodeClusterJ implements RMNodeTableDef, RMNodeDataAccess<HopRMNod
         objarr[1] = commandPort;
         RMNodeDTO rmnodeDTO = session.find(RMNodeDTO.class, objarr);
         if (rmnodeDTO == null) {
-            session.flush();
-            session.close();
+            //session.flush();
+           // session.close();
             throw new StorageException("HOP :: Error while retrieving row");
         }
         return createHopRMNode(rmnodeDTO);
@@ -135,8 +136,8 @@ public class RMNodeClusterJ implements RMNodeTableDef, RMNodeDataAccess<HopRMNod
             }
         } finally {
             if (session != null) {
-                session.flush();
-                session.close();
+                //session.flush();
+                //session.close();
             }
         }
         return createHopRMNode(rmnodeDTO);
@@ -153,20 +154,23 @@ public class RMNodeClusterJ implements RMNodeTableDef, RMNodeDataAccess<HopRMNod
         try {
             if (removed != null) {
                 for (HopRMNode rm : removed) {
-                    Object[] objarr = new Object[2];
+                    /*Object[] objarr = new Object[2];
                     objarr[0] = rm.getHostName();
-                    objarr[1] = rm.getCommandPort();
-                    RMNodeDTO persistable = session.newInstance(RMNodeDTO.class, objarr);
+                    objarr[1] = rm.getCommandPort();*/
+                    RMNodeDTO persistable = session.newInstance(RMNodeDTO.class, rm.getNodeId());
                     session.deletePersistent(persistable);
+                    //session.close();
                 }
             }
             if (modified != null) {
                 for (HopRMNode rm : modified) {
                     RMNodeDTO persistable = createPersistable(rm, session);
                     session.savePersistent(persistable);
+                    //session.close();
                 }
             }
         } catch (Exception e) {
+            //session.close();
             throw new StorageException(e);
         }
     }
@@ -196,7 +200,8 @@ public class RMNodeClusterJ implements RMNodeTableDef, RMNodeDataAccess<HopRMNod
         rmDTO.setLasthealthreporttime(hopRMNode.getLastHealthReportTime());
         ////////////////////////////////////
         session.savePersistent(rmDTO);
-        session.close();
+        //session.flush();
+        //session.close();
         return rmDTO;
     }
 

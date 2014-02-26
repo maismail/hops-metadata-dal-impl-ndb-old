@@ -56,8 +56,8 @@ public class NodeIdClusterJ implements NodeIdTableDef, NodeIdDataAccess<HopNodeI
         NodeIdDTO nodeidDTO = null;
         if (session != null) {
             nodeidDTO = session.find(NodeIdDTO.class, objarr);
-            session.flush();
-            session.close();
+            //session.flush();
+            //session.close();
         }
         if (nodeidDTO == null) {
             throw new StorageException("HOP :: Error while retrieving row");
