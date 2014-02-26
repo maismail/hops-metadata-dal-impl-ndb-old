@@ -35,9 +35,9 @@ public class ReplicaUnderConstructionClusterj implements ReplicaUnderConstructio
     @PrimaryKey
     @Column(name = STORAGE_ID)
     @Index(name = "idx_datanodeStorage")
-    String getStorageId();
+    int getStorageId();
 
-    void setStorageId(String id);
+    void setStorageId(int id);
 
     @Column(name = REPLICA_INDEX)
     int getIndex();

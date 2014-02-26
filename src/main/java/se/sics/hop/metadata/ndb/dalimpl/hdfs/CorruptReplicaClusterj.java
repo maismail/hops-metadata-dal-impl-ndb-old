@@ -35,9 +35,9 @@ public class CorruptReplicaClusterj implements CorruptReplicaTableDef, CorruptRe
 
     @PrimaryKey
     @Column(name = STORAGE_ID)
-    String getStorageId();
+    int getStorageId();
 
-    void setStorageId(String id);
+    void setStorageId(int id);
   }
   private ClusterjConnector connector = ClusterjConnector.getInstance();
 
@@ -69,7 +69,7 @@ public class CorruptReplicaClusterj implements CorruptReplicaTableDef, CorruptRe
   }
 
   @Override
-  public HopCorruptReplica findByPk(long blockId, String storageId) throws StorageException {
+  public HopCorruptReplica findByPk(long blockId, int storageId) throws StorageException {
     try {
       Session session = connector.obtainSession();
       Object[] keys = new Object[2];

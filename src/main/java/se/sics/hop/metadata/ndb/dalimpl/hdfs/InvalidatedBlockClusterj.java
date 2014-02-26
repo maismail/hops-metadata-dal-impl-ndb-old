@@ -28,9 +28,9 @@ public class InvalidatedBlockClusterj implements InvalidatedBlockTableDef, Inval
 
     @PrimaryKey
     @Column(name = STORAGE_ID)
-    String getStorageId();
+    int getStorageId();
 
-    void setStorageId(String storageId);
+    void setStorageId(int storageId);
 
     @PrimaryKey
     @Column(name = BLOCK_ID)
@@ -68,7 +68,7 @@ public class InvalidatedBlockClusterj implements InvalidatedBlockTableDef, Inval
   }
 
   @Override
-  public List<HopInvalidatedBlock> findInvalidatedBlockByStorageId(String storageId) throws StorageException {
+  public List<HopInvalidatedBlock> findInvalidatedBlockByStorageId(int storageId) throws StorageException {
     try {
       Session session = connector.obtainSession();
       QueryBuilder qb = session.getQueryBuilder();

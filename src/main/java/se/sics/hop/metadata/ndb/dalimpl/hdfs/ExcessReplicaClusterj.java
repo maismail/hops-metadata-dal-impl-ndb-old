@@ -34,9 +34,9 @@ public class ExcessReplicaClusterj implements ExcessReplicaTableDef, ExcessRepli
 
     @PrimaryKey
     @Column(name = STORAGE_ID)
-    String getStorageId();
+    int getStorageId();
 
-    void setStorageId(String storageId);
+    void setStorageId(int storageId);
   }
   private ClusterjConnector connector = ClusterjConnector.getInstance();
 
@@ -67,7 +67,7 @@ public class ExcessReplicaClusterj implements ExcessReplicaTableDef, ExcessRepli
   }
 
   @Override
-  public List<HopExcessReplica> findExcessReplicaByStorageId(String storageId) throws StorageException {
+  public List<HopExcessReplica> findExcessReplicaByStorageId(int storageId) throws StorageException {
     try {
       Session session = connector.obtainSession();
       QueryBuilder qb = session.getQueryBuilder();
