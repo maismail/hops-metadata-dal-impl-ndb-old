@@ -156,7 +156,7 @@ public class BlockInfoClusterj implements BlockInfoTableDef, BlockInfoDataAccess
 
     // TODO - set the Partition KEY before calling this operation
     @Override
-    public List<HopBlockInfo> findByStorageId(String storageId) throws StorageException {
+    public List<HopBlockInfo> findByStorageId(int storageId) throws StorageException {
         try {
             Session session = connector.obtainSession();
             List<HopBlockInfo> ret = new ArrayList<HopBlockInfo>();
