@@ -34,7 +34,7 @@ public class ReplicaClusterj implements ReplicaTableDef, ReplicaDataAccess<HopIn
 
     @PrimaryKey
     @Column(name = STORAGE_ID)
-    @Index(name = "idx_datanodeStorage")
+    @Index(name = "storage_idx")
     int getStorageId();
 
     void setStorageId(int id);
