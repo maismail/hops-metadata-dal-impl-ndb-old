@@ -37,10 +37,12 @@ import se.sics.hop.metadata.ndb.dalimpl.hdfs.ReplicaClusterj;
 import se.sics.hop.metadata.ndb.dalimpl.hdfs.ReplicaUnderConstructionClusterj;
 import se.sics.hop.metadata.ndb.dalimpl.hdfs.UnderReplicatedBlockClusterj;
 import se.sics.hop.metadata.ndb.dalimpl.hdfs.VariableClusterj;
+import se.sics.hop.metadata.ndb.dalimpl.yarn.NodeClusterJ;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.NodeIdClusterJ;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.RMNodeClusterJ;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.YarnVariablesClusterJ;
 import se.sics.hop.metadata.ndb.mysqlserver.MysqlServerConnector;
+import se.sics.hop.metadata.yarn.dal.NodeDataAccess;
 import se.sics.hop.metadata.yarn.dal.NodeIdDataAccess;
 import se.sics.hop.metadata.yarn.dal.RMNodeDataAccess;
 import se.sics.hop.metadata.yarn.dal.YarnVariablesDataAccess;
@@ -87,6 +89,7 @@ public class NdbStorageFactory implements DALStorageFactory {
     dataAccessMap.put(RMNodeDataAccess.class, new RMNodeClusterJ());
     dataAccessMap.put(NodeIdDataAccess.class, new NodeIdClusterJ());
     dataAccessMap.put(YarnVariablesDataAccess.class, new YarnVariablesClusterJ());
+    dataAccessMap.put(NodeDataAccess.class, new NodeClusterJ());
   }
 
   @Override

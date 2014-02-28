@@ -90,21 +90,13 @@ public class RMNodeClusterJ implements RMNodeTableDef, RMNodeDataAccess<HopRMNod
     @Override
     public HopRMNode findByNodeId(int nodeid) throws StorageException {
         connector = ClusterjConnector.getInstance();
-        Session session = null;
-        RMNodeDTO rmnodeDTO = null;
-        try {
-            session = connector.obtainSession();
-            System.out.println("RMNodeImplClusterJ :: findByNodeId-" + nodeid + " :: session=" + session.toString());
-            rmnodeDTO = session.find(RMNodeDTO.class, nodeid);
-            if (rmnodeDTO == null) {
-                throw new StorageException("Error while retrieving row");
-            }
-        } finally {
-            if (session != null) {
-                //session.flush();
-                //session.close();
-            }
+        Session session = connector.obtainSession();
+        System.out.println("RMNodeImplClusterJ :: findByNodeId-" + nodeid + " :: session=" + session.toString());
+        RMNodeDTO rmnodeDTO = session.find(RMNodeDTO.class, nodeid);
+        if (rmnodeDTO == null) {
+            throw new StorageException("Error while retrieving row");
         }
+
         return createHopRMNode(rmnodeDTO);
     }
 
@@ -116,8 +108,6 @@ public class RMNodeClusterJ implements RMNodeTableDef, RMNodeDataAccess<HopRMNod
         objarr[1] = commandPort;
         RMNodeDTO rmnodeDTO = session.find(RMNodeDTO.class, objarr);
         if (rmnodeDTO == null) {
-            //session.flush();
-           // session.close();
             throw new StorageException("HOP :: Error while retrieving row");
         }
         return createHopRMNode(rmnodeDTO);
@@ -125,20 +115,11 @@ public class RMNodeClusterJ implements RMNodeTableDef, RMNodeDataAccess<HopRMNod
 
     @Override
     public HopRMNode findByHostName(String hostName) throws StorageException {
-        Session session = null;
-        RMNodeDTO rmnodeDTO = null;
-        try {
-            session = connector.obtainSession();
-            System.out.println("RMNodeImplClusterJ :: findByHostName-" + hostName + " :: session=" + session.toString());
-            rmnodeDTO = session.find(RMNodeDTO.class, hostName);
-            if (rmnodeDTO == null) {
-                throw new StorageException("Error while retrieving row");
-            }
-        } finally {
-            if (session != null) {
-                //session.flush();
-                //session.close();
-            }
+        Session session = connector.obtainSession();
+        System.out.println("RMNodeImplClusterJ :: findByHostName-" + hostName + " :: session=" + session.toString());
+        RMNodeDTO rmnodeDTO = session.find(RMNodeDTO.class, hostName);
+        if (rmnodeDTO == null) {
+            throw new StorageException("Error while retrieving row");
         }
         return createHopRMNode(rmnodeDTO);
     }
@@ -155,30 +136,27 @@ public class RMNodeClusterJ implements RMNodeTableDef, RMNodeDataAccess<HopRMNod
             if (removed != null) {
                 for (HopRMNode rm : removed) {
                     /*Object[] objarr = new Object[2];
-                    objarr[0] = rm.getHostName();
-                    objarr[1] = rm.getCommandPort();*/
+                     objarr[0] = rm.getHostName();
+                     objarr[1] = rm.getCommandPort();*/
                     RMNodeDTO persistable = session.newInstance(RMNodeDTO.class, rm.getNodeId());
                     session.deletePersistent(persistable);
-                    //session.close();
                 }
             }
             if (modified != null) {
                 for (HopRMNode rm : modified) {
                     RMNodeDTO persistable = createPersistable(rm, session);
                     session.savePersistent(persistable);
-                    //session.close();
                 }
             }
         } catch (Exception e) {
-            //session.close();
             throw new StorageException(e);
         }
     }
 
     @Override
     public void createRMNode(HopRMNode rmNode) throws StorageException {
-            Session session = connector.obtainSession();
-            createPersistable(rmNode, session);
+        Session session = connector.obtainSession();
+        createPersistable(rmNode, session);
     }
 
     private RMNodeDTO createPersistable(HopRMNode hopRMNode, Session session) {
@@ -200,13 +178,12 @@ public class RMNodeClusterJ implements RMNodeTableDef, RMNodeDataAccess<HopRMNod
         rmDTO.setLasthealthreporttime(hopRMNode.getLastHealthReportTime());
         ////////////////////////////////////
         session.savePersistent(rmDTO);
-        //session.flush();
-        //session.close();
         return rmDTO;
     }
 
     /**
      * Transforms a DTO to Hop object.
+     *
      * @param rmDTO
      * @return HopRMNode
      */
