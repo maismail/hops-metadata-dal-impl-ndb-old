@@ -1,12 +1,9 @@
 package se.sics.hop.metadata.ndb.dalimpl.yarn;
 
-import com.mysql.clusterj.Query;
 import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
-import com.mysql.clusterj.query.QueryBuilder;
-import com.mysql.clusterj.query.QueryDomainType;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.entity.yarn.YarnVariables;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
@@ -14,12 +11,14 @@ import se.sics.hop.metadata.yarn.dal.YarnVariablesDataAccess;
 import se.sics.hop.metadata.yarn.tabledef.YarnVariablesTableDef;
 
 /**
+ * Table with one row that is used to obtain unique ids for tables. This
+ * solution can be dropped once ClusterJ implements auto-increment.
  *
- * @author teo
+ * @author Theofilos Kakantousis <tkak@sics.se>
  */
 public class YarnVariablesClusterJ implements YarnVariablesTableDef, YarnVariablesDataAccess<YarnVariables> {
 
-    @PersistenceCapable(table = "hayarn_variables")
+    @PersistenceCapable(table = TABLE_NAME)
     public interface YarnVariablesDTO {
 
         @PrimaryKey
@@ -28,36 +27,55 @@ public class YarnVariablesClusterJ implements YarnVariablesTableDef, YarnVariabl
 
         void setId(int id);
 
-        @Column(name = LAST_GIVEN_ID)
-        int getLastGivenId();
+        @Column(name = LAST_UPDATEDCONTAINERINFO_ID)
+        int getLastupdatedcontainerinfoid();
 
-        void setLastGivenId(int lastgivenid);
+        void setLastupdatedcontainerinfoid(int lastupdatedcontainerinfoid);
     }
     private ClusterjConnector connector = ClusterjConnector.getInstance();
 
     @Override
-    public int getNodeId() throws StorageException {
-        int id;
-        Session session = null;
+    public YarnVariables findById() throws StorageException {
 
-        try {
-            session = connector.obtainSession();
-            System.out.println("VariablesClusterJ :: getNodeId() - session=" + session.toString());
-            QueryBuilder builder = session.getQueryBuilder();
-            QueryDomainType<YarnVariablesDTO> domain = builder.createQueryDefinition(YarnVariablesDTO.class);
-            Query<YarnVariablesDTO> query = session.createQuery(domain);
-            YarnVariablesDTO result = query.getResultList().get(0);
-            id = result.getLastGivenId();
-            result.setLastGivenId(id++);
-            session.updatePersistent(result);
-
-        } finally {
-            if (session != null) {
-                session.flush();
-                session.close();
-            }
+        Session session = connector.obtainSession();
+        YarnVariablesDTO yarnDTO = null;
+        if (session != null) {
+            yarnDTO = session.find(YarnVariablesDTO.class, idVal);
         }
-        return 0;
+        if (yarnDTO == null) {
+            throw new StorageException("HOP :: Error while retrieving row");
+        }
+        YarnVariables objFound = new YarnVariables(yarnDTO.getId(), yarnDTO.getLastupdatedcontainerinfoid());
 
+        return objFound;
+        /*QueryBuilder builder = session.getQueryBuilder();
+         QueryDomainType<YarnVariablesDTO> domain = builder.createQueryDefinition(YarnVariablesDTO.class);
+         Query<YarnVariablesDTO> query = session.createQuery(domain);
+         YarnVariablesDTO result = query.getResultList().get(0);
+         lastupdatedcontainerinfoid = result.getLastupdatedcontainerinfoid();
+         result.setLastupdatedcontainerinfoid(lastupdatedcontainerinfoid++);
+         session.updatePersistent(result);*/
+        //return lastupdatedcontainerinfoid;
+
+    }
+
+    @Override
+    public YarnVariables findByIdIncrementUpdatedContainerInfo() throws StorageException {
+
+        Session session = connector.obtainSession();
+        YarnVariablesDTO yarnDTO = null;
+        if (session != null) {
+            yarnDTO = session.find(YarnVariablesDTO.class, idVal);
+        }
+        if (yarnDTO == null) {
+            throw new StorageException("HOP :: Error while retrieving row");
+        }
+        YarnVariables objFound = new YarnVariables(yarnDTO.getId(), yarnDTO.getLastupdatedcontainerinfoid());
+        YarnVariablesDTO newDTO = session.newInstance(YarnVariablesDTO.class);
+        newDTO.setId(idVal);
+        int newid = objFound.getLastupdatedcontainerinfoid() + 1;
+        newDTO.setLastupdatedcontainerinfoid(newid);
+        session.savePersistent(newDTO);
+        return objFound;
     }
 }

@@ -172,7 +172,9 @@ public class RMNodeClusterJ implements RMNodeTableDef, RMNodeDataAccess<HopRMNod
         rmDTO.setNextheartbeat(true);
         //TODO: Remove testing values
         rmDTO.setResourceid(hopRMNode.getResourceId());
-        rmDTO.setNodebaseid(hopRMNode.getNodebaseId());
+        if(hopRMNode.getNodebaseId()>0){
+            rmDTO.setNodebaseid(hopRMNode.getNodebaseId());
+        }
         rmDTO.setHealthreport("Healthy");
         rmDTO.setRMContextid(hopRMNode.getRmcontextId());
         rmDTO.setLasthealthreporttime(hopRMNode.getLastHealthReportTime());
