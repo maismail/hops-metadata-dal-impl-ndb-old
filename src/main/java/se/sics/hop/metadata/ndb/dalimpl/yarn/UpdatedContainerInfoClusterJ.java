@@ -41,8 +41,15 @@ public class UpdatedContainerInfoClusterJ implements UpdatedContainerInfoTableDe
     private ClusterjConnector connector = ClusterjConnector.getInstance();
 
     @Override
-    public void clear(int rmnodeid) throws StorageException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public void clear(List<HopUpdatedContainerInfo> list) throws StorageException {
+        List<UpdatedContainerInfoDTO> toRemove = new ArrayList<UpdatedContainerInfoDTO>();
+        Session session = connector.obtainSession();
+        for (HopUpdatedContainerInfo hop : list) {
+            UpdatedContainerInfoDTO uci = session.newInstance(UpdatedContainerInfoDTO.class);
+            uci.setid(hop.getId());
+
+        }
+        session.deletePersistentAll(toRemove);
     }
 
     @Override

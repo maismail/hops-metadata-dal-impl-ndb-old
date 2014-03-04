@@ -1,10 +1,19 @@
 package se.sics.hop.metadata.ndb.dalimpl.yarn;
 
+import com.mysql.clusterj.Query;
 import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
+import com.mysql.clusterj.query.Predicate;
+import com.mysql.clusterj.query.QueryBuilder;
+import com.mysql.clusterj.query.QueryDomainType;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.entity.yarn.HopApplicationId;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
@@ -30,6 +39,11 @@ public class ApplicationIdClusterJ implements ApplicationIdTableDef, Application
         long getclustertimestamp();
 
         void setclustertimestamp(long clustertimestamp);
+
+        @Column(name = FINISHED)
+        int getfinished();
+
+        void setfinished(int finished);
     }
     private ClusterjConnector connector = ClusterjConnector.getInstance();
 
@@ -46,6 +60,25 @@ public class ApplicationIdClusterJ implements ApplicationIdTableDef, Application
         }
 
         return createHopApplicationId(applicationIdDTO);
+    }
+
+    @Override
+    public List<HopApplicationId> findFinished() throws StorageException {
+        try {
+            Session session = connector.obtainSession();
+            QueryBuilder qb = session.getQueryBuilder();
+
+            QueryDomainType<ApplicationIdDTO> dobj = qb.createQueryDefinition(ApplicationIdDTO.class);
+            Predicate pred1 = dobj.get("finished").equal(dobj.param("finished"));
+            dobj.where(pred1);
+            Query<ApplicationIdDTO> query = session.createQuery(dobj);
+            query.setParameter("finished", 1);
+
+            List<ApplicationIdDTO> results = query.getResultList();
+            return createApplicationIdList(results);
+        } catch (Exception e) {
+            throw new StorageException(e);
+        }
     }
 
     @Override
@@ -71,21 +104,64 @@ public class ApplicationIdClusterJ implements ApplicationIdTableDef, Application
     }
 
     @Override
-    public void createApplicationId(HopApplicationId applicationattemptid) throws StorageException {
+    public void createApplicationId(HopApplicationId applicationId) throws StorageException {
         Session session = connector.obtainSession();
-        createPersistable(applicationattemptid, session);
+        createPersistable(applicationId, session);
+    }
+
+    @Override
+    public void deleteAll() throws StorageException {
+        Session session = connector.obtainSession();
+        session.deletePersistentAll(ApplicationIdDTO.class);
+    }
+
+    @Override
+    public void deleteFinished(List<HopApplicationId> list) throws StorageException {
+        Session session = connector.obtainSession();
+        List<ApplicationIdDTO> toRemove = new ArrayList<ApplicationIdDTO>();
+        for (HopApplicationId hop : list) {
+            ApplicationIdDTO appidDTO = session.newInstance(ApplicationIdDTO.class);
+            appidDTO.setid(hop.getId());
+            appidDTO.setclustertimestamp(hop.getClustertimestamp());
+            appidDTO.setfinished(hop.getFinished());
+        }
+        session.deletePersistentAll(toRemove);
+    }
+
+    @Override
+    public List<HopApplicationId> findAll() throws StorageException {
+        Session session = connector.obtainSession();
+        QueryBuilder qb = session.getQueryBuilder();
+        QueryDomainType<ApplicationIdDTO> dobj = qb.createQueryDefinition(ApplicationIdDTO.class);
+        Query<ApplicationIdDTO> query = session.createQuery(dobj);
+        List<ApplicationIdDTO> results = query.getResultList();
+        try {
+            return createApplicationIdList(results);
+        } catch (IOException ex) {
+            Logger.getLogger(ApplicationIdClusterJ.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return null;
+    }
+
+    private List<HopApplicationId> createApplicationIdList(List<ApplicationIdDTO> list) throws IOException {
+        List<HopApplicationId> applicationIds = new ArrayList<HopApplicationId>();
+        for (ApplicationIdDTO persistable : list) {
+            applicationIds.add(createHopApplicationId(persistable));
+        }
+        return applicationIds;
     }
 
     private ApplicationIdDTO createPersistable(HopApplicationId hopApplicationId, Session session) {
         ApplicationIdDTO applicationIdDTO = session.newInstance(ApplicationIdDTO.class);
         applicationIdDTO.setid(hopApplicationId.getId());
         applicationIdDTO.setclustertimestamp(hopApplicationId.getClustertimestamp());
+        applicationIdDTO.setfinished(hopApplicationId.getFinished());
         session.savePersistent(applicationIdDTO);
         return applicationIdDTO;
     }
 
     private HopApplicationId createHopApplicationId(ApplicationIdDTO applicationIdDTO) {
-        HopApplicationId hop = new HopApplicationId(applicationIdDTO.getid(), applicationIdDTO.getclustertimestamp());
+        HopApplicationId hop = new HopApplicationId(applicationIdDTO.getid(), applicationIdDTO.getclustertimestamp(), applicationIdDTO.getfinished());
         return hop;
     }
 }

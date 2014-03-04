@@ -30,6 +30,11 @@ public class ContainerIdClusterJ implements ContainerIdTableDef, ContainerIdData
         int getapplicationattemptid();
 
         void setapplicationattemptid(int applicationattemptid);
+
+        @Column(name = TO_CLEAN)
+        boolean gettoclean();
+
+        void settoclean(boolean toclean);
     }
     private ClusterjConnector connector = ClusterjConnector.getInstance();
 
@@ -71,7 +76,7 @@ public class ContainerIdClusterJ implements ContainerIdTableDef, ContainerIdData
     }
 
     @Override
-    public void createContainerStatus(HopContainerId containerstatus) throws StorageException {
+    public void createContainerId(HopContainerId containerstatus) throws StorageException {
         Session session = connector.obtainSession();
         createPersistable(containerstatus, session);
     }
@@ -81,12 +86,13 @@ public class ContainerIdClusterJ implements ContainerIdTableDef, ContainerIdData
         //Set values to persist new ContainerStatus
         containerIdDTO.setid(hopContainerId.getId());
         containerIdDTO.setapplicationattemptid(hopContainerId.getApplicationAttemptId());
+        containerIdDTO.settoclean(hopContainerId.isToClean());
         session.savePersistent(containerIdDTO);
         return containerIdDTO;
     }
 
     private HopContainerId createHopContainerId(ContainerIdDTO containerIdDTO) {
-        HopContainerId hop = new HopContainerId(containerIdDTO.getid(), containerIdDTO.getapplicationattemptid());
+        HopContainerId hop = new HopContainerId(containerIdDTO.getid(), containerIdDTO.getapplicationattemptid(), containerIdDTO.gettoclean());
         return hop;
     }
 }
