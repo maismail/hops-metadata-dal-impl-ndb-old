@@ -63,6 +63,28 @@ public class ApplicationIdClusterJ implements ApplicationIdTableDef, Application
     }
 
     @Override
+    public HopApplicationId findFinished(int id) throws StorageException {
+        Session session = connector.obtainSession();
+        QueryBuilder qb = session.getQueryBuilder();
+
+        QueryDomainType<ApplicationIdDTO> dobj = qb.createQueryDefinition(ApplicationIdDTO.class);
+        Predicate pred1 = dobj.get("id").equal(dobj.param("id"));
+        Predicate pred2 = dobj.get("finished").equal(dobj.param("finished"));
+        pred1 = pred1.and(pred2);
+        dobj.where(pred1);
+        Query<ApplicationIdDTO> query = session.createQuery(dobj);
+        query.setParameter("id", id);
+        query.setParameter("finished", 1);
+        List<ApplicationIdDTO> result = query.getResultList();
+
+        if (result != null && !result.isEmpty()) {
+            return createHopApplicationId(result.get(0));
+        } else {
+            throw new StorageException("HOP - Finished ApplicationId was not found");
+        }
+    }
+
+    @Override
     public List<HopApplicationId> findFinished() throws StorageException {
         try {
             Session session = connector.obtainSession();

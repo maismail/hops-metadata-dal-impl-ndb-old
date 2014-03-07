@@ -4,6 +4,7 @@ import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
+import java.util.Collection;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.entity.yarn.YarnVariables;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
@@ -31,6 +32,26 @@ public class YarnVariablesClusterJ implements YarnVariablesTableDef, YarnVariabl
         int getLastupdatedcontainerinfoid();
 
         void setLastupdatedcontainerinfoid(int lastupdatedcontainerinfoid);
+
+        @Column(name = LAST_NODEID_ID)
+        int getlastnodeidid();
+
+        void setlastnodeidid(int lastnodeidid);
+
+        @Column(name = LAST_NODE_ID)
+        int getlastnodeid();
+
+        void setlastnodeid(int lastnodeid);
+
+        @Column(name = LAST_RESOURCE_ID)
+        int getlastresourceid();
+
+        void setlastresourceid(int lastresourceid);
+        
+        @Column(name = LAST_LIST_ID)
+        int getlastlistid();
+
+        void setlastlistid(int lastlistid);
     }
     private ClusterjConnector connector = ClusterjConnector.getInstance();
 
@@ -45,18 +66,8 @@ public class YarnVariablesClusterJ implements YarnVariablesTableDef, YarnVariabl
         if (yarnDTO == null) {
             throw new StorageException("HOP :: Error while retrieving row");
         }
-        YarnVariables objFound = new YarnVariables(yarnDTO.getId(), yarnDTO.getLastupdatedcontainerinfoid());
-
+        YarnVariables objFound = new YarnVariables(yarnDTO.getId(), yarnDTO.getLastupdatedcontainerinfoid(), yarnDTO.getlastnodeidid(), yarnDTO.getlastnodeid(), yarnDTO.getlastresourceid(), yarnDTO.getlastlistid());
         return objFound;
-        /*QueryBuilder builder = session.getQueryBuilder();
-         QueryDomainType<YarnVariablesDTO> domain = builder.createQueryDefinition(YarnVariablesDTO.class);
-         Query<YarnVariablesDTO> query = session.createQuery(domain);
-         YarnVariablesDTO result = query.getResultList().get(0);
-         lastupdatedcontainerinfoid = result.getLastupdatedcontainerinfoid();
-         result.setLastupdatedcontainerinfoid(lastupdatedcontainerinfoid++);
-         session.updatePersistent(result);*/
-        //return lastupdatedcontainerinfoid;
-
     }
 
     @Override
@@ -70,12 +81,45 @@ public class YarnVariablesClusterJ implements YarnVariablesTableDef, YarnVariabl
         if (yarnDTO == null) {
             throw new StorageException("HOP :: Error while retrieving row");
         }
-        YarnVariables objFound = new YarnVariables(yarnDTO.getId(), yarnDTO.getLastupdatedcontainerinfoid());
+        YarnVariables objFound = new YarnVariables(yarnDTO.getId(), yarnDTO.getLastupdatedcontainerinfoid(), yarnDTO.getlastnodeidid(), yarnDTO.getlastnodeid(), yarnDTO.getlastresourceid(), yarnDTO.getlastlistid());
         YarnVariablesDTO newDTO = session.newInstance(YarnVariablesDTO.class);
         newDTO.setId(idVal);
         int newid = objFound.getLastupdatedcontainerinfoid() + 1;
         newDTO.setLastupdatedcontainerinfoid(newid);
         session.savePersistent(newDTO);
         return objFound;
+    }
+
+    @Override
+    public void prepare(Collection<YarnVariables> modified, Collection<YarnVariables> removed) throws StorageException {
+        Session session = connector.obtainSession();
+        try {
+            if (removed != null) {
+                for (YarnVariables hopApplicationId : removed) {
+                    YarnVariablesDTO persistable = session.newInstance(YarnVariablesDTO.class, hopApplicationId.getId());
+                    session.deletePersistent(persistable);
+                }
+            }
+            if (modified != null) {
+                for (YarnVariables hopAppAttemptId : modified) {
+                    YarnVariablesDTO persistable = createPersistable(hopAppAttemptId, session);
+                    session.savePersistent(persistable);
+                }
+            }
+        } catch (Exception e) {
+            throw new StorageException(e);
+        }
+    }
+
+    private YarnVariablesDTO createPersistable(YarnVariables yarnVariables, Session session) {
+        YarnVariablesDTO yarnDTO = session.newInstance(YarnVariablesDTO.class);
+        yarnDTO.setId(yarnVariables.getId());
+        yarnDTO.setLastupdatedcontainerinfoid(yarnVariables.getLastupdatedcontainerinfoid());
+        yarnDTO.setlastnodeidid(yarnVariables.getLastnodeidId());
+        yarnDTO.setlastnodeid(yarnVariables.getLastnodeId());
+        yarnDTO.setlastresourceid(yarnVariables.getLastresourceId());
+        yarnDTO.setlastlistid(yarnVariables.getLastlistid());
+        session.savePersistent(yarnDTO);
+        return yarnDTO;
     }
 }

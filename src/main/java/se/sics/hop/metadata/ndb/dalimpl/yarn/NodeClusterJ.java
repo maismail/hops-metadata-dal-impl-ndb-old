@@ -1,10 +1,15 @@
 package se.sics.hop.metadata.ndb.dalimpl.yarn;
 
+import com.mysql.clusterj.Query;
 import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
+import com.mysql.clusterj.query.Predicate;
+import com.mysql.clusterj.query.QueryBuilder;
+import com.mysql.clusterj.query.QueryDomainType;
 import java.util.Collection;
+import java.util.List;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.entity.yarn.HopNode;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
@@ -52,15 +57,39 @@ public class NodeClusterJ implements NodeTableDef, NodeDataAccess<HopNode> {
     public HopNode findById(int id) throws StorageException {
         Session session = connector.obtainSession();
 
-        NodeClusterJ.NodeDTO nodeDTO = null;
+        NodeDTO nodeDTO = null;
         if (session != null) {
-            nodeDTO = session.find(NodeClusterJ.NodeDTO.class, id);
+            nodeDTO = session.find(NodeDTO.class, id);
         }
         if (nodeDTO == null) {
             throw new StorageException("HOP :: Error while retrieving row");
         }
 
         return createHopNode(nodeDTO);
+    }
+
+    @Override
+    public HopNode findByNameLocation(String name, String location) throws StorageException {
+        try {
+            Session session = connector.obtainSession();
+            QueryBuilder qb = session.getQueryBuilder();
+            QueryDomainType<NodeDTO> dobj = qb.createQueryDefinition(NodeDTO.class);
+            Predicate pred1 = dobj.get("name").equal(dobj.param("name"));
+            Predicate pred2 = dobj.get("location").equal(dobj.param("location"));
+            pred1 = pred1.and(pred2);
+            dobj.where(pred1);
+            Query<NodeDTO> query = session.createQuery(dobj);
+            query.setParameter("name", name);
+            query.setParameter("location", location);
+            List<NodeDTO> results = query.getResultList();
+            if (results != null && !results.isEmpty()) {
+                return createHopNode(results.get(0));
+            } else {
+                throw new StorageException("HOP - findByNameLocation :: Node was not found");
+            }
+        } catch (Exception e) {
+            throw new StorageException(e);
+        }
     }
 
     @Override
@@ -91,7 +120,7 @@ public class NodeClusterJ implements NodeTableDef, NodeDataAccess<HopNode> {
         createPersistable(node, session);
     }
 
-    private NodeClusterJ.NodeDTO createPersistable(HopNode hopNode, Session session) {
+    private NodeDTO createPersistable(HopNode hopNode, Session session) {
         NodeClusterJ.NodeDTO nodeDTO = session.newInstance(NodeClusterJ.NodeDTO.class);
         //Set values to persist new rmnode
         nodeDTO.setId(hopNode.getId());

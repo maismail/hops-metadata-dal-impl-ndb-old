@@ -47,7 +47,7 @@ public class UpdatedContainerInfoClusterJ implements UpdatedContainerInfoTableDe
         for (HopUpdatedContainerInfo hop : list) {
             UpdatedContainerInfoDTO uci = session.newInstance(UpdatedContainerInfoDTO.class);
             uci.setid(hop.getId());
-
+            toRemove.add(uci);
         }
         session.deletePersistentAll(toRemove);
     }

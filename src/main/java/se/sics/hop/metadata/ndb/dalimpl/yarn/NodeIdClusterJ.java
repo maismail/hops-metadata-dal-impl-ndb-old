@@ -37,12 +37,6 @@ public class NodeIdClusterJ implements NodeIdTableDef, NodeIdDataAccess<HopNodeI
         int getPort();
 
         void setPort(int port);
-
-        //@Lob
-        @Column(name = OBJECT)
-        byte[] getObject();
-
-        void setObject(byte[] object);
     }
     private ClusterjConnector connector = ClusterjConnector.getInstance();
 
@@ -99,9 +93,7 @@ public class NodeIdClusterJ implements NodeIdTableDef, NodeIdDataAccess<HopNodeI
         //Set values to persist new rmnode
         nodeDTO.setId(hopNodeId.getId());
         nodeDTO.setHost(hopNodeId.getHost());
-        nodeDTO.setPort(hopNodeId.getPort());
-        nodeDTO.setObject(hopNodeId.getObject());
-        
+        nodeDTO.setPort(hopNodeId.getPort());        
         session.savePersistent(nodeDTO);
         return nodeDTO;
     }
@@ -113,6 +105,6 @@ public class NodeIdClusterJ implements NodeIdTableDef, NodeIdDataAccess<HopNodeI
      * @return HopRMNode
      */
     private HopNodeId createHopNodeId(NodeIdDTO nodeidDTO) {
-        return new HopNodeId(nodeidDTO.getId(), nodeidDTO.getHost(), nodeidDTO.getPort(), nodeidDTO.getObject());
+        return new HopNodeId(nodeidDTO.getId(), nodeidDTO.getHost(), nodeidDTO.getPort());
     }
 }
