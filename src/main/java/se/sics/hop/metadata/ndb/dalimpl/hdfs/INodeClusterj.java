@@ -161,7 +161,7 @@ public class INodeClusterj implements INodeTableDef, INodeDataAccess<HopINode> {
   @Override
   public HopINode indexScanfindInodeById(long inodeId) throws StorageException {
     try {
-      System.out.println("*** pruneScanfindInodeById, Id "+inodeId);
+      //System.out.println("*** pruneScanfindInodeById, Id "+inodeId);
       Session session = connector.obtainSession();
       
       QueryBuilder qb = session.getQueryBuilder();
@@ -190,7 +190,7 @@ public class INodeClusterj implements INodeTableDef, INodeDataAccess<HopINode> {
   @Override
   public List<HopINode> indexScanFindInodesByParentId(long parentId) throws StorageException {
     try {
-      System.out.println("*** indexScanFindInodesByParentId ");
+      //System.out.println("*** indexScanFindInodesByParentId ");
       Session session = connector.obtainSession();
             
       QueryBuilder qb = session.getQueryBuilder();
@@ -211,7 +211,7 @@ public class INodeClusterj implements INodeTableDef, INodeDataAccess<HopINode> {
   @Override
   public HopINode pkLookUpFindInodeByNameAndParentId(String name, long parentId) throws StorageException {
     try {
-      System.out.println("*** pkLookUpFindInodeByNameAndParentId, name "+name+" parentId "+parentId);
+     // System.out.println("*** pkLookUpFindInodeByNameAndParentId, name "+name+" parentId "+parentId);
       
       Session session = connector.obtainSession();
 
@@ -277,9 +277,9 @@ public class INodeClusterj implements INodeTableDef, INodeDataAccess<HopINode> {
   }
   
   private void explain(Query<InodeDTO> query){
-      Map<String,Object> map = query.explain();
-      System.out.println("Explain");
-      System.out.println("keys " +Arrays.toString(map.keySet().toArray()));
-      System.out.println("values "+ Arrays.toString(map.values().toArray()));
+//      Map<String,Object> map = query.explain();
+//      System.out.println("Explain");
+//      System.out.println("keys " +Arrays.toString(map.keySet().toArray()));
+//      System.out.println("values "+ Arrays.toString(map.values().toArray()));
   }
 }
