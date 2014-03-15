@@ -1,16 +1,20 @@
 package se.sics.hop.metadata.ndb.dalimpl.yarn;
 
+import com.mysql.clusterj.Query;
 import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
+import com.mysql.clusterj.query.Predicate;
+import com.mysql.clusterj.query.QueryBuilder;
+import com.mysql.clusterj.query.QueryDomainType;
 import java.util.Collection;
+import java.util.List;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.entity.yarn.HopNodeId;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
 import se.sics.hop.metadata.yarn.dal.NodeIdDataAccess;
 import se.sics.hop.metadata.yarn.tabledef.NodeIdTableDef;
-import static se.sics.hop.metadata.yarn.tabledef.NodeIdTableDef.TABLE_NAME;
 
 /**
  *
@@ -39,6 +43,35 @@ public class NodeIdClusterJ implements NodeIdTableDef, NodeIdDataAccess<HopNodeI
         void setPort(int port);
     }
     private ClusterjConnector connector = ClusterjConnector.getInstance();
+
+    @Override
+    public HopNodeId findById(int id) throws StorageException {
+        Session session = connector.obtainSession();
+
+        /*NodeIdDTO nodeidDTO = null;
+         if (session != null) {
+         nodeidDTO = session.find(NodeIdDTO.class, id);
+         }
+         if (nodeidDTO == null) {
+         throw new StorageException("HOP :: Error while retrieving row");
+         }
+         * */
+        QueryBuilder qb = session.getQueryBuilder();
+
+        QueryDomainType<NodeIdDTO> dobj = qb.createQueryDefinition(NodeIdDTO.class);
+        Predicate pred1 = dobj.get("id").equal(dobj.param("id"));
+        dobj.where(pred1);
+        Query<NodeIdDTO> query = session.createQuery(dobj);
+        query.setParameter("id", id);
+
+        List<NodeIdDTO> results = query.getResultList();
+        if (results != null && !results.isEmpty()) {
+            return createHopNodeId(results.get(0));
+        } else {
+            return null;
+        }
+
+    }
 
     @Override
     public HopNodeId findByHostPort(String host, int port) throws StorageException {
@@ -82,18 +115,18 @@ public class NodeIdClusterJ implements NodeIdTableDef, NodeIdDataAccess<HopNodeI
     }
 
     @Override
-    public void createNodeId(HopNodeId nodeId, int id) throws StorageException {
+    public void createNodeId(HopNodeId nodeId) throws StorageException {
         Session session = connector.obtainSession();
         createPersistable(nodeId, session);
     }
 
     private NodeIdDTO createPersistable(HopNodeId hopNodeId, Session session) {
         NodeIdDTO nodeDTO = session.newInstance(NodeIdDTO.class);
-        System.out.println("NodeIdClusterJ :: creating NodeID with id:"+hopNodeId.getId());
+        System.out.println("NodeIdClusterJ :: creating NodeID with id:" + hopNodeId.getId());
         //Set values to persist new rmnode
         nodeDTO.setId(hopNodeId.getId());
         nodeDTO.setHost(hopNodeId.getHost());
-        nodeDTO.setPort(hopNodeId.getPort());        
+        nodeDTO.setPort(hopNodeId.getPort());
         session.savePersistent(nodeDTO);
         return nodeDTO;
     }

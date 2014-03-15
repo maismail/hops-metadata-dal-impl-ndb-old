@@ -24,14 +24,14 @@ public class YarnVariablesClusterJ implements YarnVariablesTableDef, YarnVariabl
 
         @PrimaryKey
         @Column(name = ID)
-        int getId();
+        int getid();
 
-        void setId(int id);
+        void setid(int id);
 
         @Column(name = LAST_UPDATEDCONTAINERINFO_ID)
-        int getLastupdatedcontainerinfoid();
+        int getlastupdatedcontainerinfoid();
 
-        void setLastupdatedcontainerinfoid(int lastupdatedcontainerinfoid);
+        void setlastupdatedcontainerinfoid(int lastupdatedcontainerinfoid);
 
         @Column(name = LAST_NODEID_ID)
         int getlastnodeidid();
@@ -47,11 +47,21 @@ public class YarnVariablesClusterJ implements YarnVariablesTableDef, YarnVariabl
         int getlastresourceid();
 
         void setlastresourceid(int lastresourceid);
-        
+
         @Column(name = LAST_LIST_ID)
         int getlastlistid();
 
         void setlastlistid(int lastlistid);
+
+        @Column(name = LAST_NODEHBRESPONSE_ID)
+        int getlastnodehbresponseid();
+
+        void setlastnodehbresponseid(int lastnodehbresponseid);
+
+        @Column(name = LAST_RMCONTEXT_ID)
+        int getlastrmcontextid();
+
+        void setlastrmcontextid(int lastrmcontextid);
     }
     private ClusterjConnector connector = ClusterjConnector.getInstance();
 
@@ -66,7 +76,7 @@ public class YarnVariablesClusterJ implements YarnVariablesTableDef, YarnVariabl
         if (yarnDTO == null) {
             throw new StorageException("HOP :: Error while retrieving row");
         }
-        YarnVariables objFound = new YarnVariables(yarnDTO.getId(), yarnDTO.getLastupdatedcontainerinfoid(), yarnDTO.getlastnodeidid(), yarnDTO.getlastnodeid(), yarnDTO.getlastresourceid(), yarnDTO.getlastlistid());
+        YarnVariables objFound = new YarnVariables(yarnDTO.getid(), yarnDTO.getlastupdatedcontainerinfoid(), yarnDTO.getlastnodeidid(), yarnDTO.getlastnodeid(), yarnDTO.getlastresourceid(), yarnDTO.getlastlistid(), yarnDTO.getlastnodehbresponseid(), yarnDTO.getlastrmcontextid());
         return objFound;
     }
 
@@ -77,15 +87,17 @@ public class YarnVariablesClusterJ implements YarnVariablesTableDef, YarnVariabl
         YarnVariablesDTO yarnDTO = null;
         if (session != null) {
             yarnDTO = session.find(YarnVariablesDTO.class, idVal);
+        } else {
+            throw new StorageException("Session was null");
         }
         if (yarnDTO == null) {
             throw new StorageException("HOP :: Error while retrieving row");
         }
-        YarnVariables objFound = new YarnVariables(yarnDTO.getId(), yarnDTO.getLastupdatedcontainerinfoid(), yarnDTO.getlastnodeidid(), yarnDTO.getlastnodeid(), yarnDTO.getlastresourceid(), yarnDTO.getlastlistid());
+        YarnVariables objFound = new YarnVariables(yarnDTO.getid(), yarnDTO.getlastupdatedcontainerinfoid(), yarnDTO.getlastnodeidid(), yarnDTO.getlastnodeid(), yarnDTO.getlastresourceid(), yarnDTO.getlastlistid(), yarnDTO.getlastnodehbresponseid(), yarnDTO.getlastrmcontextid());
         YarnVariablesDTO newDTO = session.newInstance(YarnVariablesDTO.class);
-        newDTO.setId(idVal);
+        newDTO.setid(idVal);
         int newid = objFound.getLastupdatedcontainerinfoid() + 1;
-        newDTO.setLastupdatedcontainerinfoid(newid);
+        newDTO.setlastupdatedcontainerinfoid(newid);
         session.savePersistent(newDTO);
         return objFound;
     }
@@ -113,12 +125,14 @@ public class YarnVariablesClusterJ implements YarnVariablesTableDef, YarnVariabl
 
     private YarnVariablesDTO createPersistable(YarnVariables yarnVariables, Session session) {
         YarnVariablesDTO yarnDTO = session.newInstance(YarnVariablesDTO.class);
-        yarnDTO.setId(yarnVariables.getId());
-        yarnDTO.setLastupdatedcontainerinfoid(yarnVariables.getLastupdatedcontainerinfoid());
+        yarnDTO.setid(yarnVariables.getId());
+        yarnDTO.setlastupdatedcontainerinfoid(yarnVariables.getLastupdatedcontainerinfoid());
         yarnDTO.setlastnodeidid(yarnVariables.getLastnodeidId());
         yarnDTO.setlastnodeid(yarnVariables.getLastnodeId());
         yarnDTO.setlastresourceid(yarnVariables.getLastresourceId());
         yarnDTO.setlastlistid(yarnVariables.getLastlistid());
+        yarnDTO.setlastnodehbresponseid(yarnVariables.getLastnodehbresponseid());
+        yarnDTO.setlastrmcontextid(yarnVariables.getLastrmcontextid());
         session.savePersistent(yarnDTO);
         return yarnDTO;
     }

@@ -61,8 +61,10 @@ public class JustLaunchedContainersClusterJ implements JustLaunchedContainersTab
         try {
             if (removed != null) {
                 for (HopJustLaunchedContainers hopContainerId : removed) {
-                    
-                    JustLaunchedContainersDTO persistable = session.newInstance(JustLaunchedContainersDTO.class, hopContainerId.getContainerid());
+                    Object[] objarr = new Object[2];
+                    objarr[0] = hopContainerId.getRmnodeid();
+                    objarr[1] = hopContainerId.getContainerid();
+                    JustLaunchedContainersDTO persistable = session.newInstance(JustLaunchedContainersDTO.class, objarr);
                     session.deletePersistent(persistable);
                 }
             }

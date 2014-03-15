@@ -43,7 +43,10 @@ import se.sics.hop.metadata.ndb.dalimpl.yarn.ContainerIdClusterJ;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.ContainerStatusClusterJ;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.JustLaunchedContainersClusterJ;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.NodeClusterJ;
+import se.sics.hop.metadata.ndb.dalimpl.yarn.NodeHBResponseClusterJ;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.NodeIdClusterJ;
+import se.sics.hop.metadata.ndb.dalimpl.yarn.RMContextInactiveNodesClusterJ;
+import se.sics.hop.metadata.ndb.dalimpl.yarn.RMContextNodesClusterJ;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.RMNodeClusterJ;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.ResourceClusterJ;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.UpdatedContainerInfoClusterJ;
@@ -55,7 +58,10 @@ import se.sics.hop.metadata.yarn.dal.ContainerIdDataAccess;
 import se.sics.hop.metadata.yarn.dal.ContainerStatusDataAccess;
 import se.sics.hop.metadata.yarn.dal.JustLaunchedContainersDataAccess;
 import se.sics.hop.metadata.yarn.dal.NodeDataAccess;
+import se.sics.hop.metadata.yarn.dal.NodeHBResponseDataAccess;
 import se.sics.hop.metadata.yarn.dal.NodeIdDataAccess;
+import se.sics.hop.metadata.yarn.dal.RMContextInactiveNodesDataAccess;
+import se.sics.hop.metadata.yarn.dal.RMContextNodesDataAccess;
 import se.sics.hop.metadata.yarn.dal.RMNodeDataAccess;
 import se.sics.hop.metadata.yarn.dal.ResourceDataAccess;
 import se.sics.hop.metadata.yarn.dal.UpdatedContainerInfoDataAccess;
@@ -111,6 +117,10 @@ public class NdbStorageFactory implements DALStorageFactory {
         dataAccessMap.put(ApplicationIdDataAccess.class, new ApplicationIdClusterJ());
         dataAccessMap.put(JustLaunchedContainersDataAccess.class, new JustLaunchedContainersClusterJ());
         dataAccessMap.put(ResourceDataAccess.class, new ResourceClusterJ());
+        dataAccessMap.put(NodeHBResponseDataAccess.class, new NodeHBResponseClusterJ());
+        dataAccessMap.put(RMContextNodesDataAccess.class, new RMContextNodesClusterJ());
+        dataAccessMap.put(RMContextInactiveNodesDataAccess.class, new RMContextInactiveNodesClusterJ());
+
     }
 
     @Override
