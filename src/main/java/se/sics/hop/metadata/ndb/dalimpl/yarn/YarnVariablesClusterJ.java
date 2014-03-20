@@ -80,7 +80,7 @@ public class YarnVariablesClusterJ implements YarnVariablesTableDef, YarnVariabl
         return objFound;
     }
 
-    @Override
+    /*@Override
     public YarnVariables findByIdIncrementUpdatedContainerInfo() throws StorageException {
 
         Session session = connector.obtainSession();
@@ -100,7 +100,7 @@ public class YarnVariablesClusterJ implements YarnVariablesTableDef, YarnVariabl
         newDTO.setlastupdatedcontainerinfoid(newid);
         session.savePersistent(newDTO);
         return objFound;
-    }
+    }*/
 
     @Override
     public void prepare(Collection<YarnVariables> modified, Collection<YarnVariables> removed) throws StorageException {

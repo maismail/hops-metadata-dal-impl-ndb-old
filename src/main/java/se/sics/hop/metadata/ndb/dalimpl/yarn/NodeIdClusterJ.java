@@ -47,15 +47,6 @@ public class NodeIdClusterJ implements NodeIdTableDef, NodeIdDataAccess<HopNodeI
     @Override
     public HopNodeId findById(int id) throws StorageException {
         Session session = connector.obtainSession();
-
-        /*NodeIdDTO nodeidDTO = null;
-         if (session != null) {
-         nodeidDTO = session.find(NodeIdDTO.class, id);
-         }
-         if (nodeidDTO == null) {
-         throw new StorageException("HOP :: Error while retrieving row");
-         }
-         * */
         QueryBuilder qb = session.getQueryBuilder();
 
         QueryDomainType<NodeIdDTO> dobj = qb.createQueryDefinition(NodeIdDTO.class);
