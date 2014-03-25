@@ -50,6 +50,11 @@ public class FiCaSchedulerNodeClusterJ implements FiCaSchedulerNodeTableDef, FiC
         int getusedresourceid();
 
         void setusedresourceid(int usedresourceid);
+
+        @Column(name = NODENAME)
+        String getnodename();
+
+        void setnodename(String nodename);
     }
     private ClusterjConnector connector = ClusterjConnector.getInstance();
 
@@ -102,7 +107,8 @@ public class FiCaSchedulerNodeClusterJ implements FiCaSchedulerNodeTableDef, FiC
                 ficaschedulernodeDTO.getusedresourceid(),
                 ficaschedulernodeDTO.gettotalcapabilityid(),
                 ficaschedulernodeDTO.getnumcontainers(),
-                ficaschedulernodeDTO.getrmnodeid());
+                ficaschedulernodeDTO.getrmnodeid(),
+                ficaschedulernodeDTO.getnodename());
         return null;
 
     }

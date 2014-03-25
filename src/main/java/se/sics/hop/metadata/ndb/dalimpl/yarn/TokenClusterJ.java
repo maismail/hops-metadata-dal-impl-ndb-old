@@ -1,5 +1,6 @@
 package se.sics.hop.metadata.ndb.dalimpl.yarn;
 
+import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
@@ -33,7 +34,7 @@ public class TokenClusterJ implements TokenTableDef, TokenDataAccess<HopToken> {
         @Column(name = KIND)
         String getkind();
 
-        void setkind(int kind);
+        void setkind(String kind);
 
         @Column(name = PASSWORD)
         byte[] getpassword();
@@ -43,22 +44,71 @@ public class TokenClusterJ implements TokenTableDef, TokenDataAccess<HopToken> {
         @Column(name = SERVICE)
         String getservice();
 
-        void setservice(int service);
+        void setservice(String service);
     }
     private ClusterjConnector connector = ClusterjConnector.getInstance();
 
     @Override
     public HopToken findById(int id) throws StorageException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        Session session = connector.obtainSession();
+
+        TokenDTO tokenDTO = null;
+        if (session != null) {
+            tokenDTO = session.find(TokenDTO.class, id);
+        }
+        if (tokenDTO == null) {
+            throw new StorageException("HOP :: Error while retrieving row");
+        }
+
+        return createHopToken(tokenDTO);
     }
 
     @Override
     public void prepare(Collection<HopToken> modified, Collection<HopToken> removed) throws StorageException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        Session session = connector.obtainSession();
+        try {
+            if (removed != null) {
+                for (HopToken token : removed) {
+
+                    TokenDTO persistable = session.newInstance(TokenDTO.class, token.getId());
+                    session.deletePersistent(persistable);
+                }
+            }
+            if (modified != null) {
+                for (HopToken token : modified) {
+                    TokenDTO persistable = createPersistable(token, session);
+                    session.savePersistent(persistable);
+                }
+            }
+        } catch (Exception e) {
+            throw new StorageException(e);
+        }
     }
 
     @Override
     public void createToken(HopToken token) throws StorageException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        Session session = connector.obtainSession();
+        createPersistable(token, session);
+    }
+
+    private HopToken createHopToken(TokenDTO tokenDTO) {
+        return new HopToken(
+                tokenDTO.getid(),
+                tokenDTO.getidentifier(),
+                tokenDTO.getkind(),
+                tokenDTO.getpassword(),
+                tokenDTO.getservice());
+    }
+
+    private TokenDTO createPersistable(HopToken token, Session session) {
+        TokenDTO tokenDTO = session.newInstance(TokenDTO.class);
+        //Set values to persist new rmnode
+        tokenDTO.setid(token.getId());
+        tokenDTO.setidentifier(token.getIdentifier());
+        tokenDTO.setkind(token.getKind());
+        tokenDTO.setpassword(token.getPassword());
+        tokenDTO.setservice(token.getService());
+        session.savePersistent(tokenDTO);
+        return tokenDTO;
     }
 }

@@ -87,7 +87,6 @@ public class ResourceClusterJ implements ResourceTableDef, ResourceDataAccess<Ho
 
     private ResourceDTO createPersistable(HopResource resource, Session session) {
         ResourceDTO resourceDTO = session.newInstance(ResourceDTO.class);
-        //Set values to persist new rmnode
         resourceDTO.setId(resource.getId());
         resourceDTO.setMemory(resource.getMemory());
         resourceDTO.setVirtualcores(resource.getVirtualcores());
