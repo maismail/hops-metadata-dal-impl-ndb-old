@@ -26,6 +26,11 @@ public class ApplicationAttemptIdClusterJ implements ApplicationAttemptIdTableDe
 
         void setid(int id);
 
+        @Column(name = ATTEMPT_ID)
+        int getattemptid();
+
+        void setattemptid(int attemptid);
+
         @Column(name = APPLICATION_ID)
         int getapplicationid();
 
@@ -55,7 +60,7 @@ public class ApplicationAttemptIdClusterJ implements ApplicationAttemptIdTableDe
             if (removed != null) {
                 for (HopApplicationAttemptId hopAppAttemptId : removed) {
 
-                    ApplicationAttemptIdDTO persistable = session.newInstance(ApplicationAttemptIdDTO.class, hopAppAttemptId.getId());
+                    ApplicationAttemptIdDTO persistable = session.newInstance(ApplicationAttemptIdDTO.class, hopAppAttemptId.getAttemptId());
                     session.deletePersistent(persistable);
                 }
             }
@@ -78,14 +83,15 @@ public class ApplicationAttemptIdClusterJ implements ApplicationAttemptIdTableDe
 
     private ApplicationAttemptIdDTO createPersistable(HopApplicationAttemptId hopAppAttemptId, Session session) {
         ApplicationAttemptIdDTO appAttemptIdDTO = session.newInstance(ApplicationAttemptIdDTO.class);
-        appAttemptIdDTO.setid(hopAppAttemptId.getId());
-        appAttemptIdDTO.setapplicationid(hopAppAttemptId.getApplicationid());
+        appAttemptIdDTO.setid(hopAppAttemptId.getNdbId());
+        appAttemptIdDTO.setapplicationid(hopAppAttemptId.getApplicationidId());
+        appAttemptIdDTO.setattemptid(hopAppAttemptId.getAttemptId());
         session.savePersistent(appAttemptIdDTO);
         return appAttemptIdDTO;
     }
 
     private HopApplicationAttemptId createHopApplicationAttemptId(ApplicationAttemptIdDTO appAttemptIdDTO) {
-        HopApplicationAttemptId hop = new HopApplicationAttemptId(appAttemptIdDTO.getid(), appAttemptIdDTO.getapplicationid());
+        HopApplicationAttemptId hop = new HopApplicationAttemptId(appAttemptIdDTO.getid(), appAttemptIdDTO.getattemptid(), appAttemptIdDTO.getapplicationid());
         return hop;
     }
 }

@@ -35,6 +35,11 @@ public class ApplicationIdClusterJ implements ApplicationIdTableDef, Application
 
         void setid(int id);
 
+        @Column(name = APP_ID)
+        int getappid();
+
+        void setappid(int appid);
+
         @Column(name = CLUSTER_TIMESTAMP)
         long getclustertimestamp();
 
@@ -60,6 +65,28 @@ public class ApplicationIdClusterJ implements ApplicationIdTableDef, Application
         }
 
         return createHopApplicationId(applicationIdDTO);
+    }
+
+    @Override
+    public HopApplicationId findByAppIdClusterTimestamp(int appid, long clustertimestamp) throws StorageException {
+        Session session = connector.obtainSession();
+        QueryBuilder qb = session.getQueryBuilder();
+
+        QueryDomainType<ApplicationIdDTO> dobj = qb.createQueryDefinition(ApplicationIdDTO.class);
+        Predicate pred1 = dobj.get("appid").equal(dobj.param("appid"));
+        Predicate pred2 = dobj.get("clustertimestamp").equal(dobj.param("clustertimestamp"));
+        pred1 = pred1.and(pred2);
+        dobj.where(pred1);
+        Query<ApplicationIdDTO> query = session.createQuery(dobj);
+        query.setParameter("appid", appid);
+        query.setParameter("clustertimestamp", clustertimestamp);
+        List<ApplicationIdDTO> result = query.getResultList();
+
+        if (result != null && !result.isEmpty()) {
+            return createHopApplicationId(result.get(0));
+        } else {
+            throw new StorageException("HOP - Finished ApplicationId was not found");
+        }
     }
 
     @Override
@@ -110,7 +137,7 @@ public class ApplicationIdClusterJ implements ApplicationIdTableDef, Application
             if (removed != null) {
                 for (HopApplicationId hopApplicationId : removed) {
 
-                    ApplicationIdDTO persistable = session.newInstance(ApplicationIdDTO.class, hopApplicationId.getId());
+                    ApplicationIdDTO persistable = session.newInstance(ApplicationIdDTO.class, hopApplicationId.getNdbId());
                     session.deletePersistent(persistable);
                 }
             }
@@ -144,6 +171,7 @@ public class ApplicationIdClusterJ implements ApplicationIdTableDef, Application
         for (HopApplicationId hop : list) {
             ApplicationIdDTO appidDTO = session.newInstance(ApplicationIdDTO.class);
             appidDTO.setid(hop.getId());
+            appidDTO.setappid(hop.getId());
             appidDTO.setclustertimestamp(hop.getClustertimestamp());
             appidDTO.setfinished(hop.getFinished());
         }
@@ -175,7 +203,8 @@ public class ApplicationIdClusterJ implements ApplicationIdTableDef, Application
 
     private ApplicationIdDTO createPersistable(HopApplicationId hopApplicationId, Session session) {
         ApplicationIdDTO applicationIdDTO = session.newInstance(ApplicationIdDTO.class);
-        applicationIdDTO.setid(hopApplicationId.getId());
+        applicationIdDTO.setid(hopApplicationId.getNdbId());
+        applicationIdDTO.setappid(hopApplicationId.getId());
         applicationIdDTO.setclustertimestamp(hopApplicationId.getClustertimestamp());
         applicationIdDTO.setfinished(hopApplicationId.getFinished());
         session.savePersistent(applicationIdDTO);
@@ -183,7 +212,7 @@ public class ApplicationIdClusterJ implements ApplicationIdTableDef, Application
     }
 
     private HopApplicationId createHopApplicationId(ApplicationIdDTO applicationIdDTO) {
-        HopApplicationId hop = new HopApplicationId(applicationIdDTO.getid(), applicationIdDTO.getclustertimestamp(), applicationIdDTO.getfinished());
+        HopApplicationId hop = new HopApplicationId(applicationIdDTO.getid(), applicationIdDTO.getappid(), applicationIdDTO.getclustertimestamp(), applicationIdDTO.getfinished());
         return hop;
     }
 }

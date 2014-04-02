@@ -62,6 +62,26 @@ public class YarnVariablesClusterJ implements YarnVariablesTableDef, YarnVariabl
         int getlastrmcontextid();
 
         void setlastrmcontextid(int lastrmcontextid);
+
+        @Column(name = LAST_CONTAINERSTATUS_ID)
+        int getlastcontainerstatusid();
+
+        void setlastcontainerstatusid(int lastrmcontainerstatusid);
+
+        @Column(name = LAST_CONTAINERID_ID)
+        int getlastcontaineridid();
+
+        void setlastcontaineridid(int lastcontaineridid);
+
+        @Column(name = LAST_APPATTEMPTID_ID)
+        int getlastappattemptidid();
+
+        void setlastappattemptidid(int lastappattemptidid);
+
+        @Column(name = LAST_APPLICATIONID_ID)
+        int getlastapplicationidid();
+
+        void setlastapplicationidid(int lastapplicationidid);
     }
     private ClusterjConnector connector = ClusterjConnector.getInstance();
 
@@ -76,32 +96,31 @@ public class YarnVariablesClusterJ implements YarnVariablesTableDef, YarnVariabl
         if (yarnDTO == null) {
             throw new StorageException("HOP :: Error while retrieving row");
         }
-        YarnVariables objFound = new YarnVariables(yarnDTO.getid(), yarnDTO.getlastupdatedcontainerinfoid(), yarnDTO.getlastnodeidid(), yarnDTO.getlastnodeid(), yarnDTO.getlastresourceid(), yarnDTO.getlastlistid(), yarnDTO.getlastnodehbresponseid(), yarnDTO.getlastrmcontextid());
+        YarnVariables objFound = new YarnVariables(yarnDTO.getid(), yarnDTO.getlastupdatedcontainerinfoid(), yarnDTO.getlastnodeidid(), yarnDTO.getlastnodeid(), yarnDTO.getlastresourceid(), yarnDTO.getlastlistid(), yarnDTO.getlastnodehbresponseid(), yarnDTO.getlastrmcontextid(), yarnDTO.getlastcontainerstatusid(), yarnDTO.getlastcontaineridid(), yarnDTO.getlastappattemptidid(), yarnDTO.getlastapplicationidid());
         return objFound;
     }
 
     /*@Override
-    public YarnVariables findByIdIncrementUpdatedContainerInfo() throws StorageException {
+     public YarnVariables findByIdIncrementUpdatedContainerInfo() throws StorageException {
 
-        Session session = connector.obtainSession();
-        YarnVariablesDTO yarnDTO = null;
-        if (session != null) {
-            yarnDTO = session.find(YarnVariablesDTO.class, idVal);
-        } else {
-            throw new StorageException("Session was null");
-        }
-        if (yarnDTO == null) {
-            throw new StorageException("HOP :: Error while retrieving row");
-        }
-        YarnVariables objFound = new YarnVariables(yarnDTO.getid(), yarnDTO.getlastupdatedcontainerinfoid(), yarnDTO.getlastnodeidid(), yarnDTO.getlastnodeid(), yarnDTO.getlastresourceid(), yarnDTO.getlastlistid(), yarnDTO.getlastnodehbresponseid(), yarnDTO.getlastrmcontextid());
-        YarnVariablesDTO newDTO = session.newInstance(YarnVariablesDTO.class);
-        newDTO.setid(idVal);
-        int newid = objFound.getLastupdatedcontainerinfoid() + 1;
-        newDTO.setlastupdatedcontainerinfoid(newid);
-        session.savePersistent(newDTO);
-        return objFound;
-    }*/
-
+     Session session = connector.obtainSession();
+     YarnVariablesDTO yarnDTO = null;
+     if (session != null) {
+     yarnDTO = session.find(YarnVariablesDTO.class, idVal);
+     } else {
+     throw new StorageException("Session was null");
+     }
+     if (yarnDTO == null) {
+     throw new StorageException("HOP :: Error while retrieving row");
+     }
+     YarnVariables objFound = new YarnVariables(yarnDTO.getid(), yarnDTO.getlastupdatedcontainerinfoid(), yarnDTO.getlastnodeidid(), yarnDTO.getlastnodeid(), yarnDTO.getlastresourceid(), yarnDTO.getlastlistid(), yarnDTO.getlastnodehbresponseid(), yarnDTO.getlastrmcontextid());
+     YarnVariablesDTO newDTO = session.newInstance(YarnVariablesDTO.class);
+     newDTO.setid(idVal);
+     int newid = objFound.getLastupdatedcontainerinfoid() + 1;
+     newDTO.setlastupdatedcontainerinfoid(newid);
+     session.savePersistent(newDTO);
+     return objFound;
+     }*/
     @Override
     public void prepare(Collection<YarnVariables> modified, Collection<YarnVariables> removed) throws StorageException {
         Session session = connector.obtainSession();
@@ -133,6 +152,10 @@ public class YarnVariablesClusterJ implements YarnVariablesTableDef, YarnVariabl
         yarnDTO.setlastlistid(yarnVariables.getLastlistid());
         yarnDTO.setlastnodehbresponseid(yarnVariables.getLastnodehbresponseid());
         yarnDTO.setlastrmcontextid(yarnVariables.getLastrmcontextid());
+        yarnDTO.setlastcontainerstatusid(yarnVariables.getLastcontainerstatusid());
+        yarnDTO.setlastcontaineridid(yarnVariables.getLastcontaineridId());
+        yarnDTO.setlastappattemptidid(yarnVariables.getLastappattemptidId());
+        yarnDTO.setlastapplicationidid(yarnVariables.getLastapplicationidId());
         session.savePersistent(yarnDTO);
         return yarnDTO;
     }

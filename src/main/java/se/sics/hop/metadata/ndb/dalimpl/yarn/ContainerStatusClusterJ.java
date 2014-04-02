@@ -99,19 +99,19 @@ public class ContainerStatusClusterJ implements ContainerStatusTableDef, Contain
     }
 
     @Override
-    public List<HopContainerStatus> findByUpdatedContainerInfoIdAndType(int uciId, String type) throws StorageException {
+    public List<HopContainerStatus> findByUpdatedContainerInfoIdAndState(int uciId, String state) throws StorageException {
         try {
             Session session = connector.obtainSession();
             QueryBuilder qb = session.getQueryBuilder();
 
             QueryDomainType<ContainerStatusDTO> dobj = qb.createQueryDefinition(ContainerStatusDTO.class);
             Predicate pred1 = dobj.get("updatedcontainerinfoid").equal(dobj.param("updatedcontainerinfoid"));
-            Predicate pred2 = dobj.get("type").equal(dobj.param("type"));
+            Predicate pred2 = dobj.get("state").equal(dobj.param("state"));
             pred1 = pred1.and(pred2);
             dobj.where(pred1);
             Query<ContainerStatusDTO> query = session.createQuery(dobj);
             query.setParameter("updatedcontainerinfoid", uciId);
-            query.setParameter("type", type);
+            query.setParameter("state", state);
             List<ContainerStatusDTO> results = query.getResultList();
             return createHopContainerStatusList(results);
         } catch (Exception e) {
@@ -156,7 +156,9 @@ public class ContainerStatusClusterJ implements ContainerStatusTableDef, Contain
         csDTO.setdiagnostics(hopCS.getDiagnostics());
         csDTO.setexitstatus(hopCS.getExitstatus());
         csDTO.settype(hopCS.getType());
-        csDTO.setupdatedcontainerinfoid(hopCS.getUpdatedcontainerinfoid());
+        if (hopCS.getUpdatedcontainerinfoid() != -1) {
+            csDTO.setupdatedcontainerinfoid(hopCS.getUpdatedcontainerinfoid());
+        }
         session.savePersistent(csDTO);
         return csDTO;
     }

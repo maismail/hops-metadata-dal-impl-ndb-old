@@ -32,6 +32,11 @@ public class ContainerIdClusterJ implements ContainerIdTableDef, ContainerIdData
 
         void setid(int id);
 
+        @Column(name = CONTAINERID)
+        int getcontid();
+
+        void setcontid(int contid);
+
         @Column(name = APPLICATIONATTEMPT_ID)
         int getapplicationattemptid();
 
@@ -109,13 +114,10 @@ public class ContainerIdClusterJ implements ContainerIdTableDef, ContainerIdData
     @Override
     public void prepare(Collection<HopContainerId> modified, Collection<HopContainerId> removed) throws StorageException {
         Session session = connector.obtainSession();
-
-
         try {
             if (removed != null) {
                 for (HopContainerId hopContainerId : removed) {
-
-                    ContainerIdDTO persistable = session.newInstance(ContainerIdDTO.class, hopContainerId.getId());
+                    ContainerIdDTO persistable = session.newInstance(ContainerIdDTO.class, hopContainerId.getNdbId());
                     session.deletePersistent(persistable);
                 }
             }
@@ -134,22 +136,21 @@ public class ContainerIdClusterJ implements ContainerIdTableDef, ContainerIdData
     public void createContainerId(HopContainerId containerstatus) throws StorageException {
         Session session = connector.obtainSession();
         createPersistable(containerstatus, session);
-
-
     }
 
     private ContainerIdDTO createPersistable(HopContainerId hopContainerId, Session session) {
         ContainerIdDTO containerIdDTO = session.newInstance(ContainerIdDTO.class);
         //Set values to persist new ContainerStatus
-        containerIdDTO.setid(hopContainerId.getId());
+        containerIdDTO.setid(hopContainerId.getNdbId());
+        containerIdDTO.setcontid(hopContainerId.getContid());
         containerIdDTO.setapplicationattemptid(hopContainerId.getApplicationAttemptId());
-        containerIdDTO.settoclean(hopContainerId.isToClean());
+        containerIdDTO.settoclean(hopContainerId.getToClean());
         session.savePersistent(containerIdDTO);
         return containerIdDTO;
     }
 
     private HopContainerId createHopContainerId(ContainerIdDTO containerIdDTO) {
-        HopContainerId hop = new HopContainerId(containerIdDTO.getid(), containerIdDTO.getapplicationattemptid(), containerIdDTO.gettoclean());
+        HopContainerId hop = new HopContainerId(containerIdDTO.getid(), containerIdDTO.getcontid(), containerIdDTO.getapplicationattemptid(), containerIdDTO.gettoclean());
         return hop;
     }
 
