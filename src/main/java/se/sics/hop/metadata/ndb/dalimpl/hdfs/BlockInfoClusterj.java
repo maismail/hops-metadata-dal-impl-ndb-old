@@ -40,9 +40,9 @@ public class BlockInfoClusterj implements BlockInfoTableDef, BlockInfoDataAccess
 
         @Column(name = INODE_ID)
         @Index(name = "idx_inodeid")
-        long getINodeId();
+        int getINodeId();
 
-        void setINodeId(long iNodeID);
+        void setINodeId(int iNodeID);
 
         @Column(name = NUM_BYTES)
         long getNumBytes();
@@ -127,7 +127,7 @@ public class BlockInfoClusterj implements BlockInfoTableDef, BlockInfoDataAccess
     }
 
     @Override
-    public List<HopBlockInfo> findByInodeId(long id) throws StorageException {
+    public List<HopBlockInfo> findByInodeId(int id) throws StorageException {
         try {
             Session session = connector.obtainSession();
             QueryBuilder qb = session.getQueryBuilder();

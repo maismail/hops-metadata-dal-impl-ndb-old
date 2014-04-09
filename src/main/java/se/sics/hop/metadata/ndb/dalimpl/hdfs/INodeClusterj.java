@@ -42,8 +42,8 @@ public class INodeClusterj implements INodeTableDef, INodeDataAccess<HopINode> {
 
     @Column(name = ID)
     @Index(name = "inode_idx")
-    long getId();     // id of the inode
-    void setId(long id);
+    int getId();     // id of the inode
+    void setId(int id);
 
     @PrimaryKey
     @Column(name = NAME)
@@ -54,8 +54,8 @@ public class INodeClusterj implements INodeTableDef, INodeDataAccess<HopINode> {
     @PrimaryKey
     @Column(name = PARENT_ID)
     @Index(name = "parent_idx")
-    long getParentId();     // id of the inode
-    void setParentId(long parentid);
+    int getParentId();     // id of the inode
+    void setParentId(int parentid);
      
     // marker for InodeDirectory
     @Column(name = IS_DIR)
@@ -159,7 +159,7 @@ public class INodeClusterj implements INodeTableDef, INodeDataAccess<HopINode> {
   }
 
   @Override
-  public HopINode indexScanfindInodeById(long inodeId) throws StorageException {
+  public HopINode indexScanfindInodeById(int inodeId) throws StorageException {
     try {
       //System.out.println("*** pruneScanfindInodeById, Id "+inodeId);
       Session session = connector.obtainSession();
@@ -188,7 +188,7 @@ public class INodeClusterj implements INodeTableDef, INodeDataAccess<HopINode> {
   }
 
   @Override
-  public List<HopINode> indexScanFindInodesByParentId(long parentId) throws StorageException {
+  public List<HopINode> indexScanFindInodesByParentId(int parentId) throws StorageException {
     try {
       //System.out.println("*** indexScanFindInodesByParentId ");
       Session session = connector.obtainSession();
@@ -209,7 +209,7 @@ public class INodeClusterj implements INodeTableDef, INodeDataAccess<HopINode> {
   }
 
   @Override
-  public HopINode pkLookUpFindInodeByNameAndParentId(String name, long parentId) throws StorageException {
+  public HopINode pkLookUpFindInodeByNameAndParentId(String name, int parentId) throws StorageException {
     try {
      // System.out.println("*** pkLookUpFindInodeByNameAndParentId, name "+name+" parentId "+parentId);
       

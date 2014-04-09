@@ -24,9 +24,9 @@ public class INodeAttributesClusterj implements INodeAttributesTableDef, INodeAt
 
     @PrimaryKey
     @Column(name = ID)
-    long getId();
+    int getId();
 
-    void setId(long id);
+    void setId(int id);
 
     @Column(name = NSQUOTA)
     long getNSQuota();
@@ -51,7 +51,7 @@ public class INodeAttributesClusterj implements INodeAttributesTableDef, INodeAt
   private ClusterjConnector connector = ClusterjConnector.getInstance();
 
   @Override
-  public HopINodeAttributes findAttributesByPk(long inodeId) throws StorageException {
+  public HopINodeAttributes findAttributesByPk(Integer inodeId) throws StorageException {
     Session session = connector.obtainSession();
     try {
       INodeAttributesDTO dto = session.find(INodeAttributesDTO.class, inodeId);
@@ -63,10 +63,10 @@ public class INodeAttributesClusterj implements INodeAttributesTableDef, INodeAt
   }
   
   @Override
-  public Collection<HopINodeAttributes> findAttributesByPkList(Collection<Long> inodeIds) throws StorageException {
+  public Collection<HopINodeAttributes> findAttributesByPkList(Collection<Integer> inodeIds) throws StorageException {
     Session session = connector.obtainSession();
     try {
-        List<Long> inodeIdList  = (List<Long>)inodeIds;
+        List<Integer> inodeIdList  = (List<Integer>)inodeIds;
         List<HopINodeAttributes> inodeAttributesBatchResponse = new ArrayList<HopINodeAttributes>();
         List<INodeAttributesDTO> inodeAttributesBatchRequest = new ArrayList<INodeAttributesDTO>();
         for(int i = 0; i < inodeIdList.size(); i++){
