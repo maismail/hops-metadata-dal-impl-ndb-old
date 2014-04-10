@@ -56,6 +56,12 @@ public class INodeClusterj implements INodeTableDef, INodeDataAccess<HopINode> {
     @Index(name = "parent_idx")
     int getParentId();     // id of the inode
     void setParentId(int parentid);
+    
+    //id of the parent inode 
+    @PrimaryKey
+    @Column(name = PART_KEY)
+    int getPartKey();     // partitioning key of the inode
+    void setPartKey(int parentid);
      
     // marker for InodeDirectory
     @Column(name = IS_DIR)
@@ -135,9 +141,10 @@ public class INodeClusterj implements INodeTableDef, INodeDataAccess<HopINode> {
     Session session = connector.obtainSession();
     try {
       for (HopINode inode : removed) {
-        Object[] pk = new Object[2];
+        Object[] pk = new Object[3];
         pk[0] = inode.getParentId();
         pk[1] = inode.getName();
+        pk[2] = inode.getPartKey();
         InodeDTO persistable = session.newInstance(InodeDTO.class, pk);
         session.deletePersistent(persistable);
       }
@@ -159,18 +166,20 @@ public class INodeClusterj implements INodeTableDef, INodeDataAccess<HopINode> {
   }
 
   @Override
-  public HopINode indexScanfindInodeById(int inodeId) throws StorageException {
+  public HopINode indexScanfindInodeById(int inodeId/*, int part_key*/) throws StorageException {
     try {
       //System.out.println("*** pruneScanfindInodeById, Id "+inodeId);
       Session session = connector.obtainSession();
       
       QueryBuilder qb = session.getQueryBuilder();
       QueryDomainType<InodeDTO> dobj = qb.createQueryDefinition(InodeDTO.class);
-      Predicate pred1 = dobj.get("id").equal(dobj.param("IdParam"));
-      dobj.where(pred1);
+      Predicate pred1 = dobj.get("id").equal(dobj.param("idParam"));
+      //Predicate pred2 = dobj.get("partKey").equal(dobj.param("partKeyParam"));
+      dobj.where(pred1/*.and(pred2)*/);
 
       Query<InodeDTO> query = session.createQuery(dobj);
-      query.setParameter("IdParam", inodeId);
+      query.setParameter("idParam", inodeId);
+      //query.setParameter("partKeyParam", part_key);
      
       List<InodeDTO> results = query.getResultList();
       explain(query);
@@ -209,15 +218,16 @@ public class INodeClusterj implements INodeTableDef, INodeDataAccess<HopINode> {
   }
 
   @Override
-  public HopINode pkLookUpFindInodeByNameAndParentId(String name, int parentId) throws StorageException {
+  public HopINode pkLookUpFindInodeByNameAndParentId(String name, int parentId, int part_key) throws StorageException {
     try {
      // System.out.println("*** pkLookUpFindInodeByNameAndParentId, name "+name+" parentId "+parentId);
       
       Session session = connector.obtainSession();
 
-      Object[] pk = new Object[2];
+      Object[] pk = new Object[3];
       pk[0] = parentId;
       pk[1] = name;
+      pk[2] = part_key;
       
       InodeDTO result = session.find(InodeDTO.class, pk);
       if(result != null){
@@ -244,6 +254,7 @@ public class INodeClusterj implements INodeTableDef, INodeDataAccess<HopINode> {
             persistable.getId(),
             persistable.getName(),
             persistable.getParentId(),
+            persistable.getPartKey(),
             persistable.getIsDir(),
             persistable.getIsDirWithQuota(),
             persistable.getModificationTime(),
@@ -262,6 +273,7 @@ public class INodeClusterj implements INodeTableDef, INodeDataAccess<HopINode> {
     persistable.setId(inode.getId());
     persistable.setName(inode.getName());
     persistable.setParentId(inode.getParentId());
+    persistable.setPartKey(inode.getPartKey());
     persistable.setIsDir(inode.getIsDir());
     persistable.setIsDirWithQuota(inode.getIsDirWithQuota());
     persistable.setModificationTime(inode.getModificationTime());
