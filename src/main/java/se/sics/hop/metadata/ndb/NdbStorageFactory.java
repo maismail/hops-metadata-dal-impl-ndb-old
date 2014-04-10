@@ -23,8 +23,10 @@ import se.sics.hop.metadata.hdfs.dal.ReplicaUnderConstructionDataAccess;
 import se.sics.hop.metadata.hdfs.dal.UnderReplicatedBlockDataAccess;
 import se.sics.hop.metadata.hdfs.dal.VariableDataAccess;
 import se.sics.hop.exception.StorageInitializtionException;
+import se.sics.hop.metadata.hdfs.dal.BlockLookUpDataAccess;
 import se.sics.hop.metadata.hdfs.dal.StorageIdMapDataAccess;
 import se.sics.hop.metadata.ndb.dalimpl.hdfs.BlockInfoClusterj;
+import se.sics.hop.metadata.ndb.dalimpl.hdfs.BlockLookUpClusterj;
 import se.sics.hop.metadata.ndb.dalimpl.hdfs.CorruptReplicaClusterj;
 import se.sics.hop.metadata.ndb.dalimpl.hdfs.ExcessReplicaClusterj;
 import se.sics.hop.metadata.ndb.dalimpl.hdfs.INodeAttributesClusterj;
@@ -79,6 +81,7 @@ public class NdbStorageFactory implements DALStorageFactory {
     dataAccessMap.put(UnderReplicatedBlockDataAccess.class, new UnderReplicatedBlockClusterj());
     dataAccessMap.put(VariableDataAccess.class, new VariableClusterj());
     dataAccessMap.put(StorageIdMapDataAccess.class, new StorageIdMapClusterj());
+    dataAccessMap.put(BlockLookUpDataAccess.class, new BlockLookUpClusterj());
   }
 
   @Override

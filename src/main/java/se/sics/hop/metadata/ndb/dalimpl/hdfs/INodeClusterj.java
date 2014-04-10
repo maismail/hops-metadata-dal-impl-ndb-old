@@ -166,7 +166,7 @@ public class INodeClusterj implements INodeTableDef, INodeDataAccess<HopINode> {
   }
 
   @Override
-  public HopINode indexScanfindInodeById(int inodeId/*, int part_key*/) throws StorageException {
+  public HopINode pruneIndexScanfindInodeById(int inodeId, int part_key) throws StorageException {
     try {
       //System.out.println("*** pruneScanfindInodeById, Id "+inodeId);
       Session session = connector.obtainSession();
@@ -174,12 +174,12 @@ public class INodeClusterj implements INodeTableDef, INodeDataAccess<HopINode> {
       QueryBuilder qb = session.getQueryBuilder();
       QueryDomainType<InodeDTO> dobj = qb.createQueryDefinition(InodeDTO.class);
       Predicate pred1 = dobj.get("id").equal(dobj.param("idParam"));
-      //Predicate pred2 = dobj.get("partKey").equal(dobj.param("partKeyParam"));
-      dobj.where(pred1/*.and(pred2)*/);
+      Predicate pred2 = dobj.get("partKey").equal(dobj.param("partKeyParam"));
+      dobj.where(pred1.and(pred2));
 
       Query<InodeDTO> query = session.createQuery(dobj);
       query.setParameter("idParam", inodeId);
-      //query.setParameter("partKeyParam", part_key);
+      query.setParameter("partKeyParam", part_key);
      
       List<InodeDTO> results = query.getResultList();
       explain(query);

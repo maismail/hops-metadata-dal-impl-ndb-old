@@ -6,6 +6,7 @@ import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.Index;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
+import com.mysql.clusterj.query.Predicate;
 import com.mysql.clusterj.query.QueryBuilder;
 import com.mysql.clusterj.query.QueryDomainType;
 import java.util.ArrayList;
@@ -32,6 +33,12 @@ public class BlockInfoClusterj implements BlockInfoTableDef, BlockInfoDataAccess
         long getBlockId();
 
         void setBlockId(long bid);
+        
+        @PrimaryKey
+        @Column(name = PART_KEY)
+        int getPartKey();
+        
+        void setPartKey(int bid);
 
         @Column(name = BLOCK_INDEX)
         int getBlockIndex();
@@ -86,7 +93,10 @@ public class BlockInfoClusterj implements BlockInfoTableDef, BlockInfoDataAccess
         try {
             Session session = connector.obtainSession();
             for (HopBlockInfo block : removed) {
-                BlockInfoClusterj.BlockInfoDTO bTable = session.newInstance(BlockInfoClusterj.BlockInfoDTO.class, block.getBlockId());
+                Object[] pk = new Object[2];
+                pk[0] = block.getBlockId();
+                pk[1] = block.getPartKey();
+                BlockInfoClusterj.BlockInfoDTO bTable = session.newInstance(BlockInfoClusterj.BlockInfoDTO.class, pk);
                 session.deletePersistent(bTable);
             }
 
@@ -107,10 +117,14 @@ public class BlockInfoClusterj implements BlockInfoTableDef, BlockInfoDataAccess
     }
 
     @Override
-    public HopBlockInfo findById(long blockId) throws StorageException {
+    public HopBlockInfo findById(long blockId, int partKey) throws StorageException {
         try {
+            Object[] pk = new Object[2];
+            pk[0] = blockId;
+            pk[1] = partKey;
+                
             Session session = connector.obtainSession();
-            BlockInfoClusterj.BlockInfoDTO bit = session.find(BlockInfoClusterj.BlockInfoDTO.class, blockId);
+            BlockInfoClusterj.BlockInfoDTO bit = session.find(BlockInfoClusterj.BlockInfoDTO.class, pk);
             if (bit == null) {
                 return null;
             }
@@ -127,14 +141,17 @@ public class BlockInfoClusterj implements BlockInfoTableDef, BlockInfoDataAccess
     }
 
     @Override
-    public List<HopBlockInfo> findByInodeId(int id) throws StorageException {
+    public List<HopBlockInfo> findByInodeId(int inodeId, int partKey) throws StorageException {
         try {
             Session session = connector.obtainSession();
             QueryBuilder qb = session.getQueryBuilder();
             QueryDomainType<BlockInfoClusterj.BlockInfoDTO> dobj = qb.createQueryDefinition(BlockInfoClusterj.BlockInfoDTO.class);
-            dobj.where(dobj.get("iNodeId").equal(dobj.param("param")));
+            Predicate pred1 = dobj.get("iNodeId").equal(dobj.param("inodeParam"));
+            Predicate pred2 = dobj.get("partKey").equal(dobj.param("partKeyParam"));
+            dobj.where(pred1.and(pred2));
             Query<BlockInfoClusterj.BlockInfoDTO> query = session.createQuery(dobj);
-            query.setParameter("param", id);
+            query.setParameter("inodeParam", inodeId);
+            query.setParameter("partKey", partKey);
             return createBlockInfoList(query.getResultList());
         } catch (Exception e) {
             throw new StorageException(e);
@@ -189,6 +206,7 @@ public class BlockInfoClusterj implements BlockInfoTableDef, BlockInfoDataAccess
     private HopBlockInfo createBlockInfo(BlockInfoClusterj.BlockInfoDTO bDTO) {
         HopBlockInfo hopBlockInfo = new HopBlockInfo(
                 bDTO.getBlockId(),
+                bDTO.getPartKey(),
                 bDTO.getBlockIndex(),
                 bDTO.getINodeId(),
                 bDTO.getNumBytes(),
@@ -202,6 +220,7 @@ public class BlockInfoClusterj implements BlockInfoTableDef, BlockInfoDataAccess
 
     private void createPersistable(HopBlockInfo block, BlockInfoClusterj.BlockInfoDTO persistable) {
         persistable.setBlockId(block.getBlockId());
+        persistable.setPartKey(block.getPartKey());
         persistable.setNumBytes(block.getNumBytes());
         persistable.setGenerationStamp(block.getGenerationStamp());
         persistable.setINodeId(block.getInodeId());
