@@ -80,12 +80,12 @@ public class BlockLookUpClusterj implements BlockLookUpTableDef, BlockLookUpData
     }
 
     
-    private HopBlockLookUp createBlockInfo(BlockLookUpClusterj.BlockLookUpDTO dto) {
+    protected static HopBlockLookUp createBlockInfo(BlockLookUpClusterj.BlockLookUpDTO dto) {
         HopBlockLookUp lookup = new HopBlockLookUp(dto.getBlockId(), dto.getINodeId(), dto.getPartKey());
         return lookup;
     }
 
-    private void createPersistable(HopBlockLookUp lookup, BlockLookUpClusterj.BlockLookUpDTO persistable) {
+    protected static void createPersistable(HopBlockLookUp lookup, BlockLookUpClusterj.BlockLookUpDTO persistable) {
         persistable.setBlockId(lookup.getBlockId());
         persistable.setINodeId(lookup.getInodeId());
         persistable.setPartKey(lookup.getPartKey());

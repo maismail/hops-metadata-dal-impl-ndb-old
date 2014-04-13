@@ -166,7 +166,7 @@ public class INodeClusterj implements INodeTableDef, INodeDataAccess<HopINode> {
   }
 
   @Override
-  public HopINode pruneIndexScanfindInodeById(int inodeId, int part_key) throws StorageException {
+  public HopINode pruneIndexScanByInodeId(int inodeId, int part_key) throws StorageException {
     try {
       //System.out.println("*** pruneScanfindInodeById, Id "+inodeId);
       Session session = connector.obtainSession();
@@ -180,6 +180,35 @@ public class INodeClusterj implements INodeTableDef, INodeDataAccess<HopINode> {
       Query<InodeDTO> query = session.createQuery(dobj);
       query.setParameter("idParam", inodeId);
       query.setParameter("partKeyParam", part_key);
+     
+      List<InodeDTO> results = query.getResultList();
+      explain(query);
+      if(results.size() > 1){
+        throw new StorageException("Only one record was expected");
+      }
+      if(results.size() == 1){
+        return createInode(results.get(0));
+      }else{
+        return null;
+      }
+    } catch (Exception e) {
+      throw new StorageException(e);
+    }
+  }
+  
+  @Override
+  public HopINode indexScanfindInodeById(int inodeId) throws StorageException {
+    try {
+      //System.out.println("*** pruneScanfindInodeById, Id "+inodeId);
+      Session session = connector.obtainSession();
+      
+      QueryBuilder qb = session.getQueryBuilder();
+      QueryDomainType<InodeDTO> dobj = qb.createQueryDefinition(InodeDTO.class);
+      Predicate pred1 = dobj.get("id").equal(dobj.param("idParam"));
+      dobj.where(pred1);
+
+      Query<InodeDTO> query = session.createQuery(dobj);
+      query.setParameter("idParam", inodeId);
      
       List<InodeDTO> results = query.getResultList();
       explain(query);
