@@ -28,7 +28,11 @@ public class YarnVariablesClusterJ implements YarnVariablesTableDef, YarnVariabl
 
         void setid(int id);
 
-        @Column(name = LAST_UPDATEDCONTAINERINFO_ID)
+        @Column(name = VALUE)
+        int getvalue();
+
+        void setvalue(int value);
+        /*@Column(name = LAST_UPDATEDCONTAINERINFO_ID)
         int getlastupdatedcontainerinfoid();
 
         void setlastupdatedcontainerinfoid(int lastupdatedcontainerinfoid);
@@ -81,46 +85,29 @@ public class YarnVariablesClusterJ implements YarnVariablesTableDef, YarnVariabl
         @Column(name = LAST_APPLICATIONID_ID)
         int getlastapplicationidid();
 
-        void setlastapplicationidid(int lastapplicationidid);
+        void setlastapplicationidid(int lastapplicationidid);*/
     }
     private ClusterjConnector connector = ClusterjConnector.getInstance();
 
     @Override
-    public YarnVariables findById() throws StorageException {
+    public YarnVariables findById(int id) throws StorageException {
 
         Session session = connector.obtainSession();
         YarnVariablesDTO yarnDTO = null;
         if (session != null) {
-            yarnDTO = session.find(YarnVariablesDTO.class, idVal);
+            if(id == Integer.MIN_VALUE){
+                id = idVal;
+            }
+            yarnDTO = session.find(YarnVariablesDTO.class, id);
         }
         if (yarnDTO == null) {
             throw new StorageException("HOP :: Error while retrieving row");
         }
-        YarnVariables objFound = new YarnVariables(yarnDTO.getid(), yarnDTO.getlastupdatedcontainerinfoid(), yarnDTO.getlastnodeidid(), yarnDTO.getlastnodeid(), yarnDTO.getlastresourceid(), yarnDTO.getlastlistid(), yarnDTO.getlastnodehbresponseid(), yarnDTO.getlastrmcontextid(), yarnDTO.getlastcontainerstatusid(), yarnDTO.getlastcontaineridid(), yarnDTO.getlastappattemptidid(), yarnDTO.getlastapplicationidid());
+        YarnVariables objFound = new YarnVariables(yarnDTO.getid(), yarnDTO.getvalue());
+        //YarnVariables objFound = new YarnVariables(yarnDTO.getid(), yarnDTO.getlastupdatedcontainerinfoid(), yarnDTO.getlastnodeidid(), yarnDTO.getlastnodeid(), yarnDTO.getlastresourceid(), yarnDTO.getlastlistid(), yarnDTO.getlastnodehbresponseid(), yarnDTO.getlastrmcontextid(), yarnDTO.getlastcontainerstatusid(), yarnDTO.getlastcontaineridid(), yarnDTO.getlastappattemptidid(), yarnDTO.getlastapplicationidid());
         return objFound;
     }
 
-    /*@Override
-     public YarnVariables findByIdIncrementUpdatedContainerInfo() throws StorageException {
-
-     Session session = connector.obtainSession();
-     YarnVariablesDTO yarnDTO = null;
-     if (session != null) {
-     yarnDTO = session.find(YarnVariablesDTO.class, idVal);
-     } else {
-     throw new StorageException("Session was null");
-     }
-     if (yarnDTO == null) {
-     throw new StorageException("HOP :: Error while retrieving row");
-     }
-     YarnVariables objFound = new YarnVariables(yarnDTO.getid(), yarnDTO.getlastupdatedcontainerinfoid(), yarnDTO.getlastnodeidid(), yarnDTO.getlastnodeid(), yarnDTO.getlastresourceid(), yarnDTO.getlastlistid(), yarnDTO.getlastnodehbresponseid(), yarnDTO.getlastrmcontextid());
-     YarnVariablesDTO newDTO = session.newInstance(YarnVariablesDTO.class);
-     newDTO.setid(idVal);
-     int newid = objFound.getLastupdatedcontainerinfoid() + 1;
-     newDTO.setlastupdatedcontainerinfoid(newid);
-     session.savePersistent(newDTO);
-     return objFound;
-     }*/
     @Override
     public void prepare(Collection<YarnVariables> modified, Collection<YarnVariables> removed) throws StorageException {
         Session session = connector.obtainSession();
@@ -145,7 +132,8 @@ public class YarnVariablesClusterJ implements YarnVariablesTableDef, YarnVariabl
     private YarnVariablesDTO createPersistable(YarnVariables yarnVariables, Session session) {
         YarnVariablesDTO yarnDTO = session.newInstance(YarnVariablesDTO.class);
         yarnDTO.setid(yarnVariables.getId());
-        yarnDTO.setlastupdatedcontainerinfoid(yarnVariables.getLastupdatedcontainerinfoid());
+        yarnDTO.setvalue(yarnVariables.getValue());
+        /*yarnDTO.setlastupdatedcontainerinfoid(yarnVariables.getLastupdatedcontainerinfoid());
         yarnDTO.setlastnodeidid(yarnVariables.getLastnodeidId());
         yarnDTO.setlastnodeid(yarnVariables.getLastnodeId());
         yarnDTO.setlastresourceid(yarnVariables.getLastresourceId());
@@ -155,7 +143,7 @@ public class YarnVariablesClusterJ implements YarnVariablesTableDef, YarnVariabl
         yarnDTO.setlastcontainerstatusid(yarnVariables.getLastcontainerstatusid());
         yarnDTO.setlastcontaineridid(yarnVariables.getLastcontaineridId());
         yarnDTO.setlastappattemptidid(yarnVariables.getLastappattemptidId());
-        yarnDTO.setlastapplicationidid(yarnVariables.getLastapplicationidId());
+        yarnDTO.setlastapplicationidid(yarnVariables.getLastapplicationidId());*/
         session.savePersistent(yarnDTO);
         return yarnDTO;
     }

@@ -47,7 +47,7 @@ public class ResourceClusterJ implements ResourceTableDef, ResourceDataAccess<Ho
             resourceDTO = session.find(ResourceDTO.class, id);
         }
         if (resourceDTO == null) {
-            throw new StorageException("HOP :: Error while retrieving row");
+            throw new StorageException("HOP :: Error while retrieving row:"+id);
         }
 
         return createHopResource(resourceDTO);

@@ -4,6 +4,7 @@ import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import se.sics.hop.exception.StorageException;
@@ -99,12 +100,10 @@ public class RMNodeClusterJ implements RMNodeTableDef, RMNodeDataAccess<HopRMNod
 
     @Override
     public HopRMNode findByNodeId(int nodeid) throws StorageException {
-        connector = ClusterjConnector.getInstance();
         Session session = connector.obtainSession();
-        System.out.println("RMNodeImplClusterJ :: findByNodeId-" + nodeid + " :: session=" + session.toString());
         RMNodeDTO rmnodeDTO = session.find(RMNodeDTO.class, nodeid);
         if (rmnodeDTO == null) {
-            throw new StorageException("Error while retrieving row");
+            throw new StorageException("Error while retrieving row:"+nodeid);
         }
 
         return createHopRMNode(rmnodeDTO);
@@ -118,7 +117,7 @@ public class RMNodeClusterJ implements RMNodeTableDef, RMNodeDataAccess<HopRMNod
         objarr[1] = commandPort;
         RMNodeDTO rmnodeDTO = session.find(RMNodeDTO.class, objarr);
         if (rmnodeDTO == null) {
-            throw new StorageException("HOP :: Error while retrieving row");
+            throw new StorageException("HOP :: Error while retrieving row:"+hostName+":"+commandPort);
         }
         return createHopRMNode(rmnodeDTO);
     }
@@ -126,10 +125,9 @@ public class RMNodeClusterJ implements RMNodeTableDef, RMNodeDataAccess<HopRMNod
     @Override
     public HopRMNode findByHostName(String hostName) throws StorageException {
         Session session = connector.obtainSession();
-        System.out.println("RMNodeImplClusterJ :: findByHostName-" + hostName + " :: session=" + session.toString());
         RMNodeDTO rmnodeDTO = session.find(RMNodeDTO.class, hostName);
         if (rmnodeDTO == null) {
-            throw new StorageException("Error while retrieving row");
+            throw new StorageException("Error while retrieving row:"+hostName);
         }
         return createHopRMNode(rmnodeDTO);
     }
@@ -137,6 +135,16 @@ public class RMNodeClusterJ implements RMNodeTableDef, RMNodeDataAccess<HopRMNod
     @Override
     public List<HopRMNode> findByNodeAddress(String nodeAddress) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void deleteAll(int startId, int endId) throws StorageException {
+        Session session = connector.obtainSession();
+        for (int i = startId; i < endId; i++) {
+            RMNodeDTO rmnodeDTO = session.find(RMNodeDTO.class, i);
+            session.deletePersistent(rmnodeDTO);
+        }
+        //session.deletePersistentAll(RMNodeDTO.class);
     }
 
     @Override

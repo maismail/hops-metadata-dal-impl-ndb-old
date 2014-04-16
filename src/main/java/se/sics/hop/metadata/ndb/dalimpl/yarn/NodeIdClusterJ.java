@@ -46,39 +46,55 @@ public class NodeIdClusterJ implements NodeIdTableDef, NodeIdDataAccess<HopNodeI
 
     @Override
     public HopNodeId findById(int id) throws StorageException {
-        Session session = connector.obtainSession();
-        QueryBuilder qb = session.getQueryBuilder();
+        List<NodeIdDTO> results = null;
+        try {
+            Session session = connector.obtainSession();
+            QueryBuilder qb = session.getQueryBuilder();
 
-        QueryDomainType<NodeIdDTO> dobj = qb.createQueryDefinition(NodeIdDTO.class);
-        Predicate pred1 = dobj.get("id").equal(dobj.param("id"));
-        dobj.where(pred1);
-        Query<NodeIdDTO> query = session.createQuery(dobj);
-        query.setParameter("id", id);
+            QueryDomainType<NodeIdDTO> dobj = qb.createQueryDefinition(NodeIdDTO.class);
+            Predicate pred1 = dobj.get("id").equal(dobj.param("id"));
+            dobj.where(pred1);
+            Query<NodeIdDTO> query = session.createQuery(dobj);
+            query.setParameter("id", id);
 
-        List<NodeIdDTO> results = query.getResultList();
-        if (results != null && !results.isEmpty()) {
-            return createHopNodeId(results.get(0));
-        } else {
-            return null;
+            results = query.getResultList();
+
+            if (results != null && !results.isEmpty()) {
+                return createHopNodeId(results.get(0));
+            }
+        } catch (Exception e) {
+            if (e.getMessage().contains("Tuple did not exist")) {
+                throw new StorageException("HOP :: Error while retrieving row:" + id);
+            }
         }
 
+        throw new StorageException("HOP :: Error while retrieving row:" + id);
     }
 
     @Override
     public HopNodeId findByHostPort(String host, int port) throws StorageException {
-        Session session = connector.obtainSession();
-        Object[] objarr = new Object[2];
-        objarr[0] = host;
-        objarr[1] = port;
         NodeIdDTO nodeidDTO = null;
-        if (session != null) {
-            nodeidDTO = session.find(NodeIdDTO.class, objarr);
-        }
-        if (nodeidDTO == null) {
-            throw new StorageException("HOP :: Error while retrieving row");
-        }
+        try {
+            Session session = connector.obtainSession();
 
-        return createHopNodeId(nodeidDTO);
+            Object[] objarr = new Object[2];
+            objarr[0] = host;
+            objarr[1] = port;
+
+            if (session != null) {
+                nodeidDTO = session.find(NodeIdDTO.class, objarr);
+            }
+            if (nodeidDTO == null) {
+                throw new StorageException("HOP :: Error while retrieving row:" + host + ":" + port);
+            }
+            return createHopNodeId(nodeidDTO);
+        } catch (Exception e) {
+            if (e.getMessage().contains("Tuple did not exist")) {
+                throw new StorageException("HOP :: Error while retrieving row:" + host + ":" + port);
+            }
+        }
+        throw new StorageException("HOP :: Error while retrieving row:" + host + ":" + port);
+
     }
 
     @Override
@@ -106,6 +122,35 @@ public class NodeIdClusterJ implements NodeIdTableDef, NodeIdDataAccess<HopNodeI
     }
 
     @Override
+    public void deleteAll(int startId, int endId) throws StorageException {
+        Session session = connector.obtainSession();
+        //session.deletePersistentAll(NodeIdDTO.class);
+        for (int i = startId; i < endId; i++) {
+            QueryBuilder qb = session.getQueryBuilder();
+
+            QueryDomainType<NodeIdDTO> dobj = qb.createQueryDefinition(NodeIdDTO.class);
+            Predicate pred1 = dobj.get("id").equal(dobj.param("id"));
+            dobj.where(pred1);
+            Query<NodeIdDTO> query = session.createQuery(dobj);
+            query.setParameter("id", i);
+
+            List<NodeIdDTO> results = query.getResultList();
+            try {
+                NodeIdDTO del = session.newInstance(NodeIdDTO.class);
+                del.setHost(results.get(0).getHost());
+                del.setPort(results.get(0).getPort());
+                Object[] objarr = new Object[2];
+                objarr[0] = results.get(0).getHost();
+                objarr[1] = results.get(0).getPort();
+                NodeIdDTO nodeidDTO = session.find(NodeIdDTO.class, objarr);
+
+                session.deletePersistent(nodeidDTO);
+            } catch (Exception e) {
+            }
+        }
+    }
+
+    @Override
     public void createNodeId(HopNodeId nodeId) throws StorageException {
         Session session = connector.obtainSession();
         createPersistable(nodeId, session);
@@ -113,7 +158,6 @@ public class NodeIdClusterJ implements NodeIdTableDef, NodeIdDataAccess<HopNodeI
 
     private NodeIdDTO createPersistable(HopNodeId hopNodeId, Session session) {
         NodeIdDTO nodeDTO = session.newInstance(NodeIdDTO.class);
-        System.out.println("NodeIdClusterJ :: creating NodeID with id:" + hopNodeId.getId());
         //Set values to persist new rmnode
         nodeDTO.setId(hopNodeId.getId());
         nodeDTO.setHost(hopNodeId.getHost());
