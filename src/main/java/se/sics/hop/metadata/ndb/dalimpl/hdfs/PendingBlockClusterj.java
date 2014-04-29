@@ -8,6 +8,7 @@ import com.mysql.clusterj.annotation.PrimaryKey;
 import com.mysql.clusterj.query.Predicate;
 import com.mysql.clusterj.query.PredicateOperand;
 import com.mysql.clusterj.query.QueryBuilder;
+import com.mysql.clusterj.query.QueryDefinition;
 import com.mysql.clusterj.query.QueryDomainType;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -30,23 +31,54 @@ public class PendingBlockClusterj implements PendingBlockTableDef, PendingBlockD
     return CountHelper.countWithCriterion(TABLE_NAME, String.format("%s>%d", TIME_STAMP, timeLimit));
   }
 
+  @Override
+  public List<HopPendingBlockInfo> findByINodeId(int inodeId, int partKey) throws StorageException {
+    try {
+      Session session = connector.obtainSession();
+      
+      QueryBuilder qb = session.getQueryBuilder();
+      QueryDomainType<PendingBlockDTO> qdt = qb.createQueryDefinition(PendingBlockDTO.class);
+      
+      Predicate pred1 = qdt.get("iNodeId").equal(qdt.param("idParam"));
+      Predicate pred2 = qdt.get("partKey").equal(qdt.param("partKeyParam"));
+      qdt.where(pred1.and(pred2));
+
+      Query<PendingBlockDTO> query = session.createQuery(qdt);
+      query.setParameter("idParam", inodeId);
+      query.setParameter("partKeyParam", partKey);
+     
+      List<PendingBlockDTO> results = query.getResultList();
+ 
+      return createList(query.getResultList());
+    } catch (Exception e) {
+      throw new StorageException(e);
+    }
+  }
+
   @PersistenceCapable(table = TABLE_NAME)
   public interface PendingBlockDTO {
 
     @PrimaryKey
     @Column(name = BLOCK_ID)
     long getBlockId();
-
     void setBlockId(long blockId);
+    
+    @PrimaryKey
+    @Column(name = INODE_ID)
+    int getINodeId();
+    void setINodeId(int inodeId);
+    
+    @PrimaryKey
+    @Column(name = PART_KEY)
+    int getPartKey();
+    void setPartKey(int partKey );
 
     @Column(name = TIME_STAMP)
     long getTimestamp();
-
     void setTimestamp(long timestamp);
 
     @Column(name = NUM_REPLICAS_IN_PROGRESS)
     int getNumReplicasInProgress();
-
     void setNumReplicasInProgress(int numReplicasInProgress);
   }
   private ClusterjConnector connector = ClusterjConnector.getInstance();
@@ -66,16 +98,24 @@ public class PendingBlockClusterj implements PendingBlockTableDef, PendingBlockD
     }
 
     for (HopPendingBlockInfo p : removed) {
-      PendingBlockDTO pTable = session.newInstance(PendingBlockDTO.class, p.getBlockId());
+      Object[] pk = new Object[3];
+        pk[0] = p.getBlockId();
+        pk[1] = p.getInodeId();
+        pk[2] = p.getPartKey();
+      PendingBlockDTO pTable = session.newInstance(PendingBlockDTO.class, pk);
       session.deletePersistent(pTable);
     }
   }
 
   @Override
-  public HopPendingBlockInfo findByPKey(long blockId) throws StorageException {
+  public HopPendingBlockInfo findByPKey(long blockId, int inodeId, int partKey) throws StorageException {
     try {
       Session session = connector.obtainSession();
-      PendingBlockDTO pendingTable = session.find(PendingBlockDTO.class, blockId);
+      Object[] pk = new Object[3];
+      pk[0] = blockId;
+      pk[1] = inodeId;
+      pk[2] = partKey;
+      PendingBlockDTO pendingTable = session.find(PendingBlockDTO.class, pk);
       HopPendingBlockInfo pendingBlock = null;
       if (pendingTable != null) {
         pendingBlock = createHopPendingBlockInfo(pendingTable);
@@ -138,7 +178,7 @@ public class PendingBlockClusterj implements PendingBlockTableDef, PendingBlockD
   }
 
   private HopPendingBlockInfo createHopPendingBlockInfo(PendingBlockDTO pendingTable) {
-    return new HopPendingBlockInfo(pendingTable.getBlockId(),
+    return new HopPendingBlockInfo(pendingTable.getBlockId(),pendingTable.getINodeId(),pendingTable.getPartKey(),
             pendingTable.getTimestamp(), pendingTable.getNumReplicasInProgress());
   }
 
@@ -146,5 +186,7 @@ public class PendingBlockClusterj implements PendingBlockTableDef, PendingBlockD
     pendingTable.setBlockId(pendingBlock.getBlockId());
     pendingTable.setNumReplicasInProgress(pendingBlock.getNumReplicas());
     pendingTable.setTimestamp(pendingBlock.getTimeStamp());
+    pendingTable.setINodeId(pendingBlock.getInodeId());
+    pendingTable.setPartKey(pendingBlock.getPartKey());
   }
 }
