@@ -103,7 +103,7 @@ public class ReplicaClusterj implements ReplicaTableDef, ReplicaDataAccess<HopIn
         Object[] pk = new Object[4];
         pk[0] = replica.getBlockId();
         pk[1] = replica.getStorageId();
-        pk[2] = replica.getInodeID();
+        pk[2] = replica.getInodeId();
         pk[3] = replica.getPartKey();
         session.deletePersistent(ReplicaDTO.class, pk);
       }
@@ -112,14 +112,12 @@ public class ReplicaClusterj implements ReplicaTableDef, ReplicaDataAccess<HopIn
         ReplicaDTO newInstance = session.newInstance(ReplicaDTO.class);
         createPersistable(replica, newInstance);
         session.savePersistent(newInstance);
-        LOG.debug("TestX added replica bid="+newInstance.getBlockId()+" iid="+newInstance.getINodeId()+" partKey="+newInstance.getPartKey()+" sid="+newInstance.getStorageId());
       }
 
       for (HopIndexedReplica replica : modified) {
         ReplicaDTO newInstance = session.newInstance(ReplicaDTO.class);
         createPersistable(replica, newInstance);
         session.savePersistent(newInstance);
-        LOG.debug("TestX modified replica bid="+newInstance.getBlockId()+" iid="+newInstance.getINodeId()+" partKey="+newInstance.getPartKey()+" sid="+newInstance.getStorageId());
       }
     } catch (Exception e) {
       throw new StorageException(e);
@@ -138,7 +136,7 @@ public class ReplicaClusterj implements ReplicaTableDef, ReplicaDataAccess<HopIn
     newInstance.setBlockId(replica.getBlockId());
     newInstance.setIndex(replica.getIndex());
     newInstance.setStorageId(replica.getStorageId());
-    newInstance.setINodeId(replica.getInodeID());
+    newInstance.setINodeId(replica.getInodeId());
     newInstance.setPartKey(replica.getPartKey());
   }
 }
