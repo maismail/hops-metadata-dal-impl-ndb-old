@@ -7,6 +7,7 @@ import com.mysql.clusterj.annotation.PrimaryKey;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import se.sics.hop.metadata.hdfs.dal.INodeAttributesDataAccess;
 import se.sics.hop.metadata.hdfs.entity.hdfs.HopINodeAttributes;
 import se.sics.hop.exception.StorageException;
@@ -25,8 +26,11 @@ public class INodeAttributesClusterj implements INodeAttributesTableDef, INodeAt
     @PrimaryKey
     @Column(name = ID)
     int getId();
-
     void setId(int id);
+    
+    @Column(name = PART_KEY)
+    int getPartKey();
+    void setPartKey(int partKey);
 
     @Column(name = NSQUOTA)
     long getNSQuota();
@@ -51,10 +55,14 @@ public class INodeAttributesClusterj implements INodeAttributesTableDef, INodeAt
   private ClusterjConnector connector = ClusterjConnector.getInstance();
 
   @Override
-  public HopINodeAttributes findAttributesByPk(Integer inodeId) throws StorageException {
+  public HopINodeAttributes findAttributesByPk(Integer inodeId, Integer partKey) throws StorageException {
     Session session = connector.obtainSession();
     try {
-      INodeAttributesDTO dto = session.find(INodeAttributesDTO.class, inodeId);
+      Object[] pk = new Object[2];
+      pk[0] = inodeId;
+      pk[1] = partKey;
+      
+      INodeAttributesDTO dto = session.find(INodeAttributesDTO.class, pk);
       HopINodeAttributes iNodeAttributes = makeINodeAttributes(dto);
       return iNodeAttributes;
     } catch (Exception e) {
@@ -63,15 +71,16 @@ public class INodeAttributesClusterj implements INodeAttributesTableDef, INodeAt
   }
   
   @Override
-  public Collection<HopINodeAttributes> findAttributesByPkList(Collection<Integer> inodeIds) throws StorageException {
+  public Collection<HopINodeAttributes> findAttributesByPkList(Map<Integer/*inodeid*/, Integer/*partkey*/> inodes) throws StorageException {
     Session session = connector.obtainSession();
     try {
-        List<Integer> inodeIdList  = (List<Integer>)inodeIds;
         List<HopINodeAttributes> inodeAttributesBatchResponse = new ArrayList<HopINodeAttributes>();
         List<INodeAttributesDTO> inodeAttributesBatchRequest = new ArrayList<INodeAttributesDTO>();
-        for(int i = 0; i < inodeIdList.size(); i++){
+        for(Integer inodeId : inodes.keySet()){
+          Integer partKey = inodes.get(inodeId);
           INodeAttributesDTO dto = session.newInstance(INodeAttributesDTO.class);
-          dto.setId(inodeIdList.get(i));
+          dto.setId(inodeId);
+          dto.setPartKey(partKey);
           inodeAttributesBatchRequest.add(dto);
           session.load(dto);
         }
@@ -81,7 +90,6 @@ public class INodeAttributesClusterj implements INodeAttributesTableDef, INodeAt
         for(int i = 0; i < inodeAttributesBatchRequest.size();i++){
           inodeAttributesBatchResponse.add(makeINodeAttributes(inodeAttributesBatchRequest.get(i)));
         }
-        
         return inodeAttributesBatchResponse;
     } catch (Exception e) {
       throw new StorageException(e);
@@ -94,7 +102,10 @@ public class INodeAttributesClusterj implements INodeAttributesTableDef, INodeAt
     try {
       if (removed != null) {
         for (HopINodeAttributes attr : removed) {
-          INodeAttributesDTO persistable = session.newInstance(INodeAttributesDTO.class, attr.getInodeId());
+          Object[] pk = new Object[2];
+          pk[0] = attr.getInodeId();
+          pk[1] = attr.getPartKey();
+          INodeAttributesDTO persistable = session.newInstance(INodeAttributesDTO.class, pk);
           session.deletePersistent(persistable);
         }
       }
@@ -116,6 +127,7 @@ public class INodeAttributesClusterj implements INodeAttributesTableDef, INodeAt
     dto.setNSCount(attribute.getNsCount());
     dto.setDSQuota(attribute.getDsQuota());
     dto.setDiskspace(attribute.getDiskspace());
+    dto.setPartKey(attribute.getPartKey());
     return dto;
   }
 
@@ -125,6 +137,7 @@ public class INodeAttributesClusterj implements INodeAttributesTableDef, INodeAt
     }
     HopINodeAttributes iNodeAttributes = new HopINodeAttributes(
             dto.getId(),
+            dto.getPartKey(),
             dto.getNSQuota(),
             dto.getNSCount(),
             dto.getDSQuota(),
