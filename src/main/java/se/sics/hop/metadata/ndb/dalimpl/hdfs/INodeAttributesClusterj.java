@@ -11,6 +11,7 @@ import java.util.Map;
 import se.sics.hop.metadata.hdfs.dal.INodeAttributesDataAccess;
 import se.sics.hop.metadata.hdfs.entity.hdfs.HopINodeAttributes;
 import se.sics.hop.exception.StorageException;
+import se.sics.hop.metadata.hdfs.entity.hdfs.HopINodeCandidatePK;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
 import se.sics.hop.metadata.hdfs.tabledef.INodeAttributesTableDef;
 
@@ -71,16 +72,15 @@ public class INodeAttributesClusterj implements INodeAttributesTableDef, INodeAt
   }
   
   @Override
-  public Collection<HopINodeAttributes> findAttributesByPkList(Map<Integer/*inodeid*/, Integer/*partkey*/> inodes) throws StorageException {
+  public Collection<HopINodeAttributes> findAttributesByPkList(List<HopINodeCandidatePK> inodePks) throws StorageException {
     Session session = connector.obtainSession();
     try {
         List<HopINodeAttributes> inodeAttributesBatchResponse = new ArrayList<HopINodeAttributes>();
         List<INodeAttributesDTO> inodeAttributesBatchRequest = new ArrayList<INodeAttributesDTO>();
-        for(Integer inodeId : inodes.keySet()){
-          Integer partKey = inodes.get(inodeId);
+        for(HopINodeCandidatePK pk : inodePks){
           INodeAttributesDTO dto = session.newInstance(INodeAttributesDTO.class);
-          dto.setId(inodeId);
-          dto.setPartKey(partKey);
+          dto.setId(pk.getInodeId());
+          dto.setPartKey(pk.getPartKey());
           inodeAttributesBatchRequest.add(dto);
           session.load(dto);
         }
