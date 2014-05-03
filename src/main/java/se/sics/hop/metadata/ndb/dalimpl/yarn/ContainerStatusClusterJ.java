@@ -156,7 +156,7 @@ public class ContainerStatusClusterJ implements ContainerStatusTableDef, Contain
         csDTO.setdiagnostics(hopCS.getDiagnostics());
         csDTO.setexitstatus(hopCS.getExitstatus());
         csDTO.settype(hopCS.getType());
-        if (hopCS.getUpdatedcontainerinfoid() != -1) {
+        if (hopCS.getUpdatedcontainerinfoid() != Integer.MIN_VALUE) {
             csDTO.setupdatedcontainerinfoid(hopCS.getUpdatedcontainerinfoid());
         }
         session.savePersistent(csDTO);

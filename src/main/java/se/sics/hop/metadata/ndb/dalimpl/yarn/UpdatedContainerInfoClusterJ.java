@@ -118,7 +118,9 @@ public class UpdatedContainerInfoClusterJ implements UpdatedContainerInfoTableDe
         UpdatedContainerInfoDTO uciDTO = session.newInstance(UpdatedContainerInfoDTO.class);
         //Set values to persist new rmnode
         uciDTO.setid(hopUCI.getId());
-        uciDTO.setrmnodeid(hopUCI.getRmnodeid());
+        if (hopUCI.getRmnodeid() != Integer.MIN_VALUE) {
+            uciDTO.setrmnodeid(hopUCI.getRmnodeid());
+        }
         session.savePersistent(uciDTO);
         return uciDTO;
     }

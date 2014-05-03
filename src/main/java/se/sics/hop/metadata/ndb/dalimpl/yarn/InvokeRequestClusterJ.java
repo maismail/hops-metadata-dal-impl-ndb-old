@@ -69,6 +69,21 @@ public class InvokeRequestClusterJ implements InvokeRequestTableDef, InvokeReque
     }
 
     @Override
+    public List<InvokeRequest> findAll(int numberOfRequests) throws StorageException {
+        Session session = connector.obtainSession();
+        QueryBuilder qb = session.getQueryBuilder();
+        QueryDomainType<InvokeRequestDTO> dobj = qb.createQueryDefinition(InvokeRequestDTO.class);
+        Query<InvokeRequestDTO> query = session.createQuery(dobj);
+        List<InvokeRequestDTO> results = query.getResultList();
+        try {
+            return createHopInvokeRequestsList(results, numberOfRequests);
+        } catch (IOException ex) {
+            Logger.getLogger(ApplicationIdClusterJ.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return null;
+    }
+
+    @Override
     public void prepare(Collection<InvokeRequest> modified, Collection<InvokeRequest> removed) throws StorageException {
         Session session = connector.obtainSession();
         try {
@@ -88,10 +103,11 @@ public class InvokeRequestClusterJ implements InvokeRequestTableDef, InvokeReque
             throw new StorageException(e);
         }
     }
+
     @Override
     public void deleteAll(int startId, int endId) throws StorageException {
-    
-    Session session = connector.obtainSession();
+
+        Session session = connector.obtainSession();
         //session.deletePersistentAll(NodeIdDTO.class);
         for (int i = startId; i < endId; i++) {
             QueryBuilder qb = session.getQueryBuilder();
@@ -129,6 +145,20 @@ public class InvokeRequestClusterJ implements InvokeRequestTableDef, InvokeReque
         List<InvokeRequest> hopInvokeRequests = new ArrayList<InvokeRequest>();
         for (InvokeRequestDTO persistable : list) {
             hopInvokeRequests.add(createHopInvokeRequests(persistable));
+        }
+        return hopInvokeRequests;
+    }
+
+    private List<InvokeRequest> createHopInvokeRequestsList(List<InvokeRequestDTO> list, int numberOfRequests) throws IOException {
+        List<InvokeRequest> hopInvokeRequests = new ArrayList<InvokeRequest>();
+        int counter = 0;
+
+        for (InvokeRequestDTO persistable : list) {
+            if (counter == numberOfRequests) {
+                break;
+            }
+            hopInvokeRequests.add(createHopInvokeRequests(persistable));
+            counter++;
         }
         return hopInvokeRequests;
     }

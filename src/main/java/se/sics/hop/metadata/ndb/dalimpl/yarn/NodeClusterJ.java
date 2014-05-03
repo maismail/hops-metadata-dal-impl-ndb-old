@@ -125,7 +125,7 @@ public class NodeClusterJ implements NodeTableDef, NodeDataAccess<HopNode> {
     }
 
     @Override
-    public void createNode(HopNode node, int id) throws StorageException {
+    public void createNode(HopNode node) throws StorageException {
         Session session = connector.obtainSession();
         createPersistable(node, session);
     }
