@@ -47,6 +47,11 @@ public class EncodingStatusClusterj implements EncodingStatusTableDef, EncodingS
 
     void setCodec(String codec);
 
+    @Column(name = TARGET_REPLICATION)
+    int getTargetReplication();
+
+    void setTargetReplication(int targetReplication);
+
     @Column(name = MODIFICATION_TIME)
     long getModificationTime();
 
@@ -81,6 +86,7 @@ public class EncodingStatusClusterj implements EncodingStatusTableDef, EncodingS
     dto.setInodeId(status.getInodeId());
     dto.setStatus(status.getStatus());
     dto.setCodec(status.getCodec());
+    dto.setTargetReplication(status.getTargetReplication());
     dto.setModificationTime(status.getModificationTime());
   }
 
@@ -148,7 +154,8 @@ public class EncodingStatusClusterj implements EncodingStatusTableDef, EncodingS
       return null;
     }
 
-    return new HopEncodingStatus(dto.getInodeId(), dto.getStatus(), dto.getCodec(), dto.getModificationTime());
+    return new HopEncodingStatus(dto.getInodeId(), dto.getStatus(), dto.getCodec(), dto.getTargetReplication(),
+        dto.getModificationTime());
   }
 
   private List<HopEncodingStatus> findAllWithStatus(int status) throws StorageException {
@@ -171,8 +178,9 @@ public class EncodingStatusClusterj implements EncodingStatusTableDef, EncodingS
         long inodeId = result.getLong(INODE_ID);
         int status = result.getInt(STATUS);
         String codec = result.getString(CODEC);
+        int targetReplication = result.getInt(TARGET_REPLICATION);
         long modificationTime = result.getLong(MODIFICATION_TIME);
-        resultList.add(new HopEncodingStatus(inodeId, status, codec, modificationTime));
+        resultList.add(new HopEncodingStatus(inodeId, status, codec, targetReplication, modificationTime));
       }
     } catch (SQLException ex) {
       throw new StorageException(ex);
