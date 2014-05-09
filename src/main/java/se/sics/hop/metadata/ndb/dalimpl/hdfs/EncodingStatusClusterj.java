@@ -104,6 +104,11 @@ public class EncodingStatusClusterj implements EncodingStatusTableDef, EncodingS
   }
 
   @Override
+  public Collection<HopEncodingStatus> findRequestedRepairs(long limit) throws StorageException {
+    return findWithStatus(HopEncodingStatus.REPAIR_REQUESTED, limit);
+  }
+
+  @Override
   public int countRequestedEncodings() throws StorageException {
     return CountHelper.countWhere(TABLE_NAME, STATUS + "=" + HopEncodingStatus.ENCODING_REQUESTED);
   }
