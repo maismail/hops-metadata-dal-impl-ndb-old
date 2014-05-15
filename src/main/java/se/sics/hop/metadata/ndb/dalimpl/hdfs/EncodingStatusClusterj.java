@@ -1,12 +1,9 @@
 package se.sics.hop.metadata.ndb.dalimpl.hdfs;
 
-import com.mysql.clusterj.Query;
 import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
-import com.mysql.clusterj.query.QueryBuilder;
-import com.mysql.clusterj.query.QueryDomainType;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.dal.EncodingStatusDataAccess;
 import se.sics.hop.metadata.hdfs.entity.hop.HopEncodingStatus;
@@ -147,6 +144,16 @@ public class EncodingStatusClusterj implements EncodingStatusTableDef, EncodingS
   @Override
   public int countActiveRepairs() throws StorageException {
     return CountHelper.countWhere(TABLE_NAME, STATUS + "=" + HopEncodingStatus.REPAIR_ACTIVE);
+  }
+
+  @Override
+  public Collection<HopEncodingStatus> findPotentiallyFixed(long limit) throws StorageException {
+    return findWithStatus(HopEncodingStatus.POTENTIALLY_FIXED, limit);
+  }
+
+  @Override
+  public int countPotentiallyFixed() throws StorageException {
+    return CountHelper.countWhere(TABLE_NAME, STATUS + "=" + HopEncodingStatus.POTENTIALLY_FIXED);
   }
 
   private HopEncodingStatus createHopEncoding(EncodingStatusDto dto) {
