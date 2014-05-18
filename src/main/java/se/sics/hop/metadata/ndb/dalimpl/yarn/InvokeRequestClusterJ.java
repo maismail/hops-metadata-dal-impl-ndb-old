@@ -29,12 +29,12 @@ public class InvokeRequestClusterJ implements InvokeRequestTableDef, InvokeReque
     @PersistenceCapable(table = TABLE_NAME)
     public interface InvokeRequestDTO {
 
-        @PrimaryKey
         @Column(name = ID)
         int getid();
 
         void setid(int id);
 
+        @PrimaryKey
         @Column(name = NODEID)
         int getnodeid();
 
@@ -54,26 +54,29 @@ public class InvokeRequestClusterJ implements InvokeRequestTableDef, InvokeReque
     }
 
     @Override
-    public List<InvokeRequest> findAll() throws StorageException {
+    public InvokeRequest findByNodeId(int rmNodeId) throws StorageException {
         Session session = connector.obtainSession();
-        QueryBuilder qb = session.getQueryBuilder();
-        QueryDomainType<InvokeRequestDTO> dobj = qb.createQueryDefinition(InvokeRequestDTO.class);
-        Query<InvokeRequestDTO> query = session.createQuery(dobj);
-        List<InvokeRequestDTO> results = query.getResultList();
-        try {
-            return createHopInvokeRequestsList(results);
-        } catch (IOException ex) {
-            Logger.getLogger(ApplicationIdClusterJ.class.getName()).log(Level.SEVERE, null, ex);
+        InvokeRequestDTO req = session.find(InvokeRequestDTO.class, rmNodeId);
+        if (req == null) {
+            throw new StorageException("Error while retrieving row:" + rmNodeId);
         }
-        return null;
+
+        return createHopInvokeRequest(req);
     }
 
     @Override
-    public List<InvokeRequest> findAll(int numberOfRequests) throws StorageException {
+    public List<InvokeRequest> findAll(int numberOfRequests, boolean pending) throws StorageException {
         Session session = connector.obtainSession();
         QueryBuilder qb = session.getQueryBuilder();
         QueryDomainType<InvokeRequestDTO> dobj = qb.createQueryDefinition(InvokeRequestDTO.class);
+        Predicate pred1 = dobj.get("id").equal(dobj.param("id"));
+        dobj.where(pred1);
         Query<InvokeRequestDTO> query = session.createQuery(dobj);
+        if (pending) {
+            query.setParameter("id", 1);
+        } else {
+            query.setParameter("id", 0);
+        }
         List<InvokeRequestDTO> results = query.getResultList();
         try {
             return createHopInvokeRequestsList(results, numberOfRequests);
@@ -89,7 +92,7 @@ public class InvokeRequestClusterJ implements InvokeRequestTableDef, InvokeReque
         try {
             if (removed != null) {
                 for (InvokeRequest hopInvokeRequests : removed) {
-                    InvokeRequestDTO persistable = session.newInstance(InvokeRequestDTO.class, hopInvokeRequests.getId());
+                    InvokeRequestDTO persistable = session.newInstance(InvokeRequestDTO.class, hopInvokeRequests.getNodeid());
                     session.deletePersistent(persistable);
                 }
             }
@@ -144,7 +147,7 @@ public class InvokeRequestClusterJ implements InvokeRequestTableDef, InvokeReque
     private List<InvokeRequest> createHopInvokeRequestsList(List<InvokeRequestDTO> list) throws IOException {
         List<InvokeRequest> hopInvokeRequests = new ArrayList<InvokeRequest>();
         for (InvokeRequestDTO persistable : list) {
-            hopInvokeRequests.add(createHopInvokeRequests(persistable));
+            hopInvokeRequests.add(createHopInvokeRequest(persistable));
         }
         return hopInvokeRequests;
     }
@@ -154,16 +157,16 @@ public class InvokeRequestClusterJ implements InvokeRequestTableDef, InvokeReque
         int counter = 0;
 
         for (InvokeRequestDTO persistable : list) {
-            if (counter == numberOfRequests) {
+            if (numberOfRequests > 0 && counter == numberOfRequests) {
                 break;
             }
-            hopInvokeRequests.add(createHopInvokeRequests(persistable));
+            hopInvokeRequests.add(createHopInvokeRequest(persistable));
             counter++;
         }
         return hopInvokeRequests;
     }
 
-    private InvokeRequest createHopInvokeRequests(InvokeRequestDTO invokerequestsDTO) {
+    private InvokeRequest createHopInvokeRequest(InvokeRequestDTO invokerequestsDTO) {
         return new InvokeRequest(invokerequestsDTO.getid(), invokerequestsDTO.getnodeid(), invokerequestsDTO.gettype());
     }
 }
