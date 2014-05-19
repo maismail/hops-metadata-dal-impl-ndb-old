@@ -28,25 +28,20 @@ public class InvalidatedBlockClusterj implements InvalidatedBlockTableDef, Inval
   public interface InvalidateBlocksDTO {
 
     @PrimaryKey
-    @Column(name = STORAGE_ID)
-    int getStorageId();
-    void setStorageId(int storageId);
-
+    @Column(name = INODE_ID)
+    int getINodeId();
+    void setINodeId(int inodeID);
+    
     @PrimaryKey
     @Column(name = BLOCK_ID)
     long getBlockId();
     void setBlockId(long storageId);
     
     @PrimaryKey
-    @Column(name = INODE_ID)
-    int getINodeId();
-    void setINodeId(int inodeID);
-
-    @PrimaryKey
-    @Column(name = PART_KEY)
-    int getPartKey();
-    void setPartKey(int partKey);
-
+    @Column(name = STORAGE_ID)
+    int getStorageId();
+    void setStorageId(int storageId);
+    
     @Column(name = GENERATION_STAMP)
     long getGenerationStamp();
     void setGenerationStamp(long generationStamp);
@@ -90,19 +85,17 @@ public class InvalidatedBlockClusterj implements InvalidatedBlockTableDef, Inval
   }
 
   @Override
-  public Collection<HopInvalidatedBlock> findInvalidatedBlocksByBlockId(long bid, int inodeId, int partKey) throws StorageException {
+  public Collection<HopInvalidatedBlock> findInvalidatedBlocksByBlockId(long bid, int inodeId) throws StorageException {
     try {
       Session session = connector.obtainSession();
       QueryBuilder qb = session.getQueryBuilder();
       QueryDomainType<InvalidateBlocksDTO> qdt = qb.createQueryDefinition(InvalidateBlocksDTO.class);
       Predicate pred1 = qdt.get("blockId").equal(qdt.param("blockIdParam"));
       Predicate pred2 = qdt.get("iNodeId").equal(qdt.param("iNodeIdParam"));
-      Predicate pred3 = qdt.get("partKey").equal(qdt.param("partKeyParam"));
-      qdt.where(pred1.and(pred2).and(pred3));
+      qdt.where(pred1.and(pred2));
       Query<InvalidateBlocksDTO> query = session.createQuery(qdt);
       query.setParameter("blockIdParam", bid);
       query.setParameter("iNodeIdParam", inodeId);
-      query.setParameter("partKeyParam", partKey);
       return createList(query.getResultList());
     } catch (Exception e) {
       throw new StorageException(e);
@@ -110,17 +103,15 @@ public class InvalidatedBlockClusterj implements InvalidatedBlockTableDef, Inval
   }
   
   @Override
-  public Collection<HopInvalidatedBlock> findInvalidatedBlocksByINodeId(int inodeId, int partKey) throws StorageException {
+  public Collection<HopInvalidatedBlock> findInvalidatedBlocksByINodeId(int inodeId) throws StorageException {
     try {
       Session session = connector.obtainSession();
       QueryBuilder qb = session.getQueryBuilder();
       QueryDomainType<InvalidateBlocksDTO> qdt = qb.createQueryDefinition(InvalidateBlocksDTO.class);
       Predicate pred1 = qdt.get("iNodeId").equal(qdt.param("iNodeIdParam"));
-      Predicate pred2 = qdt.get("partKey").equal(qdt.param("partKeyParam"));
-      qdt.where(pred1.and(pred2));
+      qdt.where(pred1);
       Query<InvalidateBlocksDTO> query = session.createQuery(qdt);
       query.setParameter("iNodeIdParam", inodeId);
-      query.setParameter("partKeyParam", partKey);
       return createList(query.getResultList());
     } catch (Exception e) {
       throw new StorageException(e);
@@ -128,14 +119,13 @@ public class InvalidatedBlockClusterj implements InvalidatedBlockTableDef, Inval
   }
 
   @Override
-  public HopInvalidatedBlock findInvBlockByPkey(long blockId, int storageId, int inodeId, int partkey) throws StorageException {
+  public HopInvalidatedBlock findInvBlockByPkey(long blockId, int storageId, int inodeId) throws StorageException {
     try {
       Session session = connector.obtainSession();
-      Object[] pk = new Object[4];
-      pk[0] = blockId;
-      pk[1] = storageId;
-      pk[2] = inodeId;
-      pk[3] = partkey;
+      Object[] pk = new Object[3];
+      pk[0] = inodeId;
+      pk[1] = blockId;
+      pk[2] = storageId;
               
       InvalidateBlocksDTO invTable = session.find(InvalidateBlocksDTO.class, pk);
       if (invTable == null) {
@@ -182,11 +172,10 @@ public class InvalidatedBlockClusterj implements InvalidatedBlockTableDef, Inval
   @Override
   public void remove(HopInvalidatedBlock invBlock) {
     Session session = connector.obtainSession();
-    Object[] pk = new Object[4];
-    pk[0] = invBlock.getBlockId();
-    pk[1] = invBlock.getStorageId();
-    pk[2] = invBlock.getInodeId();
-    pk[3] = invBlock.getPartKey();
+    Object[] pk = new Object[3];
+    pk[0] = invBlock.getInodeId();
+    pk[1] = invBlock.getBlockId();
+    pk[2] = invBlock.getStorageId();
     session.deletePersistent(InvalidateBlocksDTO.class, pk);
   }
 
@@ -200,7 +189,7 @@ public class InvalidatedBlockClusterj implements InvalidatedBlockTableDef, Inval
 
   private HopInvalidatedBlock createReplica(InvalidateBlocksDTO invBlockTable) {
     return new HopInvalidatedBlock(invBlockTable.getStorageId(), invBlockTable.getBlockId(),
-            invBlockTable.getGenerationStamp(), invBlockTable.getNumBytes(),invBlockTable.getINodeId(), invBlockTable.getPartKey());
+            invBlockTable.getGenerationStamp(), invBlockTable.getNumBytes(),invBlockTable.getINodeId());
   }
 
   private void createPersistable(HopInvalidatedBlock invBlock, InvalidateBlocksDTO newInvTable) {
@@ -209,6 +198,5 @@ public class InvalidatedBlockClusterj implements InvalidatedBlockTableDef, Inval
     newInvTable.setGenerationStamp(invBlock.getGenerationStamp());
     newInvTable.setNumBytes(invBlock.getNumBytes());
     newInvTable.setINodeId(invBlock.getInodeId());
-    newInvTable.setPartKey(invBlock.getPartKey());
   }
 }
