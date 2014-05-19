@@ -28,10 +28,6 @@ public class INodeAttributesClusterj implements INodeAttributesTableDef, INodeAt
     @Column(name = ID)
     int getId();
     void setId(int id);
-    
-    @Column(name = PART_KEY)
-    int getPartKey();
-    void setPartKey(int partKey);
 
     @Column(name = NSQUOTA)
     long getNSQuota();
@@ -56,12 +52,11 @@ public class INodeAttributesClusterj implements INodeAttributesTableDef, INodeAt
   private ClusterjConnector connector = ClusterjConnector.getInstance();
 
   @Override
-  public HopINodeAttributes findAttributesByPk(Integer inodeId, Integer partKey) throws StorageException {
+  public HopINodeAttributes findAttributesByPk(Integer inodeId) throws StorageException {
     Session session = connector.obtainSession();
     try {
-      Object[] pk = new Object[2];
+      Object[] pk = new Object[1];
       pk[0] = inodeId;
-      pk[1] = partKey;
       
       INodeAttributesDTO dto = session.find(INodeAttributesDTO.class, pk);
       HopINodeAttributes iNodeAttributes = makeINodeAttributes(dto);
@@ -80,7 +75,6 @@ public class INodeAttributesClusterj implements INodeAttributesTableDef, INodeAt
         for(HopINodeCandidatePK pk : inodePks){
           INodeAttributesDTO dto = session.newInstance(INodeAttributesDTO.class);
           dto.setId(pk.getInodeId());
-          dto.setPartKey(pk.getPartKey());
           inodeAttributesBatchRequest.add(dto);
           session.load(dto);
         }
@@ -102,9 +96,8 @@ public class INodeAttributesClusterj implements INodeAttributesTableDef, INodeAt
     try {
       if (removed != null) {
         for (HopINodeAttributes attr : removed) {
-          Object[] pk = new Object[2];
+          Object[] pk = new Object[1];
           pk[0] = attr.getInodeId();
-          pk[1] = attr.getPartKey();
           INodeAttributesDTO persistable = session.newInstance(INodeAttributesDTO.class, pk);
           session.deletePersistent(persistable);
         }
@@ -127,7 +120,6 @@ public class INodeAttributesClusterj implements INodeAttributesTableDef, INodeAt
     dto.setNSCount(attribute.getNsCount());
     dto.setDSQuota(attribute.getDsQuota());
     dto.setDiskspace(attribute.getDiskspace());
-    dto.setPartKey(attribute.getPartKey());
     return dto;
   }
 
@@ -137,7 +129,6 @@ public class INodeAttributesClusterj implements INodeAttributesTableDef, INodeAt
     }
     HopINodeAttributes iNodeAttributes = new HopINodeAttributes(
             dto.getId(),
-            dto.getPartKey(),
             dto.getNSQuota(),
             dto.getNSCount(),
             dto.getDSQuota(),

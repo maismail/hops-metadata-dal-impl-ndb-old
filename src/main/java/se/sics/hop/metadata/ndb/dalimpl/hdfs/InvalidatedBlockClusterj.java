@@ -179,9 +179,7 @@ public class InvalidatedBlockClusterj implements InvalidatedBlockTableDef, Inval
     pk[0] = invBlock.getInodeId();
     pk[1] = invBlock.getBlockId();
     pk[2] = invBlock.getStorageId();
-    System.out.println("remove is called inodeid "+pk[0]+"tyep "+pk[0].getClass()+"blockId "+pk[1]+"tyep "+pk[1].getClass()+" sid "+pk[2]+"tyep "+pk[2].getClass());
     session.deletePersistent(InvalidateBlocksDTO.class, pk);
-    System.out.println("remove was successfull");
   }
 
   private List<HopInvalidatedBlock> createList(List<InvalidateBlocksDTO> dtoList) {
