@@ -3,6 +3,7 @@ package se.sics.hop.metadata.ndb.dalimpl.hdfs;
 import com.mysql.clusterj.Query;
 import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
+import com.mysql.clusterj.annotation.Index;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
 import com.mysql.clusterj.query.Predicate;
@@ -30,22 +31,18 @@ public class ExcessReplicaClusterj implements ExcessReplicaTableDef, ExcessRepli
   public interface ExcessReplicaDTO {
 
     @PrimaryKey
-    @Column(name = BLOCK_ID)
-    long getBlockId();
-    void setBlockId(long storageId);
-    
-    @PrimaryKey
     @Column(name = INODE_ID)
     int getINodeId();
     void setINodeId(int inodeID);
-
+    
     @PrimaryKey
-    @Column(name = PART_KEY)
-    int getPartKey();
-    void setPartKey(int partKey);
+    @Column(name = BLOCK_ID)
+    long getBlockId();
+    void setBlockId(long storageId);
 
     @PrimaryKey
     @Column(name = STORAGE_ID)
+    @Index(name = STORAGE_IDX)
     int getStorageId();
     void setStorageId(int storageId);
   }
@@ -67,11 +64,10 @@ public class ExcessReplicaClusterj implements ExcessReplicaTableDef, ExcessRepli
       }
 
       for (HopExcessReplica exReplica : removed) {
-        Object[] pk = new Object[4];
-        pk[0] = exReplica.getBlockId();
-        pk[1] = exReplica.getStorageId();
-        pk[2] = exReplica.getInodeId();
-        pk[3] = exReplica.getPartKey();
+        Object[] pk = new Object[3];
+        pk[0] = exReplica.getInodeId();
+        pk[1] = exReplica.getBlockId();
+        pk[2] = exReplica.getStorageId();
         session.deletePersistent(ExcessReplicaDTO.class, pk);
       }
     } catch (Exception e) {
@@ -95,19 +91,17 @@ public class ExcessReplicaClusterj implements ExcessReplicaTableDef, ExcessRepli
   }
 
   @Override
-  public List<HopExcessReplica> findExcessReplicaByBlockId(long bId, int inodeId, int partKey) throws StorageException {
+  public List<HopExcessReplica> findExcessReplicaByBlockId(long bId, int inodeId) throws StorageException {
     try {
       Session session = connector.obtainSession();
       QueryBuilder qb = session.getQueryBuilder();
       QueryDomainType<ExcessReplicaDTO> qdt = qb.createQueryDefinition(ExcessReplicaDTO.class);
       Predicate pred1 = qdt.get("blockId").equal(qdt.param("blockIdParam"));
       Predicate pred2 = qdt.get("iNodeId").equal(qdt.param("iNodeIdParam"));
-      Predicate pred3 = qdt.get("partKey").equal(qdt.param("partKeyParam"));
-      qdt.where(pred1.and(pred2).and(pred3));
+      qdt.where(pred1.and(pred2));
       Query<ExcessReplicaDTO> query = session.createQuery(qdt);
       query.setParameter("blockIdParam", bId);
       query.setParameter("iNodeIdParam", inodeId);
-      query.setParameter("partKeyParam", partKey);
       return createList(query.getResultList());
     } catch (Exception e) {
       throw new StorageException(e);
@@ -115,17 +109,15 @@ public class ExcessReplicaClusterj implements ExcessReplicaTableDef, ExcessRepli
   }
   
     @Override
-  public List<HopExcessReplica> findExcessReplicaByINodeId(int inodeId, int partKey) throws StorageException {
+  public List<HopExcessReplica> findExcessReplicaByINodeId(int inodeId) throws StorageException {
     try {
       Session session = connector.obtainSession();
       QueryBuilder qb = session.getQueryBuilder();
       QueryDomainType<ExcessReplicaDTO> qdt = qb.createQueryDefinition(ExcessReplicaDTO.class);
       Predicate pred1 = qdt.get("iNodeId").equal(qdt.param("iNodeIdParam"));
-      Predicate pred2 = qdt.get("partKey").equal(qdt.param("partKeyParam"));
-      qdt.where(pred1.and(pred2));
+      qdt.where(pred1);
       Query<ExcessReplicaDTO> query = session.createQuery(qdt);
       query.setParameter("iNodeIdParam", inodeId);
-      query.setParameter("partKeyParam", partKey);
       return createList(query.getResultList());
     } catch (Exception e) {
       throw new StorageException(e);
@@ -133,14 +125,14 @@ public class ExcessReplicaClusterj implements ExcessReplicaTableDef, ExcessRepli
   }
 
   @Override
-  public HopExcessReplica findByPK(long bId, int sId, int inodeId, int partKey) throws StorageException {
+  public HopExcessReplica findByPK(long bId, int sId, int inodeId) throws StorageException {
     try {
       Session session = connector.obtainSession();
       Object[] pk = new Object[4];
-      pk[0] = bId;
-      pk[1] = sId;
-      pk[2] = inodeId;
-      pk[3] = partKey;
+      pk[0] = inodeId;
+      pk[1] = bId;
+      pk[2] = sId;
+
       ExcessReplicaDTO invTable = session.find(ExcessReplicaDTO.class, pk);
       if (invTable == null) {
         return null;
@@ -171,13 +163,12 @@ public class ExcessReplicaClusterj implements ExcessReplicaTableDef, ExcessRepli
   }
 
   private HopExcessReplica createReplica(ExcessReplicaDTO exReplicaTable) {
-    return new HopExcessReplica(exReplicaTable.getStorageId(), exReplicaTable.getBlockId(), exReplicaTable.getINodeId(), exReplicaTable.getPartKey());
+    return new HopExcessReplica(exReplicaTable.getStorageId(), exReplicaTable.getBlockId(), exReplicaTable.getINodeId());
   }
 
   private void createPersistable(HopExcessReplica exReplica, ExcessReplicaDTO exReplicaTable) {
     exReplicaTable.setBlockId(exReplica.getBlockId());
     exReplicaTable.setStorageId(exReplica.getStorageId());
     exReplicaTable.setINodeId(exReplica.getInodeId());
-    exReplicaTable.setPartKey(exReplica.getPartKey());
   }
 }

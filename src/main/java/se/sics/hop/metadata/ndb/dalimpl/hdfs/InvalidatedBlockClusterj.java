@@ -3,6 +3,7 @@ package se.sics.hop.metadata.ndb.dalimpl.hdfs;
 import com.mysql.clusterj.Query;
 import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
+import com.mysql.clusterj.annotation.Index;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
 import com.mysql.clusterj.query.Predicate;
@@ -35,10 +36,11 @@ public class InvalidatedBlockClusterj implements InvalidatedBlockTableDef, Inval
     @PrimaryKey
     @Column(name = BLOCK_ID)
     long getBlockId();
-    void setBlockId(long storageId);
+    void setBlockId(long blockId);
     
     @PrimaryKey
     @Column(name = STORAGE_ID)
+    @Index(name = STORAGE_IDX)
     int getStorageId();
     void setStorageId(int storageId);
     
@@ -171,12 +173,15 @@ public class InvalidatedBlockClusterj implements InvalidatedBlockTableDef, Inval
 
   @Override
   public void remove(HopInvalidatedBlock invBlock) {
+    
     Session session = connector.obtainSession();
     Object[] pk = new Object[3];
     pk[0] = invBlock.getInodeId();
     pk[1] = invBlock.getBlockId();
     pk[2] = invBlock.getStorageId();
+    System.out.println("remove is called inodeid "+pk[0]+"tyep "+pk[0].getClass()+"blockId "+pk[1]+"tyep "+pk[1].getClass()+" sid "+pk[2]+"tyep "+pk[2].getClass());
     session.deletePersistent(InvalidateBlocksDTO.class, pk);
+    System.out.println("remove was successfull");
   }
 
   private List<HopInvalidatedBlock> createList(List<InvalidateBlocksDTO> dtoList) {
