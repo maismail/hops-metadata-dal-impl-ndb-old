@@ -55,10 +55,7 @@ public class INodeAttributesClusterj implements INodeAttributesTableDef, INodeAt
   public HopINodeAttributes findAttributesByPk(Integer inodeId) throws StorageException {
     Session session = connector.obtainSession();
     try {
-      Object[] pk = new Object[1];
-      pk[0] = inodeId;
-      
-      INodeAttributesDTO dto = session.find(INodeAttributesDTO.class, pk);
+      INodeAttributesDTO dto = session.find(INodeAttributesDTO.class, inodeId);
       HopINodeAttributes iNodeAttributes = makeINodeAttributes(dto);
       return iNodeAttributes;
     } catch (Exception e) {
@@ -96,9 +93,7 @@ public class INodeAttributesClusterj implements INodeAttributesTableDef, INodeAt
     try {
       if (removed != null) {
         for (HopINodeAttributes attr : removed) {
-          Object[] pk = new Object[1];
-          pk[0] = attr.getInodeId();
-          INodeAttributesDTO persistable = session.newInstance(INodeAttributesDTO.class, pk);
+          INodeAttributesDTO persistable = session.newInstance(INodeAttributesDTO.class, attr.getInodeId());
           session.deletePersistent(persistable);
         }
       }
