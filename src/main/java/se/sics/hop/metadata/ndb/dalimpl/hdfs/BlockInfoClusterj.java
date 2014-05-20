@@ -28,29 +28,21 @@ public class BlockInfoClusterj implements BlockInfoTableDef, BlockInfoDataAccess
 
     @PersistenceCapable(table = TABLE_NAME)
     public interface BlockInfoDTO {
-
+        @PrimaryKey
+        @Column(name = INODE_ID)
+        int getINodeId();
+        void setINodeId(int iNodeID);
+        
         @PrimaryKey
         @Column(name = BLOCK_ID)
         long getBlockId();
-
         void setBlockId(long bid);
         
-        @PrimaryKey
-        @Column(name = PART_KEY)
-        int getPartKey();
-        
-        void setPartKey(int bid);
 
         @Column(name = BLOCK_INDEX)
         int getBlockIndex();
 
         void setBlockIndex(int idx);
-
-        @Column(name = INODE_ID)
-        @Index(name = "idx_inodeid")
-        int getINodeId();
-
-        void setINodeId(int iNodeID);
 
         @Column(name = NUM_BYTES)
         long getNumBytes();
@@ -95,8 +87,9 @@ public class BlockInfoClusterj implements BlockInfoTableDef, BlockInfoDataAccess
             Session session = connector.obtainSession();
             for (HopBlockInfo block : removed) {
                 Object[] pk = new Object[2];
-                pk[0] = block.getBlockId();
-                pk[1] = block.getPartKey();
+                pk[0] = block.getInodeId();
+                pk[1] = block.getBlockId();
+                
                 BlockInfoClusterj.BlockInfoDTO bTable = session.newInstance(BlockInfoClusterj.BlockInfoDTO.class, pk);
                 session.deletePersistent(bTable);
                 
@@ -112,7 +105,7 @@ public class BlockInfoClusterj implements BlockInfoTableDef, BlockInfoDataAccess
                 
                 //save a new row in the lookup table
                 BlockLookUpClusterj.BlockLookUpDTO lookupDTO = session.newInstance(BlockLookUpClusterj.BlockLookUpDTO.class);
-                BlockLookUpClusterj.createPersistable(new HopBlockLookUp(block.getBlockId(), block.getInodeId(), block.getPartKey()), lookupDTO);
+                BlockLookUpClusterj.createPersistable(new HopBlockLookUp(block.getBlockId(), block.getInodeId()), lookupDTO);
                 session.savePersistent(lookupDTO);
             }
 
@@ -123,7 +116,7 @@ public class BlockInfoClusterj implements BlockInfoTableDef, BlockInfoDataAccess
                 
                 //save a new row in the lookup table
                 BlockLookUpClusterj.BlockLookUpDTO lookupDTO = session.newInstance(BlockLookUpClusterj.BlockLookUpDTO.class);
-                BlockLookUpClusterj.createPersistable(new HopBlockLookUp(block.getBlockId(), block.getInodeId(), block.getPartKey()), lookupDTO);
+                BlockLookUpClusterj.createPersistable(new HopBlockLookUp(block.getBlockId(), block.getInodeId()), lookupDTO);
                 session.savePersistent(lookupDTO);
             }
         } catch (Exception e) {
@@ -132,12 +125,12 @@ public class BlockInfoClusterj implements BlockInfoTableDef, BlockInfoDataAccess
     }
 
     @Override
-    public HopBlockInfo findById(long blockId, int partKey) throws StorageException {
+    public HopBlockInfo findById(long blockId, int inodeId) throws StorageException {
         try {
             Object[] pk = new Object[2];
-            pk[0] = blockId;
-            pk[1] = partKey;
-                
+            pk[0] = inodeId;
+            pk[1] = blockId;
+            
             Session session = connector.obtainSession();
             BlockInfoClusterj.BlockInfoDTO bit = session.find(BlockInfoClusterj.BlockInfoDTO.class, pk);
             if (bit == null) {
@@ -156,17 +149,15 @@ public class BlockInfoClusterj implements BlockInfoTableDef, BlockInfoDataAccess
     }
 
     @Override
-    public List<HopBlockInfo> findByInodeId(int inodeId, int partKey) throws StorageException {
+    public List<HopBlockInfo> findByInodeId(int inodeId) throws StorageException {
         try {
             Session session = connector.obtainSession();
             QueryBuilder qb = session.getQueryBuilder();
             QueryDomainType<BlockInfoClusterj.BlockInfoDTO> dobj = qb.createQueryDefinition(BlockInfoClusterj.BlockInfoDTO.class);
             Predicate pred1 = dobj.get("iNodeId").equal(dobj.param("iNodeParam"));
-            Predicate pred2 = dobj.get("partKey").equal(dobj.param("partKeyParam"));
-            dobj.where(pred1.and(pred2));
+            dobj.where(pred1);
             Query<BlockInfoClusterj.BlockInfoDTO> query = session.createQuery(dobj);
             query.setParameter("iNodeParam", inodeId);
-            query.setParameter("partKeyParam", partKey);
             return createBlockInfoList(query.getResultList());
         } catch (Exception e) {
             throw new StorageException(e);
@@ -237,7 +228,6 @@ public class BlockInfoClusterj implements BlockInfoTableDef, BlockInfoDataAccess
     private HopBlockInfo createBlockInfo(BlockInfoClusterj.BlockInfoDTO bDTO) {
         HopBlockInfo hopBlockInfo = new HopBlockInfo(
                 bDTO.getBlockId(),
-                bDTO.getPartKey(),
                 bDTO.getBlockIndex(),
                 bDTO.getINodeId(),
                 bDTO.getNumBytes(),
@@ -251,7 +241,6 @@ public class BlockInfoClusterj implements BlockInfoTableDef, BlockInfoDataAccess
 
     private void createPersistable(HopBlockInfo block, BlockInfoClusterj.BlockInfoDTO persistable) {
         persistable.setBlockId(block.getBlockId());
-        persistable.setPartKey(block.getPartKey());
         persistable.setNumBytes(block.getNumBytes());
         persistable.setGenerationStamp(block.getGenerationStamp());
         persistable.setINodeId(block.getInodeId());
