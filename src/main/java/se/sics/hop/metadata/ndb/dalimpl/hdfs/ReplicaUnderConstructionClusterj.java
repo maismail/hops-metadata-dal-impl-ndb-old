@@ -3,7 +3,6 @@ package se.sics.hop.metadata.ndb.dalimpl.hdfs;
 import com.mysql.clusterj.Query;
 import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
-import com.mysql.clusterj.annotation.Index;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
 import com.mysql.clusterj.query.Predicate;
@@ -15,8 +14,6 @@ import java.util.List;
 import se.sics.hop.metadata.hdfs.dal.ReplicaUnderConstructionDataAccess;
 import se.sics.hop.metadata.hdfs.entity.hdfs.HopReplicaUnderConstruction;
 import se.sics.hop.exception.StorageException;
-import static se.sics.hop.metadata.hdfs.tabledef.ReplicaTableDef.INODE_ID;
-import static se.sics.hop.metadata.hdfs.tabledef.ReplicaTableDef.PART_KEY;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
 import se.sics.hop.metadata.hdfs.tabledef.ReplicaUnderConstructionTableDef;
 
@@ -30,6 +27,11 @@ public class ReplicaUnderConstructionClusterj implements ReplicaUnderConstructio
   public interface ReplicaUcDTO {
 
     @PrimaryKey
+    @Column(name = INODE_ID)
+    int getINodeId();
+    void setINodeId(int inodeID);
+    
+    @PrimaryKey
     @Column(name = BLOCK_ID)
     long getBlockId();
     void setBlockId(long blkid);
@@ -38,16 +40,6 @@ public class ReplicaUnderConstructionClusterj implements ReplicaUnderConstructio
     @Column(name = STORAGE_ID)
     int getStorageId();
     void setStorageId(int id);
-    
-    @PrimaryKey
-    @Column(name = INODE_ID)
-    int getINodeId();
-    void setINodeId(int inodeID);
-
-    @PrimaryKey
-    @Column(name = PART_KEY)
-    int getPartKey();
-    void setPartKey(int partKey);
 
     @Column(name = REPLICA_INDEX)
     int getIndex();
@@ -63,11 +55,10 @@ public class ReplicaUnderConstructionClusterj implements ReplicaUnderConstructio
   public void prepare(Collection<HopReplicaUnderConstruction> removed, Collection<HopReplicaUnderConstruction> newed, Collection<HopReplicaUnderConstruction> modified) throws StorageException {
     Session session = connector.obtainSession();
     for (HopReplicaUnderConstruction replica : removed) {
-      Object[] pk = new Object[4];
-      pk[0] = replica.getBlockId();
-      pk[1] = replica.getStorageId();
-      pk[2] = replica.getInodeId();
-      pk[3] = replica.getPartKey();
+      Object[] pk = new Object[3];
+      pk[0] = replica.getInodeId();
+      pk[1] = replica.getBlockId();
+      pk[2] = replica.getStorageId();
       session.deletePersistent(ReplicaUcDTO.class, pk);
     }
 
@@ -79,17 +70,17 @@ public class ReplicaUnderConstructionClusterj implements ReplicaUnderConstructio
   }
 
   @Override
-  public List<HopReplicaUnderConstruction> findReplicaUnderConstructionByBlockId(long blockId, int partKey) throws StorageException {
+  public List<HopReplicaUnderConstruction> findReplicaUnderConstructionByBlockId(long blockId, int inodeId) throws StorageException {
     try {
       Session session = connector.obtainSession();
       QueryBuilder qb = session.getQueryBuilder();
       QueryDomainType<ReplicaUcDTO> dobj = qb.createQueryDefinition(ReplicaUcDTO.class);
       Predicate pred1 = dobj.get("blockId").equal(dobj.param("blockIdParam"));
-      Predicate pred2 = dobj.get("partKey").equal(dobj.param("partKeyParam"));
+      Predicate pred2 = dobj.get("iNodeId").equal(dobj.param("iNodeIdParam"));
       dobj.where(pred1.and(pred2));
       Query<ReplicaUcDTO> query = session.createQuery(dobj);
       query.setParameter("blockIdParam", blockId);
-      query.setParameter("partKeyParam", partKey);
+      query.setParameter("iNodeIdParam", inodeId);
       return createReplicaList(query.getResultList());
     } catch (Exception e) {
       throw new StorageException(e);
@@ -97,17 +88,15 @@ public class ReplicaUnderConstructionClusterj implements ReplicaUnderConstructio
   }
   
   @Override
-  public List<HopReplicaUnderConstruction> findReplicaUnderConstructionByINodeId(int inodeId, int partKey) throws StorageException {
+  public List<HopReplicaUnderConstruction> findReplicaUnderConstructionByINodeId(int inodeId) throws StorageException {
     try {
       Session session = connector.obtainSession();
       QueryBuilder qb = session.getQueryBuilder();
       QueryDomainType<ReplicaUcDTO> dobj = qb.createQueryDefinition(ReplicaUcDTO.class);
       Predicate pred1 = dobj.get("iNodeId").equal(dobj.param("iNodeIdParam"));
-      Predicate pred2 = dobj.get("partKey").equal(dobj.param("partKeyParam"));
-      dobj.where(pred1.and(pred2));
+      dobj.where(pred1);
       Query<ReplicaUcDTO> query = session.createQuery(dobj);
       query.setParameter("iNodeIdParam", inodeId);
-      query.setParameter("partKeyParam", partKey);
       return createReplicaList(query.getResultList());
     } catch (Exception e) {
       throw new StorageException(e);
@@ -119,7 +108,7 @@ public class ReplicaUnderConstructionClusterj implements ReplicaUnderConstructio
     Session session = connector.obtainSession();
     List<HopReplicaUnderConstruction> replicas = new ArrayList<HopReplicaUnderConstruction>(replicaUc.size());
     for (ReplicaUcDTO t : replicaUc) {
-      replicas.add(new HopReplicaUnderConstruction(t.getState(), t.getStorageId(), t.getBlockId(), t.getINodeId(), t.getPartKey(), t.getIndex()));
+      replicas.add(new HopReplicaUnderConstruction(t.getState(), t.getStorageId(), t.getBlockId(), t.getINodeId(), t.getIndex()));
     }
     return replicas;
   }
@@ -130,6 +119,5 @@ public class ReplicaUnderConstructionClusterj implements ReplicaUnderConstructio
     newInstance.setStorageId(replica.getStorageId());
     newInstance.setState(replica.getState());
     newInstance.setINodeId(replica.getInodeId());
-    newInstance.setPartKey(replica.getPartKey());
   }
 }

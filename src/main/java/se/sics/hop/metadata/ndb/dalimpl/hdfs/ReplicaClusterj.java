@@ -31,6 +31,11 @@ public class ReplicaClusterj implements ReplicaTableDef, ReplicaDataAccess<HopIn
   public interface ReplicaDTO {
 
     @PrimaryKey
+    @Column(name = INODE_ID)
+    int getINodeId();
+    void setINodeId(int inodeID);
+    
+    @PrimaryKey
     @Column(name = BLOCK_ID)
     long getBlockId();
     void setBlockId(long bid);
@@ -40,16 +45,6 @@ public class ReplicaClusterj implements ReplicaTableDef, ReplicaDataAccess<HopIn
     @Index(name = "storage_idx")
     int getStorageId();
     void setStorageId(int id);
-    
-    @PrimaryKey
-    @Column(name = INODE_ID)
-    int getINodeId();
-    void setINodeId(int inodeID);
-
-    @PrimaryKey
-    @Column(name = PART_KEY)
-    int getPartKey();
-    void setPartKey(int partKey);
 
     @Column(name = REPLICA_INDEX)
     int getIndex();
@@ -58,17 +53,17 @@ public class ReplicaClusterj implements ReplicaTableDef, ReplicaDataAccess<HopIn
   private ClusterjConnector connector = ClusterjConnector.getInstance();
 
   @Override
-  public List<HopIndexedReplica> findReplicasById(long blockId, int partKey) throws StorageException {
+  public List<HopIndexedReplica> findReplicasById(long blockId, int inodeId) throws StorageException {
     try {
       Session session = connector.obtainSession();
       QueryBuilder qb = session.getQueryBuilder();
       QueryDomainType<ReplicaDTO> dobj = qb.createQueryDefinition(ReplicaDTO.class);
       Predicate pred1 = dobj.get("blockId").equal(dobj.param("blockIdParam"));
-      Predicate pred2 = dobj.get("partKey").equal(dobj.param("partKeyParam"));
+      Predicate pred2 = dobj.get("iNodeId").equal(dobj.param("iNodeIdParam"));
       dobj.where(pred1.and(pred2));
       Query<ReplicaDTO> query = session.createQuery(dobj);
       query.setParameter("blockIdParam", blockId);
-      query.setParameter("partKeyParam", partKey);
+      query.setParameter("iNodeIdParam", inodeId);
       return createReplicaList(query.getResultList());
     } catch (Exception e) {
       throw new StorageException(e);
@@ -77,17 +72,15 @@ public class ReplicaClusterj implements ReplicaTableDef, ReplicaDataAccess<HopIn
   
   
   @Override
-  public List<HopIndexedReplica> findReplicasByINodeId(int inodeId, int partKey) throws StorageException {
+  public List<HopIndexedReplica> findReplicasByINodeId(int inodeId) throws StorageException {
     try {
       Session session = connector.obtainSession();
       QueryBuilder qb = session.getQueryBuilder();
       QueryDomainType<ReplicaDTO> dobj = qb.createQueryDefinition(ReplicaDTO.class);
       Predicate pred1 = dobj.get("iNodeId").equal(dobj.param("iNodeIdParam"));
-      Predicate pred2 = dobj.get("partKey").equal(dobj.param("partKeyParam"));
-      dobj.where(pred1.and(pred2));
+      dobj.where(pred1);
       Query<ReplicaDTO> query = session.createQuery(dobj);
       query.setParameter("iNodeIdParam", inodeId);
-      query.setParameter("partKeyParam", partKey);
       return createReplicaList(query.getResultList());
     } catch (Exception e) {
       throw new StorageException(e);
@@ -100,11 +93,10 @@ public class ReplicaClusterj implements ReplicaTableDef, ReplicaDataAccess<HopIn
     try {
       Session session = connector.obtainSession();
       for (HopIndexedReplica replica : removed) {
-        Object[] pk = new Object[4];
-        pk[0] = replica.getBlockId();
-        pk[1] = replica.getStorageId();
-        pk[2] = replica.getInodeId();
-        pk[3] = replica.getPartKey();
+        Object[] pk = new Object[3];
+        pk[0] = replica.getInodeId();
+        pk[1] = replica.getBlockId();
+        pk[2] = replica.getStorageId();
         session.deletePersistent(ReplicaDTO.class, pk);
       }
 
@@ -127,7 +119,7 @@ public class ReplicaClusterj implements ReplicaTableDef, ReplicaDataAccess<HopIn
   private List<HopIndexedReplica> createReplicaList(List<ReplicaDTO> triplets) {
     List<HopIndexedReplica> replicas = new ArrayList<HopIndexedReplica>(triplets.size());
     for (ReplicaDTO t : triplets) {
-      replicas.add(new HopIndexedReplica(t.getBlockId(), t.getStorageId(), t.getINodeId(), t.getPartKey(), t.getIndex()));
+      replicas.add(new HopIndexedReplica(t.getBlockId(), t.getStorageId(), t.getINodeId(), t.getIndex()));
     }
     return replicas;
   }
@@ -137,6 +129,5 @@ public class ReplicaClusterj implements ReplicaTableDef, ReplicaDataAccess<HopIn
     newInstance.setIndex(replica.getIndex());
     newInstance.setStorageId(replica.getStorageId());
     newInstance.setINodeId(replica.getInodeId());
-    newInstance.setPartKey(replica.getPartKey());
   }
 }
