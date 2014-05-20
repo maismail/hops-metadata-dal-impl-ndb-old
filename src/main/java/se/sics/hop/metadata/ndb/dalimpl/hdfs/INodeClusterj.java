@@ -7,16 +7,12 @@ import com.mysql.clusterj.annotation.Index;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
 import com.mysql.clusterj.query.Predicate;
-import com.mysql.clusterj.query.PredicateOperand;
 import com.mysql.clusterj.query.QueryBuilder;
 import com.mysql.clusterj.query.QueryDomainType;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
-import se.sics.hop.Common;
 import se.sics.hop.metadata.hdfs.dal.INodeDataAccess;
 import se.sics.hop.metadata.hdfs.entity.hdfs.HopINode;
 import se.sics.hop.exception.StorageException;
@@ -37,7 +33,6 @@ public class INodeClusterj implements INodeTableDef, INodeDataAccess<HopINode> {
   }
 
   @PersistenceCapable(table = TABLE_NAME)
-  @Index(name = "path_lookup_idx")
   public interface InodeDTO {
 
     @Column(name = ID)
@@ -56,12 +51,6 @@ public class INodeClusterj implements INodeTableDef, INodeDataAccess<HopINode> {
     @Index(name = "parent_idx")
     int getParentId();     // id of the inode
     void setParentId(int parentid);
-    
-    //id of the parent inode 
-    @PrimaryKey
-    @Column(name = PART_KEY)
-    int getPartKey();     // partitioning key of the inode
-    void setPartKey(int parentid);
      
     // marker for InodeDirectory
     @Column(name = IS_DIR)
@@ -141,10 +130,9 @@ public class INodeClusterj implements INodeTableDef, INodeDataAccess<HopINode> {
     Session session = connector.obtainSession();
     try {
       for (HopINode inode : removed) {
-        Object[] pk = new Object[3];
+        Object[] pk = new Object[2];
         pk[0] = inode.getParentId();
         pk[1] = inode.getName();
-        pk[2] = inode.getPartKey();
         InodeDTO persistable = session.newInstance(InodeDTO.class, pk);
         session.deletePersistent(persistable);
       }
@@ -165,37 +153,6 @@ public class INodeClusterj implements INodeTableDef, INodeDataAccess<HopINode> {
     }
   }
 
-  @Override
-  public HopINode pruneIndexScanByInodeId(int inodeId, int part_key) throws StorageException {
-    try {
-      //System.out.println("*** pruneScanfindInodeById, Id "+inodeId);
-      Session session = connector.obtainSession();
-      
-      QueryBuilder qb = session.getQueryBuilder();
-      QueryDomainType<InodeDTO> dobj = qb.createQueryDefinition(InodeDTO.class);
-      Predicate pred1 = dobj.get("id").equal(dobj.param("idParam"));
-      Predicate pred2 = dobj.get("partKey").equal(dobj.param("partKeyParam"));
-      dobj.where(pred1.and(pred2));
-
-      Query<InodeDTO> query = session.createQuery(dobj);
-      query.setParameter("idParam", inodeId);
-      query.setParameter("partKeyParam", part_key);
-     
-      List<InodeDTO> results = query.getResultList();
-      explain(query);
-      if(results.size() > 1){
-        throw new StorageException("Only one record was expected");
-      }
-      if(results.size() == 1){
-        return createInode(results.get(0));
-      }else{
-        return null;
-      }
-    } catch (Exception e) {
-      throw new StorageException(e);
-    }
-  }
-  
   @Override
   public HopINode indexScanfindInodeById(int inodeId) throws StorageException {
     try {
@@ -247,16 +204,15 @@ public class INodeClusterj implements INodeTableDef, INodeDataAccess<HopINode> {
   }
 
   @Override
-  public HopINode pkLookUpFindInodeByNameAndParentId(String name, int parentId, int part_key) throws StorageException {
+  public HopINode pkLookUpFindInodeByNameAndParentId(String name, int parentId) throws StorageException {
     try {
      // System.out.println("*** pkLookUpFindInodeByNameAndParentId, name "+name+" parentId "+parentId);
       
       Session session = connector.obtainSession();
 
-      Object[] pk = new Object[3];
+      Object[] pk = new Object[2];
       pk[0] = parentId;
       pk[1] = name;
-      pk[2] = part_key;
       
       InodeDTO result = session.find(InodeDTO.class, pk);
       if(result != null){
@@ -283,7 +239,6 @@ public class INodeClusterj implements INodeTableDef, INodeDataAccess<HopINode> {
             persistable.getId(),
             persistable.getName(),
             persistable.getParentId(),
-            persistable.getPartKey(),
             persistable.getIsDir(),
             persistable.getIsDirWithQuota(),
             persistable.getModificationTime(),
@@ -302,7 +257,6 @@ public class INodeClusterj implements INodeTableDef, INodeDataAccess<HopINode> {
     persistable.setId(inode.getId());
     persistable.setName(inode.getName());
     persistable.setParentId(inode.getParentId());
-    persistable.setPartKey(inode.getPartKey());
     persistable.setIsDir(inode.getIsDir());
     persistable.setIsDirWithQuota(inode.getIsDirWithQuota());
     persistable.setModificationTime(inode.getModificationTime());
