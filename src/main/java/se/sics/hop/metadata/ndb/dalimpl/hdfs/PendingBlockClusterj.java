@@ -19,6 +19,7 @@ import se.sics.hop.metadata.hdfs.entity.hdfs.HopPendingBlockInfo;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
 import se.sics.hop.metadata.ndb.mysqlserver.CountHelper;
 import se.sics.hop.metadata.hdfs.tabledef.PendingBlockTableDef;
+import static se.sics.hop.metadata.hdfs.tabledef.PendingBlockTableDef.INODE_ID;
 
 /**
  *
@@ -32,7 +33,7 @@ public class PendingBlockClusterj implements PendingBlockTableDef, PendingBlockD
   }
 
   @Override
-  public List<HopPendingBlockInfo> findByINodeId(int inodeId, int partKey) throws StorageException {
+  public List<HopPendingBlockInfo> findByINodeId(int inodeId) throws StorageException {
     try {
       Session session = connector.obtainSession();
       
@@ -40,12 +41,10 @@ public class PendingBlockClusterj implements PendingBlockTableDef, PendingBlockD
       QueryDomainType<PendingBlockDTO> qdt = qb.createQueryDefinition(PendingBlockDTO.class);
       
       Predicate pred1 = qdt.get("iNodeId").equal(qdt.param("idParam"));
-      Predicate pred2 = qdt.get("partKey").equal(qdt.param("partKeyParam"));
-      qdt.where(pred1.and(pred2));
+      qdt.where(pred1);
 
       Query<PendingBlockDTO> query = session.createQuery(qdt);
       query.setParameter("idParam", inodeId);
-      query.setParameter("partKeyParam", partKey);
      
       List<PendingBlockDTO> results = query.getResultList();
  
@@ -59,19 +58,14 @@ public class PendingBlockClusterj implements PendingBlockTableDef, PendingBlockD
   public interface PendingBlockDTO {
 
     @PrimaryKey
-    @Column(name = BLOCK_ID)
-    long getBlockId();
-    void setBlockId(long blockId);
-    
-    @PrimaryKey
     @Column(name = INODE_ID)
     int getINodeId();
     void setINodeId(int inodeId);
     
     @PrimaryKey
-    @Column(name = PART_KEY)
-    int getPartKey();
-    void setPartKey(int partKey );
+    @Column(name = BLOCK_ID)
+    long getBlockId();
+    void setBlockId(long blockId);
 
     @Column(name = TIME_STAMP)
     long getTimestamp();
@@ -98,23 +92,22 @@ public class PendingBlockClusterj implements PendingBlockTableDef, PendingBlockD
     }
 
     for (HopPendingBlockInfo p : removed) {
-      Object[] pk = new Object[3];
-        pk[0] = p.getBlockId();
-        pk[1] = p.getInodeId();
-        pk[2] = p.getPartKey();
+      Object[] pk = new Object[2];
+        pk[0] = p.getInodeId();
+        pk[1] = p.getBlockId();
       PendingBlockDTO pTable = session.newInstance(PendingBlockDTO.class, pk);
       session.deletePersistent(pTable);
     }
   }
 
   @Override
-  public HopPendingBlockInfo findByPKey(long blockId, int inodeId, int partKey) throws StorageException {
+  public HopPendingBlockInfo findByPKey(long blockId, int inodeId) throws StorageException {
     try {
       Session session = connector.obtainSession();
-      Object[] pk = new Object[3];
-      pk[0] = blockId;
-      pk[1] = inodeId;
-      pk[2] = partKey;
+      Object[] pk = new Object[2];
+      pk[0] = inodeId;
+      pk[1] = blockId;
+
       PendingBlockDTO pendingTable = session.find(PendingBlockDTO.class, pk);
       HopPendingBlockInfo pendingBlock = null;
       if (pendingTable != null) {
@@ -178,7 +171,7 @@ public class PendingBlockClusterj implements PendingBlockTableDef, PendingBlockD
   }
 
   private HopPendingBlockInfo createHopPendingBlockInfo(PendingBlockDTO pendingTable) {
-    return new HopPendingBlockInfo(pendingTable.getBlockId(),pendingTable.getINodeId(),pendingTable.getPartKey(),
+    return new HopPendingBlockInfo(pendingTable.getBlockId(),pendingTable.getINodeId(),
             pendingTable.getTimestamp(), pendingTable.getNumReplicasInProgress());
   }
 
@@ -187,6 +180,5 @@ public class PendingBlockClusterj implements PendingBlockTableDef, PendingBlockD
     pendingTable.setNumReplicasInProgress(pendingBlock.getNumReplicas());
     pendingTable.setTimestamp(pendingBlock.getTimeStamp());
     pendingTable.setINodeId(pendingBlock.getInodeId());
-    pendingTable.setPartKey(pendingBlock.getPartKey());
   }
 }

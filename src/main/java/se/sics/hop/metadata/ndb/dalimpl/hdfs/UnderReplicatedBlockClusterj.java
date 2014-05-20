@@ -42,19 +42,14 @@ public class UnderReplicatedBlockClusterj implements UnderReplicatedBlockTableDe
   public interface UnderReplicatedBlocksDTO {
 
     @PrimaryKey
-    @Column(name = BLOCK_ID)
-    long getBlockId();
-    void setBlockId(long bid);
-    
-    @PrimaryKey
     @Column(name = INODE_ID)
     int getINodeId();
     void setINodeId(int inodeId);
     
     @PrimaryKey
-    @Column(name = PART_KEY)
-    int getPartKey();
-    void setPartKey(int partKey );
+    @Column(name = BLOCK_ID)
+    long getBlockId();
+    void setBlockId(long bid);
 
     @Column(name = LEVEL)
     int getLevel();
@@ -64,13 +59,12 @@ public class UnderReplicatedBlockClusterj implements UnderReplicatedBlockTableDe
   private ClusterjConnector connector = ClusterjConnector.getInstance();
 
   @Override
-  public HopUnderReplicatedBlock findByPk(long blockId, int inodeId, int partKey) throws StorageException {
+  public HopUnderReplicatedBlock findByPk(long blockId, int inodeId) throws StorageException {
     try {
       Session session = connector.obtainSession();
-      Object[] pk = new Object[3];
-        pk[0] = blockId;
-        pk[1] = inodeId;
-        pk[2] = partKey;
+      Object[] pk = new Object[2];
+        pk[0] = inodeId;
+        pk[1] = blockId;
         
       UnderReplicatedBlocksDTO urbt = session.find(UnderReplicatedBlocksDTO.class, pk);
       if (urbt == null) {
@@ -86,11 +80,10 @@ public class UnderReplicatedBlockClusterj implements UnderReplicatedBlockTableDe
   public void prepare(Collection<HopUnderReplicatedBlock> removed, Collection<HopUnderReplicatedBlock> newed, Collection<HopUnderReplicatedBlock> modified) throws StorageException {
     Session session = connector.obtainSession();
     for (HopUnderReplicatedBlock urBlock : removed) {
-      Object[] pk = new Object[3];
-      pk[0] = urBlock.getBlockId();
-      pk[1] = urBlock.getInodeId();
-      pk[2] = urBlock.getPartKey();
-        
+      Object[] pk = new Object[2];
+      pk[0] = urBlock.getInodeId();
+      pk[1] = urBlock.getBlockId();
+      
       session.deletePersistent(UnderReplicatedBlocksDTO.class, pk);
     }
 
@@ -111,11 +104,10 @@ public class UnderReplicatedBlockClusterj implements UnderReplicatedBlockTableDe
     persistable.setBlockId(block.getBlockId());
     persistable.setLevel(block.getLevel());
     persistable.setINodeId(block.getInodeId());
-    persistable.setPartKey(block.getPartKey());
   }
 
   private HopUnderReplicatedBlock createUrBlock(UnderReplicatedBlocksDTO bit) {
-    HopUnderReplicatedBlock block = new HopUnderReplicatedBlock(bit.getLevel(), bit.getBlockId(), bit.getINodeId(), bit.getPartKey());
+    HopUnderReplicatedBlock block = new HopUnderReplicatedBlock(bit.getLevel(), bit.getBlockId(), bit.getINodeId());
     return block;
   }
 
@@ -181,7 +173,7 @@ public class UnderReplicatedBlockClusterj implements UnderReplicatedBlockTableDe
   }
   
   @Override
-  public List<HopUnderReplicatedBlock> findByINodeId(int inodeId, int partKey) throws StorageException {
+  public List<HopUnderReplicatedBlock> findByINodeId(int inodeId) throws StorageException {
     try {
       Session session = connector.obtainSession();
       
@@ -189,12 +181,10 @@ public class UnderReplicatedBlockClusterj implements UnderReplicatedBlockTableDe
       QueryDomainType<UnderReplicatedBlocksDTO> qdt = qb.createQueryDefinition(UnderReplicatedBlocksDTO.class);
       
       Predicate pred1 = qdt.get("iNodeId").equal(qdt.param("idParam"));
-      Predicate pred2 = qdt.get("partKey").equal(qdt.param("partKeyParam"));
-      qdt.where(pred1.and(pred2));
+      qdt.where(pred1);
 
       Query<UnderReplicatedBlocksDTO> query = session.createQuery(qdt);
       query.setParameter("idParam", inodeId);
-      query.setParameter("partKeyParam", partKey);
      
       List<UnderReplicatedBlocksDTO> results = query.getResultList();
  
