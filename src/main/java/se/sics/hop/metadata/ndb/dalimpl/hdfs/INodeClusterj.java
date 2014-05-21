@@ -7,16 +7,12 @@ import com.mysql.clusterj.annotation.Index;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
 import com.mysql.clusterj.query.Predicate;
-import com.mysql.clusterj.query.PredicateOperand;
 import com.mysql.clusterj.query.QueryBuilder;
 import com.mysql.clusterj.query.QueryDomainType;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
-import se.sics.hop.Common;
 import se.sics.hop.metadata.hdfs.dal.INodeDataAccess;
 import se.sics.hop.metadata.hdfs.entity.hdfs.HopINode;
 import se.sics.hop.exception.StorageException;
@@ -37,13 +33,12 @@ public class INodeClusterj implements INodeTableDef, INodeDataAccess<HopINode> {
   }
 
   @PersistenceCapable(table = TABLE_NAME)
-  @Index(name = "path_lookup_idx")
   public interface InodeDTO {
 
     @Column(name = ID)
     @Index(name = "inode_idx")
-    long getId();     // id of the inode
-    void setId(long id);
+    int getId();     // id of the inode
+    void setId(int id);
 
     @PrimaryKey
     @Column(name = NAME)
@@ -54,8 +49,8 @@ public class INodeClusterj implements INodeTableDef, INodeDataAccess<HopINode> {
     @PrimaryKey
     @Column(name = PARENT_ID)
     @Index(name = "parent_idx")
-    long getParentId();     // id of the inode
-    void setParentId(long parentid);
+    int getParentId();     // id of the inode
+    void setParentId(int parentid);
      
     // marker for InodeDirectory
     @Column(name = IS_DIR)
@@ -159,18 +154,18 @@ public class INodeClusterj implements INodeTableDef, INodeDataAccess<HopINode> {
   }
 
   @Override
-  public HopINode indexScanfindInodeById(long inodeId) throws StorageException {
+  public HopINode indexScanfindInodeById(int inodeId) throws StorageException {
     try {
       //System.out.println("*** pruneScanfindInodeById, Id "+inodeId);
       Session session = connector.obtainSession();
       
       QueryBuilder qb = session.getQueryBuilder();
       QueryDomainType<InodeDTO> dobj = qb.createQueryDefinition(InodeDTO.class);
-      Predicate pred1 = dobj.get("id").equal(dobj.param("IdParam"));
+      Predicate pred1 = dobj.get("id").equal(dobj.param("idParam"));
       dobj.where(pred1);
 
       Query<InodeDTO> query = session.createQuery(dobj);
-      query.setParameter("IdParam", inodeId);
+      query.setParameter("idParam", inodeId);
      
       List<InodeDTO> results = query.getResultList();
       explain(query);
@@ -188,7 +183,7 @@ public class INodeClusterj implements INodeTableDef, INodeDataAccess<HopINode> {
   }
 
   @Override
-  public List<HopINode> indexScanFindInodesByParentId(long parentId) throws StorageException {
+  public List<HopINode> indexScanFindInodesByParentId(int parentId) throws StorageException {
     try {
       //System.out.println("*** indexScanFindInodesByParentId ");
       Session session = connector.obtainSession();
@@ -209,7 +204,7 @@ public class INodeClusterj implements INodeTableDef, INodeDataAccess<HopINode> {
   }
 
   @Override
-  public HopINode pkLookUpFindInodeByNameAndParentId(String name, long parentId) throws StorageException {
+  public HopINode pkLookUpFindInodeByNameAndParentId(String name, int parentId) throws StorageException {
     try {
      // System.out.println("*** pkLookUpFindInodeByNameAndParentId, name "+name+" parentId "+parentId);
       

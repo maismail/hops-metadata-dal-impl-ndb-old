@@ -7,9 +7,11 @@ import com.mysql.clusterj.annotation.PrimaryKey;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import se.sics.hop.metadata.hdfs.dal.INodeAttributesDataAccess;
 import se.sics.hop.metadata.hdfs.entity.hdfs.HopINodeAttributes;
 import se.sics.hop.exception.StorageException;
+import se.sics.hop.metadata.hdfs.entity.hdfs.HopINodeCandidatePK;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
 import se.sics.hop.metadata.hdfs.tabledef.INodeAttributesTableDef;
 
@@ -24,9 +26,8 @@ public class INodeAttributesClusterj implements INodeAttributesTableDef, INodeAt
 
     @PrimaryKey
     @Column(name = ID)
-    long getId();
-
-    void setId(long id);
+    int getId();
+    void setId(int id);
 
     @Column(name = NSQUOTA)
     long getNSQuota();
@@ -51,7 +52,7 @@ public class INodeAttributesClusterj implements INodeAttributesTableDef, INodeAt
   private ClusterjConnector connector = ClusterjConnector.getInstance();
 
   @Override
-  public HopINodeAttributes findAttributesByPk(long inodeId) throws StorageException {
+  public HopINodeAttributes findAttributesByPk(Integer inodeId) throws StorageException {
     Session session = connector.obtainSession();
     try {
       INodeAttributesDTO dto = session.find(INodeAttributesDTO.class, inodeId);
@@ -63,15 +64,14 @@ public class INodeAttributesClusterj implements INodeAttributesTableDef, INodeAt
   }
   
   @Override
-  public Collection<HopINodeAttributes> findAttributesByPkList(Collection<Long> inodeIds) throws StorageException {
+  public Collection<HopINodeAttributes> findAttributesByPkList(List<HopINodeCandidatePK> inodePks) throws StorageException {
     Session session = connector.obtainSession();
     try {
-        List<Long> inodeIdList  = (List<Long>)inodeIds;
         List<HopINodeAttributes> inodeAttributesBatchResponse = new ArrayList<HopINodeAttributes>();
         List<INodeAttributesDTO> inodeAttributesBatchRequest = new ArrayList<INodeAttributesDTO>();
-        for(int i = 0; i < inodeIdList.size(); i++){
+        for(HopINodeCandidatePK pk : inodePks){
           INodeAttributesDTO dto = session.newInstance(INodeAttributesDTO.class);
-          dto.setId(inodeIdList.get(i));
+          dto.setId(pk.getInodeId());
           inodeAttributesBatchRequest.add(dto);
           session.load(dto);
         }
@@ -81,7 +81,6 @@ public class INodeAttributesClusterj implements INodeAttributesTableDef, INodeAt
         for(int i = 0; i < inodeAttributesBatchRequest.size();i++){
           inodeAttributesBatchResponse.add(makeINodeAttributes(inodeAttributesBatchRequest.get(i)));
         }
-        
         return inodeAttributesBatchResponse;
     } catch (Exception e) {
       throw new StorageException(e);
