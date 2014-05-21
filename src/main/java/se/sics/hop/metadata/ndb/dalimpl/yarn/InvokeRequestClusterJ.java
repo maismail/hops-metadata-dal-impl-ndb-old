@@ -29,11 +29,6 @@ public class InvokeRequestClusterJ implements InvokeRequestTableDef, InvokeReque
     @PersistenceCapable(table = TABLE_NAME)
     public interface InvokeRequestDTO {
 
-        @Column(name = ID)
-        int getid();
-
-        void setid(int id);
-
         @PrimaryKey
         @Column(name = NODEID)
         int getnodeid();
@@ -44,6 +39,11 @@ public class InvokeRequestClusterJ implements InvokeRequestTableDef, InvokeReque
         int gettype();
 
         void settype(int type);
+
+        @Column(name = STATUS)
+        int getstatus();
+
+        void setstatus(int status);
     }
     private ClusterjConnector connector = ClusterjConnector.getInstance();
 
@@ -69,13 +69,13 @@ public class InvokeRequestClusterJ implements InvokeRequestTableDef, InvokeReque
         Session session = connector.obtainSession();
         QueryBuilder qb = session.getQueryBuilder();
         QueryDomainType<InvokeRequestDTO> dobj = qb.createQueryDefinition(InvokeRequestDTO.class);
-        Predicate pred1 = dobj.get("id").equal(dobj.param("id"));
+        Predicate pred1 = dobj.get(STATUS).equal(dobj.param(STATUS));
         dobj.where(pred1);
         Query<InvokeRequestDTO> query = session.createQuery(dobj);
         if (pending) {
-            query.setParameter("id", 1);
+            query.setParameter(STATUS, STATUS_PENDING);
         } else {
-            query.setParameter("id", 0);
+            query.setParameter(STATUS, STATUS_NEW);
         }
         List<InvokeRequestDTO> results = query.getResultList();
         try {
@@ -107,39 +107,11 @@ public class InvokeRequestClusterJ implements InvokeRequestTableDef, InvokeReque
         }
     }
 
-    @Override
-    public void deleteAll(int startId, int endId) throws StorageException {
-
-        Session session = connector.obtainSession();
-        //session.deletePersistentAll(NodeIdDTO.class);
-        for (int i = startId; i < endId; i++) {
-            QueryBuilder qb = session.getQueryBuilder();
-
-            QueryDomainType<InvokeRequestDTO> dobj = qb.createQueryDefinition(InvokeRequestDTO.class);
-            Predicate pred1 = dobj.get("id").equal(dobj.param("id"));
-            dobj.where(pred1);
-            Query<InvokeRequestDTO> query = session.createQuery(dobj);
-            query.setParameter("id", i);
-
-            List<InvokeRequestDTO> results = query.getResultList();
-            try {
-                InvokeRequestDTO del = session.newInstance(InvokeRequestDTO.class);
-                del.setid(results.get(0).getid());
-                del.setnodeid(results.get(0).getnodeid());
-                del.settype(results.get(0).gettype());
-                InvokeRequestDTO nodeidDTO = session.find(InvokeRequestDTO.class, del.getid());
-
-                session.deletePersistent(nodeidDTO);
-            } catch (Exception e) {
-            }
-        }
-    }
-
     private InvokeRequestDTO createPersistable(InvokeRequest hopInvokeRequests, Session session) {
         InvokeRequestDTO invokerequestsDTO = session.newInstance(InvokeRequestDTO.class);
-        invokerequestsDTO.setid(hopInvokeRequests.getId());
         invokerequestsDTO.setnodeid(hopInvokeRequests.getNodeid());
         invokerequestsDTO.settype(hopInvokeRequests.getType());
+        invokerequestsDTO.setstatus(hopInvokeRequests.getStatus());
         session.savePersistent(invokerequestsDTO);
         return invokerequestsDTO;
     }
@@ -155,7 +127,6 @@ public class InvokeRequestClusterJ implements InvokeRequestTableDef, InvokeReque
     private List<InvokeRequest> createHopInvokeRequestsList(List<InvokeRequestDTO> list, int numberOfRequests) throws IOException {
         List<InvokeRequest> hopInvokeRequests = new ArrayList<InvokeRequest>();
         int counter = 0;
-
         for (InvokeRequestDTO persistable : list) {
             if (numberOfRequests > 0 && counter == numberOfRequests) {
                 break;
@@ -167,6 +138,6 @@ public class InvokeRequestClusterJ implements InvokeRequestTableDef, InvokeReque
     }
 
     private InvokeRequest createHopInvokeRequest(InvokeRequestDTO invokerequestsDTO) {
-        return new InvokeRequest(invokerequestsDTO.getid(), invokerequestsDTO.getnodeid(), invokerequestsDTO.gettype());
+        return new InvokeRequest(invokerequestsDTO.getnodeid(), invokerequestsDTO.gettype(), invokerequestsDTO.getstatus());
     }
 }

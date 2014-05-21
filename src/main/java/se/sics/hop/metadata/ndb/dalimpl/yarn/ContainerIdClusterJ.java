@@ -93,12 +93,12 @@ public class ContainerIdClusterJ implements ContainerIdTableDef, ContainerIdData
             Session session = connector.obtainSession();
             QueryBuilder qb = session.getQueryBuilder();
             QueryDomainType<ContainerIdDTO> dobj = qb.createQueryDefinition(ContainerIdDTO.class);
-            Predicate pred1 = dobj.get("id").equal(dobj.param("id"));
+            Predicate pred1 = dobj.get("contid").equal(dobj.param("contid"));
             Predicate pred2 = dobj.get("toclean").equal(dobj.param("toclean"));
             pred1 = pred1.and(pred2);
             dobj.where(pred1);
             Query<ContainerIdDTO> query = session.createQuery(dobj);
-            query.setParameter("id", id);
+            query.setParameter("contid", id);
             query.setParameter("toclean", 1);
             List<ContainerIdDTO> results = query.getResultList();
             if (results != null && !results.isEmpty()) {

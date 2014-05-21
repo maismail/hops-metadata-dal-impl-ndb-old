@@ -86,11 +86,6 @@ public class RMNodeClusterJ implements RMNodeTableDef, RMNodeDataAccess<HopRMNod
 
         void setLasthealthreporttime(long lasthealthreporttime);
 
-        @Column(name = NODEHBRESPONSE_ID)
-        int getnodehbresponseid();
-
-        void setnodehbresponseid(int nodehbresponseid);
-
         @Column(name = CURRENT_STATE)
         String getcurrentstate();
 
@@ -199,7 +194,6 @@ public class RMNodeClusterJ implements RMNodeTableDef, RMNodeDataAccess<HopRMNod
         rmDTO.setHealthreport("Healthy");
         rmDTO.setRMContextid(hopRMNode.getRmcontextId());
         rmDTO.setLasthealthreporttime(hopRMNode.getLastHealthReportTime());
-        rmDTO.setnodehbresponseid(hopRMNode.getLastHBResponseId());
         rmDTO.setcurrentstate(hopRMNode.getCurrentState());
         ////////////////////////////////////
         session.savePersistent(rmDTO);
@@ -213,6 +207,6 @@ public class RMNodeClusterJ implements RMNodeTableDef, RMNodeDataAccess<HopRMNod
      * @return HopRMNode
      */
     private HopRMNode createHopRMNode(RMNodeDTO rmDTO) {
-        return new HopRMNode(rmDTO.getNodeid(), rmDTO.getHostname(), rmDTO.getCommandport(), rmDTO.getHttpport(), rmDTO.getNodeaddress(), rmDTO.getHttpaddress(), rmDTO.getNextheartbeat(), rmDTO.getResourceid(), rmDTO.getNodebaseid(), rmDTO.getHealthreport(), rmDTO.getRMContextid(), rmDTO.getLasthealthreporttime(), rmDTO.getnodehbresponseid(), rmDTO.getcurrentstate());
+        return new HopRMNode(rmDTO.getNodeid(), rmDTO.getHostname(), rmDTO.getCommandport(), rmDTO.getHttpport(), rmDTO.getNodeaddress(), rmDTO.getHttpaddress(), rmDTO.getNextheartbeat(), rmDTO.getResourceid(), rmDTO.getNodebaseid(), rmDTO.getHealthreport(), rmDTO.getRMContextid(), rmDTO.getLasthealthreporttime(), rmDTO.getcurrentstate());
     }
 }
