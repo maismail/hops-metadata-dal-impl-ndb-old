@@ -53,7 +53,8 @@ public class InvalidatedBlockClusterj implements InvalidatedBlockTableDef, Inval
     void setNumBytes(long numBytes);
   }
   private ClusterjConnector connector = ClusterjConnector.getInstance();
-
+  private final static int NOT_FOUND_ROW = -1000;
+  
   @Override
   public int countAll() throws StorageException {
     return CountHelper.countAll(TABLE_NAME);
@@ -87,7 +88,7 @@ public class InvalidatedBlockClusterj implements InvalidatedBlockTableDef, Inval
   }
 
   @Override
-  public Collection<HopInvalidatedBlock> findInvalidatedBlocksByBlockId(long bid, int inodeId) throws StorageException {
+  public List<HopInvalidatedBlock> findInvalidatedBlocksByBlockId(long bid, int inodeId) throws StorageException {
     try {
       Session session = connector.obtainSession();
       QueryBuilder qb = session.getQueryBuilder();
@@ -105,7 +106,7 @@ public class InvalidatedBlockClusterj implements InvalidatedBlockTableDef, Inval
   }
   
   @Override
-  public Collection<HopInvalidatedBlock> findInvalidatedBlocksByINodeId(int inodeId) throws StorageException {
+  public List<HopInvalidatedBlock> findInvalidatedBlocksByINodeId(int inodeId) throws StorageException {
     try {
       Session session = connector.obtainSession();
       QueryBuilder qb = session.getQueryBuilder();
@@ -134,6 +135,24 @@ public class InvalidatedBlockClusterj implements InvalidatedBlockTableDef, Inval
         return null;
       }
       return createReplica(invTable);
+    } catch (Exception e) {
+      throw new StorageException(e);
+    }
+  }
+
+  @Override
+  public List<HopInvalidatedBlock> findInvalidatedBlocksbyPKS(long[] blockIds, int[] inodesIds, int[] storageIds) throws StorageException {
+    try {
+      Session session = connector.obtainSession();
+      List<InvalidateBlocksDTO> invBlocks = new ArrayList<InvalidateBlocksDTO>();
+      for (int i = 0; i < blockIds.length; i++) {
+        InvalidateBlocksDTO invTable = session.newInstance(InvalidateBlocksDTO.class, new Object[]{inodesIds[i], blockIds[i], storageIds[i]});
+        invTable.setGenerationStamp(NOT_FOUND_ROW);
+        invTable = session.load(invTable);
+        invBlocks.add(invTable);
+      }
+      session.flush();
+      return createList(invBlocks);
     } catch (Exception e) {
       throw new StorageException(e);
     }
@@ -185,7 +204,9 @@ public class InvalidatedBlockClusterj implements InvalidatedBlockTableDef, Inval
   private List<HopInvalidatedBlock> createList(List<InvalidateBlocksDTO> dtoList) {
     List<HopInvalidatedBlock> list = new ArrayList<HopInvalidatedBlock>();
     for (InvalidateBlocksDTO dto : dtoList) {
-      list.add(createReplica(dto));
+      if (dto.getGenerationStamp() != NOT_FOUND_ROW) {
+        list.add(createReplica(dto));
+      }
     }
     return list;
   }

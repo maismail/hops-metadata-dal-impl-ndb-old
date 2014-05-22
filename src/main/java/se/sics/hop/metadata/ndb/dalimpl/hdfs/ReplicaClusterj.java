@@ -51,7 +51,8 @@ public class ReplicaClusterj implements ReplicaTableDef, ReplicaDataAccess<HopIn
     void setIndex(int index);
   }
   private ClusterjConnector connector = ClusterjConnector.getInstance();
-
+  private final static int NOT_FOUND_ROW = -1000;
+  
   @Override
   public List<HopIndexedReplica> findReplicasById(long blockId, int inodeId) throws StorageException {
     try {
@@ -89,6 +90,25 @@ public class ReplicaClusterj implements ReplicaTableDef, ReplicaDataAccess<HopIn
   
 
   @Override
+  public List<HopIndexedReplica> findReplicasByPKS(long[] blockIds, int[] inodeIds, int[] sids) throws StorageException {
+    try {
+      Session session = connector.obtainSession();
+      List<ReplicaDTO> dtos = new ArrayList<ReplicaDTO>();
+      for (int i = 0; i < blockIds.length; i++) {
+        ReplicaDTO newInstance = session.newInstance(ReplicaDTO.class, new Object[]{inodeIds[i], blockIds[i], sids[i]});
+        newInstance.setIndex(NOT_FOUND_ROW);
+        newInstance = session.load(newInstance);
+        dtos.add(newInstance);
+      }
+      session.flush();
+      return createReplicaList(dtos);
+    } catch (Exception e) {
+      throw new StorageException(e);
+    }
+  }
+   
+  
+  @Override
   public void prepare(Collection<HopIndexedReplica> removed, Collection<HopIndexedReplica> newed, Collection<HopIndexedReplica> modified) throws StorageException {
     try {
       Session session = connector.obtainSession();
@@ -119,7 +139,9 @@ public class ReplicaClusterj implements ReplicaTableDef, ReplicaDataAccess<HopIn
   private List<HopIndexedReplica> createReplicaList(List<ReplicaDTO> triplets) {
     List<HopIndexedReplica> replicas = new ArrayList<HopIndexedReplica>(triplets.size());
     for (ReplicaDTO t : triplets) {
-      replicas.add(new HopIndexedReplica(t.getBlockId(), t.getStorageId(), t.getINodeId(), t.getIndex()));
+      if (t.getIndex() != NOT_FOUND_ROW) {
+        replicas.add(new HopIndexedReplica(t.getBlockId(), t.getStorageId(), t.getINodeId(), t.getIndex()));
+      }
     }
     return replicas;
   }
