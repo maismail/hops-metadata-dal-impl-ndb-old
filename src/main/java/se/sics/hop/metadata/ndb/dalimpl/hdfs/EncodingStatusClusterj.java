@@ -39,9 +39,9 @@ public class EncodingStatusClusterj implements EncodingStatusTableDef, EncodingS
     void setInodeId(long inodeId);
 
     @Column(name = STATUS)
-    int getStatus();
+    Integer getStatus();
 
-    void setStatus(int status);
+    void setStatus(Integer status);
 
     @Column(name = CODEC)
     String getCodec();
@@ -49,19 +49,20 @@ public class EncodingStatusClusterj implements EncodingStatusTableDef, EncodingS
     void setCodec(String codec);
 
     @Column(name = TARGET_REPLICATION)
-    int getTargetReplication();
+    Integer getTargetReplication();
 
-    void setTargetReplication(int targetReplication);
+    void setTargetReplication(Integer targetReplication);
 
     @Column(name = STATUS_MODIFICATION_TIME)
-    long getStatusModificationTime();
+    Long getStatusModificationTime();
 
-    void setStatusModificationTime(long modificationTime);
+    void setStatusModificationTime(Long modificationTime);
 
     @Index
     @Column(name = PARITY_INODE_ID)
     long getParityInodeId();
 
+    // Long type not possible because of index
     void setParityInodeId(long inodeId);
 
     @Column(name = PARITY_STATUS)
@@ -70,9 +71,9 @@ public class EncodingStatusClusterj implements EncodingStatusTableDef, EncodingS
     void setParityStatus(Integer status);
 
     @Column(name = PARITY_STATUS_MODIFICATION_TIME)
-    long getParityStatusModificationTime();
+    Long getParityStatusModificationTime();
 
-    void setParityStatusModificationTime(long modificationTime);
+    void setParityStatusModificationTime(Long modificationTime);
 
     @Column(name = PARITY_FILE_NAME)
     String getParityFileName();
@@ -275,7 +276,14 @@ public class EncodingStatusClusterj implements EncodingStatusTableDef, EncodingS
       return null;
     }
 
-    return new HopEncodingStatus(dto.getInodeId(), dto.getParityInodeId(), dto.getStatus(), dto.getCodec(),
+    // This is necessary because Long cannot be used for clusterj fields with an index.
+    // But it shouldn't be 0 anyway as it is always the root folder
+    Long parityInodeId = null;
+    if (dto.getParityInodeId() != 0) {
+      parityInodeId = dto.getParityInodeId();
+    }
+
+    return new HopEncodingStatus(dto.getInodeId(), parityInodeId, dto.getStatus(), dto.getCodec(),
         dto.getTargetReplication(), dto.getStatusModificationTime(), dto.getParityStatus(),
         dto.getParityStatusModificationTime(), dto.getParityFileName());
   }
