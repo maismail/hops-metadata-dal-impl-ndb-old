@@ -8,6 +8,7 @@ import com.mysql.clusterj.annotation.PrimaryKey;
 import com.mysql.clusterj.query.Predicate;
 import com.mysql.clusterj.query.QueryBuilder;
 import com.mysql.clusterj.query.QueryDomainType;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import se.sics.hop.exception.StorageException;
@@ -62,7 +63,7 @@ public class NodeClusterJ implements NodeTableDef, NodeDataAccess<HopNode> {
             nodeDTO = session.find(NodeDTO.class, id);
         }
         if (nodeDTO == null) {
-            throw new StorageException("HOP :: Error while retrieving row:"+id);
+            throw new StorageException("HOP :: Error while retrieving row:" + id);
         }
 
         return createHopNode(nodeDTO);
@@ -97,20 +98,21 @@ public class NodeClusterJ implements NodeTableDef, NodeDataAccess<HopNode> {
         Session session = connector.obtainSession();
         try {
             if (removed != null) {
+                List<NodeDTO> toRemove = new ArrayList<NodeDTO>();
                 for (HopNode node : removed) {
-
-                    NodeDTO persistable = session.newInstance(NodeDTO.class, node.getId());
-                    session.deletePersistent(persistable);
+                    toRemove.add(session.newInstance(NodeDTO.class, node.getId()));
                 }
+                session.deletePersistentAll(toRemove);
             }
             if (modified != null) {
+                List<NodeDTO> toModify = new ArrayList<NodeDTO>();
                 for (HopNode node : modified) {
-                    NodeDTO persistable = createPersistable(node, session);
-                    session.savePersistent(persistable);
+                    toModify.add(createPersistable(node, session));
                 }
+                session.savePersistentAll(toModify);
             }
         } catch (Exception e) {
-            throw new StorageException(e);
+            throw new StorageException("Error while modifying Node, error:" + e.getMessage());
         }
     }
 
@@ -127,7 +129,9 @@ public class NodeClusterJ implements NodeTableDef, NodeDataAccess<HopNode> {
     @Override
     public void createNode(HopNode node) throws StorageException {
         Session session = connector.obtainSession();
-        createPersistable(node, session);
+        
+            session.savePersistent(createPersistable(node, session));
+        
     }
 
     private NodeDTO createPersistable(HopNode hopNode, Session session) {
@@ -138,7 +142,7 @@ public class NodeClusterJ implements NodeTableDef, NodeDataAccess<HopNode> {
         nodeDTO.setLocation(hopNode.getLocation());
         nodeDTO.setLevel(hopNode.getLevel());
         nodeDTO.setParent(hopNode.getParent());
-        session.savePersistent(nodeDTO);
+        //session.savePersistent(nodeDTO);
         return nodeDTO;
     }
 

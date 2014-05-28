@@ -86,29 +86,33 @@ public class RMContextNodesClusterJ implements RMContextNodesTableDef, RMContext
         Session session = connector.obtainSession();
         try {
             if (removed != null) {
+                List<RMContextNodesDTO> toRemove = new ArrayList<RMContextNodesDTO>();
                 for (HopRMContextNodes entry : removed) {
                     Object[] objarr = new Object[2];
                     objarr[0] = entry.getRmcontextid();
                     objarr[1] = entry.getNodeidId();
-                    RMContextNodesDTO persistable = session.newInstance(RMContextNodesDTO.class, objarr);
-                    session.deletePersistent(persistable);
+                    toRemove.add(session.newInstance(RMContextNodesDTO.class, objarr));
                 }
+                session.deletePersistentAll(toRemove);
             }
             if (modified != null) {
-                for (HopRMContextNodes entry : modified) {
-                    RMContextNodesDTO persistable = createPersistable(entry, session);
-                    session.savePersistent(persistable);
+                List<RMContextNodesDTO> toModify = new ArrayList<RMContextNodesDTO>();
+                for (HopRMContextNodes req : modified) {
+                    toModify.add(createPersistable(req, session));
                 }
+                session.savePersistentAll(toModify);
             }
         } catch (Exception e) {
-            throw new StorageException(e);
+            throw new StorageException("Error while modifying invokerequests, error:" + e.getMessage());
         }
     }
 
     @Override
     public void createRMContextNodesEntry(HopRMContextNodes entry) throws StorageException {
         Session session = connector.obtainSession();
-        createPersistable(entry, session);
+        
+            session.savePersistent(createPersistable(entry, session));
+        
     }
 
     private HopRMContextNodes createRMContextNodesEntry(RMContextNodesDTO entry) {
@@ -123,7 +127,7 @@ public class RMContextNodesClusterJ implements RMContextNodesTableDef, RMContext
         persistable.setrmcontextid(entry.getRmcontextid());
         persistable.setnodeidid(entry.getNodeidId());
         persistable.setrmnodeid(entry.getRmnodeId());
-        session.savePersistent(persistable);
+        //session.savePersistent(persistable);
         return persistable;
     }
 

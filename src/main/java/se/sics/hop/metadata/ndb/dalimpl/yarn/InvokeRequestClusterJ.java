@@ -50,7 +50,7 @@ public class InvokeRequestClusterJ implements InvokeRequestTableDef, InvokeReque
     @Override
     public void createInvokeRequest(InvokeRequest invokeRequest) throws StorageException {
         Session session = connector.obtainSession();
-        createPersistable(invokeRequest, session);
+        session.makePersistent(createPersistable(invokeRequest, session));
     }
 
     @Override
@@ -58,7 +58,7 @@ public class InvokeRequestClusterJ implements InvokeRequestTableDef, InvokeReque
         Session session = connector.obtainSession();
         InvokeRequestDTO req = session.find(InvokeRequestDTO.class, rmNodeId);
         if (req == null) {
-            throw new StorageException("Error while retrieving row:" + rmNodeId);
+            throw new StorageException("Error while retrieving invoke request row:" + rmNodeId);
         }
 
         return createHopInvokeRequest(req);
@@ -91,19 +91,21 @@ public class InvokeRequestClusterJ implements InvokeRequestTableDef, InvokeReque
         Session session = connector.obtainSession();
         try {
             if (removed != null) {
-                for (InvokeRequest hopInvokeRequests : removed) {
-                    InvokeRequestDTO persistable = session.newInstance(InvokeRequestDTO.class, hopInvokeRequests.getNodeid());
-                    session.deletePersistent(persistable);
+                List<InvokeRequestDTO> toRemove = new ArrayList<InvokeRequestDTO>();
+                for (InvokeRequest req : removed) {
+                    toRemove.add(session.newInstance(InvokeRequestDTO.class, req.getNodeid()));
                 }
+                session.deletePersistentAll(toRemove);
             }
             if (modified != null) {
-                for (InvokeRequest hopAppAttemptId : modified) {
-                    InvokeRequestDTO persistable = createPersistable(hopAppAttemptId, session);
-                    session.savePersistent(persistable);
+                List<InvokeRequestDTO> toModify = new ArrayList<InvokeRequestDTO>();
+                for (InvokeRequest req : modified) {
+                    toModify.add(createPersistable(req, session));
                 }
+                session.savePersistentAll(toModify);
             }
         } catch (Exception e) {
-            throw new StorageException(e);
+            throw new StorageException("Error while modifying invokerequests, error:" + e.getMessage());
         }
     }
 
@@ -112,7 +114,7 @@ public class InvokeRequestClusterJ implements InvokeRequestTableDef, InvokeReque
         invokerequestsDTO.setnodeid(hopInvokeRequests.getNodeid());
         invokerequestsDTO.settype(hopInvokeRequests.getType());
         invokerequestsDTO.setstatus(hopInvokeRequests.getStatus());
-        session.savePersistent(invokerequestsDTO);
+        //session.savePersistent(invokerequestsDTO);
         return invokerequestsDTO;
     }
 

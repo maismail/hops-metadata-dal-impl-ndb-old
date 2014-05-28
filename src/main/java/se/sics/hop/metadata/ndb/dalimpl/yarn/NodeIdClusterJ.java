@@ -8,6 +8,7 @@ import com.mysql.clusterj.annotation.PrimaryKey;
 import com.mysql.clusterj.query.Predicate;
 import com.mysql.clusterj.query.QueryBuilder;
 import com.mysql.clusterj.query.QueryDomainType;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import se.sics.hop.exception.StorageException;
@@ -46,7 +47,7 @@ public class NodeIdClusterJ implements NodeIdTableDef, NodeIdDataAccess<HopNodeI
 
     @Override
     public HopNodeId findById(int id) throws StorageException {
-        List<NodeIdDTO> results = null;
+        List<NodeIdDTO> results;
         try {
             Session session = connector.obtainSession();
             QueryBuilder qb = session.getQueryBuilder();
@@ -102,22 +103,21 @@ public class NodeIdClusterJ implements NodeIdTableDef, NodeIdDataAccess<HopNodeI
         Session session = connector.obtainSession();
         try {
             if (removed != null) {
-                for (HopNodeId nodeid : removed) {
-                    Object[] objarr = new Object[2];
-                    objarr[0] = nodeid.getHost();
-                    objarr[1] = nodeid.getPort();
-                    NodeIdDTO persistable = session.newInstance(NodeIdDTO.class, objarr);
-                    session.deletePersistent(persistable);
+                List<NodeIdDTO> toRemove = new ArrayList<NodeIdDTO>();
+                for (HopNodeId req : removed) {
+                    toRemove.add(session.newInstance(NodeIdDTO.class, req.getId()));
                 }
+                session.deletePersistentAll(toRemove);
             }
             if (modified != null) {
-                for (HopNodeId nodeid : modified) {
-                    NodeIdDTO persistable = createPersistable(nodeid, session);
-                    session.savePersistent(persistable);
+                List<NodeIdDTO> toModify = new ArrayList<NodeIdDTO>();
+                for (HopNodeId req : modified) {
+                    toModify.add(createPersistable(req, session));
                 }
+                session.savePersistentAll(toModify);
             }
         } catch (Exception e) {
-            throw new StorageException(e);
+            throw new StorageException("Error while modifying NodeIds, error:" + e.getMessage());
         }
     }
 
@@ -153,7 +153,10 @@ public class NodeIdClusterJ implements NodeIdTableDef, NodeIdDataAccess<HopNodeI
     @Override
     public void createNodeId(HopNodeId nodeId) throws StorageException {
         Session session = connector.obtainSession();
-        createPersistable(nodeId, session);
+       
+            session.savePersistent(createPersistable(nodeId, session));
+       
+
     }
 
     private NodeIdDTO createPersistable(HopNodeId hopNodeId, Session session) {
@@ -162,7 +165,7 @@ public class NodeIdClusterJ implements NodeIdTableDef, NodeIdDataAccess<HopNodeI
         nodeDTO.setId(hopNodeId.getId());
         nodeDTO.setHost(hopNodeId.getHost());
         nodeDTO.setPort(hopNodeId.getPort());
-        session.savePersistent(nodeDTO);
+        //session.savePersistent(nodeDTO);
         return nodeDTO;
     }
 

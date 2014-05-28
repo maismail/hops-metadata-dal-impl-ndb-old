@@ -4,7 +4,9 @@ import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.entity.yarn.HopResource;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
@@ -47,7 +49,7 @@ public class ResourceClusterJ implements ResourceTableDef, ResourceDataAccess<Ho
             resourceDTO = session.find(ResourceDTO.class, id);
         }
         if (resourceDTO == null) {
-            throw new StorageException("HOP :: Error while retrieving row:"+id);
+            throw new StorageException("HOP :: Error while retrieving row:" + id);
         }
 
         return createHopResource(resourceDTO);
@@ -58,27 +60,28 @@ public class ResourceClusterJ implements ResourceTableDef, ResourceDataAccess<Ho
         Session session = connector.obtainSession();
         try {
             if (removed != null) {
-                for (HopResource resource : removed) {
-
-                    ResourceDTO persistable = session.newInstance(ResourceDTO.class, resource.getId());
-                    session.deletePersistent(persistable);
+                List<ResourceDTO> toRemove = new ArrayList<ResourceDTO>();
+                for (HopResource req : removed) {
+                    toRemove.add(session.newInstance(ResourceDTO.class, req.getId()));
                 }
+                session.deletePersistentAll(toRemove);
             }
             if (modified != null) {
-                for (HopResource resource : modified) {
-                    ResourceDTO persistable = createPersistable(resource, session);
-                    session.savePersistent(persistable);
+                List<ResourceDTO> toModify = new ArrayList<ResourceDTO>();
+                for (HopResource req : modified) {
+                    toModify.add(createPersistable(req, session));
                 }
+                session.savePersistentAll(toModify);
             }
         } catch (Exception e) {
-            throw new StorageException(e);
+            throw new StorageException("Error while modifying resources, error:" + e.getMessage());
         }
     }
 
     @Override
     public void createResource(HopResource resourceNode) throws StorageException {
         Session session = connector.obtainSession();
-        createPersistable(resourceNode, session);
+        session.savePersistent(createPersistable(resourceNode, session));
     }
 
     private HopResource createHopResource(ResourceDTO resourceDTO) {
@@ -90,7 +93,7 @@ public class ResourceClusterJ implements ResourceTableDef, ResourceDataAccess<Ho
         resourceDTO.setId(resource.getId());
         resourceDTO.setMemory(resource.getMemory());
         resourceDTO.setVirtualcores(resource.getVirtualcores());
-        session.savePersistent(resourceDTO);
+        //session.savePersistent(resourceDTO);
         return resourceDTO;
     }
 }

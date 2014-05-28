@@ -98,7 +98,7 @@ public class RMNodeClusterJ implements RMNodeTableDef, RMNodeDataAccess<HopRMNod
         Session session = connector.obtainSession();
         RMNodeDTO rmnodeDTO = session.find(RMNodeDTO.class, nodeid);
         if (rmnodeDTO == null) {
-            throw new StorageException("Error while retrieving row:"+nodeid);
+            throw new StorageException("Error while retrieving row:" + nodeid);
         }
 
         return createHopRMNode(rmnodeDTO);
@@ -112,7 +112,7 @@ public class RMNodeClusterJ implements RMNodeTableDef, RMNodeDataAccess<HopRMNod
         objarr[1] = commandPort;
         RMNodeDTO rmnodeDTO = session.find(RMNodeDTO.class, objarr);
         if (rmnodeDTO == null) {
-            throw new StorageException("HOP :: Error while retrieving row:"+hostName+":"+commandPort);
+            throw new StorageException("HOP :: Error while retrieving row:" + hostName + ":" + commandPort);
         }
         return createHopRMNode(rmnodeDTO);
     }
@@ -122,7 +122,7 @@ public class RMNodeClusterJ implements RMNodeTableDef, RMNodeDataAccess<HopRMNod
         Session session = connector.obtainSession();
         RMNodeDTO rmnodeDTO = session.find(RMNodeDTO.class, hostName);
         if (rmnodeDTO == null) {
-            throw new StorageException("Error while retrieving row:"+hostName);
+            throw new StorageException("Error while retrieving row:" + hostName);
         }
         return createHopRMNode(rmnodeDTO);
     }
@@ -147,29 +147,30 @@ public class RMNodeClusterJ implements RMNodeTableDef, RMNodeDataAccess<HopRMNod
         Session session = connector.obtainSession();
         try {
             if (removed != null) {
+                List<RMNodeDTO> toRemove = new ArrayList<RMNodeDTO>();
                 for (HopRMNode rm : removed) {
-                    /*Object[] objarr = new Object[2];
-                     objarr[0] = rm.getHostName();
-                     objarr[1] = rm.getCommandPort();*/
-                    RMNodeDTO persistable = session.newInstance(RMNodeDTO.class, rm.getNodeId());
-                    session.deletePersistent(persistable);
+                    toRemove.add(session.newInstance(RMNodeDTO.class, rm.getNodeId()));
                 }
+                session.deletePersistentAll(toRemove);
             }
             if (modified != null) {
+                List<RMNodeDTO> toModify = new ArrayList<RMNodeDTO>();
                 for (HopRMNode rm : modified) {
-                    RMNodeDTO persistable = createPersistable(rm, session);
-                    session.savePersistent(persistable);
+                    toModify.add(createPersistable(rm, session));
                 }
+                session.savePersistentAll(toModify);
             }
         } catch (Exception e) {
-            throw new StorageException(e);
+            throw new StorageException("Error while modifying invokerequests, error:" + e.getMessage());
         }
     }
 
     @Override
     public void createRMNode(HopRMNode rmNode) throws StorageException {
         Session session = connector.obtainSession();
-        createPersistable(rmNode, session);
+        
+            session.savePersistent(createPersistable(rmNode, session));
+        
     }
 
     private RMNodeDTO createPersistable(HopRMNode hopRMNode, Session session) {
@@ -183,7 +184,6 @@ public class RMNodeClusterJ implements RMNodeTableDef, RMNodeDataAccess<HopRMNod
         rmDTO.setNodeaddress(hopRMNode.getNodeAddress());
         rmDTO.setHttpaddress(hopRMNode.getHttpAddress());
         rmDTO.setNextheartbeat(true);
-        //TODO: Remove testing values
         if (hopRMNode.getResourceId() > 0) {
             rmDTO.setResourceid(hopRMNode.getResourceId());
         }
@@ -196,7 +196,7 @@ public class RMNodeClusterJ implements RMNodeTableDef, RMNodeDataAccess<HopRMNod
         rmDTO.setLasthealthreporttime(hopRMNode.getLastHealthReportTime());
         rmDTO.setcurrentstate(hopRMNode.getCurrentState());
         ////////////////////////////////////
-        session.savePersistent(rmDTO);
+        //session.savePersistent(rmDTO);
         return rmDTO;
     }
 
