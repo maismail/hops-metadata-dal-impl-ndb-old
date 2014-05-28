@@ -8,6 +8,8 @@ import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
 import com.mysql.clusterj.query.QueryBuilder;
 import com.mysql.clusterj.query.QueryDomainType;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.dal.EncodingStatusDataAccess;
 import se.sics.hop.metadata.hdfs.entity.hop.HopEncodingStatus;
@@ -25,6 +27,8 @@ import java.util.Collection;
 import java.util.List;
 
 public class EncodingStatusClusterj implements EncodingStatusTableDef, EncodingStatusDataAccess<HopEncodingStatus> {
+
+  static final Log LOG = LogFactory.getLog(EncodingStatusClusterj.class);
 
   private ClusterjConnector clusterjConnector = ClusterjConnector.getInstance();
   private MysqlServerConnector mysqlConnector = MysqlServerConnector.getInstance();
@@ -83,6 +87,7 @@ public class EncodingStatusClusterj implements EncodingStatusTableDef, EncodingS
 
   @Override
   public void add(HopEncodingStatus status) {
+    LOG.info("ADD " + status.toString());
     Session session = clusterjConnector.obtainSession();
     EncodingStatusDto dto = session.newInstance(EncodingStatusDto.class);
     copyState(status, dto);
@@ -91,6 +96,7 @@ public class EncodingStatusClusterj implements EncodingStatusTableDef, EncodingS
 
   @Override
   public void update(HopEncodingStatus status) throws StorageException {
+    LOG.info("UPDATE " + status.toString());
     Session session = clusterjConnector.obtainSession();
     EncodingStatusDto dto = session.newInstance(EncodingStatusDto.class);
     copyState(status, dto);
