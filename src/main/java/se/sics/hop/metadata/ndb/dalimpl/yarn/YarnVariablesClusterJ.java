@@ -4,7 +4,9 @@ import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.entity.yarn.YarnVariables;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
@@ -113,19 +115,21 @@ public class YarnVariablesClusterJ implements YarnVariablesTableDef, YarnVariabl
         Session session = connector.obtainSession();
         try {
             if (removed != null) {
-                for (YarnVariables hopApplicationId : removed) {
-                    YarnVariablesDTO persistable = session.newInstance(YarnVariablesDTO.class, hopApplicationId.getId());
-                    session.deletePersistent(persistable);
+                List<YarnVariablesDTO> toRemove = new ArrayList<YarnVariablesDTO>();
+                for (YarnVariables entry : removed) {
+                    toRemove.add(session.newInstance(YarnVariablesDTO.class, entry.getId()));
                 }
+                session.deletePersistentAll(toRemove);
             }
             if (modified != null) {
-                for (YarnVariables hopAppAttemptId : modified) {
-                    YarnVariablesDTO persistable = createPersistable(hopAppAttemptId, session);
-                    session.savePersistent(persistable);
+                List<YarnVariablesDTO> toModify = new ArrayList<YarnVariablesDTO>();
+                for (YarnVariables entry : modified) {
+                    toModify.add(createPersistable(entry, session));
                 }
+                session.savePersistentAll(toModify);
             }
         } catch (Exception e) {
-            throw new StorageException(e);
+            throw new StorageException("Error while modifying invokerequests, error:" + e.getMessage());
         }
     }
 
@@ -144,7 +148,7 @@ public class YarnVariablesClusterJ implements YarnVariablesTableDef, YarnVariabl
         yarnDTO.setlastcontaineridid(yarnVariables.getLastcontaineridId());
         yarnDTO.setlastappattemptidid(yarnVariables.getLastappattemptidId());
         yarnDTO.setlastapplicationidid(yarnVariables.getLastapplicationidId());*/
-        session.savePersistent(yarnDTO);
+        //session.savePersistent(yarnDTO);
         return yarnDTO;
     }
 }
