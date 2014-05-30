@@ -183,15 +183,14 @@ public class RMNodeClusterJ implements RMNodeTableDef, RMNodeDataAccess<HopRMNod
         rmDTO.setHttpport(hopRMNode.getHttpPort());
         rmDTO.setNodeaddress(hopRMNode.getNodeAddress());
         rmDTO.setHttpaddress(hopRMNode.getHttpAddress());
-        rmDTO.setNextheartbeat(true);
+        rmDTO.setNextheartbeat(hopRMNode.isNextHeartbeat());
         if (hopRMNode.getResourceId() > 0) {
             rmDTO.setResourceid(hopRMNode.getResourceId());
         }
-
         if (hopRMNode.getNodebaseId() > 0) {
             rmDTO.setNodebaseid(hopRMNode.getNodebaseId());
         }
-        rmDTO.setHealthreport("Healthy");
+        rmDTO.setHealthreport(hopRMNode.getHealthReport());
         rmDTO.setRMContextid(hopRMNode.getRmcontextId());
         rmDTO.setLasthealthreporttime(hopRMNode.getLastHealthReportTime());
         rmDTO.setcurrentstate(hopRMNode.getCurrentState());
