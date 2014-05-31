@@ -24,19 +24,22 @@ import se.sics.hop.metadata.hdfs.tabledef.CorruptReplicaTableDef;
  */
 public class CorruptReplicaClusterj implements CorruptReplicaTableDef, CorruptReplicaDataAccess<HopCorruptReplica> {
 
+
   @PersistenceCapable(table = TABLE_NAME)
   public interface CorruptReplicaDTO {
-
+    @PrimaryKey
+    @Column(name = INODE_ID)
+    int getINodeId();
+    void setINodeId(int inodeId);
+    
     @PrimaryKey
     @Column(name = BLOCK_ID)
     long getBlockId();
-
     void setBlockId(long bid);
 
     @PrimaryKey
     @Column(name = STORAGE_ID)
     int getStorageId();
-
     void setStorageId(int id);
   }
   private ClusterjConnector connector = ClusterjConnector.getInstance();
@@ -55,9 +58,11 @@ public class CorruptReplicaClusterj implements CorruptReplicaTableDef, CorruptRe
   public void prepare(Collection<HopCorruptReplica> removed, Collection<HopCorruptReplica> newed, Collection<HopCorruptReplica> modified) throws StorageException {
     Session session = connector.obtainSession();
     for (HopCorruptReplica corruptReplica : removed) {
-      Object[] pk = new Object[2];
-      pk[0] = corruptReplica.getBlockId();
-      pk[1] = corruptReplica.getStorageId();
+      Object[] pk = new Object[4];
+      pk[0] = corruptReplica.getInodeId();
+      pk[1] = corruptReplica.getBlockId();
+      pk[2] = corruptReplica.getStorageId();
+
       session.deletePersistent(CorruptReplicaDTO.class, pk);
     }
 
@@ -69,12 +74,14 @@ public class CorruptReplicaClusterj implements CorruptReplicaTableDef, CorruptRe
   }
 
   @Override
-  public HopCorruptReplica findByPk(long blockId, int storageId) throws StorageException {
+  public HopCorruptReplica findByPk(long blockId, int storageId, int inodeId) throws StorageException {
     try {
       Session session = connector.obtainSession();
       Object[] keys = new Object[2];
-      keys[0] = blockId;
-      keys[1] = storageId;
+      keys[0] = inodeId;
+      keys[1] = blockId;
+      keys[2] = storageId;
+      
       CorruptReplicaDTO corruptReplicaTable = session.find(CorruptReplicaDTO.class, keys);
       if (corruptReplicaTable != null) {
         return createReplica(corruptReplicaTable);
@@ -101,24 +108,43 @@ public class CorruptReplicaClusterj implements CorruptReplicaTableDef, CorruptRe
   }
 
   @Override
-  public List<HopCorruptReplica> findByBlockId(long blockId) throws StorageException {
+  public List<HopCorruptReplica> findByBlockId(long blockId, int inodeId) throws StorageException {
     try {
       Session session = connector.obtainSession();
       QueryBuilder qb = session.getQueryBuilder();
       QueryDomainType<CorruptReplicaDTO> dobj = qb.createQueryDefinition(CorruptReplicaDTO.class);
-      Predicate pred = dobj.get("blockId").equal(dobj.param("blockId"));
-      dobj.where(pred);
+      Predicate pred1 = dobj.get("blockId").equal(dobj.param("blockId"));
+      Predicate pred2 = dobj.get("iNodeId").equal(dobj.param("iNodeIdParam"));
+      dobj.where(pred1.and(pred2));
       Query<CorruptReplicaDTO> query = session.createQuery(dobj);
       query.setParameter("blockId", blockId);
+      query.setParameter("iNodeIdParam", inodeId);
       List<CorruptReplicaDTO> creplicas = query.getResultList();
       return createCorruptReplicaList(creplicas);
     } catch (Exception e) {
       throw new StorageException(e);
     }
   }
+  
+    @Override
+  public List<HopCorruptReplica> findByINodeId(int inodeId) throws StorageException {
+    try {
+      Session session = connector.obtainSession();
+      QueryBuilder qb = session.getQueryBuilder();
+      QueryDomainType<CorruptReplicaDTO> dobj = qb.createQueryDefinition(CorruptReplicaDTO.class);
+      Predicate pred1 = dobj.get("iNodeId").equal(dobj.param("iNodeIdParam"));
+      dobj.where(pred1);
+      Query<CorruptReplicaDTO> query = session.createQuery(dobj);
+      query.setParameter("iNodeIdParam", inodeId);
+      return createCorruptReplicaList(query.getResultList());
+    } catch (Exception e) {
+      throw new StorageException(e);
+    }
+  }
+
 
   private HopCorruptReplica createReplica(CorruptReplicaDTO corruptReplicaTable) {
-    return new HopCorruptReplica(corruptReplicaTable.getBlockId(), corruptReplicaTable.getStorageId());
+    return new HopCorruptReplica(corruptReplicaTable.getBlockId(), corruptReplicaTable.getStorageId(), corruptReplicaTable.getINodeId());
   }
 
   private List<HopCorruptReplica> createCorruptReplicaList(List<CorruptReplicaDTO> persistables) {
@@ -132,5 +158,6 @@ public class CorruptReplicaClusterj implements CorruptReplicaTableDef, CorruptRe
   private void createPersistable(HopCorruptReplica corruptReplica, CorruptReplicaDTO corruptReplicaTable) {
     corruptReplicaTable.setBlockId(corruptReplica.getBlockId());
     corruptReplicaTable.setStorageId(corruptReplica.getStorageId());
+    corruptReplicaTable.setINodeId(corruptReplica.getInodeId());
   }
 }

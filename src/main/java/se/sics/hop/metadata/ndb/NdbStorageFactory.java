@@ -9,6 +9,8 @@ import se.sics.hop.DALStorageFactory;
 import se.sics.hop.StorageConnector;
 import se.sics.hop.metadata.hdfs.dal.*;
 import se.sics.hop.exception.StorageInitializtionException;
+import se.sics.hop.metadata.hdfs.dal.BlockLookUpDataAccess;
+import se.sics.hop.metadata.hdfs.dal.StorageIdMapDataAccess;
 import se.sics.hop.metadata.ndb.dalimpl.hdfs.*;
 import se.sics.hop.metadata.ndb.mysqlserver.MysqlServerConnector;
 
@@ -51,6 +53,7 @@ public class NdbStorageFactory implements DALStorageFactory {
     dataAccessMap.put(VariableDataAccess.class, new VariableClusterj());
     dataAccessMap.put(StorageIdMapDataAccess.class, new StorageIdMapClusterj());
     dataAccessMap.put(EncodingStatusDataAccess.class, new EncodingStatusClusterj() {});
+    dataAccessMap.put(BlockLookUpDataAccess.class, new BlockLookUpClusterj());
   }
 
   @Override
