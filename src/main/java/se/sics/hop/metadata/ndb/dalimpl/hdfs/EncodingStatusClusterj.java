@@ -38,9 +38,9 @@ public class EncodingStatusClusterj implements EncodingStatusTableDef, EncodingS
 
     @PrimaryKey
     @Column(name = INODE_ID)
-    long getInodeId();
+    int getInodeId();
 
-    void setInodeId(long inodeId);
+    void setInodeId(int inodeId);
 
     @Column(name = STATUS)
     Integer getStatus();
@@ -64,10 +64,10 @@ public class EncodingStatusClusterj implements EncodingStatusTableDef, EncodingS
 
     @Index
     @Column(name = PARITY_INODE_ID)
-    long getParityInodeId();
+    int getParityInodeId();
 
     // Long type not possible because of index
-    void setParityInodeId(long inodeId);
+    void setParityInodeId(int inodeId);
 
     @Column(name = PARITY_STATUS)
     Integer getParityStatus();
@@ -112,7 +112,7 @@ public class EncodingStatusClusterj implements EncodingStatusTableDef, EncodingS
   }
 
   private void copyState(HopEncodingStatus status, EncodingStatusDto dto) {
-    Long inodeId = status.getInodeId();
+    Integer inodeId = status.getInodeId();
     if (inodeId != null) {
       dto.setInodeId(inodeId);
     }
@@ -132,7 +132,7 @@ public class EncodingStatusClusterj implements EncodingStatusTableDef, EncodingS
     if (statusModificationTime != null) {
       dto.setStatusModificationTime(statusModificationTime);
     }
-    Long parityInodeId = status.getParityInodeId();
+    Integer parityInodeId = status.getParityInodeId();
     if (parityInodeId != null) {
       dto.setParityInodeId(parityInodeId);
     }
@@ -151,7 +151,7 @@ public class EncodingStatusClusterj implements EncodingStatusTableDef, EncodingS
   }
 
   @Override
-  public HopEncodingStatus findByInodeId(long inodeId) throws StorageException {
+  public HopEncodingStatus findByInodeId(int inodeId) throws StorageException {
     try {
       Session session = clusterjConnector.obtainSession();
       EncodingStatusDto dto = session.find(EncodingStatusDto.class, inodeId);
@@ -165,7 +165,7 @@ public class EncodingStatusClusterj implements EncodingStatusTableDef, EncodingS
   }
 
   @Override
-  public HopEncodingStatus findByParityInodeId(long inodeId) throws StorageException {
+  public HopEncodingStatus findByParityInodeId(int inodeId) throws StorageException {
     try {
       Session session = clusterjConnector.obtainSession();
       QueryBuilder builder = session.getQueryBuilder();
@@ -282,9 +282,9 @@ public class EncodingStatusClusterj implements EncodingStatusTableDef, EncodingS
       return null;
     }
 
-    // This is necessary because Long cannot be used for clusterj fields with an index.
+    // This is necessary because Integer cannot be used for clusterj fields with an index.
     // But it shouldn't be 0 anyway as it is always the root folder
-    Long parityInodeId = null;
+    Integer parityInodeId = null;
     if (dto.getParityInodeId() != 0) {
       parityInodeId = dto.getParityInodeId();
     }
@@ -324,8 +324,8 @@ public class EncodingStatusClusterj implements EncodingStatusTableDef, EncodingS
       resultList = new ArrayList<HopEncodingStatus>();
 
       while (result.next()) {
-        Long inodeId = result.getLong(INODE_ID);
-        Long parityInodeId = result.getLong(PARITY_INODE_ID);
+        Integer inodeId = result.getInt(INODE_ID);
+        Integer parityInodeId = result.getInt(PARITY_INODE_ID);
         Integer status = result.getInt(STATUS);
         String codec = result.getString(CODEC);
         Integer targetReplication = result.getInt(TARGET_REPLICATION);
