@@ -163,8 +163,8 @@ public class EncodingStatusClusterj implements EncodingStatusTableDef, EncodingS
       dto.setLostBlockCount(lostBlocks);
     }
     Integer lostParityBlocks = status.getLostParityBlocks();
-    if (lostBlocks != null) {
-      dto.setLostParityBlockCount(lostBlocks);
+    if (lostParityBlocks != null) {
+      dto.setLostParityBlockCount(lostParityBlocks);
     }
   }
 
