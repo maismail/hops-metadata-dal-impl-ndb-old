@@ -83,6 +83,16 @@ public class EncodingStatusClusterj implements EncodingStatusTableDef, EncodingS
     String getParityFileName();
 
     void setParityFileName(String parityFileName);
+
+    @Column(name = LOST_BLOCKS)
+    int getLostBlockCount();
+
+    void setLostBlockCount(int n);
+
+    @Column(name = LOST_PARITY_BLOCKS)
+    int getLostParityBlockCount();
+
+    void setLostParityBlockCount(int n);
   }
 
   @Override
@@ -148,6 +158,14 @@ public class EncodingStatusClusterj implements EncodingStatusTableDef, EncodingS
     if (parityFileName != null) {
       dto.setParityFileName(parityFileName);
     }
+    Integer lostBlocks = status.getLostBlocks();
+    if (lostBlocks != null) {
+      dto.setLostBlockCount(lostBlocks);
+    }
+    Integer lostParityBlocks = status.getLostParityBlocks();
+    if (lostBlocks != null) {
+      dto.setLostParityBlockCount(lostBlocks);
+    }
   }
 
   @Override
@@ -199,7 +217,17 @@ public class EncodingStatusClusterj implements EncodingStatusTableDef, EncodingS
 
   @Override
   public Collection<HopEncodingStatus> findRequestedRepairs(long limit) throws StorageException {
-    return findWithStatus(HopEncodingStatus.REPAIR_REQUESTED, limit);
+    /*
+     * Prioritize files with more missing blocks and also prioritize source files over parity files.
+     * Finally, prioritize earlier detected failures to prevent starvation.
+     */
+    final String query = "SELECT " + INODE_ID + ", " + STATUS + ", " + CODEC + ", " + TARGET_REPLICATION
+        + ", " + PARITY_STATUS + ", " + STATUS_MODIFICATION_TIME  + ", " + PARITY_STATUS_MODIFICATION_TIME
+        + ", " + PARITY_INODE_ID + ", " + PARITY_FILE_NAME + ", " + LOST_BLOCKS  + ", " + LOST_PARITY_BLOCKS
+        + ", " + LOST_BLOCKS  + "+" + LOST_PARITY_BLOCKS  + " AS " + LOST_BLOCK_SUM + " FROM " + TABLE_NAME
+        + " WHERE " + STATUS  + "=" + HopEncodingStatus.REPAIR_REQUESTED + " ORDER BY " + LOST_BLOCK_SUM
+        + " DESC, " + LOST_BLOCKS + " DESC, " + STATUS_MODIFICATION_TIME + " ASC LIMIT " + limit;
+    return findStatus(query);
   }
 
   @Override
@@ -238,18 +266,20 @@ public class EncodingStatusClusterj implements EncodingStatusTableDef, EncodingS
   }
 
   @Override
-  public Collection<HopEncodingStatus> findPotentiallyFixed(long limit) throws StorageException {
-    return findWithStatus(HopEncodingStatus.POTENTIALLY_FIXED, limit);
-  }
-
-  @Override
-  public int countPotentiallyFixed() throws StorageException {
-    return CountHelper.countWhere(TABLE_NAME, STATUS + "=" + HopEncodingStatus.POTENTIALLY_FIXED);
-  }
-
-  @Override
   public Collection<HopEncodingStatus> findRequestedParityRepairs(long limit) throws StorageException {
-    return findWithParityStatus(HopEncodingStatus.PARITY_REPAIR_REQUESTED, limit);
+    final String queryString = "SELECT * FROM %s WHERE %s=%s AND %s!=%s AND %s!=%s ORDER BY %s ASC LIMIT %s";
+    String query = String.format(
+        STATUS_QUERY,
+        TABLE_NAME,
+        PARITY_STATUS,
+        HopEncodingStatus.PARITY_REPAIR_REQUESTED,
+        STATUS,
+        HopEncodingStatus.REPAIR_ACTIVE,
+        STATUS,
+        HopEncodingStatus.REPAIR_FAILED,
+        PARITY_STATUS_MODIFICATION_TIME,
+        limit);
+    return findStatus(query);
   }
 
   @Override
@@ -268,13 +298,23 @@ public class EncodingStatusClusterj implements EncodingStatusTableDef, EncodingS
   }
 
   @Override
-  public Collection<HopEncodingStatus> findPotentiallyFixedParities(long limit) throws StorageException {
-    return findWithParityStatus(HopEncodingStatus.PARITY_POTENTIALLY_FIXED, limit);
+  public void setLostBlockCount(int n) {
+
   }
 
   @Override
-  public int countPotentiallyFixedParities() throws StorageException {
-    return CountHelper.countWhere(TABLE_NAME, PARITY_STATUS + "=" + HopEncodingStatus.PARITY_POTENTIALLY_FIXED);
+  public int getLostBlockCount() {
+    return 0;
+  }
+
+  @Override
+  public void setLostParityBlockCount(int n) {
+
+  }
+
+  @Override
+  public int getLostParityBlockCount() {
+    return 0;
   }
 
   private HopEncodingStatus createHopEncoding(EncodingStatusDto dto) {
@@ -291,7 +331,8 @@ public class EncodingStatusClusterj implements EncodingStatusTableDef, EncodingS
 
     return new HopEncodingStatus(dto.getInodeId(), parityInodeId, dto.getStatus(), dto.getCodec(),
         dto.getTargetReplication(), dto.getStatusModificationTime(), dto.getParityStatus(),
-        dto.getParityStatusModificationTime(), dto.getParityFileName());
+        dto.getParityStatusModificationTime(), dto.getParityFileName(), dto.getLostBlockCount(),
+        dto.getLostParityBlockCount());
   }
 
   private List<HopEncodingStatus> findAllWithStatus(int status) throws StorageException {
@@ -302,19 +343,20 @@ public class EncodingStatusClusterj implements EncodingStatusTableDef, EncodingS
     return findWithParityStatus(status, Long.MAX_VALUE);
   }
 
-  private static final String LIMITED_STATUS_QUERY = "SELECT * FROM %s WHERE %s=%s ORDER BY %s ASC LIMIT %s";
+  private static final String STATUS_QUERY = "SELECT * FROM %s WHERE %s=%s ORDER BY %s ASC LIMIT %s";
 
   private List<HopEncodingStatus> findWithParityStatus(int findStatus, long limit) throws StorageException {
-    return findStatus(PARITY_STATUS, findStatus, limit, PARITY_STATUS_MODIFICATION_TIME);
+    String query = String.format(STATUS_QUERY, TABLE_NAME, PARITY_STATUS, findStatus, PARITY_STATUS_MODIFICATION_TIME,
+        limit);
+    return findStatus(query);
   }
 
   private List<HopEncodingStatus> findWithStatus(int findStatus, long limit) throws StorageException {
-    return findStatus(STATUS, findStatus, limit, STATUS_MODIFICATION_TIME);
+    String query = String.format(STATUS_QUERY, TABLE_NAME, STATUS, findStatus, STATUS_MODIFICATION_TIME, limit);
+    return findStatus(query);
   }
 
-  private List<HopEncodingStatus> findStatus(String column, int findStatus, long limit, String orderColumn)
-      throws StorageException {
-    String query = String.format(LIMITED_STATUS_QUERY, TABLE_NAME, column, findStatus, orderColumn, limit);
+  private List<HopEncodingStatus> findStatus(String query) throws StorageException {
     ArrayList<HopEncodingStatus> resultList;
     try {
       Connection conn = mysqlConnector.obtainSession();
@@ -333,8 +375,11 @@ public class EncodingStatusClusterj implements EncodingStatusTableDef, EncodingS
         Integer parityStatus = result.getInt(PARITY_STATUS);
         Long parityStatusModificationTime = result.getLong(PARITY_STATUS_MODIFICATION_TIME);
         String parityFileName = result.getString(PARITY_FILE_NAME);
+        int lostBlocks = result.getInt(LOST_BLOCKS);
+        int lostParityBlocks = result.getInt(LOST_PARITY_BLOCKS);
         resultList.add(new HopEncodingStatus(inodeId, parityInodeId, status, codec, targetReplication,
-            statusModificationTime, parityStatus, parityStatusModificationTime, parityFileName));
+            statusModificationTime, parityStatus, parityStatusModificationTime, parityFileName, lostBlocks,
+            lostParityBlocks));
       }
     } catch (SQLException ex) {
       throw new StorageException(ex);
