@@ -317,6 +317,11 @@ public class EncodingStatusClusterj implements EncodingStatusTableDef, EncodingS
     return 0;
   }
 
+  @Override
+  public Collection<HopEncodingStatus> findDeleted(long limit) throws StorageException {
+    return findWithStatus(HopEncodingStatus.DELETED, limit);
+  }
+
   private HopEncodingStatus createHopEncoding(EncodingStatusDto dto) {
     if (dto == null) {
       return null;
