@@ -93,6 +93,11 @@ public class EncodingStatusClusterj implements EncodingStatusTableDef, EncodingS
     int getLostParityBlockCount();
 
     void setLostParityBlockCount(int n);
+
+    @Column(name = REVOKED)
+    Boolean getRevoked();
+
+    void setRevoked(Boolean revoked);
   }
 
   @Override
@@ -167,6 +172,10 @@ public class EncodingStatusClusterj implements EncodingStatusTableDef, EncodingS
     if (lostParityBlocks != null) {
       dto.setLostParityBlockCount(lostParityBlocks);
     }
+    Boolean revoked = status.getRevoked();
+    if (revoked != null) {
+      dto.setRevoked(revoked);
+    }
   }
 
   @Override
@@ -228,7 +237,7 @@ public class EncodingStatusClusterj implements EncodingStatusTableDef, EncodingS
         + ", " + LOST_BLOCKS  + "+" + LOST_PARITY_BLOCKS  + " AS " + LOST_BLOCK_SUM + " FROM " + TABLE_NAME
         + " WHERE " + STATUS  + "=" + HopEncodingStatus.REPAIR_REQUESTED + " ORDER BY " + LOST_BLOCK_SUM
         + " DESC, " + LOST_BLOCKS + " DESC, " + STATUS_MODIFICATION_TIME + " ASC LIMIT " + limit;
-    return findStatus(query);
+    return find(query);
   }
 
   @Override
@@ -280,7 +289,7 @@ public class EncodingStatusClusterj implements EncodingStatusTableDef, EncodingS
         HopEncodingStatus.REPAIR_FAILED,
         PARITY_STATUS_MODIFICATION_TIME,
         limit);
-    return findStatus(query);
+    return find(query);
   }
 
   @Override
@@ -323,6 +332,31 @@ public class EncodingStatusClusterj implements EncodingStatusTableDef, EncodingS
     return findWithStatus(HopEncodingStatus.DELETED, limit);
   }
 
+  @Override
+  public Collection<HopEncodingStatus> findRevoked() throws StorageException {
+    try {
+      Session session = clusterjConnector.obtainSession();
+      QueryBuilder builder = session.getQueryBuilder();
+      QueryDomainType<EncodingStatusDto> domain = builder.createQueryDefinition(EncodingStatusDto.class);
+      domain.where(domain.get("revoked").equal(domain.param(REVOKED)));
+      Query<EncodingStatusDto> query = session.createQuery(domain);
+      query.setParameter(REVOKED, true);
+
+      List<EncodingStatusDto> results = query.getResultList();
+      return createHopEncodings(results);
+    } catch (Exception e) {
+      throw new StorageException(e);
+    }
+  }
+
+  private List<HopEncodingStatus> createHopEncodings(List<EncodingStatusDto> list) {
+    List<HopEncodingStatus> result = new ArrayList<HopEncodingStatus>(list.size());
+    for (EncodingStatusDto dto : list) {
+      result.add(createHopEncoding(dto));
+    }
+    return result;
+  }
+
   private HopEncodingStatus createHopEncoding(EncodingStatusDto dto) {
     if (dto == null) {
       return null;
@@ -338,7 +372,7 @@ public class EncodingStatusClusterj implements EncodingStatusTableDef, EncodingS
     return new HopEncodingStatus(dto.getInodeId(), parityInodeId, dto.getStatus(), dto.getCodec(),
         dto.getTargetReplication(), dto.getStatusModificationTime(), dto.getParityStatus(),
         dto.getParityStatusModificationTime(), dto.getParityFileName(), dto.getLostBlockCount(),
-        dto.getLostParityBlockCount());
+        dto.getLostParityBlockCount(), dto.getRevoked());
   }
 
   private List<HopEncodingStatus> findAllWithStatus(int status) throws StorageException {
@@ -354,15 +388,15 @@ public class EncodingStatusClusterj implements EncodingStatusTableDef, EncodingS
   private List<HopEncodingStatus> findWithParityStatus(int findStatus, long limit) throws StorageException {
     String query = String.format(STATUS_QUERY, TABLE_NAME, PARITY_STATUS, findStatus, PARITY_STATUS_MODIFICATION_TIME,
         limit);
-    return findStatus(query);
+    return find(query);
   }
 
   private List<HopEncodingStatus> findWithStatus(int findStatus, long limit) throws StorageException {
     String query = String.format(STATUS_QUERY, TABLE_NAME, STATUS, findStatus, STATUS_MODIFICATION_TIME, limit);
-    return findStatus(query);
+    return find(query);
   }
 
-  private List<HopEncodingStatus> findStatus(String query) throws StorageException {
+  private List<HopEncodingStatus> find(String query) throws StorageException {
     ArrayList<HopEncodingStatus> resultList;
     try {
       Connection conn = mysqlConnector.obtainSession();
@@ -382,10 +416,11 @@ public class EncodingStatusClusterj implements EncodingStatusTableDef, EncodingS
         Long parityStatusModificationTime = result.getLong(PARITY_STATUS_MODIFICATION_TIME);
         String parityFileName = result.getString(PARITY_FILE_NAME);
         int lostBlocks = result.getInt(LOST_BLOCKS);
+        Boolean revoked = result.getBoolean(REVOKED);
         int lostParityBlocks = result.getInt(LOST_PARITY_BLOCKS);
         resultList.add(new HopEncodingStatus(inodeId, parityInodeId, status, codec, targetReplication,
             statusModificationTime, parityStatus, parityStatusModificationTime, parityFileName, lostBlocks,
-            lostParityBlocks));
+            lostParityBlocks, revoked));
       }
     } catch (SQLException ex) {
       throw new StorageException(ex);
