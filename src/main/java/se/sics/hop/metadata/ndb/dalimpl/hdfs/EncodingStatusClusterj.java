@@ -118,6 +118,7 @@ public class EncodingStatusClusterj implements EncodingStatusTableDef, EncodingS
     Session session = clusterjConnector.obtainSession();
     EncodingStatusDto dto = session.newInstance(EncodingStatusDto.class);
     copyState(status, dto);
+    LOG.info("Delte " + status);
     session.deletePersistent(dto);
   }
 
