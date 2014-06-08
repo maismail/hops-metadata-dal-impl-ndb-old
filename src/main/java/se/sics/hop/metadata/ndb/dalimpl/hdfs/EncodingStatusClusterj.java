@@ -416,11 +416,13 @@ public class EncodingStatusClusterj implements EncodingStatusTableDef, EncodingS
         Long parityStatusModificationTime = result.getLong(PARITY_STATUS_MODIFICATION_TIME);
         String parityFileName = result.getString(PARITY_FILE_NAME);
         int lostBlocks = result.getInt(LOST_BLOCKS);
-        Boolean revoked = result.getBoolean(REVOKED);
         int lostParityBlocks = result.getInt(LOST_PARITY_BLOCKS);
+        // TODO STEFFEN - This leads to crashed with column revoked not found.
+        // No idea why but the revoked flag is not read in this context anyway.
+//        Boolean revoked = result.getBoolean(REVOKED);
         resultList.add(new HopEncodingStatus(inodeId, parityInodeId, status, codec, targetReplication,
             statusModificationTime, parityStatus, parityStatusModificationTime, parityFileName, lostBlocks,
-            lostParityBlocks, revoked));
+            lostParityBlocks, /*revoked*/ null));
       }
     } catch (SQLException ex) {
       throw new StorageException(ex);
