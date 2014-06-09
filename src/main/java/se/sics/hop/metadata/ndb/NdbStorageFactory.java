@@ -23,6 +23,8 @@ import se.sics.hop.metadata.hdfs.dal.ReplicaUnderConstructionDataAccess;
 import se.sics.hop.metadata.hdfs.dal.UnderReplicatedBlockDataAccess;
 import se.sics.hop.metadata.hdfs.dal.VariableDataAccess;
 import se.sics.hop.exception.StorageInitializtionException;
+import se.sics.hop.metadata.crap.CrapDataAccess;
+import se.sics.hop.metadata.ndb.dalimpl.crap.CrapClusterj;
 import se.sics.hop.metadata.ndb.dalimpl.hdfs.BlockInfoClusterj;
 import se.sics.hop.metadata.ndb.dalimpl.hdfs.CorruptReplicaClusterj;
 import se.sics.hop.metadata.ndb.dalimpl.hdfs.ExcessReplicaClusterj;
@@ -41,6 +43,8 @@ import se.sics.hop.metadata.ndb.dalimpl.yarn.ApplicationAttemptIdClusterJ;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.ApplicationIdClusterJ;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.ContainerIdClusterJ;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.ContainerStatusClusterJ;
+import se.sics.hop.metadata.ndb.dalimpl.yarn.FiCaSchedulerNodeClusterJ;
+import se.sics.hop.metadata.ndb.dalimpl.yarn.FifoSchedulerNodesClusterJ;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.InvokeRequestClusterJ;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.JustLaunchedContainersClusterJ;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.NodeClusterJ;
@@ -57,6 +61,8 @@ import se.sics.hop.metadata.yarn.dal.ApplicationAttemptIdDataAccess;
 import se.sics.hop.metadata.yarn.dal.ApplicationIdDataAccess;
 import se.sics.hop.metadata.yarn.dal.ContainerIdDataAccess;
 import se.sics.hop.metadata.yarn.dal.ContainerStatusDataAccess;
+import se.sics.hop.metadata.yarn.dal.FiCaSchedulerNodeDataAccess;
+import se.sics.hop.metadata.yarn.dal.FifoSchedulerNodesDataAccess;
 import se.sics.hop.metadata.yarn.dal.InvokeRequestDataAccess;
 import se.sics.hop.metadata.yarn.dal.JustLaunchedContainersDataAccess;
 import se.sics.hop.metadata.yarn.dal.NodeDataAccess;
@@ -123,8 +129,11 @@ public class NdbStorageFactory implements DALStorageFactory {
         dataAccessMap.put(RMContextNodesDataAccess.class, new RMContextNodesClusterJ());
         dataAccessMap.put(RMContextInactiveNodesDataAccess.class, new RMContextInactiveNodesClusterJ());
         dataAccessMap.put(InvokeRequestDataAccess.class, new InvokeRequestClusterJ());
+        dataAccessMap.put(FiCaSchedulerNodeDataAccess.class, new FiCaSchedulerNodeClusterJ());
+        dataAccessMap.put(FifoSchedulerNodesDataAccess.class, new FifoSchedulerNodesClusterJ());
         
-
+        //CRAP
+        dataAccessMap.put(CrapDataAccess.class, new CrapClusterj());
     }
 
     @Override

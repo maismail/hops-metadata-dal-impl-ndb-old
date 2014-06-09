@@ -109,8 +109,7 @@ public class FiCaSchedulerNodeClusterJ implements FiCaSchedulerNodeTableDef, FiC
                 ficaschedulernodeDTO.getnumcontainers(),
                 ficaschedulernodeDTO.getrmnodeid(),
                 ficaschedulernodeDTO.getnodename());
-        return null;
-
+        return hop;
     }
 
     private FiCaSchedulerNodeDTO createPersistable(HopFiCaSchedulerNode hop, Session session) {
@@ -121,6 +120,7 @@ public class FiCaSchedulerNodeClusterJ implements FiCaSchedulerNodeTableDef, FiC
         ficaDTO.setrmnodeid(hop.getRmNodeID());
         ficaDTO.settotalcapabilityid(hop.getTotalCapabilityID());
         ficaDTO.setusedresourceid(hop.getUsedResourceID());
+        ficaDTO.setnodename(hop.getNodeName());
         session.savePersistent(ficaDTO);
         return ficaDTO;
     }
