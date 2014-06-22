@@ -108,7 +108,6 @@ public class TokenClusterJ implements TokenTableDef, TokenDataAccess<HopToken> {
         tokenDTO.setkind(token.getKind());
         tokenDTO.setpassword(token.getPassword());
         tokenDTO.setservice(token.getService());
-        session.savePersistent(tokenDTO);
         return tokenDTO;
     }
 }

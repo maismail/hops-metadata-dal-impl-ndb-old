@@ -97,8 +97,8 @@ public class FiCaSchedulerNodeClusterJ implements FiCaSchedulerNodeTableDef, FiC
 
     @Override
     public void createFiCaSchedulerNode(HopFiCaSchedulerNode node) throws StorageException {
-        Session session = connector.obtainSession();
-        createPersistable(node, session);
+        Session session = connector.obtainSession();  
+        session.savePersistent(createPersistable(node, session));
     }
 
     private HopFiCaSchedulerNode createHopFiCaSchedulerNode(FiCaSchedulerNodeDTO ficaschedulernodeDTO) {
@@ -121,7 +121,6 @@ public class FiCaSchedulerNodeClusterJ implements FiCaSchedulerNodeTableDef, FiC
         ficaDTO.settotalcapabilityid(hop.getTotalCapabilityID());
         ficaDTO.setusedresourceid(hop.getUsedResourceID());
         ficaDTO.setnodename(hop.getNodeName());
-        session.savePersistent(ficaDTO);
         return ficaDTO;
     }
 }

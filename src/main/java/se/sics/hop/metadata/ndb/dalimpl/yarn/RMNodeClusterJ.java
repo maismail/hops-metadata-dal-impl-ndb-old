@@ -97,6 +97,7 @@ public class RMNodeClusterJ implements RMNodeTableDef, RMNodeDataAccess<HopRMNod
     public HopRMNode findByNodeId(int nodeid) throws StorageException {
         Session session = connector.obtainSession();
         RMNodeDTO rmnodeDTO = session.find(RMNodeDTO.class, nodeid);
+        System.out.println("DTO" + rmnodeDTO.getNodeid());
         if (rmnodeDTO == null) {
             throw new StorageException("Error while retrieving row:" + nodeid);
         }

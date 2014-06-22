@@ -1,10 +1,16 @@
 package se.sics.hop.metadata.ndb.dalimpl.yarn;
 
+import com.mysql.clusterj.Query;
 import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
+import com.mysql.clusterj.query.Predicate;
+import com.mysql.clusterj.query.QueryBuilder;
+import com.mysql.clusterj.query.QueryDomainType;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.entity.yarn.HopFifoSchedulerNodes;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
@@ -83,7 +89,26 @@ public class FifoSchedulerNodesClusterJ implements FifoSchedulerNodesTableDef, F
     @Override
     public void createFifoSchedulerNodesEntry(HopFifoSchedulerNodes entry) throws StorageException {
         Session session = connector.obtainSession();
-        createPersistable(entry, session);
+        session.savePersistent(createPersistable(entry, session));
+    }
+    
+    @Override
+    public List<HopFifoSchedulerNodes> getAllByFifoSchedulerId(int fifoSchedulerId) throws StorageException {
+        try {
+            Session session = connector.obtainSession();
+            QueryBuilder qb = session.getQueryBuilder();
+
+            QueryDomainType<FifoSchedulerNodesClusterJ.FifoSchedulerNodesDTO> dobj = qb.createQueryDefinition(FifoSchedulerNodesClusterJ.FifoSchedulerNodesDTO.class);
+            Predicate pred1 = dobj.get("fifoschedulerid").equal(dobj.param("fifoschedulerid"));
+            dobj.where(pred1);
+            Query<FifoSchedulerNodesClusterJ.FifoSchedulerNodesDTO> query = session.createQuery(dobj);
+            query.setParameter("fifoschedulerid", fifoSchedulerId);
+
+            List<FifoSchedulerNodesClusterJ.FifoSchedulerNodesDTO> results = query.getResultList();
+            return createFifoSchedulerNodesList(results);
+        } catch (Exception e) {
+            throw new StorageException(e);
+        }   
     }
 
     private HopFifoSchedulerNodes createFifoSchedulerNodes(FifoSchedulerNodesDTO entry) {
@@ -96,7 +121,14 @@ public class FifoSchedulerNodesClusterJ implements FifoSchedulerNodesTableDef, F
         fifoDTO.setfifoschedulerid(id.getFifoSchedulerID());
         fifoDTO.setnodeidid(id.getNodeidID());
         fifoDTO.setficaschedulernodeid(id.getFicaSchedulerNodeID());
-        session.savePersistent(fifoDTO);
         return fifoDTO;
+    }
+    
+    private List<HopFifoSchedulerNodes> createFifoSchedulerNodesList(List<FifoSchedulerNodesClusterJ.FifoSchedulerNodesDTO> results) {
+        List<HopFifoSchedulerNodes> fifoSchedulerNodes = new ArrayList<HopFifoSchedulerNodes>();
+        for (FifoSchedulerNodesClusterJ.FifoSchedulerNodesDTO persistable : results) {
+            fifoSchedulerNodes.add(createFifoSchedulerNodes(persistable));
+        }
+        return fifoSchedulerNodes;
     }
 }
