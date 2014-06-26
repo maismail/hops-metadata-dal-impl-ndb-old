@@ -50,21 +50,6 @@ public class FifoSchedulerAppsClusterJ implements FifoSchedulerAppsTableDef, Fif
     private final ClusterjConnector connector = ClusterjConnector.getInstance();
 
     @Override
-    public HopFifoSchedulerApps findById(int id) throws StorageException {
-        Session session = connector.obtainSession();
-
-        FifoSchedulerAppsClusterJ.FifoSchedulerAppsDTO fifoSchedulerAppsDTO = null;
-        if (session != null) {
-            fifoSchedulerAppsDTO = session.find(FifoSchedulerAppsClusterJ.FifoSchedulerAppsDTO.class, id);
-        }
-        if (fifoSchedulerAppsDTO == null) {
-                throw new StorageException("HOP :: Error while retrieving row");
-        }
-
-        return createHopFifoSchedulerApps(fifoSchedulerAppsDTO);
-    }
-
-    @Override
     public void prepare(Collection<HopFifoSchedulerApps> modified, Collection<HopFifoSchedulerApps> removed) throws StorageException {
         Session session = connector.obtainSession();
         try {

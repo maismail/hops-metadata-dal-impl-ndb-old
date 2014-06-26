@@ -16,6 +16,7 @@ import se.sics.hop.metadata.hdfs.entity.yarn.HopFiCaSchedulerAppReservedContaine
 import se.sics.hop.metadata.ndb.ClusterjConnector;
 import se.sics.hop.metadata.yarn.dal.FiCaSchedulerAppReservedContainersDataAccess;
 import se.sics.hop.metadata.yarn.tabledef.FiCaSchedulerAppReservedContainersTableDef;
+import static se.sics.hop.metadata.yarn.tabledef.FiCaSchedulerAppReservedContainersTableDef.PRIORITY_ID;
 
 /**
  *
@@ -34,6 +35,14 @@ public class FiCaSchedulerAppReservedContainersClusterJ implements FiCaScheduler
         @Column(name = PRIORITY_ID)
         int getpriorityid();
         void setpriorityid(int priorityid);
+        
+        @Column(name = NODEID)
+        int getnodeid();
+        void setnodeid(int nodeid);
+        
+        @Column(name = RMCONTAINER)
+        int getrmcontainer();
+        void setrmcontainer(int rmcontainer);
     }
     
     private final ClusterjConnector connector = ClusterjConnector.getInstance();
@@ -76,7 +85,9 @@ public class FiCaSchedulerAppReservedContainersClusterJ implements FiCaScheduler
     
     private HopFiCaSchedulerAppReservedContainers createHopFiCaSchedulerAppReservedContainers(FiCaSchedulerAppReservedContainersDTO fiCaSchedulerAppReservedContainersDTO) {
         return new HopFiCaSchedulerAppReservedContainers(fiCaSchedulerAppReservedContainersDTO.getficaschedulerappid(),
-                                                         fiCaSchedulerAppReservedContainersDTO.getpriorityid());
+                                                         fiCaSchedulerAppReservedContainersDTO.getpriorityid(),
+                                                         fiCaSchedulerAppReservedContainersDTO.getnodeid(),
+                                                         fiCaSchedulerAppReservedContainersDTO.getrmcontainer());
     }
 
     private FiCaSchedulerAppReservedContainersDTO createPersistable(HopFiCaSchedulerAppReservedContainers hop, Session session) {
@@ -84,6 +95,8 @@ public class FiCaSchedulerAppReservedContainersClusterJ implements FiCaScheduler
         
         fiCaSchedulerAppReservedContainersDTO.setficaschedulerappid(hop.getFicaschedulerapp_id());
         fiCaSchedulerAppReservedContainersDTO.setpriorityid(hop.getPriority_id());
+        fiCaSchedulerAppReservedContainersDTO.setnodeid(hop.getNodeid());
+        fiCaSchedulerAppReservedContainersDTO.setrmcontainer(hop.getRmcontainer());
         
         return fiCaSchedulerAppReservedContainersDTO;
     }
