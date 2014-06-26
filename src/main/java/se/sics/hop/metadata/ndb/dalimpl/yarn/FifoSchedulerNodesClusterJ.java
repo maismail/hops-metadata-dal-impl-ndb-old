@@ -46,11 +46,11 @@ public class FifoSchedulerNodesClusterJ implements FifoSchedulerNodesTableDef, F
     private ClusterjConnector connector = ClusterjConnector.getInstance();
 
     @Override
-    public HopFifoSchedulerNodes findEntry(int nodeidId, int fiCaSchedulerNodeId) throws StorageException {
+    public HopFifoSchedulerNodes findEntry(int fifoschedulerid, int nodeid) throws StorageException {
         Session session = connector.obtainSession();
         Object[] objarr = new Object[2];
-        objarr[0] = nodeidId;
-        objarr[1] = fiCaSchedulerNodeId;
+        objarr[0] = fifoschedulerid;
+        objarr[1] = nodeid;
         FifoSchedulerNodesDTO entry = null;
         if (session != null) {
             entry = session.find(FifoSchedulerNodesDTO.class, objarr);

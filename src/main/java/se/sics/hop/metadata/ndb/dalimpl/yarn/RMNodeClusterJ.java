@@ -12,8 +12,6 @@ import se.sics.hop.metadata.hdfs.entity.yarn.HopRMNode;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
 import se.sics.hop.metadata.yarn.dal.RMNodeDataAccess;
 import se.sics.hop.metadata.yarn.tabledef.RMNodeTableDef;
-import static se.sics.hop.metadata.yarn.tabledef.RMNodeTableDef.COMMAND_PORT;
-import static se.sics.hop.metadata.yarn.tabledef.RMNodeTableDef.RESOURCE_ID;
 
 /**
  * Implements connection of RMNodeImpl to NDB.
@@ -97,11 +95,9 @@ public class RMNodeClusterJ implements RMNodeTableDef, RMNodeDataAccess<HopRMNod
     public HopRMNode findByNodeId(int nodeid) throws StorageException {
         Session session = connector.obtainSession();
         RMNodeDTO rmnodeDTO = session.find(RMNodeDTO.class, nodeid);
-        System.out.println("DTO" + rmnodeDTO.getNodeid());
         if (rmnodeDTO == null) {
             throw new StorageException("Error while retrieving row:" + nodeid);
         }
-
         return createHopRMNode(rmnodeDTO);
     }
 
@@ -162,16 +158,14 @@ public class RMNodeClusterJ implements RMNodeTableDef, RMNodeDataAccess<HopRMNod
                 session.savePersistentAll(toModify);
             }
         } catch (Exception e) {
-            throw new StorageException("Error while modifying invokerequests, error:" + e.getMessage());
+            throw new StorageException("Error while rmnode table:" + e.getMessage());
         }
     }
 
     @Override
     public void createRMNode(HopRMNode rmNode) throws StorageException {
         Session session = connector.obtainSession();
-        
-            session.savePersistent(createPersistable(rmNode, session));
-        
+        session.savePersistent(createPersistable(rmNode, session));
     }
 
     private RMNodeDTO createPersistable(HopRMNode hopRMNode, Session session) {

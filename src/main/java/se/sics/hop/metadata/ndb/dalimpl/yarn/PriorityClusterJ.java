@@ -4,7 +4,9 @@ import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.entity.yarn.HopPriority;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
@@ -53,27 +55,28 @@ public class PriorityClusterJ implements PriorityTableDef, PriorityDataAccess<Ho
         Session session = connector.obtainSession();
         try {
             if (removed != null) {
-                for (HopPriority priority : removed) {
-
-                    PriorityDTO persistable = session.newInstance(PriorityDTO.class, priority.getId());
-                    session.deletePersistent(persistable);
+                List<PriorityDTO> toRemove = new ArrayList<PriorityDTO>();
+                for (HopPriority pr : removed) {
+                    toRemove.add(session.newInstance(PriorityDTO.class, pr.getId()));
                 }
+                session.deletePersistentAll(toRemove);
             }
             if (modified != null) {
-                for (HopPriority priority : modified) {
-                    PriorityDTO persistable = createPersistable(priority, session);
-                    session.savePersistent(persistable);
+                List<PriorityDTO> toModify = new ArrayList<PriorityDTO>();
+                for (HopPriority pr : modified) {
+                    toModify.add(createPersistable(pr, session));
                 }
+                session.savePersistentAll(toModify);
             }
         } catch (Exception e) {
-            throw new StorageException(e);
+            throw new StorageException("Error while rmnode table:" + e.getMessage());
         }
     }
 
     @Override
     public void createPriority(HopPriority priority) throws StorageException {
         Session session = connector.obtainSession();
-        createPersistable(priority, session);
+        session.savePersistent(createPersistable(priority, session));
     }
 
     private HopPriority createHopPriority(PriorityDTO priorityDTO) {
@@ -85,7 +88,6 @@ public class PriorityClusterJ implements PriorityTableDef, PriorityDataAccess<Ho
         //Set values to persist new rmnode
         priorityDTO.setid(priority.getId());
         priorityDTO.setpriorityid(priority.getPriority());
-        session.savePersistent(priorityDTO);
         return priorityDTO;
     }
 }
