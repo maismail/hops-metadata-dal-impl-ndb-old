@@ -133,22 +133,26 @@ public class LeaseClusterj implements LeaseTableDef, LeaseDataAccess<HopLease> {
   public void prepare(Collection<HopLease> removed, Collection<HopLease> newed, Collection<HopLease> modified) throws StorageException {
     try {
       Session session = connector.obtainSession();
+      List<LeaseDTO> changes = new ArrayList<LeaseDTO>();
+      List<LeaseDTO> deletions = new ArrayList<LeaseDTO>();
       for (HopLease l : newed) {
         LeaseDTO lTable = session.newInstance(LeaseDTO.class);
         createPersistableLeaseInstance(l, lTable);
-        session.savePersistent(lTable);
+        changes.add(lTable);
       }
 
       for (HopLease l : modified) {
         LeaseDTO lTable = session.newInstance(LeaseDTO.class);
         createPersistableLeaseInstance(l, lTable);
-        session.savePersistent(lTable);
+        changes.add(lTable);
       }
 
       for (HopLease l : removed) {
         LeaseDTO lTable = session.newInstance(LeaseDTO.class, l.getHolder());
-        session.deletePersistent(lTable);
+        deletions.add(lTable);
       }
+      session.deletePersistentAll(deletions);
+      session.savePersistentAll(changes);
     } catch (Exception e) {
       throw new StorageException(e);
     }

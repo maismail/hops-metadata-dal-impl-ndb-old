@@ -87,6 +87,10 @@ public class BlockInfoClusterj implements BlockInfoTableDef, BlockInfoDataAccess
   @Override
   public void prepare(Collection<HopBlockInfo> removed, Collection<HopBlockInfo> news, Collection<HopBlockInfo> modified) throws StorageException {
     try {
+      List<BlockInfoDTO> blkChanges = new ArrayList<BlockInfoDTO>();
+      List<BlockInfoDTO> blkDeletions = new ArrayList<BlockInfoDTO>();
+      List<BlockLookUpClusterj.BlockLookUpDTO> luChanges = new ArrayList<BlockLookUpClusterj.BlockLookUpDTO>();
+      List<BlockLookUpClusterj.BlockLookUpDTO> luDeletions = new ArrayList<BlockLookUpClusterj.BlockLookUpDTO>();
       Session session = connector.obtainSession();
       for (HopBlockInfo block : removed) {
         Object[] pk = new Object[2];
@@ -94,34 +98,38 @@ public class BlockInfoClusterj implements BlockInfoTableDef, BlockInfoDataAccess
         pk[1] = block.getBlockId();
 
         BlockInfoClusterj.BlockInfoDTO bTable = session.newInstance(BlockInfoClusterj.BlockInfoDTO.class, pk);
-        session.deletePersistent(bTable);
+        blkDeletions.add(bTable);
 
         //delete the row from persistance table 
         BlockLookUpClusterj.BlockLookUpDTO lookupDTO = session.newInstance(BlockLookUpClusterj.BlockLookUpDTO.class, block.getBlockId());
-        session.deletePersistent(lookupDTO);
+        luDeletions.add(lookupDTO);
       }
 
       for (HopBlockInfo block : news) {
         BlockInfoClusterj.BlockInfoDTO bTable = session.newInstance(BlockInfoClusterj.BlockInfoDTO.class);
         createPersistable(block, bTable);
-        session.savePersistent(bTable);
+        blkChanges.add(bTable);
 
         //save a new row in the lookup table
         BlockLookUpClusterj.BlockLookUpDTO lookupDTO = session.newInstance(BlockLookUpClusterj.BlockLookUpDTO.class);
         BlockLookUpClusterj.createPersistable(new HopBlockLookUp(block.getBlockId(), block.getInodeId()), lookupDTO);
-        session.savePersistent(lookupDTO);
+        luChanges.add(lookupDTO);
       }
 
       for (HopBlockInfo block : modified) {
         BlockInfoClusterj.BlockInfoDTO bTable = session.newInstance(BlockInfoClusterj.BlockInfoDTO.class);
         createPersistable(block, bTable);
-        session.savePersistent(bTable);
+        blkChanges.add(bTable);
 
         //save a new row in the lookup table
         BlockLookUpClusterj.BlockLookUpDTO lookupDTO = session.newInstance(BlockLookUpClusterj.BlockLookUpDTO.class);
         BlockLookUpClusterj.createPersistable(new HopBlockLookUp(block.getBlockId(), block.getInodeId()), lookupDTO);
-        session.savePersistent(lookupDTO);
+        luChanges.add(lookupDTO);
       }
+      session.deletePersistentAll(blkDeletions);
+      session.deletePersistentAll(luDeletions);
+      session.savePersistentAll(blkChanges);
+      session.savePersistentAll(luChanges);
     } catch (Exception e) {
       throw new StorageException(e);
     }

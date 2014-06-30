@@ -80,24 +80,26 @@ public class PendingBlockClusterj implements PendingBlockTableDef, PendingBlockD
   @Override
   public void prepare(Collection<HopPendingBlockInfo> removed, Collection<HopPendingBlockInfo> newed, Collection<HopPendingBlockInfo> modified) throws StorageException {
     Session session = connector.obtainSession();
+    List<PendingBlockDTO> changes = new ArrayList<PendingBlockDTO>();
+    List<PendingBlockDTO> deletions = new ArrayList<PendingBlockDTO>();
     for (HopPendingBlockInfo p : newed) {
       PendingBlockDTO pTable = session.newInstance(PendingBlockDTO.class);
       createPersistableHopPendingBlockInfo(p, pTable);
-      session.savePersistent(pTable);
+      changes.add(pTable);
     }
     for (HopPendingBlockInfo p : modified) {
       PendingBlockDTO pTable = session.newInstance(PendingBlockDTO.class);
       createPersistableHopPendingBlockInfo(p, pTable);
-      session.savePersistent(pTable);
+      changes.add(pTable);
     }
 
     for (HopPendingBlockInfo p : removed) {
-      Object[] pk = new Object[2];
-        pk[0] = p.getInodeId();
-        pk[1] = p.getBlockId();
-      PendingBlockDTO pTable = session.newInstance(PendingBlockDTO.class, pk);
-      session.deletePersistent(pTable);
+      PendingBlockDTO pTable = session.newInstance(PendingBlockDTO.class);
+      createPersistableHopPendingBlockInfo(p, pTable);
+      deletions.add(pTable);
     }
+    session.deletePersistentAll(deletions);
+    session.savePersistentAll(changes);
   }
 
   @Override

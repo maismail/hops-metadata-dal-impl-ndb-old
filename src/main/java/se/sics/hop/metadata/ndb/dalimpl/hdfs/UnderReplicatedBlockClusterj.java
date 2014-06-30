@@ -79,25 +79,27 @@ public class UnderReplicatedBlockClusterj implements UnderReplicatedBlockTableDe
   @Override
   public void prepare(Collection<HopUnderReplicatedBlock> removed, Collection<HopUnderReplicatedBlock> newed, Collection<HopUnderReplicatedBlock> modified) throws StorageException {
     Session session = connector.obtainSession();
+    List<UnderReplicatedBlocksDTO> changes = new ArrayList<UnderReplicatedBlocksDTO>();
+    List<UnderReplicatedBlocksDTO> deletions = new ArrayList<UnderReplicatedBlocksDTO>();
     for (HopUnderReplicatedBlock urBlock : removed) {
-      Object[] pk = new Object[2];
-      pk[0] = urBlock.getInodeId();
-      pk[1] = urBlock.getBlockId();
-      
-      session.deletePersistent(UnderReplicatedBlocksDTO.class, pk);
+      UnderReplicatedBlocksDTO newInstance = session.newInstance(UnderReplicatedBlocksDTO.class);
+      createPersistable(urBlock, newInstance);
+      deletions.add(newInstance);
     }
 
     for (HopUnderReplicatedBlock urBlock : newed) {
       UnderReplicatedBlocksDTO newInstance = session.newInstance(UnderReplicatedBlocksDTO.class);
       createPersistable(urBlock, newInstance);
-      session.savePersistent(newInstance);
+      changes.add(newInstance);
     }
 
     for (HopUnderReplicatedBlock urBlock : modified) {
       UnderReplicatedBlocksDTO newInstance = session.newInstance(UnderReplicatedBlocksDTO.class);
       createPersistable(urBlock, newInstance);
-      session.savePersistent(newInstance);
+      changes.add(newInstance);
     }
+    session.deletePersistentAll(deletions);
+    session.savePersistentAll(changes);
   }
 
   private void createPersistable(HopUnderReplicatedBlock block, UnderReplicatedBlocksDTO persistable) {

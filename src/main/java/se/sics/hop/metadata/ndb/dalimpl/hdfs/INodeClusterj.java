@@ -129,25 +129,29 @@ public class INodeClusterj implements INodeTableDef, INodeDataAccess<HopINode> {
   public void prepare(Collection<HopINode> removed, Collection<HopINode> newEntries, Collection<HopINode> modified) throws StorageException {
     Session session = connector.obtainSession();
     try {
+      List<InodeDTO> changes = new ArrayList<InodeDTO>();
+      List<InodeDTO> deletions = new ArrayList<InodeDTO>();
       for (HopINode inode : removed) {
         Object[] pk = new Object[2];
         pk[0] = inode.getParentId();
         pk[1] = inode.getName();
         InodeDTO persistable = session.newInstance(InodeDTO.class, pk);
-        session.deletePersistent(persistable);
+        deletions.add(persistable);
       }
       
       for (HopINode inode : newEntries) {
         InodeDTO persistable = session.newInstance(InodeDTO.class);
         createPersistable(inode, persistable);
-        session.savePersistent(persistable);
+        changes.add(persistable);
       }
 
       for (HopINode inode : modified) {
         InodeDTO persistable = session.newInstance(InodeDTO.class);
         createPersistable(inode, persistable);
-        session.savePersistent(persistable);
+        changes.add(persistable);
       }
+      session.deletePersistentAll(deletions);
+      session.savePersistentAll(changes);
     } catch (Exception e) {
       throw new StorageException(e);
     }

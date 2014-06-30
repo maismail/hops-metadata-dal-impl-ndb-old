@@ -43,23 +43,27 @@ public class LeasePathClusterj implements LeasePathTableDef, LeasePathDataAccess
   @Override
   public void prepare(Collection<HopLeasePath> removed, Collection<HopLeasePath> newed, Collection<HopLeasePath> modified) throws StorageException {
     try {
+      List<LeasePathsDTO> changes = new ArrayList<LeasePathsDTO>();
+      List<LeasePathsDTO> deletions = new ArrayList<LeasePathsDTO>();
       Session session = connector.obtainSession();
       for (HopLeasePath lp : newed) {
         LeasePathsDTO lTable = session.newInstance(LeasePathsDTO.class);
         createPersistableLeasePathInstance(lp, lTable);
-        session.savePersistent(lTable);
+        changes.add(lTable);
       }
 
       for (HopLeasePath lp : modified) {
         LeasePathsDTO lTable = session.newInstance(LeasePathsDTO.class);
         createPersistableLeasePathInstance(lp, lTable);
-        session.savePersistent(lTable);
+        changes.add(lTable);
       }
 
       for (HopLeasePath lp : removed) {
         LeasePathsDTO lTable = session.newInstance(LeasePathsDTO.class, lp.getPath());
-        session.deletePersistent(lTable);
+        deletions.add(lTable);
       }
+      session.deletePersistentAll(deletions);
+      session.savePersistentAll(changes);
     } catch (Exception e) {
       throw new StorageException(e);
     }

@@ -9,6 +9,7 @@ import com.mysql.clusterj.query.Predicate;
 import com.mysql.clusterj.query.PredicateOperand;
 import com.mysql.clusterj.query.QueryBuilder;
 import com.mysql.clusterj.query.QueryDomainType;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.SortedSet;
@@ -196,25 +197,27 @@ public class LeaderClusterj implements LeaderTableDef, LeaderDataAccess<HopLeade
   public void prepare(Collection<HopLeader> removed, Collection<HopLeader> newed, Collection<HopLeader> modified) throws StorageException {
     try {
       Session session = connector.obtainSession();
+      List<LeaderDTO> changes = new ArrayList<LeaderDTO>();
+      List<LeaderDTO> deletions = new ArrayList<LeaderDTO>();
       for (HopLeader l : newed) {
         LeaderDTO lTable = session.newInstance(LeaderDTO.class);
         createPersistableLeaderInstance(l, lTable);
-        session.savePersistent(lTable);
+        changes.add(lTable);
       }
 
       for (HopLeader l : modified) {
         LeaderDTO lTable = session.newInstance(LeaderDTO.class);
         createPersistableLeaderInstance(l, lTable);
-        session.savePersistent(lTable);
+        changes.add(lTable);
       }
 
       for (HopLeader l : removed) {
-        Object[] pk = new Object[2];
-        pk[0] = l.getId();
-        pk[1] = l.getPartitionVal();
-        LeaderDTO lTable = session.newInstance(LeaderDTO.class, pk);
-        session.deletePersistent(lTable);
+        LeaderDTO lTable = session.newInstance(LeaderDTO.class);
+        createPersistableLeaderInstance(l, lTable);
+        deletions.add(lTable);
       }
+      session.deletePersistentAll(deletions);
+      session.savePersistentAll(changes);
     } catch (Exception e) {
       throw new StorageException(e);
     }

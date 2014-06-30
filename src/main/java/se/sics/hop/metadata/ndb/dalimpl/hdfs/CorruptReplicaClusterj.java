@@ -57,20 +57,21 @@ public class CorruptReplicaClusterj implements CorruptReplicaTableDef, CorruptRe
   @Override
   public void prepare(Collection<HopCorruptReplica> removed, Collection<HopCorruptReplica> newed, Collection<HopCorruptReplica> modified) throws StorageException {
     Session session = connector.obtainSession();
+    List<CorruptReplicaDTO> changes = new ArrayList<CorruptReplicaDTO>();
+    List<CorruptReplicaDTO> deletions = new ArrayList<CorruptReplicaDTO>();
     for (HopCorruptReplica corruptReplica : removed) {
-      Object[] pk = new Object[4];
-      pk[0] = corruptReplica.getInodeId();
-      pk[1] = corruptReplica.getBlockId();
-      pk[2] = corruptReplica.getStorageId();
-
-      session.deletePersistent(CorruptReplicaDTO.class, pk);
+      CorruptReplicaDTO newInstance = session.newInstance(CorruptReplicaDTO.class);
+      createPersistable(corruptReplica, newInstance);
+      deletions.add(newInstance);
     }
 
     for (HopCorruptReplica corruptReplica : newed) {
       CorruptReplicaDTO newInstance = session.newInstance(CorruptReplicaDTO.class);
       createPersistable(corruptReplica, newInstance);
-      session.savePersistent(newInstance);
+      changes.add(newInstance);
     }
+    session.deletePersistentAll(deletions);
+    session.savePersistentAll(changes);
   }
 
   @Override
