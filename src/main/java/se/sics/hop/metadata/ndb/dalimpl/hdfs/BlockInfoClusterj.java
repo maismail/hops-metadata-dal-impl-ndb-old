@@ -149,14 +149,8 @@ public class BlockInfoClusterj implements BlockInfoTableDef, BlockInfoDataAccess
       }
       return createBlockInfo(bit);
     } catch (Exception e) {
-            //[S] clusterj new lib 7.3.2 sometimes throws tuple not found exception
-      //if the row does not exist. Silly
-      if (e.getMessage().contains("Tuple did not exist")) {
-        return null;
-      } else {
         throw new StorageException(e);
       }
-    }
   }
 
   @Override
