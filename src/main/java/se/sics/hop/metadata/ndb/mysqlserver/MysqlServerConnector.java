@@ -5,8 +5,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Properties;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.log4j.Logger;
 import se.sics.hop.StorageConnector;
 import se.sics.hop.metadata.hdfs.dal.EntityDataAccess;
 import se.sics.hop.exception.StorageException;
@@ -20,7 +19,7 @@ import se.sics.hop.exception.StorageException;
 public class MysqlServerConnector implements StorageConnector<Connection> {
 
   private static MysqlServerConnector instance;
-  private Log log;
+  private Logger log;
   private String protocol;
   private String user;
   private String password;
@@ -28,7 +27,7 @@ public class MysqlServerConnector implements StorageConnector<Connection> {
   public static final String DRIVER = "com.mysql.jdbc.Driver";
 
   private MysqlServerConnector() {
-    log = LogFactory.getLog(MysqlServerConnector.class);
+    log = Logger.getLogger(MysqlServerConnector.class);
   }
 
   public static MysqlServerConnector getInstance(){

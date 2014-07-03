@@ -9,8 +9,11 @@ import com.mysql.clusterj.Session;
 import com.mysql.clusterj.SessionFactory;
 import com.mysql.clusterj.Transaction;
 import java.util.Properties;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.log4j.Logger;
+//import java.util.logging.Logger;
+
+//import org.apache.commons.logging.Log;
+//import org.apache.commons.logging.LogFactory;
 import se.sics.hop.StorageConnector;
 import se.sics.hop.metadata.hdfs.dal.BlockInfoDataAccess;
 import se.sics.hop.metadata.hdfs.dal.CorruptReplicaDataAccess;
@@ -48,7 +51,7 @@ public class ClusterjConnector implements StorageConnector<Session> {
     private static ClusterjConnector instance;
     static SessionFactory sessionFactory;
     static ThreadLocal<Session> sessionPool = new ThreadLocal<Session>();
-    static final Log LOG = LogFactory.getLog(ClusterjConnector.class);
+    static final Logger LOG = Logger.getLogger(ClusterjConnector.class);
 
     /*@Override
     public void clearSession() {

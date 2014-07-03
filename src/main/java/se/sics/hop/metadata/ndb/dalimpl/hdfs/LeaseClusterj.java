@@ -12,8 +12,7 @@ import com.mysql.clusterj.query.QueryDomainType;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.log4j.Logger;
 import se.sics.hop.metadata.hdfs.dal.LeaseDataAccess;
 import se.sics.hop.metadata.hdfs.entity.hdfs.HopLease;
 import se.sics.hop.exception.StorageException;
@@ -47,7 +46,7 @@ public class LeaseClusterj implements LeaseTableDef, LeaseDataAccess<HopLease> {
     void setHolderId(int holder_id);
   }
   private ClusterjConnector connector = ClusterjConnector.getInstance();
-  private static Log log = LogFactory.getLog(LeaseDataAccess.class);
+  private static Logger log = Logger.getLogger(LeaseDataAccess.class);
 
   @Override
   public int countAll() throws StorageException {
