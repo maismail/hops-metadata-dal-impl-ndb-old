@@ -12,16 +12,16 @@ import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
 import java.util.Collection;
 import se.sics.hop.exception.StorageException;
-import se.sics.hop.metadata.hdfs.entity.yarn.HopVersion;
+import se.sics.hop.metadata.hdfs.entity.yarn.HopRMStateVersion;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
-import se.sics.hop.metadata.yarn.dal.VersionDataAccess;
+import se.sics.hop.metadata.yarn.dal.RMStateVersionDataAccess;
 import se.sics.hop.metadata.yarn.tabledef.VersionTableDef;
 
 /**
  *
  * @author nickstanogias
  */
-public class VersionClusterJ implements VersionTableDef, VersionDataAccess<HopVersion>{
+public class RMStateVersionClusterJ implements VersionTableDef, RMStateVersionDataAccess<HopRMStateVersion>{
 
 
     @PersistenceCapable(table = TABLE_NAME)
@@ -40,12 +40,12 @@ public class VersionClusterJ implements VersionTableDef, VersionDataAccess<HopVe
     private final ClusterjConnector connector = ClusterjConnector.getInstance();
     
     @Override
-    public HopVersion findById(int id) throws StorageException {
+    public HopRMStateVersion findById(int id) throws StorageException {
         Session session = connector.obtainSession();
 
-        VersionClusterJ.VersionDTO versionDTO = null;
+        RMStateVersionClusterJ.VersionDTO versionDTO = null;
         if (session != null) {
-            versionDTO = session.find(VersionClusterJ.VersionDTO.class, id);
+            versionDTO = session.find(RMStateVersionClusterJ.VersionDTO.class, id);
         }
         if (versionDTO == null) {
                 throw new StorageException("HOP :: Error while retrieving row");
@@ -55,18 +55,18 @@ public class VersionClusterJ implements VersionTableDef, VersionDataAccess<HopVe
     }
     
     @Override
-    public void prepare(Collection<HopVersion> modified, Collection<HopVersion> removed) throws StorageException {
+    public void prepare(Collection<HopRMStateVersion> modified, Collection<HopRMStateVersion> removed) throws StorageException {
         Session session = connector.obtainSession();
         try {
             if (removed != null) {
-                for (HopVersion hop : removed) {
-                    VersionClusterJ.VersionDTO persistable = session.newInstance(VersionClusterJ.VersionDTO.class, hop.getId());
+                for (HopRMStateVersion hop : removed) {
+                    RMStateVersionClusterJ.VersionDTO persistable = session.newInstance(RMStateVersionClusterJ.VersionDTO.class, hop.getId());
                     session.deletePersistent(persistable);
                 }
             }
             if (modified != null) {
-                for (HopVersion hop : modified) {
-                    VersionClusterJ.VersionDTO persistable = createPersistable(hop, session);
+                for (HopRMStateVersion hop : modified) {
+                    RMStateVersionClusterJ.VersionDTO persistable = createPersistable(hop, session);
                     session.savePersistent(persistable);
                 }
             }
@@ -75,12 +75,12 @@ public class VersionClusterJ implements VersionTableDef, VersionDataAccess<HopVe
         }
     }
     
-    private HopVersion createHopVersion(VersionDTO versionDTO) {
-        return new HopVersion(versionDTO.getid(), versionDTO.getversion());
+    private HopRMStateVersion createHopVersion(VersionDTO versionDTO) {
+        return new HopRMStateVersion(versionDTO.getid(), versionDTO.getversion());
     }
 
-    private VersionDTO createPersistable(HopVersion hop, Session session) {
-        VersionClusterJ.VersionDTO versionDTO = session.newInstance(VersionClusterJ.VersionDTO.class);   
+    private VersionDTO createPersistable(HopRMStateVersion hop, Session session) {
+        RMStateVersionClusterJ.VersionDTO versionDTO = session.newInstance(RMStateVersionClusterJ.VersionDTO.class);   
         versionDTO.setid(hop.getId());
         versionDTO.setversion(hop.getVersion());
         
