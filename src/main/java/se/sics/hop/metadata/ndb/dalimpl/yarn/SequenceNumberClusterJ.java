@@ -10,7 +10,9 @@ import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.entity.yarn.HopSequenceNumber;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
@@ -58,16 +60,18 @@ public class SequenceNumberClusterJ implements SequenceNumberTableDef, SequenceN
         Session session = connector.obtainSession();
         try {
             if (removed != null) {
+                List<SequenceNumberDTO> toRemove = new ArrayList<SequenceNumberDTO>();
                 for (HopSequenceNumber hop : removed) {
-                    SequenceNumberClusterJ.SequenceNumberDTO persistable = session.newInstance(SequenceNumberClusterJ.SequenceNumberDTO.class, hop.getId());
-                    session.deletePersistent(persistable);
+                    toRemove.add(session.newInstance(SequenceNumberClusterJ.SequenceNumberDTO.class, hop.getId()));
                 }
+                session.deletePersistentAll(toRemove);
             }
             if (modified != null) {
+                List<SequenceNumberDTO> toModify = new ArrayList<SequenceNumberDTO>();
                 for (HopSequenceNumber hop : modified) {
-                    SequenceNumberClusterJ.SequenceNumberDTO persistable = createPersistable(hop, session);
-                    session.savePersistent(persistable);
+                    toModify.add(createPersistable(hop, session));
                 }
+                session.savePersistentAll(toModify);
             }
         } catch (Exception e) {
             throw new StorageException(e);

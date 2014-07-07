@@ -10,7 +10,9 @@ import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.entity.yarn.HopRMStateVersion;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
@@ -59,16 +61,18 @@ public class RMStateVersionClusterJ implements VersionTableDef, RMStateVersionDa
         Session session = connector.obtainSession();
         try {
             if (removed != null) {
+                List<VersionDTO> toRemove = new ArrayList<VersionDTO>();
                 for (HopRMStateVersion hop : removed) {
-                    RMStateVersionClusterJ.VersionDTO persistable = session.newInstance(RMStateVersionClusterJ.VersionDTO.class, hop.getId());
-                    session.deletePersistent(persistable);
+                    toRemove.add(session.newInstance(RMStateVersionClusterJ.VersionDTO.class, hop.getId()));
                 }
+                session.deletePersistentAll(toRemove);
             }
             if (modified != null) {
+                List<VersionDTO> toModify = new ArrayList<VersionDTO>();
                 for (HopRMStateVersion hop : modified) {
-                    RMStateVersionClusterJ.VersionDTO persistable = createPersistable(hop, session);
-                    session.savePersistent(persistable);
+                    toModify.add(createPersistable(hop, session));
                 }
+                session.savePersistentAll(toModify);
             }
         } catch (Exception e) {
             throw new StorageException(e);

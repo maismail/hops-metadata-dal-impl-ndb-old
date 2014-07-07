@@ -146,19 +146,21 @@ public class ApplicationAttemptStateClusterJ implements ApplicationAttemptStateT
         Session session = connector.obtainSession();
         try {
             if (removed != null) {
+                List<ApplicationAttemptStateDTO> toRemove = new ArrayList<ApplicationAttemptStateDTO>();
                 for (HopApplicationAttemptState hop : removed) {
                     Object[] objarr = new Object[2];
                     objarr[0] = hop.getApplicationid();
                     objarr[1] = hop.getApplicationattemptid();
-                    ApplicationAttemptStateClusterJ.ApplicationAttemptStateDTO persistable = session.newInstance(ApplicationAttemptStateClusterJ.ApplicationAttemptStateDTO.class, objarr);
-                    session.deletePersistent(persistable);
+                    toRemove.add(session.newInstance(ApplicationAttemptStateClusterJ.ApplicationAttemptStateDTO.class, objarr));
                 }
+                session.deletePersistentAll(toRemove);
             }
             if (modified != null) {
+                List<ApplicationAttemptStateDTO> toModify = new ArrayList<ApplicationAttemptStateDTO>();
                 for (HopApplicationAttemptState hop : modified) {
-                    ApplicationAttemptStateClusterJ.ApplicationAttemptStateDTO persistable = createPersistable(hop, session);
-                    session.savePersistent(persistable);
+                    toModify.add(createPersistable(hop, session));
                 }
+                session.savePersistentAll(toModify);
             }
         } catch (Exception e) {
             throw new StorageException(e);

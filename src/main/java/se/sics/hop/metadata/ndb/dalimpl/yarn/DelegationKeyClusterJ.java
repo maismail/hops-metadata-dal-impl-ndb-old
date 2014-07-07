@@ -10,7 +10,9 @@ import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.entity.yarn.HopDelegationKey;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
@@ -58,16 +60,18 @@ public class DelegationKeyClusterJ implements DelegationKeyTableDef, DelegationK
         Session session = connector.obtainSession();
         try {
             if (removed != null) {
+                List<DelegationKeyDTO> toRemove = new ArrayList<DelegationKeyDTO>();
                 for (HopDelegationKey hop : removed) {
-                    DelegationKeyClusterJ.DelegationKeyDTO persistable = session.newInstance(DelegationKeyClusterJ.DelegationKeyDTO.class, hop.getKey());
-                    session.deletePersistent(persistable);
+                    toRemove.add(session.newInstance(DelegationKeyClusterJ.DelegationKeyDTO.class, hop.getKey()));
                 }
+                session.deletePersistentAll(toRemove);
             }
             if (modified != null) {
+                List<DelegationKeyDTO> toModify = new ArrayList<DelegationKeyDTO>();
                 for (HopDelegationKey hop : modified) {
-                    DelegationKeyClusterJ.DelegationKeyDTO persistable = createPersistable(hop, session);
-                    session.savePersistent(persistable);
+                    toModify.add(createPersistable(hop, session));
                 }
+                session.savePersistentAll(toModify);
             }
         } catch (Exception e) {
             throw new StorageException(e);

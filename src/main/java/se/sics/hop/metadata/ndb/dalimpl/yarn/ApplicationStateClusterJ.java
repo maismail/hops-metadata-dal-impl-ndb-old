@@ -80,16 +80,18 @@ public class ApplicationStateClusterJ implements ApplicationStateTableDef, Appli
         Session session = connector.obtainSession();
         try {
             if (removed != null) {
+                List<ApplicationStateDTO> toRemove = new ArrayList<ApplicationStateDTO>();
                 for (HopApplicationState hop : removed) {
-                    ApplicationStateDTO persistable = session.newInstance(ApplicationStateDTO.class, hop.getApplicationid());
-                    session.deletePersistent(persistable);
+                    toRemove.add(session.newInstance(ApplicationStateDTO.class, hop.getApplicationid())); 
                 }
+                session.deletePersistentAll(toRemove);
             }
             if (modified != null) {
+                List<ApplicationStateDTO> toModify = new ArrayList<ApplicationStateDTO>();
                 for (HopApplicationState hop : modified) {
-                    ApplicationStateDTO persistable = createPersistable(hop, session);
-                    session.savePersistent(persistable);
+                    toModify.add(createPersistable(hop, session)); 
                 }
+                session.savePersistentAll(toModify);
             }
         } catch (Exception e) {
             throw new StorageException(e);
