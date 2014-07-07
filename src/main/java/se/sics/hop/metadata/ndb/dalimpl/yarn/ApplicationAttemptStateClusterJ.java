@@ -84,7 +84,7 @@ public class ApplicationAttemptStateClusterJ implements ApplicationAttemptStateT
     }
 
     @Override
-    public List<String> findByApplicationAttemptIdByApplicationId(int applicationid) throws StorageException {
+    public List<String> findApplicationAttemptIdStrByApplicationId(String applicationid) throws StorageException {
         try {
             Session session = connector.obtainSession();
             QueryBuilder qb = session.getQueryBuilder();
@@ -107,7 +107,32 @@ public class ApplicationAttemptStateClusterJ implements ApplicationAttemptStateT
         } catch (Exception e) {
             throw new StorageException(e);
         }
+    }
 
+    @Override
+    public List<HopApplicationAttemptState> findApplicationAttemptIdByApplicationId(String applicationid) throws StorageException {
+        try {
+            Session session = connector.obtainSession();
+            QueryBuilder qb = session.getQueryBuilder();
+            QueryDomainType<ApplicationAttemptStateDTO> dobj = qb.createQueryDefinition(ApplicationAttemptStateDTO.class);
+            Predicate pred1 = dobj.get("applicationid").equal(dobj.param("applicationid"));
+            dobj.where(pred1);
+            Query<ApplicationAttemptStateDTO> query = session.createQuery(dobj);
+            query.setParameter("applicationid", applicationid);
+            List<ApplicationAttemptStateDTO> results = query.getResultList();
+            List<HopApplicationAttemptState> appAttemptIds;
+            if (results != null && !results.isEmpty()) {
+                appAttemptIds = new ArrayList<HopApplicationAttemptState>();
+                for (ApplicationAttemptStateDTO dto : results) {
+                    appAttemptIds.add(createHopApplicationAttemptState(dto));
+                }
+                return appAttemptIds;
+            } else {
+                throw new StorageException("HOP :: findApplicationAttemptIdByApplicationId - Empty results");
+            }
+        } catch (Exception e) {
+            throw new StorageException(e);
+        }
     }
 
     @Override
