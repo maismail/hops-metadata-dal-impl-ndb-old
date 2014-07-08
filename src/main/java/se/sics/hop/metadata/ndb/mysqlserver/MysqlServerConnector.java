@@ -3,6 +3,8 @@ package se.sics.hop.metadata.ndb.mysqlserver;
 import com.mysql.clusterj.Constants;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Properties;
 import org.apache.commons.logging.Log;
@@ -86,6 +88,17 @@ public class MysqlServerConnector implements StorageConnector<Connection> {
       } catch (SQLException ex) {
         throw new StorageException(ex);
       }
+    }
+  }
+  
+  public static void truncateTable(String tableName) throws StorageException, SQLException{
+    MysqlServerConnector connector = MysqlServerConnector.getInstance();
+    try {
+      Connection conn = connector.obtainSession();
+      PreparedStatement s = conn.prepareStatement("delete from "+tableName);
+      s.executeUpdate();
+    } finally {
+      connector.closeSession();
     }
   }
 

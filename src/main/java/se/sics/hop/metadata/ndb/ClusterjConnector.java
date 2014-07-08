@@ -31,6 +31,20 @@ import se.sics.hop.metadata.hdfs.entity.hop.var.HopVariable;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.dal.BlockLookUpDataAccess;
 import se.sics.hop.metadata.hdfs.dal.StorageIdMapDataAccess;
+import se.sics.hop.metadata.hdfs.tabledef.BlockInfoTableDef;
+import se.sics.hop.metadata.hdfs.tabledef.BlockLookUpTableDef;
+import se.sics.hop.metadata.hdfs.tabledef.CorruptReplicaTableDef;
+import se.sics.hop.metadata.hdfs.tabledef.ExcessReplicaTableDef;
+import se.sics.hop.metadata.hdfs.tabledef.INodeAttributesTableDef;
+import se.sics.hop.metadata.hdfs.tabledef.INodeTableDef;
+import se.sics.hop.metadata.hdfs.tabledef.InvalidatedBlockTableDef;
+import se.sics.hop.metadata.hdfs.tabledef.LeaderTableDef;
+import se.sics.hop.metadata.hdfs.tabledef.LeasePathTableDef;
+import se.sics.hop.metadata.hdfs.tabledef.PendingBlockTableDef;
+import se.sics.hop.metadata.hdfs.tabledef.ReplicaTableDef;
+import se.sics.hop.metadata.hdfs.tabledef.ReplicaUnderConstructionTableDef;
+import se.sics.hop.metadata.hdfs.tabledef.StorageIdMapTableDef;
+import se.sics.hop.metadata.hdfs.tabledef.UnderReplicatedBlockTableDef;
 import se.sics.hop.metadata.ndb.dalimpl.hdfs.BlockInfoClusterj;
 import se.sics.hop.metadata.ndb.dalimpl.hdfs.BlockLookUpClusterj;
 import se.sics.hop.metadata.ndb.dalimpl.hdfs.CorruptReplicaClusterj;
@@ -46,6 +60,7 @@ import se.sics.hop.metadata.ndb.dalimpl.hdfs.ReplicaUnderConstructionClusterj;
 import se.sics.hop.metadata.ndb.dalimpl.hdfs.StorageIdMapClusterj;
 import se.sics.hop.metadata.ndb.dalimpl.hdfs.UnderReplicatedBlockClusterj;
 import se.sics.hop.metadata.ndb.dalimpl.hdfs.VariableClusterj;
+import se.sics.hop.metadata.ndb.mysqlserver.MysqlServerConnector;
 
 public class ClusterjConnector implements StorageConnector<Session> {
 
@@ -168,43 +183,43 @@ public class ClusterjConnector implements StorageConnector<Session> {
         tx.begin();
         for (Class e : das) {
           if (e == INodeDataAccess.class) {
-            session.deletePersistentAll(INodeClusterj.InodeDTO.class);
+            MysqlServerConnector.truncateTable(INodeTableDef.TABLE_NAME);
 
           } else if (e == BlockInfoDataAccess.class) {
-            session.deletePersistentAll(BlockInfoClusterj.BlockInfoDTO.class);
+            MysqlServerConnector.truncateTable(BlockInfoTableDef.TABLE_NAME);
 
           } else if (e == LeaseDataAccess.class) {
-            session.deletePersistentAll(LeaseClusterj.LeaseDTO.class);
+            MysqlServerConnector.truncateTable(LeasePathTableDef.TABLE_NAME);
 
           } else if (e == LeasePathDataAccess.class) {
-            session.deletePersistentAll(LeasePathClusterj.LeasePathsDTO.class);
+            MysqlServerConnector.truncateTable(LeasePathTableDef.TABLE_NAME);
 
           } else if (e == ReplicaDataAccess.class) {
-            session.deletePersistentAll(ReplicaClusterj.ReplicaDTO.class);
+            MysqlServerConnector.truncateTable(ReplicaTableDef.TABLE_NAME);
 
           } else if (e == ReplicaUnderConstructionDataAccess.class) {
-            session.deletePersistentAll(ReplicaUnderConstructionClusterj.ReplicaUcDTO.class);
+            MysqlServerConnector.truncateTable(ReplicaUnderConstructionTableDef.TABLE_NAME);
 
           } else if (e == InvalidateBlockDataAccess.class) {
-            session.deletePersistentAll(InvalidatedBlockClusterj.InvalidateBlocksDTO.class);
+            MysqlServerConnector.truncateTable(InvalidatedBlockTableDef.TABLE_NAME);
 
           } else if (e == ExcessReplicaDataAccess.class) {
-            session.deletePersistentAll(ExcessReplicaClusterj.ExcessReplicaDTO.class);
+            MysqlServerConnector.truncateTable(ExcessReplicaTableDef.TABLE_NAME);
 
           } else if (e == PendingBlockDataAccess.class) {
-            session.deletePersistentAll(PendingBlockClusterj.PendingBlockDTO.class);
+            MysqlServerConnector.truncateTable(PendingBlockTableDef.TABLE_NAME);
 
           } else if (e == CorruptReplicaDataAccess.class) {
-            session.deletePersistentAll(CorruptReplicaClusterj.CorruptReplicaDTO.class);
+            MysqlServerConnector.truncateTable(CorruptReplicaTableDef.TABLE_NAME);
 
           } else if (e == UnderReplicatedBlockDataAccess.class) {
-            session.deletePersistentAll(UnderReplicatedBlockClusterj.UnderReplicatedBlocksDTO.class);
+            MysqlServerConnector.truncateTable(UnderReplicatedBlockTableDef.TABLE_NAME);
 
           } else if (e == LeaderDataAccess.class) {
-            session.deletePersistentAll(LeaderClusterj.LeaderDTO.class);
-
+            MysqlServerConnector.truncateTable(LeaderTableDef.TABLE_NAME);
+            
           } else if (e == INodeAttributesDataAccess.class) {
-            session.deletePersistentAll(INodeAttributesClusterj.INodeAttributesDTO.class);
+            MysqlServerConnector.truncateTable(INodeAttributesTableDef.TABLE_NAME);
 
           } else if (e == VariableDataAccess.class) {
             session.deletePersistentAll(VariableClusterj.VariableDTO.class);
@@ -215,16 +230,16 @@ public class ClusterjConnector implements StorageConnector<Session> {
               session.savePersistent(vd);
             }
           }else if(e == StorageIdMapDataAccess.class){
-            session.deletePersistentAll(StorageIdMapClusterj.StorageIdDTO.class);
+            MysqlServerConnector.truncateTable(StorageIdMapTableDef.TABLE_NAME);
           }else if(e == BlockLookUpDataAccess.class){
-            session.deletePersistentAll(BlockLookUpClusterj.BlockLookUpDTO.class);
+            MysqlServerConnector.truncateTable(BlockLookUpTableDef.TABLE_NAME);
           }
         }
         tx.commit();
         session.flush();
         return true;
 
-      } catch (ClusterJException ex) {
+      } catch (Exception ex) {
         LOG.error(ex.getMessage(), ex);
         tx.rollback();
       }
