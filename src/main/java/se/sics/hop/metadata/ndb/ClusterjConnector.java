@@ -40,6 +40,7 @@ import se.sics.hop.metadata.hdfs.tabledef.INodeTableDef;
 import se.sics.hop.metadata.hdfs.tabledef.InvalidatedBlockTableDef;
 import se.sics.hop.metadata.hdfs.tabledef.LeaderTableDef;
 import se.sics.hop.metadata.hdfs.tabledef.LeasePathTableDef;
+import se.sics.hop.metadata.hdfs.tabledef.LeaseTableDef;
 import se.sics.hop.metadata.hdfs.tabledef.PendingBlockTableDef;
 import se.sics.hop.metadata.hdfs.tabledef.ReplicaTableDef;
 import se.sics.hop.metadata.hdfs.tabledef.ReplicaUnderConstructionTableDef;
@@ -189,8 +190,8 @@ public class ClusterjConnector implements StorageConnector<Session> {
             MysqlServerConnector.truncateTable(BlockInfoTableDef.TABLE_NAME);
 
           } else if (e == LeaseDataAccess.class) {
-            MysqlServerConnector.truncateTable(LeasePathTableDef.TABLE_NAME);
-
+            MysqlServerConnector.truncateTable(LeaseTableDef.TABLE_NAME);
+            
           } else if (e == LeasePathDataAccess.class) {
             MysqlServerConnector.truncateTable(LeasePathTableDef.TABLE_NAME);
 
