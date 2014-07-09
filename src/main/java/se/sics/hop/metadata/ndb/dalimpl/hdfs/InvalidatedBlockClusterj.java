@@ -197,16 +197,21 @@ public class InvalidatedBlockClusterj implements InvalidatedBlockTableDef, Inval
   }
 
   @Override
-  public void remove(HopInvalidatedBlock invBlock) {
-    
-    Session session = connector.obtainSession();
-    Object[] pk = new Object[3];
-    pk[0] = invBlock.getInodeId();
-    pk[1] = invBlock.getBlockId();
-    pk[2] = invBlock.getStorageId();
-    session.deletePersistent(InvalidateBlocksDTO.class, pk);
+  public void removeAllByStorageId(int storageId) throws StorageException {
+    try {
+      Session session = connector.obtainSession();
+      QueryBuilder qb = session.getQueryBuilder();
+      QueryDomainType<InvalidateBlocksDTO> qdt = qb.createQueryDefinition(InvalidateBlocksDTO.class);
+      qdt.where(qdt.get("storageId").equal(qdt.param("param")));
+      Query<InvalidateBlocksDTO> query = session.createQuery(qdt);
+      query.setParameter("param", storageId);
+      query.deletePersistentAll();
+    } catch (Exception e) {
+      throw new StorageException(e);
+    }
   }
 
+   
   private List<HopInvalidatedBlock> createList(List<InvalidateBlocksDTO> dtoList) {
     List<HopInvalidatedBlock> list = new ArrayList<HopInvalidatedBlock>();
     for (InvalidateBlocksDTO dto : dtoList) {
