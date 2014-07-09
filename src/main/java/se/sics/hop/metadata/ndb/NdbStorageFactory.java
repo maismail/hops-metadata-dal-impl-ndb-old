@@ -12,11 +12,17 @@ import se.sics.hop.exception.StorageInitializtionException;
 import se.sics.hop.metadata.hdfs.dal.EntityDataAccess;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.ApplicationAttemptStateClusterJ;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.ApplicationStateClusterJ;
+import se.sics.hop.metadata.ndb.dalimpl.yarn.DelegationKeyClusterJ;
+import se.sics.hop.metadata.ndb.dalimpl.yarn.DelegationTokenClusterJ;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.RMStateVersionClusterJ;
+import se.sics.hop.metadata.ndb.dalimpl.yarn.SequenceNumberClusterJ;
 import se.sics.hop.metadata.yarn.dal.RMStateVersionDataAccess;
 import se.sics.hop.metadata.ndb.mysqlserver.MysqlServerConnector;
 import se.sics.hop.metadata.yarn.dal.ApplicationAttemptStateDataAccess;
 import se.sics.hop.metadata.yarn.dal.ApplicationStateDataAccess;
+import se.sics.hop.metadata.yarn.dal.DelegationKeyDataAccess;
+import se.sics.hop.metadata.yarn.dal.DelegationTokenDataAccess;
+import se.sics.hop.metadata.yarn.dal.SequenceNumberDataAccess;
 
 /**
  *
@@ -45,7 +51,9 @@ public class NdbStorageFactory implements DALStorageFactory {
         dataAccessMap.put(RMStateVersionDataAccess.class, new RMStateVersionClusterJ());
         dataAccessMap.put(ApplicationStateDataAccess.class, new ApplicationStateClusterJ());
         dataAccessMap.put(ApplicationAttemptStateDataAccess.class, new ApplicationAttemptStateClusterJ());
-
+        dataAccessMap.put(DelegationTokenDataAccess.class, new DelegationTokenClusterJ());
+        dataAccessMap.put(SequenceNumberDataAccess.class, new SequenceNumberClusterJ());
+        dataAccessMap.put(DelegationKeyDataAccess.class, new DelegationKeyClusterJ());
     }
 
     @Override

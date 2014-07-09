@@ -6,10 +6,13 @@
 
 package se.sics.hop.metadata.ndb.dalimpl.yarn;
 
+import com.mysql.clusterj.Query;
 import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
+import com.mysql.clusterj.query.QueryBuilder;
+import com.mysql.clusterj.query.QueryDomainType;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -24,7 +27,7 @@ import se.sics.hop.metadata.yarn.tabledef.DelegationKeyTableDef;
  * @author nickstanogias
  */
 public class DelegationKeyClusterJ implements DelegationKeyTableDef, DelegationKeyDataAccess<HopDelegationKey>{
-  
+    
     @PersistenceCapable(table = TABLE_NAME)
     public interface DelegationKeyDTO {
 
@@ -78,8 +81,41 @@ public class DelegationKeyClusterJ implements DelegationKeyTableDef, DelegationK
         }
     }
     
+    @Override
+    public void createDTMasterKeyEntry(HopDelegationKey hopDelegationKey) {
+        Session session = connector.obtainSession();
+        session.savePersistent(createPersistable(hopDelegationKey, session));
+    }
+    
+    @Override
+    public List<HopDelegationKey> getAll() throws StorageException {
+        try {
+            Session session = connector.obtainSession();
+            QueryBuilder qb = session.getQueryBuilder();
+            QueryDomainType<DelegationKeyClusterJ.DelegationKeyDTO> dobj = qb.createQueryDefinition(DelegationKeyClusterJ.DelegationKeyDTO.class);
+            Query<DelegationKeyClusterJ.DelegationKeyDTO> query = session.createQuery(dobj);
+            List<DelegationKeyClusterJ.DelegationKeyDTO> results = query.getResultList();
+            if (results != null && !results.isEmpty()) {
+                return createHopDelegationKeyList(results);
+            } else {
+                throw new StorageException("HOP :: Error retrieving DelegationKeys");
+            }
+        } catch (Exception e) {
+            throw new StorageException(e);
+        }
+
+    }
+    
     private HopDelegationKey createHopDelegationKey(DelegationKeyDTO delegationKeyDTO) {
         return new HopDelegationKey(delegationKeyDTO.getkey(), delegationKeyDTO.getdelegationkey());
+    }
+    
+    private List<HopDelegationKey> createHopDelegationKeyList(List<DelegationKeyClusterJ.DelegationKeyDTO> list) {
+        List<HopDelegationKey> hopList = new ArrayList<HopDelegationKey>();
+        for (DelegationKeyClusterJ.DelegationKeyDTO dto : list) {
+            hopList.add(createHopDelegationKey(dto));
+        }
+        return hopList;
     }
 
     private DelegationKeyDTO createPersistable(HopDelegationKey hop, Session session) {

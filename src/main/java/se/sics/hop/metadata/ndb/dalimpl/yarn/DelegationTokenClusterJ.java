@@ -6,10 +6,13 @@
 
 package se.sics.hop.metadata.ndb.dalimpl.yarn;
 
+import com.mysql.clusterj.Query;
 import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
+import com.mysql.clusterj.query.QueryBuilder;
+import com.mysql.clusterj.query.QueryDomainType;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -55,6 +58,31 @@ public class DelegationTokenClusterJ implements DelegationTokenTableDef, Delegat
         return createHopDelegationToken(delegationTokenDTO);
     }
     
+     @Override
+    public void createDelegationTokenEntry(HopDelegationToken hopDelegationToken) {
+        Session session = connector.obtainSession();
+        session.savePersistent(createPersistable(hopDelegationToken, session));
+    }
+    
+    @Override
+    public List<HopDelegationToken> getAll() throws StorageException {
+        try {
+            Session session = connector.obtainSession();
+            QueryBuilder qb = session.getQueryBuilder();
+            QueryDomainType<DelegationTokenClusterJ.DelegationTokenDTO> dobj = qb.createQueryDefinition(DelegationTokenClusterJ.DelegationTokenDTO.class);
+            Query<DelegationTokenClusterJ.DelegationTokenDTO> query = session.createQuery(dobj);
+            List<DelegationTokenClusterJ.DelegationTokenDTO> results = query.getResultList();
+            if (results != null && !results.isEmpty()) {
+                return createHopDelegationTokenList(results);
+            } else {
+                throw new StorageException("HOP :: Error retrieving DelegationTokens");
+            }
+        } catch (Exception e) {
+            throw new StorageException(e);
+        }
+
+    }
+    
     @Override
     public void prepare(Collection<HopDelegationToken> modified, Collection<HopDelegationToken> removed) throws StorageException {
         Session session = connector.obtainSession();
@@ -80,6 +108,14 @@ public class DelegationTokenClusterJ implements DelegationTokenTableDef, Delegat
     
     private HopDelegationToken createHopDelegationToken(DelegationTokenDTO delegationTokenDTO) {
         return new HopDelegationToken(delegationTokenDTO.getseqnumber(), delegationTokenDTO.getrmdtidentifier());
+    }
+    
+    private List<HopDelegationToken> createHopDelegationTokenList(List<DelegationTokenClusterJ.DelegationTokenDTO> list) {
+        List<HopDelegationToken> hopList = new ArrayList<HopDelegationToken>();
+        for (DelegationTokenClusterJ.DelegationTokenDTO dto : list) {
+            hopList.add(createHopDelegationToken(dto));
+        }
+        return hopList;
     }
 
     private DelegationTokenDTO createPersistable(HopDelegationToken hop, Session session) {
