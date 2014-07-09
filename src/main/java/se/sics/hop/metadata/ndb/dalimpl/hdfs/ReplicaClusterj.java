@@ -111,26 +111,28 @@ public class ReplicaClusterj implements ReplicaTableDef, ReplicaDataAccess<HopIn
   @Override
   public void prepare(Collection<HopIndexedReplica> removed, Collection<HopIndexedReplica> newed, Collection<HopIndexedReplica> modified) throws StorageException {
     try {
+      List<ReplicaDTO> changes = new ArrayList<ReplicaDTO>();
+      List<ReplicaDTO> deletions = new ArrayList<ReplicaDTO>();
       Session session = connector.obtainSession();
       for (HopIndexedReplica replica : removed) {
-        Object[] pk = new Object[3];
-        pk[0] = replica.getInodeId();
-        pk[1] = replica.getBlockId();
-        pk[2] = replica.getStorageId();
-        session.deletePersistent(ReplicaDTO.class, pk);
+        ReplicaDTO newInstance = session.newInstance(ReplicaDTO.class);
+        createPersistable(replica, newInstance);
+        deletions.add(newInstance);
       }
 
       for (HopIndexedReplica replica : newed) {
         ReplicaDTO newInstance = session.newInstance(ReplicaDTO.class);
         createPersistable(replica, newInstance);
-        session.savePersistent(newInstance);
+        changes.add(newInstance);
       }
 
       for (HopIndexedReplica replica : modified) {
         ReplicaDTO newInstance = session.newInstance(ReplicaDTO.class);
         createPersistable(replica, newInstance);
-        session.savePersistent(newInstance);
+        changes.add(newInstance);
       }
+      session.deletePersistentAll(deletions);
+      session.savePersistentAll(changes);
     } catch (Exception e) {
       throw new StorageException(e);
     }

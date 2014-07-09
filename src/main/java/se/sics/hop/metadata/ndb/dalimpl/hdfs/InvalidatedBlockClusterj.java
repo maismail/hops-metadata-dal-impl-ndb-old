@@ -162,19 +162,25 @@ public class InvalidatedBlockClusterj implements InvalidatedBlockTableDef, Inval
   public void prepare(Collection<HopInvalidatedBlock> removed, Collection<HopInvalidatedBlock> newed, Collection<HopInvalidatedBlock> modified) throws StorageException {
     try {
       Session session = connector.obtainSession();
+      List<InvalidateBlocksDTO> changes = new ArrayList<InvalidateBlocksDTO>();
+      List<InvalidateBlocksDTO> deletions = new ArrayList<InvalidateBlocksDTO>();
       for (HopInvalidatedBlock invBlock : newed) {
         InvalidateBlocksDTO newInstance = session.newInstance(InvalidateBlocksDTO.class);
         createPersistable(invBlock, newInstance);
-        session.savePersistent(newInstance);
+        changes.add(newInstance );
       }
 
       for (HopInvalidatedBlock invBlock : removed) {
-        remove(invBlock);
+        InvalidateBlocksDTO newInstance = session.newInstance(InvalidateBlocksDTO.class);
+        createPersistable(invBlock, newInstance);
+        deletions.add(newInstance);
       }
 
       if (!modified.isEmpty()) {
         throw new UnsupportedOperationException("Not yet Implemented");
       }
+      session.deletePersistentAll(deletions);
+      session.savePersistentAll(changes);
     } catch (Exception e) {
       throw new StorageException(e);
     }

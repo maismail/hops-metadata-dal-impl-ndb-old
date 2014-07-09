@@ -106,10 +106,10 @@ public class INodeClusterj implements INodeTableDef, INodeDataAccess<HopINode> {
     void setClientNode(String clientNode);
 
     //  marker for InodeFile
-    @Column(name = IS_CLOSED_FILE)
-    int getIsClosedFile();
+    @Column(name = GENERATION_STAMP)
+    int getGenerationStamp();
 
-    void setIsClosedFile(int isClosedFile);
+    void setGenerationStamp(int generation_stamp);
 
     // InodeFile
     @Column(name = HEADER)
@@ -129,25 +129,29 @@ public class INodeClusterj implements INodeTableDef, INodeDataAccess<HopINode> {
   public void prepare(Collection<HopINode> removed, Collection<HopINode> newEntries, Collection<HopINode> modified) throws StorageException {
     Session session = connector.obtainSession();
     try {
+      List<InodeDTO> changes = new ArrayList<InodeDTO>();
+      List<InodeDTO> deletions = new ArrayList<InodeDTO>();
       for (HopINode inode : removed) {
         Object[] pk = new Object[2];
         pk[0] = inode.getParentId();
         pk[1] = inode.getName();
         InodeDTO persistable = session.newInstance(InodeDTO.class, pk);
-        session.deletePersistent(persistable);
+        deletions.add(persistable);
       }
       
       for (HopINode inode : newEntries) {
         InodeDTO persistable = session.newInstance(InodeDTO.class);
         createPersistable(inode, persistable);
-        session.savePersistent(persistable);
+        changes.add(persistable);
       }
 
       for (HopINode inode : modified) {
         InodeDTO persistable = session.newInstance(InodeDTO.class);
         createPersistable(inode, persistable);
-        session.savePersistent(persistable);
+        changes.add(persistable);
       }
+      session.deletePersistentAll(deletions);
+      session.savePersistentAll(changes);
     } catch (Exception e) {
       throw new StorageException(e);
     }
@@ -248,7 +252,7 @@ public class INodeClusterj implements INodeTableDef, INodeDataAccess<HopINode> {
             persistable.getClientName(),
             persistable.getClientMachine(),
             persistable.getClientNode(),
-            persistable.getIsClosedFile(),
+            persistable.getGenerationStamp(),
             persistable.getHeader(),
             persistable.getSymlink());
   }
@@ -266,7 +270,7 @@ public class INodeClusterj implements INodeTableDef, INodeDataAccess<HopINode> {
     persistable.setClientName(inode.getClientName());
     persistable.setClientMachine(inode.getClientMachine());
     persistable.setClientNode(inode.getClientNode());
-    persistable.setIsClosedFile(inode.getIsClosedFile());
+    persistable.setGenerationStamp(inode.getGenerationStamp());
     persistable.setHeader(inode.getHeader());
     persistable.setSymlink(inode.getSymlink());
   }

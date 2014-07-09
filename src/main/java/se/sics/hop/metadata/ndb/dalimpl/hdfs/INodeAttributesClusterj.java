@@ -91,18 +91,22 @@ public class INodeAttributesClusterj implements INodeAttributesTableDef, INodeAt
   public void prepare(Collection<HopINodeAttributes> modified, Collection<HopINodeAttributes> removed) throws StorageException {
     Session session = connector.obtainSession();
     try {
+      List<INodeAttributesDTO> changes = new ArrayList<INodeAttributesDTO>();
+      List<INodeAttributesDTO> deletions = new ArrayList<INodeAttributesDTO>();
       if (removed != null) {
         for (HopINodeAttributes attr : removed) {
           INodeAttributesDTO persistable = session.newInstance(INodeAttributesDTO.class, attr.getInodeId());
-          session.deletePersistent(persistable);
+          deletions.add(persistable);
         }
       }
       if (modified != null) {
         for (HopINodeAttributes attr : modified) {
           INodeAttributesDTO persistable = createPersistable(attr, session);
-          session.savePersistent(persistable);
+          changes.add(persistable);
         }
       }
+      session.deletePersistentAll(deletions);
+      session.savePersistentAll(changes);
     } catch (Exception e) {
       throw new StorageException(e);
     }

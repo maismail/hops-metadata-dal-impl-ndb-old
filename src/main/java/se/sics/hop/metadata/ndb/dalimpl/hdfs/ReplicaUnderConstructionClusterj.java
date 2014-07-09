@@ -54,19 +54,21 @@ public class ReplicaUnderConstructionClusterj implements ReplicaUnderConstructio
   @Override
   public void prepare(Collection<HopReplicaUnderConstruction> removed, Collection<HopReplicaUnderConstruction> newed, Collection<HopReplicaUnderConstruction> modified) throws StorageException {
     Session session = connector.obtainSession();
+    List<ReplicaUcDTO> changes = new ArrayList<ReplicaUcDTO>();
+    List<ReplicaUcDTO> deletions = new ArrayList<ReplicaUcDTO>();
     for (HopReplicaUnderConstruction replica : removed) {
-      Object[] pk = new Object[3];
-      pk[0] = replica.getInodeId();
-      pk[1] = replica.getBlockId();
-      pk[2] = replica.getStorageId();
-      session.deletePersistent(ReplicaUcDTO.class, pk);
+      ReplicaUcDTO newInstance = session.newInstance(ReplicaUcDTO.class);
+      createPersistable(replica, newInstance);
+      deletions.add(newInstance);
     }
 
     for (HopReplicaUnderConstruction replica : newed) {
       ReplicaUcDTO newInstance = session.newInstance(ReplicaUcDTO.class);
       createPersistable(replica, newInstance);
-      session.savePersistent(newInstance);
+      changes.add(newInstance);
     }
+    session.deletePersistentAll(deletions);
+    session.savePersistentAll(changes);
   }
 
   @Override

@@ -57,19 +57,21 @@ public class ExcessReplicaClusterj implements ExcessReplicaTableDef, ExcessRepli
   public void prepare(Collection<HopExcessReplica> removed, Collection<HopExcessReplica> newed, Collection<HopExcessReplica> modified) throws StorageException {
     try {
       Session session = connector.obtainSession();
+      List<ExcessReplicaDTO> changes = new ArrayList<ExcessReplicaDTO>();
+      List<ExcessReplicaDTO> deletions = new ArrayList<ExcessReplicaDTO>();
       for (HopExcessReplica exReplica : newed) {
         ExcessReplicaDTO newInstance = session.newInstance(ExcessReplicaDTO.class);
         createPersistable(exReplica, newInstance);
-        session.savePersistent(newInstance);
+        changes.add(newInstance);
       }
 
       for (HopExcessReplica exReplica : removed) {
-        Object[] pk = new Object[3];
-        pk[0] = exReplica.getInodeId();
-        pk[1] = exReplica.getBlockId();
-        pk[2] = exReplica.getStorageId();
-        session.deletePersistent(ExcessReplicaDTO.class, pk);
+        ExcessReplicaDTO newInstance = session.newInstance(ExcessReplicaDTO.class);
+        createPersistable(exReplica, newInstance);
+        deletions.add(newInstance);
       }
+      session.deletePersistentAll(deletions);
+      session.savePersistentAll(changes);
     } catch (Exception e) {
       throw new StorageException(e);
     }
