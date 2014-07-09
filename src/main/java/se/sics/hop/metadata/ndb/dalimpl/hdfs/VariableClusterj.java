@@ -50,6 +50,17 @@ public class VariableClusterj implements VariableTableDef, VariableDataAccess<Ho
   }
 
   @Override
+  public void setVariable(HopVariable var) throws StorageException {
+    try {
+      Session session = connector.obtainSession();
+      VariableDTO vd = createVariableDTO(session, var);
+      session.savePersistent(vd);
+    } catch (Exception e) {
+      throw new StorageException(e);
+    }
+  }
+    
+  @Override
   public void prepare(Collection<HopVariable> newVariables, Collection<HopVariable> updatedVariables, Collection<HopVariable> removedVariables) throws StorageException {
     try {
       Session session = connector.obtainSession();
@@ -75,15 +86,19 @@ public class VariableClusterj implements VariableTableDef, VariableDataAccess<Ho
   private void updateVariables(Session session, Collection<HopVariable> vars) throws StorageException {
     List<VariableDTO> changes= new ArrayList<VariableDTO>();
     for (HopVariable var : vars) {
-      byte[] varVal = var.getBytes();
-      if (varVal.length > MAX_VARIABLE_SIZE) {
-        throw new StorageException("wrong variable size" + varVal.length + ", variable size should be less or equal to " + MAX_VARIABLE_SIZE);
-      }
-      VariableDTO vd = session.newInstance(VariableDTO.class);
-      vd.setValue(var.getBytes());
-      vd.setId(var.getType().getId());
-      changes.add(vd);
+      changes.add(createVariableDTO(session, var));
     }
     session.savePersistentAll(changes);
+  }
+
+  private VariableDTO createVariableDTO(Session session, HopVariable var) throws StorageException {
+    byte[] varVal = var.getBytes();
+    if (varVal.length > MAX_VARIABLE_SIZE) {
+      throw new StorageException("wrong variable size" + varVal.length + ", variable size should be less or equal to " + MAX_VARIABLE_SIZE);
+    }
+    VariableDTO vd = session.newInstance(VariableDTO.class);
+    vd.setValue(var.getBytes());
+    vd.setId(var.getType().getId());
+    return vd;
   }
 }
