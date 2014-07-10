@@ -1,4 +1,4 @@
-package se.sics.hop.metadata.ndb.dalimpl.yarn;
+package se.sics.hop.metadata.ndb.dalimpl.yarn.rmstatestore;
 
 import com.mysql.clusterj.Query;
 import com.mysql.clusterj.Session;
@@ -12,11 +12,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import se.sics.hop.exception.StorageException;
-import se.sics.hop.metadata.hdfs.entity.yarn.HopApplicationAttemptState;
+import se.sics.hop.metadata.hdfs.entity.yarn.rmstatestore.HopApplicationAttemptState;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
 import se.sics.hop.metadata.yarn.dal.ApplicationAttemptStateDataAccess;
-import se.sics.hop.metadata.yarn.tabledef.ApplicationAttemptStateTableDef;
-import static se.sics.hop.metadata.yarn.tabledef.ApplicationAttemptStateTableDef.APPLICATIONATTEMPTID;
+import se.sics.hop.metadata.yarn.tabledef.rmstatestore.ApplicationAttemptStateTableDef;
+import static se.sics.hop.metadata.yarn.tabledef.rmstatestore.ApplicationAttemptStateTableDef.APPLICATIONATTEMPTID;
 
 /**
  *

@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-package se.sics.hop.metadata.ndb.dalimpl.yarn;
+package se.sics.hop.metadata.ndb.dalimpl.yarn.rmstatestore;
 
 import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
@@ -14,10 +14,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import se.sics.hop.exception.StorageException;
-import se.sics.hop.metadata.hdfs.entity.yarn.HopRMStateVersion;
+import se.sics.hop.metadata.hdfs.entity.yarn.rmstatestore.HopRMStateVersion;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
 import se.sics.hop.metadata.yarn.dal.RMStateVersionDataAccess;
-import se.sics.hop.metadata.yarn.tabledef.VersionTableDef;
+import se.sics.hop.metadata.yarn.tabledef.rmstatestore.VersionTableDef;
 
 /**
  *

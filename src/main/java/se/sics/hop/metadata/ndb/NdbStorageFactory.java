@@ -10,12 +10,12 @@ import se.sics.hop.StorageConnector;
 import se.sics.hop.exception.StorageInitializtionException;
 
 import se.sics.hop.metadata.hdfs.dal.EntityDataAccess;
-import se.sics.hop.metadata.ndb.dalimpl.yarn.ApplicationAttemptStateClusterJ;
-import se.sics.hop.metadata.ndb.dalimpl.yarn.ApplicationStateClusterJ;
-import se.sics.hop.metadata.ndb.dalimpl.yarn.DelegationKeyClusterJ;
-import se.sics.hop.metadata.ndb.dalimpl.yarn.DelegationTokenClusterJ;
-import se.sics.hop.metadata.ndb.dalimpl.yarn.RMStateVersionClusterJ;
-import se.sics.hop.metadata.ndb.dalimpl.yarn.SequenceNumberClusterJ;
+import se.sics.hop.metadata.ndb.dalimpl.yarn.rmstatestore.ApplicationAttemptStateClusterJ;
+import se.sics.hop.metadata.ndb.dalimpl.yarn.rmstatestore.ApplicationStateClusterJ;
+import se.sics.hop.metadata.ndb.dalimpl.yarn.rmstatestore.DelegationKeyClusterJ;
+import se.sics.hop.metadata.ndb.dalimpl.yarn.rmstatestore.DelegationTokenClusterJ;
+import se.sics.hop.metadata.ndb.dalimpl.yarn.rmstatestore.RMStateVersionClusterJ;
+import se.sics.hop.metadata.ndb.dalimpl.yarn.rmstatestore.SequenceNumberClusterJ;
 import se.sics.hop.metadata.yarn.dal.RMStateVersionDataAccess;
 import se.sics.hop.metadata.ndb.mysqlserver.MysqlServerConnector;
 import se.sics.hop.metadata.yarn.dal.ApplicationAttemptStateDataAccess;

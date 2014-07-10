@@ -1,4 +1,4 @@
-package se.sics.hop.metadata.ndb.dalimpl.yarn;
+package se.sics.hop.metadata.ndb.dalimpl.yarn.rmstatestore;
 
 import com.mysql.clusterj.Query;
 import com.mysql.clusterj.Session;
@@ -12,10 +12,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import se.sics.hop.exception.StorageException;
-import se.sics.hop.metadata.hdfs.entity.yarn.HopApplicationState;
+import se.sics.hop.metadata.hdfs.entity.yarn.rmstatestore.HopApplicationState;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
 import se.sics.hop.metadata.yarn.dal.ApplicationStateDataAccess;
-import se.sics.hop.metadata.yarn.tabledef.ApplicationStateTableDef;
+import se.sics.hop.metadata.yarn.tabledef.rmstatestore.ApplicationStateTableDef;
 
 /**
  *
@@ -40,12 +40,12 @@ public class ApplicationStateClusterJ implements ApplicationStateTableDef, Appli
     private final ClusterjConnector connector = ClusterjConnector.getInstance();
 
     @Override
-    public HopApplicationState findByApplicationId(int id) throws StorageException {
+    public HopApplicationState findByApplicationId(String id) throws StorageException {
         Session session = connector.obtainSession();
 
         ApplicationStateDTO appStateDTO = null;
         if (session != null) {
-            appStateDTO = session.find(ApplicationStateClusterJ.ApplicationStateDTO.class, id);
+            appStateDTO = session.find(ApplicationStateDTO.class, id);
         }
         if (appStateDTO == null) {
             throw new StorageException("HOP :: Error while retrieving row");

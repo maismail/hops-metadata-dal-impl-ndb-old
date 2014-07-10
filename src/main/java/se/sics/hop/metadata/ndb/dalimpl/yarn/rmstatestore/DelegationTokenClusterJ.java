@@ -1,10 +1,4 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
-package se.sics.hop.metadata.ndb.dalimpl.yarn;
+package se.sics.hop.metadata.ndb.dalimpl.yarn.rmstatestore;
 
 import com.mysql.clusterj.Query;
 import com.mysql.clusterj.Session;
@@ -17,16 +11,16 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import se.sics.hop.exception.StorageException;
-import se.sics.hop.metadata.hdfs.entity.yarn.HopDelegationToken;
+import se.sics.hop.metadata.hdfs.entity.yarn.rmstatestore.HopDelegationToken;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
 import se.sics.hop.metadata.yarn.dal.DelegationTokenDataAccess;
-import se.sics.hop.metadata.yarn.tabledef.DelegationTokenTableDef;
+import se.sics.hop.metadata.yarn.tabledef.rmstatestore.DelegationTokenTableDef;
 
 /**
  *
  * @author nickstanogias
  */
-public class DelegationTokenClusterJ implements DelegationTokenTableDef, DelegationTokenDataAccess<HopDelegationToken>{ 
+public class DelegationTokenClusterJ implements DelegationTokenTableDef, DelegationTokenDataAccess<HopDelegationToken> {
 
     @PersistenceCapable(table = TABLE_NAME)
     public interface DelegationTokenDTO {
@@ -34,12 +28,13 @@ public class DelegationTokenClusterJ implements DelegationTokenTableDef, Delegat
         @PrimaryKey
         @Column(name = SEQ_NUMBER)
         int getseqnumber();
+
         void setseqnumber(int seqnumber);
 
         @Column(name = RMDT_IDENTIFIER)
         byte[] getrmdtidentifier();
+
         void setrmdtidentifier(byte[] rmdtidentifier);
-        
     }
     private final ClusterjConnector connector = ClusterjConnector.getInstance();
 
@@ -47,31 +42,31 @@ public class DelegationTokenClusterJ implements DelegationTokenTableDef, Delegat
     public HopDelegationToken findBySeqNumber(int seqnumber) throws StorageException {
         Session session = connector.obtainSession();
 
-        DelegationTokenClusterJ.DelegationTokenDTO delegationTokenDTO = null;
+        DelegationTokenDTO delegationTokenDTO = null;
         if (session != null) {
-            delegationTokenDTO = session.find(DelegationTokenClusterJ.DelegationTokenDTO.class, seqnumber);
+            delegationTokenDTO = session.find(DelegationTokenDTO.class, seqnumber);
         }
         if (delegationTokenDTO == null) {
-                throw new StorageException("HOP :: Error while retrieving row");
+            throw new StorageException("HOP :: Error while retrieving row");
         }
 
         return createHopDelegationToken(delegationTokenDTO);
     }
-    
-     @Override
+
+    @Override
     public void createDelegationTokenEntry(HopDelegationToken hopDelegationToken) {
         Session session = connector.obtainSession();
         session.savePersistent(createPersistable(hopDelegationToken, session));
     }
-    
+
     @Override
     public List<HopDelegationToken> getAll() throws StorageException {
         try {
             Session session = connector.obtainSession();
             QueryBuilder qb = session.getQueryBuilder();
-            QueryDomainType<DelegationTokenClusterJ.DelegationTokenDTO> dobj = qb.createQueryDefinition(DelegationTokenClusterJ.DelegationTokenDTO.class);
-            Query<DelegationTokenClusterJ.DelegationTokenDTO> query = session.createQuery(dobj);
-            List<DelegationTokenClusterJ.DelegationTokenDTO> results = query.getResultList();
+            QueryDomainType<DelegationTokenDTO> dobj = qb.createQueryDefinition(DelegationTokenDTO.class);
+            Query<DelegationTokenDTO> query = session.createQuery(dobj);
+            List<DelegationTokenDTO> results = query.getResultList();
             if (results != null && !results.isEmpty()) {
                 return createHopDelegationTokenList(results);
             } else {
@@ -82,7 +77,7 @@ public class DelegationTokenClusterJ implements DelegationTokenTableDef, Delegat
         }
 
     }
-    
+
     @Override
     public void prepare(Collection<HopDelegationToken> modified, Collection<HopDelegationToken> removed) throws StorageException {
         Session session = connector.obtainSession();
@@ -105,11 +100,11 @@ public class DelegationTokenClusterJ implements DelegationTokenTableDef, Delegat
             throw new StorageException(e);
         }
     }
-    
+
     private HopDelegationToken createHopDelegationToken(DelegationTokenDTO delegationTokenDTO) {
         return new HopDelegationToken(delegationTokenDTO.getseqnumber(), delegationTokenDTO.getrmdtidentifier());
     }
-    
+
     private List<HopDelegationToken> createHopDelegationTokenList(List<DelegationTokenClusterJ.DelegationTokenDTO> list) {
         List<HopDelegationToken> hopList = new ArrayList<HopDelegationToken>();
         for (DelegationTokenClusterJ.DelegationTokenDTO dto : list) {
@@ -122,7 +117,7 @@ public class DelegationTokenClusterJ implements DelegationTokenTableDef, Delegat
         DelegationTokenClusterJ.DelegationTokenDTO delegationTokenDTO = session.newInstance(DelegationTokenClusterJ.DelegationTokenDTO.class);
         delegationTokenDTO.setseqnumber(hop.getSeqnumber());
         delegationTokenDTO.setrmdtidentifier(hop.getRmdtidentifier());
-        
+
         return delegationTokenDTO;
-    }    
+    }
 }
