@@ -197,7 +197,7 @@ public class InvalidatedBlockClusterj implements InvalidatedBlockTableDef, Inval
   }
 
   @Override
-  public void remove(HopInvalidatedBlock invBlock) {
+  public void remove(HopInvalidatedBlock invBlock) throws StorageException {
     
     Session session = connector.obtainSession();
     Object[] pk = new Object[3];
