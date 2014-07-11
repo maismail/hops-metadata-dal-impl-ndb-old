@@ -236,6 +236,7 @@ public class ClusterjConnector implements StorageConnector<Session> {
             MysqlServerConnector.truncateTable(BlockLookUpTableDef.TABLE_NAME);
           }
         }
+        MysqlServerConnector.truncateTable("path_memcached");
         tx.commit();
         session.flush();
         return true;
