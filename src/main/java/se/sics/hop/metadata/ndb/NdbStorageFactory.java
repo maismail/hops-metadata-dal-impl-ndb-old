@@ -16,13 +16,13 @@ import se.sics.hop.metadata.ndb.dalimpl.yarn.rmstatestore.DelegationKeyClusterJ;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.rmstatestore.DelegationTokenClusterJ;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.rmstatestore.RMStateVersionClusterJ;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.rmstatestore.SequenceNumberClusterJ;
-import se.sics.hop.metadata.yarn.dal.RMStateVersionDataAccess;
+import se.sics.hop.metadata.yarn.dal.rmstatestore.RMStateVersionDataAccess;
 import se.sics.hop.metadata.ndb.mysqlserver.MysqlServerConnector;
-import se.sics.hop.metadata.yarn.dal.ApplicationAttemptStateDataAccess;
-import se.sics.hop.metadata.yarn.dal.ApplicationStateDataAccess;
-import se.sics.hop.metadata.yarn.dal.DelegationKeyDataAccess;
-import se.sics.hop.metadata.yarn.dal.DelegationTokenDataAccess;
-import se.sics.hop.metadata.yarn.dal.SequenceNumberDataAccess;
+import se.sics.hop.metadata.yarn.dal.rmstatestore.ApplicationAttemptStateDataAccess;
+import se.sics.hop.metadata.yarn.dal.rmstatestore.ApplicationStateDataAccess;
+import se.sics.hop.metadata.yarn.dal.rmstatestore.DelegationKeyDataAccess;
+import se.sics.hop.metadata.yarn.dal.rmstatestore.DelegationTokenDataAccess;
+import se.sics.hop.metadata.yarn.dal.rmstatestore.SequenceNumberDataAccess;
 
 /**
  *

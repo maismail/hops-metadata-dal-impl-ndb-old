@@ -10,7 +10,7 @@ import java.util.List;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.entity.yarn.rmstatestore.HopSequenceNumber;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
-import se.sics.hop.metadata.yarn.dal.SequenceNumberDataAccess;
+import se.sics.hop.metadata.yarn.dal.rmstatestore.SequenceNumberDataAccess;
 import se.sics.hop.metadata.yarn.tabledef.rmstatestore.SequenceNumberTableDef;
 
 /**
@@ -44,7 +44,7 @@ public class SequenceNumberClusterJ implements SequenceNumberTableDef, SequenceN
             sequenceNumberDTO = session.find(SequenceNumberDTO.class, id);
         }
         if (sequenceNumberDTO == null) {
-            throw new StorageException("HOP :: Error while retrieving row");
+            throw new StorageException("HOP :: Error while retrieving sequence number with id="+id);
         }
 
         return createHopSequenceNumber(sequenceNumberDTO);
