@@ -14,7 +14,7 @@ import java.util.List;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.entity.yarn.rmstatestore.HopApplicationAttemptState;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
-import se.sics.hop.metadata.yarn.dal.ApplicationAttemptStateDataAccess;
+import se.sics.hop.metadata.yarn.dal.rmstatestore.ApplicationAttemptStateDataAccess;
 import se.sics.hop.metadata.yarn.tabledef.rmstatestore.ApplicationAttemptStateTableDef;
 import static se.sics.hop.metadata.yarn.tabledef.rmstatestore.ApplicationAttemptStateTableDef.APPLICATIONATTEMPTID;
 
@@ -56,31 +56,10 @@ public class ApplicationAttemptStateClusterJ implements ApplicationAttemptStateT
             entry = session.find(ApplicationAttemptStateClusterJ.ApplicationAttemptStateDTO.class, objarr);
         }
         if (entry == null) {
-            throw new StorageException("HOP :: Error while retrieving row");
+            throw new StorageException("HOP :: Error while retrieving applicationAttemptState with id" + applicationid);
         }
 
         return createHopApplicationAttemptState(entry);
-    }
-
-    @Override
-    public List<HopApplicationAttemptState> findByApplicationId(int applicationid) throws StorageException {
-        try {
-            Session session = connector.obtainSession();
-            QueryBuilder qb = session.getQueryBuilder();
-            QueryDomainType<ApplicationAttemptStateDTO> dobj = qb.createQueryDefinition(ApplicationAttemptStateDTO.class);
-            Predicate pred1 = dobj.get("applicationid").equal(dobj.param("applicationid"));
-            dobj.where(pred1);
-            Query<ApplicationAttemptStateDTO> query = session.createQuery(dobj);
-            query.setParameter("applicationid", applicationid);
-            List<ApplicationAttemptStateDTO> results = query.getResultList();
-            if (results != null && !results.isEmpty()) {
-                return createHopApplicationAttemptStateList(results);
-            } else {
-                throw new StorageException("HOP - findByNameLocation :: Node was not found");
-            }
-        } catch (Exception e) {
-            throw new StorageException(e);
-        }
     }
 
     @Override
@@ -102,7 +81,7 @@ public class ApplicationAttemptStateClusterJ implements ApplicationAttemptStateT
                 }
                 return appAttemptIds;
             } else {
-                throw new StorageException("HOP :: findByApplicationAttemptIdByApplicationId - Empty results");
+                throw new StorageException("HOP :: findApplicationAttemptIdStrByApplicationId - attempt with appId:" + applicationid + " was not found");
             }
         } catch (Exception e) {
             throw new StorageException(e);
@@ -128,7 +107,7 @@ public class ApplicationAttemptStateClusterJ implements ApplicationAttemptStateT
                 }
                 return appAttemptIds;
             } else {
-                throw new StorageException("HOP :: findApplicationAttemptIdByApplicationId - Empty results");
+                throw new StorageException("HOP :: findApplicationAttemptIdByApplicationId - attempt with appId:" + applicationid + " was not found");
             }
         } catch (Exception e) {
             throw new StorageException(e);

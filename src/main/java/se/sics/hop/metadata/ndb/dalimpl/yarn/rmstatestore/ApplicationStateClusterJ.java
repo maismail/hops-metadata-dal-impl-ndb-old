@@ -5,7 +5,6 @@ import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
-import com.mysql.clusterj.query.Predicate;
 import com.mysql.clusterj.query.QueryBuilder;
 import com.mysql.clusterj.query.QueryDomainType;
 import java.util.ArrayList;
@@ -14,7 +13,7 @@ import java.util.List;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.entity.yarn.rmstatestore.HopApplicationState;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
-import se.sics.hop.metadata.yarn.dal.ApplicationStateDataAccess;
+import se.sics.hop.metadata.yarn.dal.rmstatestore.ApplicationStateDataAccess;
 import se.sics.hop.metadata.yarn.tabledef.rmstatestore.ApplicationStateTableDef;
 
 /**
@@ -48,7 +47,7 @@ public class ApplicationStateClusterJ implements ApplicationStateTableDef, Appli
             appStateDTO = session.find(ApplicationStateDTO.class, id);
         }
         if (appStateDTO == null) {
-            throw new StorageException("HOP :: Error while retrieving row");
+            throw new StorageException("HOP :: Error while retrieving applicationState with id=" + id);
         }
         return createHopApplicationState(appStateDTO);
     }
@@ -82,14 +81,14 @@ public class ApplicationStateClusterJ implements ApplicationStateTableDef, Appli
             if (removed != null) {
                 List<ApplicationStateDTO> toRemove = new ArrayList<ApplicationStateDTO>();
                 for (HopApplicationState hop : removed) {
-                    toRemove.add(session.newInstance(ApplicationStateDTO.class, hop.getApplicationid())); 
+                    toRemove.add(session.newInstance(ApplicationStateDTO.class, hop.getApplicationid()));
                 }
                 session.deletePersistentAll(toRemove);
             }
             if (modified != null) {
                 List<ApplicationStateDTO> toModify = new ArrayList<ApplicationStateDTO>();
                 for (HopApplicationState hop : modified) {
-                    toModify.add(createPersistable(hop, session)); 
+                    toModify.add(createPersistable(hop, session));
                 }
                 session.savePersistentAll(toModify);
             }

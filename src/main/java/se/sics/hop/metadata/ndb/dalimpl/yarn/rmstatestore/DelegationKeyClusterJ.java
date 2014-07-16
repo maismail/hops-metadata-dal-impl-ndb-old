@@ -13,7 +13,7 @@ import java.util.List;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.entity.yarn.rmstatestore.HopDelegationKey;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
-import se.sics.hop.metadata.yarn.dal.DelegationKeyDataAccess;
+import se.sics.hop.metadata.yarn.dal.rmstatestore.DelegationKeyDataAccess;
 import se.sics.hop.metadata.yarn.tabledef.rmstatestore.DelegationKeyTableDef;
 
 /**
@@ -47,7 +47,7 @@ public class DelegationKeyClusterJ implements DelegationKeyTableDef, DelegationK
             delegationKeyDTO = session.find(DelegationKeyClusterJ.DelegationKeyDTO.class, key);
         }
         if (delegationKeyDTO == null) {
-            throw new StorageException("HOP :: Error while retrieving row");
+            throw new StorageException("HOP :: Error while retrieving delegationKey:"+key);
         }
 
         return createHopDelegationKey(delegationKeyDTO);

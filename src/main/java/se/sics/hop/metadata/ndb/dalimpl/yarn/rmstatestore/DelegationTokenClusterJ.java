@@ -13,7 +13,7 @@ import java.util.List;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.entity.yarn.rmstatestore.HopDelegationToken;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
-import se.sics.hop.metadata.yarn.dal.DelegationTokenDataAccess;
+import se.sics.hop.metadata.yarn.dal.rmstatestore.DelegationTokenDataAccess;
 import se.sics.hop.metadata.yarn.tabledef.rmstatestore.DelegationTokenTableDef;
 
 /**
@@ -47,7 +47,7 @@ public class DelegationTokenClusterJ implements DelegationTokenTableDef, Delegat
             delegationTokenDTO = session.find(DelegationTokenDTO.class, seqnumber);
         }
         if (delegationTokenDTO == null) {
-            throw new StorageException("HOP :: Error while retrieving row");
+            throw new StorageException("HOP :: Error while retrieving delegationToken with seq_number=" + seqnumber);
         }
 
         return createHopDelegationToken(delegationTokenDTO);
