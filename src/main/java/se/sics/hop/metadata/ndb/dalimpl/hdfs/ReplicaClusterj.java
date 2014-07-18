@@ -19,6 +19,7 @@ import se.sics.hop.metadata.hdfs.dal.ReplicaDataAccess;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
 import se.sics.hop.metadata.hdfs.tabledef.ReplicaTableDef;
+import se.sics.hop.metadata.ndb.mysqlserver.CountHelper;
 
 /**
  *
@@ -136,6 +137,11 @@ public class ReplicaClusterj implements ReplicaTableDef, ReplicaDataAccess<HopIn
     } catch (Exception e) {
       throw new StorageException(e);
     }
+  }
+
+  @Override
+  public int countAllReplicasForStorageId(int sid) throws StorageException {
+    return CountHelper.countWithCriterion(TABLE_NAME, String.format("%s=%d", STORAGE_ID, sid));
   }
 
   private List<HopIndexedReplica> createReplicaList(List<ReplicaDTO> triplets) {
