@@ -6,10 +6,13 @@
 
 package se.sics.hop.metadata.ndb.dalimpl.yarn.rmstatestore;
 
+import com.mysql.clusterj.Query;
 import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
+import com.mysql.clusterj.query.QueryBuilder;
+import com.mysql.clusterj.query.QueryDomainType;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -33,13 +36,13 @@ public class AppMasterRPCClusterJ implements AppMasterRPCTableDef, AppMasterRPCD
         int getid();
         void setid(int id);
 
-        @Column(name = ENUM)
-        String getenum();
-        void setenum(String enumproto);
+        @Column(name = TYPE)
+        String gettype();
+        void settype(String type);
 
-        @Column(name = PROTO)
-        byte[] getproto();
-        void setproto(byte[] proto);
+        @Column(name = RPC)
+        byte[] getrpc();
+        void setrpc(byte[] rpc);
     }
     private final ClusterjConnector connector = ClusterjConnector.getInstance();
     
@@ -80,15 +83,45 @@ public class AppMasterRPCClusterJ implements AppMasterRPCTableDef, AppMasterRPCD
         }
     }
     
+    @Override
+    public List<HopAppMasterRPC> getAll() throws StorageException {
+        try {
+            Session session = connector.obtainSession();
+            QueryBuilder qb = session.getQueryBuilder();
+            QueryDomainType<AppMasterRPCClusterJ.AppMasterRPCDTO> dobj = qb.createQueryDefinition(AppMasterRPCClusterJ.AppMasterRPCDTO.class);
+            //Predicate pred1 = dobj.get("applicationid").equal(dobj.param("applicationid"));
+            //dobj.where(pred1);
+            Query<AppMasterRPCClusterJ.AppMasterRPCDTO> query = session.createQuery(dobj);
+            //query.setParameter("applicationid", applicationid);
+            List<AppMasterRPCClusterJ.AppMasterRPCDTO> results = query.getResultList();
+            if (results != null && !results.isEmpty()) {
+                return createHopAppMasterRPCList(results);
+            } else {
+                throw new StorageException("HOP :: Error retrieving AppMasterRPCs");
+            }
+        } catch (Exception e) {
+            throw new StorageException(e);
+        }
+    }
+    
     private HopAppMasterRPC createHopAppMasterRPC(AppMasterRPCDTO appMasterRPCDTO) {
-        return new HopAppMasterRPC(appMasterRPCDTO.getid(), appMasterRPCDTO.getenum(), appMasterRPCDTO.getproto());
+        return new HopAppMasterRPC(appMasterRPCDTO.getid(), appMasterRPCDTO.gettype(), appMasterRPCDTO.getrpc());
+    }
+    
+    private List<HopAppMasterRPC> createHopAppMasterRPCList(List<AppMasterRPCClusterJ.AppMasterRPCDTO> list) {
+        List<HopAppMasterRPC> hopList = new ArrayList<HopAppMasterRPC>();
+        for (AppMasterRPCClusterJ.AppMasterRPCDTO dto : list) {
+            hopList.add(createHopAppMasterRPC(dto));
+        }
+        return hopList;
+
     }
     
     private AppMasterRPCDTO createPersistable(HopAppMasterRPC hop, Session session) {
         AppMasterRPCClusterJ.AppMasterRPCDTO appMasterRPCDTO = session.newInstance(AppMasterRPCClusterJ.AppMasterRPCDTO.class);
         appMasterRPCDTO.setid(hop.getId());
-        appMasterRPCDTO.setenum(hop.getEnumproto());
-        appMasterRPCDTO.setproto(hop.getProto());
+        appMasterRPCDTO.settype(hop.getType());
+        appMasterRPCDTO.setrpc(hop.getRpc());
         
         return appMasterRPCDTO;
     }   
