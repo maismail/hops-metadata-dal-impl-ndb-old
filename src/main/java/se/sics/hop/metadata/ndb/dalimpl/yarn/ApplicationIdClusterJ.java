@@ -45,10 +45,10 @@ public class ApplicationIdClusterJ implements ApplicationIdTableDef, Application
 
         void setclustertimestamp(long clustertimestamp);
 
-        @Column(name = FINISHED)
-        int getfinished();
-
-        void setfinished(int finished);
+//        @Column(name = FINISHED)
+//        int getfinished();
+//
+//        void setfinished(int finished);
     }
     private ClusterjConnector connector = ClusterjConnector.getInstance();
 
@@ -173,7 +173,7 @@ public class ApplicationIdClusterJ implements ApplicationIdTableDef, Application
             appidDTO.setid(hop.getId());
             appidDTO.setappid(hop.getId());
             appidDTO.setclustertimestamp(hop.getClustertimestamp());
-            appidDTO.setfinished(hop.getFinished());
+           // appidDTO.setfinished(hop.getFinished());
         }
         session.deletePersistentAll(toRemove);
     }
@@ -206,13 +206,13 @@ public class ApplicationIdClusterJ implements ApplicationIdTableDef, Application
         applicationIdDTO.setid(hopApplicationId.getNdbId());
         applicationIdDTO.setappid(hopApplicationId.getId());
         applicationIdDTO.setclustertimestamp(hopApplicationId.getClustertimestamp());
-        applicationIdDTO.setfinished(hopApplicationId.getFinished());
+        //applicationIdDTO.setfinished(hopApplicationId.getFinished());
         session.savePersistent(applicationIdDTO);
         return applicationIdDTO;
     }
 
     private HopApplicationId createHopApplicationId(ApplicationIdDTO applicationIdDTO) {
-        HopApplicationId hop = new HopApplicationId(applicationIdDTO.getid(), applicationIdDTO.getappid(), applicationIdDTO.getclustertimestamp(), applicationIdDTO.getfinished());
+        HopApplicationId hop = new HopApplicationId(applicationIdDTO.getid(), applicationIdDTO.getappid(), applicationIdDTO.getclustertimestamp());
         return hop;
     }
 }
