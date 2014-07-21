@@ -41,6 +41,10 @@ public class CorruptReplicaClusterj implements CorruptReplicaTableDef, CorruptRe
     @Column(name = STORAGE_ID)
     int getStorageId();
     void setStorageId(int id);
+    
+    @Column(name = TIMESTAMP)
+    long getTimestamp();
+    void setTimestamp(long timestamp);
   }
   private ClusterjConnector connector = ClusterjConnector.getInstance();
 
@@ -101,6 +105,7 @@ public class CorruptReplicaClusterj implements CorruptReplicaTableDef, CorruptRe
       QueryBuilder qb = session.getQueryBuilder();
       QueryDomainType<CorruptReplicaDTO> dobj = qb.createQueryDefinition(CorruptReplicaDTO.class);
       Query<CorruptReplicaDTO> query = session.createQuery(dobj);
+      query.setOrdering(Query.Ordering.ASCENDING, "timestamp");
       List<CorruptReplicaDTO> ibts = query.getResultList();
       return createCorruptReplicaList(ibts);
     } catch (Exception e) {
@@ -160,5 +165,6 @@ public class CorruptReplicaClusterj implements CorruptReplicaTableDef, CorruptRe
     corruptReplicaTable.setBlockId(corruptReplica.getBlockId());
     corruptReplicaTable.setStorageId(corruptReplica.getStorageId());
     corruptReplicaTable.setINodeId(corruptReplica.getInodeId());
+    corruptReplicaTable.setTimestamp(System.currentTimeMillis());
   }
 }

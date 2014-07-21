@@ -124,7 +124,8 @@ public class INodeClusterj implements INodeTableDef, INodeDataAccess<HopINode> {
     void setSymlink(String symlink);
   }
   private ClusterjConnector connector = ClusterjConnector.getInstance();
-
+  private final static int NOT_FOUND_ROW = -1000;
+  
   @Override
   public void prepare(Collection<HopINode> removed, Collection<HopINode> newEntries, Collection<HopINode> modified) throws StorageException {
     Session session = connector.obtainSession();
@@ -230,10 +231,31 @@ public class INodeClusterj implements INodeTableDef, INodeDataAccess<HopINode> {
 
   }
 
+  @Override
+  public List<HopINode> getINodesPkBatched(String[] names, int[] parentIds) throws StorageException {
+    try {
+
+      Session session = connector.obtainSession();
+      List<InodeDTO> dtos = new ArrayList<InodeDTO>();
+      for (int i = 0; i < names.length; i++) {
+        InodeDTO dto = session.newInstance(InodeDTO.class, new Object[]{parentIds[i], names[i]});
+        dto.setId(NOT_FOUND_ROW);
+        dto = session.load(dto);
+        dtos.add(dto);
+      }
+      session.flush();
+      return createInodeList(dtos);
+    } catch (Exception e) {
+      throw new StorageException(e);
+    }
+  }
+    
   private List<HopINode> createInodeList(List<InodeDTO> list) throws IOException {
     List<HopINode> inodes = new ArrayList<HopINode>();
     for (InodeDTO persistable : list) {
-      inodes.add(createInode(persistable));
+      if(persistable.getId() != NOT_FOUND_ROW){
+        inodes.add(createInode(persistable));
+      }
     }
     return inodes;
   }
