@@ -19,6 +19,7 @@ import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
 import se.sics.hop.metadata.ndb.mysqlserver.CountHelper;
 import se.sics.hop.metadata.hdfs.tabledef.INodeTableDef;
+import se.sics.hop.metadata.INodeIdentifier;
 
 /**
  *
@@ -245,6 +246,28 @@ public class INodeClusterj implements INodeTableDef, INodeDataAccess<HopINode> {
       }
       session.flush();
       return createInodeList(dtos);
+    } catch (Exception e) {
+      throw new StorageException(e);
+    }
+  }
+  
+  @Override
+  public List<INodeIdentifier> getAllINodeFiles() throws StorageException {
+       try {
+
+      Session session = connector.obtainSession();
+      QueryBuilder qb = session.getQueryBuilder();
+      QueryDomainType<InodeDTO> dobj = qb.createQueryDefinition(InodeDTO.class);
+      Predicate pred = dobj.get("isDir").equal(dobj.param("isDirParam"));
+      dobj.where(pred);
+      Query<InodeDTO> query = session.createQuery(dobj);
+      query.setParameter("isDirParam", 0);
+      List<InodeDTO> dtos = query.getResultList();
+      List<INodeIdentifier> res = new ArrayList<INodeIdentifier>();
+      for(InodeDTO dto : dtos){
+        res.add(new INodeIdentifier(dto.getId(), dto.getParentId(), dto.getName()));
+      }
+      return res;
     } catch (Exception e) {
       throw new StorageException(e);
     }
