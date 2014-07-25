@@ -106,7 +106,7 @@ public class ReplicaUnderConstructionClusterj implements ReplicaUnderConstructio
   }
   
 
-  private List<HopReplicaUnderConstruction> createReplicaList(List<ReplicaUcDTO> replicaUc) {
+  private List<HopReplicaUnderConstruction> createReplicaList(List<ReplicaUcDTO> replicaUc) throws StorageException {
     Session session = connector.obtainSession();
     List<HopReplicaUnderConstruction> replicas = new ArrayList<HopReplicaUnderConstruction>(replicaUc.size());
     for (ReplicaUcDTO t : replicaUc) {

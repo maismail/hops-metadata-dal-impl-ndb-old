@@ -105,13 +105,17 @@ public class ClusterjConnector implements StorageConnector<Session> {
    * NOTE: Do not close the session returned by this call or you will die.
    */
   @Override
-  public Session obtainSession() {
+  public Session obtainSession() throws StorageException {
+    try {
     Session session = sessionPool.get();
     if (session == null) {
       session = sessionFactory.getSession();
       sessionPool.set(session);
     }
     return session;
+    } catch (Exception e) {
+      throw new StorageException(e);
+    }
   }
 
   /**
@@ -119,13 +123,16 @@ public class ClusterjConnector implements StorageConnector<Session> {
    */
   @Override
   public void beginTransaction() throws StorageException {
+    try {
     Session session = obtainSession();
-    if(session.currentTransaction().isActive())
-    {
+      if (session.currentTransaction().isActive()) {
       LOG.debug("Can not start Tx inside another Tx");
       System.exit(0);
     }
     session.currentTransaction().begin();
+    } catch (Exception e) {
+      throw new StorageException(e);
+    }
   }
 
   /**
@@ -133,6 +140,7 @@ public class ClusterjConnector implements StorageConnector<Session> {
    */
   @Override
   public void commit() throws StorageException {
+    try {
     Session session = obtainSession();
     Transaction tx = session.currentTransaction();
     if (!tx.isActive()) {
@@ -143,13 +151,17 @@ public class ClusterjConnector implements StorageConnector<Session> {
     session.flush();
     sessionPool.remove();
     session.close();
+    } catch (Exception e) {
+      throw new StorageException(e);
+    }
   }
 
   /**
    * It rolls back only when the transaction is active.
    */
   @Override
-  public void rollback() {
+  public void rollback() throws StorageException {
+    try {
     Session session = obtainSession();
     Transaction tx = session.currentTransaction();
     if (tx.isActive()) {
@@ -157,6 +169,9 @@ public class ClusterjConnector implements StorageConnector<Session> {
     }
     sessionPool.remove();
     session.close();
+    } catch (Exception e) {
+      throw new StorageException(e);
+    }
   }
 
   /**
@@ -250,34 +265,50 @@ public class ClusterjConnector implements StorageConnector<Session> {
   }
   
   @Override
-  public boolean isTransactionActive() {
+  public boolean isTransactionActive() throws StorageException {
+    try {
     return obtainSession().currentTransaction().isActive();
+    } catch (Exception e) {
+      throw new StorageException(e);
+    }
   }
 
   @Override
-  public void stopStorage() {
+  public void stopStorage() throws StorageException {
   }
 
   @Override
-  public void readLock() {
+  public void readLock() throws StorageException {
+    try {
     Session session = obtainSession();
     session.setLockMode(LockMode.SHARED);
+    } catch (Exception e) {
+      throw new StorageException(e);
+    }
   }
 
   @Override
-  public void writeLock() {
+  public void writeLock() throws StorageException {
+    try {
     Session session = obtainSession();
     session.setLockMode(LockMode.EXCLUSIVE);
+    } catch (Exception e) {
+      throw new StorageException(e);
+    }
   }
 
   @Override
-  public void readCommitted() {
+  public void readCommitted() throws StorageException {
+    try {
     Session session = obtainSession();
     session.setLockMode(LockMode.READ_COMMITTED);
+    } catch (Exception e) {
+      throw new StorageException(e);
+    }
   }
   
   @Override
-  public void setPartitionKey(Class className, Object key) {
+  public void setPartitionKey(Class className, Object key) throws StorageException {
     Class cls = null;
     if (className == BlockInfoDataAccess.class) {
       cls = BlockInfoClusterj.BlockInfoDTO.class;
@@ -309,7 +340,11 @@ public class ClusterjConnector implements StorageConnector<Session> {
       cls = VariableClusterj.VariableDTO.class;
     }
 
+    try {
     Session session = obtainSession();
     session.setPartitionKey(cls, key);
+    } catch (Exception e) {
+      throw new StorageException(e);
+    }
   }
 }
