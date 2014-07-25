@@ -11,6 +11,10 @@ import se.sics.hop.exception.StorageInitializtionException;
 
 import se.sics.hop.metadata.hdfs.dal.EntityDataAccess;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.ApplicationIdClusterJ;
+import se.sics.hop.metadata.ndb.dalimpl.yarn.FiCaSchedulerNodeClusterJ;
+import se.sics.hop.metadata.ndb.dalimpl.yarn.NodeIdClusterJ;
+import se.sics.hop.metadata.ndb.dalimpl.yarn.QueueMetricsClusterJ;
+import se.sics.hop.metadata.ndb.dalimpl.yarn.ResourceClusterJ;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.YarnVariablesClusterJ;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.rmstatestore.AppMasterRPCClusterJ;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.rmstatestore.ApplicationAttemptStateClusterJ;
@@ -23,6 +27,10 @@ import se.sics.hop.metadata.yarn.dal.rmstatestore.RMStateVersionDataAccess;
 import se.sics.hop.metadata.ndb.mysqlserver.MysqlServerConnector;
 import se.sics.hop.metadata.yarn.dal.AppMasterRPCDataAccess;
 import se.sics.hop.metadata.yarn.dal.ApplicationIdDataAccess;
+import se.sics.hop.metadata.yarn.dal.FiCaSchedulerNodeDataAccess;
+import se.sics.hop.metadata.yarn.dal.NodeIdDataAccess;
+import se.sics.hop.metadata.yarn.dal.QueueMetricsDataAccess;
+import se.sics.hop.metadata.yarn.dal.ResourceDataAccess;
 import se.sics.hop.metadata.yarn.dal.YarnVariablesDataAccess;
 import se.sics.hop.metadata.yarn.dal.rmstatestore.ApplicationAttemptStateDataAccess;
 import se.sics.hop.metadata.yarn.dal.rmstatestore.ApplicationStateDataAccess;
@@ -63,6 +71,10 @@ public class NdbStorageFactory implements DALStorageFactory {
         dataAccessMap.put(YarnVariablesDataAccess.class, new YarnVariablesClusterJ());
         dataAccessMap.put(AppMasterRPCDataAccess.class, new AppMasterRPCClusterJ());
         dataAccessMap.put(ApplicationIdDataAccess.class, new ApplicationIdClusterJ());
+        dataAccessMap.put(QueueMetricsDataAccess.class, new QueueMetricsClusterJ());
+        dataAccessMap.put(FiCaSchedulerNodeDataAccess.class, new FiCaSchedulerNodeClusterJ());
+        dataAccessMap.put(ResourceDataAccess.class, new ResourceClusterJ());
+        dataAccessMap.put(NodeIdDataAccess.class, new NodeIdClusterJ());
     }
 
     @Override
