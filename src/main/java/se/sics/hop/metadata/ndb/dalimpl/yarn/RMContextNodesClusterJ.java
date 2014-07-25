@@ -1,13 +1,9 @@
 package se.sics.hop.metadata.ndb.dalimpl.yarn;
 
-import com.mysql.clusterj.Query;
 import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
-import com.mysql.clusterj.query.Predicate;
-import com.mysql.clusterj.query.QueryBuilder;
-import com.mysql.clusterj.query.QueryDomainType;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -28,11 +24,6 @@ public class RMContextNodesClusterJ implements RMContextNodesTableDef, RMContext
     public interface RMContextNodesDTO {
 
         @PrimaryKey
-        @Column(name = RMCONTEXT_ID)
-        int getrmcontextid();
-
-        void setrmcontextid(int rmcontextid);
-
         @Column(name = NODEID_ID)
         int getnodeidid();
 
@@ -48,39 +39,34 @@ public class RMContextNodesClusterJ implements RMContextNodesTableDef, RMContext
     @Override
     public HopRMContextNodes findEntry(int rmcontextId, int nodeidId) throws StorageException {
         Session session = connector.obtainSession();
-        Object[] objarr = new Object[2];
-        objarr[0] = rmcontextId;
-        objarr[1] = nodeidId;
         RMContextNodesDTO entry = null;
         if (session != null) {
-            entry = session.find(RMContextNodesDTO.class, objarr);
+            entry = session.find(RMContextNodesDTO.class, nodeidId);
         }
         if (entry == null) {
             throw new StorageException("HOP :: Error while retrieving row");
         }
-
         return createRMContextNodesEntry(entry);
     }
 
-    @Override
-    public List<HopRMContextNodes> getAllByRMContextId(int rmcontextId) throws StorageException {
-        try {
-            Session session = connector.obtainSession();
-            QueryBuilder qb = session.getQueryBuilder();
+    /*@Override
+     public List<HopRMContextNodes> getAllByRMContextId(int rmcontextId) throws StorageException {
+     try {
+     Session session = connector.obtainSession();
+     QueryBuilder qb = session.getQueryBuilder();
 
-            QueryDomainType<RMContextNodesDTO> dobj = qb.createQueryDefinition(RMContextNodesDTO.class);
-            Predicate pred1 = dobj.get("rmcontextid").equal(dobj.param("rmcontextid"));
-            dobj.where(pred1);
-            Query<RMContextNodesDTO> query = session.createQuery(dobj);
-            query.setParameter("rmcontextid", rmcontextId);
+     QueryDomainType<RMContextNodesDTO> dobj = qb.createQueryDefinition(RMContextNodesDTO.class);
+     Predicate pred1 = dobj.get("rmcontextid").equal(dobj.param("rmcontextid"));
+     dobj.where(pred1);
+     Query<RMContextNodesDTO> query = session.createQuery(dobj);
+     query.setParameter("rmcontextid", rmcontextId);
 
-            List<RMContextNodesDTO> results = query.getResultList();
-            return createRMContextNodesList(results);
-        } catch (Exception e) {
-            throw new StorageException(e);
-        }
-    }
-
+     List<RMContextNodesDTO> results = query.getResultList();
+     return createRMContextNodesList(results);
+     } catch (Exception e) {
+     throw new StorageException(e);
+     }
+     }*/
     @Override
     public void prepare(Collection<HopRMContextNodes> modified, Collection<HopRMContextNodes> removed) throws StorageException {
         Session session = connector.obtainSession();
@@ -88,10 +74,7 @@ public class RMContextNodesClusterJ implements RMContextNodesTableDef, RMContext
             if (removed != null) {
                 List<RMContextNodesDTO> toRemove = new ArrayList<RMContextNodesDTO>();
                 for (HopRMContextNodes entry : removed) {
-                    Object[] objarr = new Object[2];
-                    objarr[0] = entry.getRmcontextid();
-                    objarr[1] = entry.getNodeidId();
-                    toRemove.add(session.newInstance(RMContextNodesDTO.class, objarr));
+                    toRemove.add(session.newInstance(RMContextNodesDTO.class, entry.getNodeidId()));
                 }
                 session.deletePersistentAll(toRemove);
             }
@@ -110,21 +93,15 @@ public class RMContextNodesClusterJ implements RMContextNodesTableDef, RMContext
     @Override
     public void createRMContextNodesEntry(HopRMContextNodes entry) throws StorageException {
         Session session = connector.obtainSession();
-        
-            session.savePersistent(createPersistable(entry, session));
-        
+        session.savePersistent(createPersistable(entry, session));
     }
 
     private HopRMContextNodes createRMContextNodesEntry(RMContextNodesDTO entry) {
-        return new HopRMContextNodes(entry.getrmcontextid(), entry.getnodeidid(), entry.getrmnodeid());
+        return new HopRMContextNodes(entry.getnodeidid(), entry.getrmnodeid());
     }
 
     private RMContextNodesDTO createPersistable(HopRMContextNodes entry, Session session) {
-        Object[] objarr = new Object[2];
-        objarr[0] = entry.getRmcontextid();
-        objarr[1] = entry.getNodeidId();
-        RMContextNodesDTO persistable = session.newInstance(RMContextNodesDTO.class, objarr);
-        persistable.setrmcontextid(entry.getRmcontextid());
+        RMContextNodesDTO persistable = session.newInstance(RMContextNodesDTO.class, entry.getNodeidId());
         persistable.setnodeidid(entry.getNodeidId());
         persistable.setrmnodeid(entry.getRmnodeId());
         //session.savePersistent(persistable);
