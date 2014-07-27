@@ -26,10 +26,10 @@ public class NodeHBResponseClusterJ implements NodeHBResponseTableDef, NodeHBRes
 
         void setid(int id);
 
-        @Column(name = RESPONSE_ID)
-        int getresponseid();
+        @Column(name = RESPONSE)
+        byte[] getresponse();
 
-        void setresponseid(int responseid);
+        void setresponse(byte[] responseid);
     }
     private ClusterjConnector connector = ClusterjConnector.getInstance();
 
@@ -54,7 +54,6 @@ public class NodeHBResponseClusterJ implements NodeHBResponseTableDef, NodeHBRes
         try {
             if (removed != null) {
                 for (HopNodeHBResponse nodehbresponse : removed) {
-
                     NodeHBResponseDTO persistable = session.newInstance(NodeHBResponseDTO.class, nodehbresponse.getId());
                     session.deletePersistent(persistable);
                 }
@@ -77,14 +76,13 @@ public class NodeHBResponseClusterJ implements NodeHBResponseTableDef, NodeHBRes
     }
 
     private HopNodeHBResponse createHopNodeHBResponse(NodeHBResponseDTO nodeHBresponseDTO) {
-        return new HopNodeHBResponse(nodeHBresponseDTO.getid(), nodeHBresponseDTO.getresponseid());
+        return new HopNodeHBResponse(nodeHBresponseDTO.getid(), nodeHBresponseDTO.getresponse());
     }
 
     private NodeHBResponseDTO createPersistable(HopNodeHBResponse nodehbresponse, Session session) {
         NodeHBResponseDTO nodeHBResponseDT0 = session.newInstance(NodeHBResponseDTO.class);
         nodeHBResponseDT0.setid(nodehbresponse.getId());
-        nodeHBResponseDT0.setresponseid(nodehbresponse.getResponseid());
-        session.savePersistent(nodeHBResponseDT0);
+        nodeHBResponseDT0.setresponse(nodehbresponse.getResponseid());
         return nodeHBResponseDT0;
     }
 }

@@ -1,13 +1,9 @@
 package se.sics.hop.metadata.ndb.dalimpl.yarn;
 
-import com.mysql.clusterj.Query;
 import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
-import com.mysql.clusterj.query.Predicate;
-import com.mysql.clusterj.query.QueryBuilder;
-import com.mysql.clusterj.query.QueryDomainType;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -52,7 +48,7 @@ public class ContainerStatusClusterJ implements ContainerStatusTableDef, Contain
 
         void setexitstatus(int exitstatus);
 
-        @Column(name = TYPE)
+        /*@Column(name = TYPE)
         String gettype();
 
         void settype(String type);
@@ -60,7 +56,7 @@ public class ContainerStatusClusterJ implements ContainerStatusTableDef, Contain
         @Column(name = UPDATEDCONTAINERINFO_ID)
         int getupdatedcontainerinfoid();
 
-        void setupdatedcontainerinfoid(int updatedcontainerinfoid);
+        void setupdatedcontainerinfoid(int updatedcontainerinfoid);*/
     }
     private ClusterjConnector connector = ClusterjConnector.getInstance();
 
@@ -79,7 +75,7 @@ public class ContainerStatusClusterJ implements ContainerStatusTableDef, Contain
         return createHopContainerStatus(uciDTO);
     }
 
-    @Override
+    /*@Override
     public List<HopContainerStatus> findByUpdatedContainerInfoId(int uciId) throws StorageException {
         try {
             Session session = connector.obtainSession();
@@ -96,9 +92,9 @@ public class ContainerStatusClusterJ implements ContainerStatusTableDef, Contain
         } catch (Exception e) {
             throw new StorageException(e);
         }
-    }
+    }*/
 
-    @Override
+    /*@Override
     public List<HopContainerStatus> findByUpdatedContainerInfoIdAndState(int uciId, String state) throws StorageException {
         try {
             Session session = connector.obtainSession();
@@ -117,7 +113,7 @@ public class ContainerStatusClusterJ implements ContainerStatusTableDef, Contain
         } catch (Exception e) {
             throw new StorageException(e);
         }
-    }
+    }*/
 
     @Override
     public void prepare(Collection<HopContainerStatus> modified, Collection<HopContainerStatus> removed) throws StorageException {
@@ -155,16 +151,16 @@ public class ContainerStatusClusterJ implements ContainerStatusTableDef, Contain
         csDTO.setcontainerid(hopCS.getContainerid());
         csDTO.setdiagnostics(hopCS.getDiagnostics());
         csDTO.setexitstatus(hopCS.getExitstatus());
-        csDTO.settype(hopCS.getType());
+        /*csDTO.settype(hopCS.getType());
         if (hopCS.getUpdatedcontainerinfoid() != Integer.MIN_VALUE) {
             csDTO.setupdatedcontainerinfoid(hopCS.getUpdatedcontainerinfoid());
-        }
-        session.savePersistent(csDTO);
+        }*/
+       
         return csDTO;
     }
 
     private HopContainerStatus createHopContainerStatus(ContainerStatusDTO csDTO) {
-        HopContainerStatus hop = new HopContainerStatus(csDTO.getid(), csDTO.getstate(), csDTO.getcontainerid(), csDTO.getdiagnostics(), csDTO.getexitstatus(), csDTO.gettype(), csDTO.getupdatedcontainerinfoid());
+        HopContainerStatus hop = new HopContainerStatus(csDTO.getid(), csDTO.getstate(), csDTO.getcontainerid(), csDTO.getdiagnostics(), csDTO.getexitstatus());
         return hop;
     }
 

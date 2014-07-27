@@ -91,27 +91,28 @@ public class UpdatedContainerInfoClusterJ implements UpdatedContainerInfoTableDe
         Session session = connector.obtainSession();
         try {
             if (removed != null) {
-                for (HopUpdatedContainerInfo hopUCI : removed) {
-
-                    UpdatedContainerInfoDTO persistable = session.newInstance(UpdatedContainerInfoDTO.class, hopUCI.getId());
-                    session.deletePersistent(persistable);
+                List<UpdatedContainerInfoDTO> toRemove = new ArrayList<UpdatedContainerInfoDTO>();
+                for (HopUpdatedContainerInfo entry : removed) {
+                    toRemove.add(createPersistable(entry, session));
                 }
+                session.deletePersistentAll(toRemove);
             }
             if (modified != null) {
-                for (HopUpdatedContainerInfo hopUCI : modified) {
-                    UpdatedContainerInfoDTO persistable = createPersistable(hopUCI, session);
-                    session.savePersistent(persistable);
+                List<UpdatedContainerInfoDTO> toModify = new ArrayList<UpdatedContainerInfoDTO>();
+                for (HopUpdatedContainerInfo entry : modified) {
+                    toModify.add(createPersistable(entry, session));
                 }
+                session.savePersistentAll(toModify);
             }
         } catch (Exception e) {
-            throw new StorageException(e);
+            throw new StorageException("Error while rmnode table:" + e.getMessage());
         }
     }
 
     @Override
     public void createUpdatedContainerInfo(HopUpdatedContainerInfo updatedContainerInfo) throws StorageException {
         Session session = connector.obtainSession();
-        createPersistable(updatedContainerInfo, session);
+        session.savePersistent(createPersistable(updatedContainerInfo, session));
     }
 
     private UpdatedContainerInfoDTO createPersistable(HopUpdatedContainerInfo hopUCI, Session session) {
@@ -121,7 +122,6 @@ public class UpdatedContainerInfoClusterJ implements UpdatedContainerInfoTableDe
         if (hopUCI.getRmnodeid() != Integer.MIN_VALUE) {
             uciDTO.setrmnodeid(hopUCI.getRmnodeid());
         }
-        session.savePersistent(uciDTO);
         return uciDTO;
     }
 
