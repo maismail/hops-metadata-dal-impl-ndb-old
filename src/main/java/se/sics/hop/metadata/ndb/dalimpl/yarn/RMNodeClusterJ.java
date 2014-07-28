@@ -1,9 +1,13 @@
 package se.sics.hop.metadata.ndb.dalimpl.yarn;
 
+import com.mysql.clusterj.Query;
 import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
+import com.mysql.clusterj.query.Predicate;
+import com.mysql.clusterj.query.QueryBuilder;
+import com.mysql.clusterj.query.QueryDomainType;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -75,10 +79,9 @@ public class RMNodeClusterJ implements RMNodeTableDef, RMNodeDataAccess<HopRMNod
         void setHealthreport(String healthreport);
 
         /*@Column(name = RMCONTEXT_ID)
-        int getRMContextid();
+         int getRMContextid();
 
-        void setRMContextid(int rmcontextid);*/
-
+         void setRMContextid(int rmcontextid);*/
         @Column(name = LAST_HEALTH_REPORT_TIME)
         long getLasthealthreporttime();
 
@@ -88,12 +91,12 @@ public class RMNodeClusterJ implements RMNodeTableDef, RMNodeDataAccess<HopRMNod
         String getcurrentstate();
 
         void setcurrentstate(String currentstate);
-        
+
         @Column(name = OVERCOMMIT_TIMEOUT)
         int getovercommittimeout();
 
         void setovercommittimeout(int overcommittimeout);
-        
+
         @Column(name = NODEMANAGER_VERSION)
         String getnodemanagerversion();
 
@@ -114,14 +117,21 @@ public class RMNodeClusterJ implements RMNodeTableDef, RMNodeDataAccess<HopRMNod
     @Override
     public HopRMNode findByHostNameCommandPort(String hostName, int commandPort) throws StorageException {
         Session session = connector.obtainSession();
-        Object[] objarr = new Object[2];
-        objarr[0] = hostName;
-        objarr[1] = commandPort;
-        RMNodeDTO rmnodeDTO = session.find(RMNodeDTO.class, objarr);
-        if (rmnodeDTO == null) {
-            throw new StorageException("HOP :: Error while retrieving row:" + hostName + ":" + commandPort);
+        QueryBuilder qb = session.getQueryBuilder();
+        QueryDomainType<RMNodeDTO> dobj = qb.createQueryDefinition(RMNodeDTO.class);
+        Predicate pred1 = dobj.get("hostname").equal(dobj.param("hostname"));
+        Predicate pred2 = dobj.get("commandport").equal(dobj.param("commandport"));
+        pred1 = pred1.and(pred2);
+        dobj.where(pred1);
+        Query<RMNodeDTO> query = session.createQuery(dobj);
+        query.setParameter("hostname", hostName);
+        query.setParameter("commandport", commandPort);
+        List<RMNodeDTO> results = query.getResultList();
+        if (results != null && !results.isEmpty()) {
+            return createHopRMNode(results.get(0));
+        } else {
+            throw new StorageException("HOP :: RMNode with host:" + hostName + ", cmport:" + commandPort + " was not found");
         }
-        return createHopRMNode(rmnodeDTO);
     }
 
     @Override

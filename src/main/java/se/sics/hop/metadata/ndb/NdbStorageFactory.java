@@ -13,6 +13,7 @@ import se.sics.hop.metadata.hdfs.dal.EntityDataAccess;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.ApplicationAttemptIdClusterJ;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.ApplicationIdClusterJ;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.ContainerIdClusterJ;
+import se.sics.hop.metadata.ndb.dalimpl.yarn.ContainerIdToCleanClusterJ;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.ContainerStatusClusterJ;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.NodeClusterJ;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.NodeHBResponseClusterJ;
@@ -36,6 +37,7 @@ import se.sics.hop.metadata.yarn.dal.AppMasterRPCDataAccess;
 import se.sics.hop.metadata.yarn.dal.ApplicationAttemptIdDataAccess;
 import se.sics.hop.metadata.yarn.dal.ApplicationIdDataAccess;
 import se.sics.hop.metadata.yarn.dal.ContainerIdDataAccess;
+import se.sics.hop.metadata.yarn.dal.ContainerIdToCleanDataAccess;
 import se.sics.hop.metadata.yarn.dal.ContainerStatusDataAccess;
 import se.sics.hop.metadata.yarn.dal.NodeDataAccess;
 import se.sics.hop.metadata.yarn.dal.NodeHBResponseDataAccess;
@@ -96,7 +98,8 @@ public class NdbStorageFactory implements DALStorageFactory {
         dataAccessMap.put(NodeHBResponseDataAccess.class, new NodeHBResponseClusterJ());
         dataAccessMap.put(UpdatedContainerInfoDataAccess.class, new UpdatedContainerInfoClusterJ());
         dataAccessMap.put(UpdatedContainerInfoContainersDataAccess.class, new UpdatedContainerInfoContainersClusterJ());
-
+        dataAccessMap.put(ContainerIdToCleanDataAccess.class, new ContainerIdToCleanClusterJ());
+        
     }
 
     @Override
