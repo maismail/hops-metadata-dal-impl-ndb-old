@@ -72,6 +72,22 @@ public class FiCaSchedulerNodeClusterJ implements FiCaSchedulerNodeTableDef, FiC
 
         return createHopFiCaSchedulerNode(ficaschedulernodeDTO);
     }
+   
+    @Override
+    public HopFiCaSchedulerNode findByNodeName(String name) throws StorageException {
+        Session session = connector.obtainSession();
+
+        FiCaSchedulerNodeDTO ficaschedulernodeDTO = null;
+        if (session != null) {
+            ficaschedulernodeDTO = session.find(FiCaSchedulerNodeDTO.class, name);
+        }
+        if (ficaschedulernodeDTO == null) {
+            throw new StorageException("HOP :: Error while retrieving row");
+        }
+
+        return createHopFiCaSchedulerNode(ficaschedulernodeDTO);
+    }
+
 
     @Override
     public void prepare(Collection<HopFiCaSchedulerNode> modified, Collection<HopFiCaSchedulerNode> removed) throws StorageException {

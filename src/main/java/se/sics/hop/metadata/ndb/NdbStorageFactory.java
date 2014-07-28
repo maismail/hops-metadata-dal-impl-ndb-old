@@ -21,6 +21,7 @@ import se.sics.hop.metadata.ndb.dalimpl.yarn.ResourceClusterJ;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.ContainerIdClusterJ;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.ContainerIdToCleanClusterJ;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.ContainerStatusClusterJ;
+import se.sics.hop.metadata.ndb.dalimpl.yarn.FifoSchedulerNodesClusterJ;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.NodeClusterJ;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.NodeHBResponseClusterJ;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.NodeIdClusterJ;
@@ -50,6 +51,7 @@ import se.sics.hop.metadata.yarn.dal.ResourceDataAccess;
 import se.sics.hop.metadata.yarn.dal.ContainerIdDataAccess;
 import se.sics.hop.metadata.yarn.dal.ContainerIdToCleanDataAccess;
 import se.sics.hop.metadata.yarn.dal.ContainerStatusDataAccess;
+import se.sics.hop.metadata.yarn.dal.FifoSchedulerNodesDataAccess;
 import se.sics.hop.metadata.yarn.dal.NodeDataAccess;
 import se.sics.hop.metadata.yarn.dal.NodeHBResponseDataAccess;
 import se.sics.hop.metadata.yarn.dal.NodeIdDataAccess;
@@ -114,7 +116,7 @@ public class NdbStorageFactory implements DALStorageFactory {
         dataAccessMap.put(UpdatedContainerInfoDataAccess.class, new UpdatedContainerInfoClusterJ());
         dataAccessMap.put(UpdatedContainerInfoContainersDataAccess.class, new UpdatedContainerInfoContainersClusterJ());
         dataAccessMap.put(ContainerIdToCleanDataAccess.class, new ContainerIdToCleanClusterJ());
-        
+        dataAccessMap.put(FifoSchedulerNodesDataAccess.class, new FifoSchedulerNodesClusterJ());
     }
 
     @Override
