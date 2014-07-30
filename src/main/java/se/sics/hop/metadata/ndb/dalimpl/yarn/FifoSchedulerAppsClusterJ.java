@@ -11,7 +11,6 @@ import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
-import com.mysql.clusterj.query.Predicate;
 import com.mysql.clusterj.query.QueryBuilder;
 import com.mysql.clusterj.query.QueryDomainType;
 import java.util.ArrayList;
@@ -34,17 +33,13 @@ public class FifoSchedulerAppsClusterJ implements FifoSchedulerAppsTableDef, Fif
     public interface FifoSchedulerAppsDTO {
 
         @PrimaryKey
-        @Column(name = FIFOSCHEDULER_ID)
-        int getfifoschedulerid();
-        void setfifoschedulerid(int fifoscheduler_id);
-
-        @Column(name = APPLICATIONATTEMPTID_ID)
-        int getapplicationattemptid();
-        void setapplicationattemptid(int applicationattempt_id);
+        @Column(name = APPID)
+        int getapplicationid();
+        void setapplicationid(int applicationid);
         
-        @Column(name = FICASCHEDULERAPP_ID)
-        int getficaschedulerappid();
-        void setficaschedulerappid(int ficaschedulerapp_id);
+        @Column(name = SCHEDULERAPPLICATION_ID)
+        int getschedulerapplicationid();
+        void setschedulerapplicationid(int schedulerapplicationid);
     }
     
     private final ClusterjConnector connector = ClusterjConnector.getInstance();
@@ -55,10 +50,7 @@ public class FifoSchedulerAppsClusterJ implements FifoSchedulerAppsTableDef, Fif
         try {
             if (removed != null) {
                 for (HopFifoSchedulerApps hop : removed) {
-                    Object[] objarr = new Object[2];
-                    objarr[0] = hop.getFifoscheduler_id();
-                    objarr[1] = hop.getApplicationattemptid_id();
-                    FifoSchedulerAppsClusterJ.FifoSchedulerAppsDTO persistable = session.newInstance(FifoSchedulerAppsClusterJ.FifoSchedulerAppsDTO.class, objarr);
+                    FifoSchedulerAppsClusterJ.FifoSchedulerAppsDTO persistable = session.newInstance(FifoSchedulerAppsClusterJ.FifoSchedulerAppsDTO.class, hop.getApplicationid());
                     session.deletePersistent(persistable);
                 }
             }
@@ -74,14 +66,11 @@ public class FifoSchedulerAppsClusterJ implements FifoSchedulerAppsTableDef, Fif
     }
     
     @Override
-    public HopFifoSchedulerApps findEntry(int fifoSchedulerId, int applicationattemptidId) throws StorageException {
+    public HopFifoSchedulerApps findByAppId(int applicationid) throws StorageException {
         Session session = connector.obtainSession();
-        Object[] objarr = new Object[2];
-        objarr[0] = fifoSchedulerId;
-        objarr[1] = applicationattemptidId;
         FifoSchedulerAppsDTO entry = null;
         if (session != null) {
-            entry = session.find(FifoSchedulerAppsDTO.class, objarr);
+            entry = session.find(FifoSchedulerAppsDTO.class, applicationid);
         }
         if (entry == null) {
             throw new StorageException("HOP :: Error while retrieving row");
@@ -97,16 +86,13 @@ public class FifoSchedulerAppsClusterJ implements FifoSchedulerAppsTableDef, Fif
     }
 
     @Override
-    public List<HopFifoSchedulerApps> getAllByFifoSchedulerId(int fifoSchedulerId) throws StorageException {
+    public List<HopFifoSchedulerApps> getAllByAppId(int appId) throws StorageException {
         try {
             Session session = connector.obtainSession();
             QueryBuilder qb = session.getQueryBuilder();
 
             QueryDomainType<FifoSchedulerAppsClusterJ.FifoSchedulerAppsDTO> dobj = qb.createQueryDefinition(FifoSchedulerAppsClusterJ.FifoSchedulerAppsDTO.class);
-            Predicate pred1 = dobj.get("fifoschedulerid").equal(dobj.param("fifoschedulerid"));
-            dobj.where(pred1);
             Query<FifoSchedulerAppsClusterJ.FifoSchedulerAppsDTO> query = session.createQuery(dobj);
-            query.setParameter("fifoschedulerid", fifoSchedulerId);
 
             List<FifoSchedulerAppsClusterJ.FifoSchedulerAppsDTO> results = query.getResultList();
             return createFifoSchedulerAppsList(results);
@@ -116,23 +102,19 @@ public class FifoSchedulerAppsClusterJ implements FifoSchedulerAppsTableDef, Fif
     }
     
     private HopFifoSchedulerApps createFifoSchedulerApps(FifoSchedulerAppsClusterJ.FifoSchedulerAppsDTO entry) {
-        HopFifoSchedulerApps hop = new HopFifoSchedulerApps(entry.getfifoschedulerid(), entry.getapplicationattemptid(), entry.getficaschedulerappid());
+        HopFifoSchedulerApps hop = new HopFifoSchedulerApps(entry.getapplicationid(), entry.getschedulerapplicationid());
         return hop;
     }
     
     private HopFifoSchedulerApps createHopFifoSchedulerApps(FifoSchedulerAppsDTO fifoSchedulerAppsDTO) {
-        return new HopFifoSchedulerApps(fifoSchedulerAppsDTO.getfifoschedulerid(),
-                                        fifoSchedulerAppsDTO.getapplicationattemptid(),
-                                        fifoSchedulerAppsDTO.getficaschedulerappid());
+        return new HopFifoSchedulerApps(fifoSchedulerAppsDTO.getapplicationid(), fifoSchedulerAppsDTO.getschedulerapplicationid());
     }
 
     private FifoSchedulerAppsClusterJ.FifoSchedulerAppsDTO createPersistable(HopFifoSchedulerApps hop, Session session) {
         FifoSchedulerAppsClusterJ.FifoSchedulerAppsDTO fifoSchedulerAppsDTO = session.newInstance(FifoSchedulerAppsClusterJ.FifoSchedulerAppsDTO.class);
         
-        fifoSchedulerAppsDTO.setapplicationattemptid(hop.getApplicationattemptid_id());
-        fifoSchedulerAppsDTO.setficaschedulerappid(hop.getFicaschedulerapp_id());
-        fifoSchedulerAppsDTO.setfifoschedulerid(hop.getFifoscheduler_id());
-        
+        fifoSchedulerAppsDTO.setapplicationid(hop.getApplicationid());
+        fifoSchedulerAppsDTO.setschedulerapplicationid(hop.getSchedulerapplication_id());
         return fifoSchedulerAppsDTO;
     }
     
