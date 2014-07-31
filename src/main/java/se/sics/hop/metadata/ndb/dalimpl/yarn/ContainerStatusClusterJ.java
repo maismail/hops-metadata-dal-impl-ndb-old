@@ -23,20 +23,15 @@ public class ContainerStatusClusterJ implements ContainerStatusTableDef, Contain
     public interface ContainerStatusDTO {
 
         @PrimaryKey
-        @Column(name = ID)
-        int getid();
-
-        void setid(int id);
+        @Column(name = CONTAINER_ID)
+        String getcontainerid();
 
         @Column(name = STATE)
         String getstate();
 
         void setstate(String state);
 
-        @Column(name = CONTAINER_ID)
-        int getcontainerid();
-
-        void setcontainerid(int containerid);
+        void setcontainerid(String containerid);
 
         @Column(name = DIAGNOSTICS)
         String getdiagnostics();
@@ -47,21 +42,11 @@ public class ContainerStatusClusterJ implements ContainerStatusTableDef, Contain
         int getexitstatus();
 
         void setexitstatus(int exitstatus);
-
-        /*@Column(name = TYPE)
-        String gettype();
-
-        void settype(String type);
-
-        @Column(name = UPDATEDCONTAINERINFO_ID)
-        int getupdatedcontainerinfoid();
-
-        void setupdatedcontainerinfoid(int updatedcontainerinfoid);*/
     }
     private ClusterjConnector connector = ClusterjConnector.getInstance();
 
     @Override
-    public HopContainerStatus findById(int id) throws StorageException {
+    public HopContainerStatus findById(String id) throws StorageException {
         Session session = connector.obtainSession();
 
         ContainerStatusDTO uciDTO = null;
@@ -75,62 +60,23 @@ public class ContainerStatusClusterJ implements ContainerStatusTableDef, Contain
         return createHopContainerStatus(uciDTO);
     }
 
-    /*@Override
-    public List<HopContainerStatus> findByUpdatedContainerInfoId(int uciId) throws StorageException {
-        try {
-            Session session = connector.obtainSession();
-            QueryBuilder qb = session.getQueryBuilder();
-
-            QueryDomainType<ContainerStatusDTO> dobj = qb.createQueryDefinition(ContainerStatusDTO.class);
-            Predicate pred1 = dobj.get("updatedcontainerinfoid").equal(dobj.param("updatedcontainerinfoid"));
-            dobj.where(pred1);
-            Query<ContainerStatusDTO> query = session.createQuery(dobj);
-            query.setParameter("updatedcontainerinfoid", uciId);
-
-            List<ContainerStatusDTO> results = query.getResultList();
-            return createHopContainerStatusList(results);
-        } catch (Exception e) {
-            throw new StorageException(e);
-        }
-    }*/
-
-    /*@Override
-    public List<HopContainerStatus> findByUpdatedContainerInfoIdAndState(int uciId, String state) throws StorageException {
-        try {
-            Session session = connector.obtainSession();
-            QueryBuilder qb = session.getQueryBuilder();
-
-            QueryDomainType<ContainerStatusDTO> dobj = qb.createQueryDefinition(ContainerStatusDTO.class);
-            Predicate pred1 = dobj.get("updatedcontainerinfoid").equal(dobj.param("updatedcontainerinfoid"));
-            Predicate pred2 = dobj.get("state").equal(dobj.param("state"));
-            pred1 = pred1.and(pred2);
-            dobj.where(pred1);
-            Query<ContainerStatusDTO> query = session.createQuery(dobj);
-            query.setParameter("updatedcontainerinfoid", uciId);
-            query.setParameter("state", state);
-            List<ContainerStatusDTO> results = query.getResultList();
-            return createHopContainerStatusList(results);
-        } catch (Exception e) {
-            throw new StorageException(e);
-        }
-    }*/
-
     @Override
     public void prepare(Collection<HopContainerStatus> modified, Collection<HopContainerStatus> removed) throws StorageException {
         Session session = connector.obtainSession();
         try {
             if (removed != null) {
+                List<ContainerStatusDTO> toRemove = new ArrayList<ContainerStatusDTO>();
                 for (HopContainerStatus hopUCI : removed) {
-
-                    ContainerStatusDTO persistable = session.newInstance(ContainerStatusDTO.class, hopUCI.getId());
-                    session.deletePersistent(persistable);
+                    toRemove.add(session.newInstance(ContainerStatusDTO.class, hopUCI.getContainerid()));
                 }
+                session.deletePersistentAll(toRemove);
             }
             if (modified != null) {
+                List<ContainerStatusDTO> toModify = new ArrayList<ContainerStatusDTO>();
                 for (HopContainerStatus hopUCI : modified) {
-                    ContainerStatusDTO persistable = createPersistable(hopUCI, session);
-                    session.savePersistent(persistable);
+                    toModify.add(createPersistable(hopUCI, session));
                 }
+                session.savePersistentAll(toModify);
             }
         } catch (Exception e) {
             throw new StorageException(e);
@@ -146,21 +92,16 @@ public class ContainerStatusClusterJ implements ContainerStatusTableDef, Contain
     private ContainerStatusDTO createPersistable(HopContainerStatus hopCS, Session session) {
         ContainerStatusDTO csDTO = session.newInstance(ContainerStatusDTO.class);
         //Set values to persist new ContainerStatus
-        csDTO.setid(hopCS.getId());
-        csDTO.setstate(hopCS.getState());
         csDTO.setcontainerid(hopCS.getContainerid());
+        csDTO.setstate(hopCS.getState());
         csDTO.setdiagnostics(hopCS.getDiagnostics());
         csDTO.setexitstatus(hopCS.getExitstatus());
-        /*csDTO.settype(hopCS.getType());
-        if (hopCS.getUpdatedcontainerinfoid() != Integer.MIN_VALUE) {
-            csDTO.setupdatedcontainerinfoid(hopCS.getUpdatedcontainerinfoid());
-        }*/
-       
+
         return csDTO;
     }
 
     private HopContainerStatus createHopContainerStatus(ContainerStatusDTO csDTO) {
-        HopContainerStatus hop = new HopContainerStatus(csDTO.getid(), csDTO.getstate(), csDTO.getcontainerid(), csDTO.getdiagnostics(), csDTO.getexitstatus());
+        HopContainerStatus hop = new HopContainerStatus(csDTO.getcontainerid(), csDTO.getstate(), csDTO.getdiagnostics(), csDTO.getexitstatus());
         return hop;
     }
 

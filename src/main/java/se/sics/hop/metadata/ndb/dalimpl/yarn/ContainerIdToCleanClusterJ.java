@@ -23,26 +23,33 @@ public class ContainerIdToCleanClusterJ implements ContainerIdToCleanTableDef, C
     public interface ContainerIdToCleanDTO {
 
         @PrimaryKey
-        @Column(name = RMNODEID)
-        int getrmnodeid();
+        @Column(name = HOSTNAME)
+        String gethostname();
 
-        void setrmnodeid(int rmnodeid);
+        void sethostname(String hostname);
+
+        @PrimaryKey
+        @Column(name = COMMANDPORT)
+        int getcommandport();
+
+        void setcommandport(int commandport);
 
         @PrimaryKey
         @Column(name = CONTAINERID)
-        int getcontainerid();
+        String getcontainerid();
 
-        void setcontainerid(int containerid);
+        void setcontainerid(String containerid);
     }
     private ClusterjConnector connector = ClusterjConnector.getInstance();
 
     @Override
-    public HopContainerIdToClean findEntry(int rmnodeid, int containerid) throws StorageException {
+    public HopContainerIdToClean findEntry(String hostname, int commandport, String containerid) throws StorageException {
         Session session = connector.obtainSession();
         ContainerIdToCleanDTO dto = null;
-        Object[] pk = new Object[2];
-        pk[0] = rmnodeid;
-        pk[1] = containerid;
+        Object[] pk = new Object[3];
+        pk[0] = hostname;
+        pk[1] = commandport;
+        pk[2] = containerid;
         if (session != null) {
             dto = session.find(ContainerIdToCleanDTO.class, pk);
         }
@@ -79,13 +86,14 @@ public class ContainerIdToCleanClusterJ implements ContainerIdToCleanTableDef, C
     private ContainerIdToCleanDTO createPersistable(HopContainerIdToClean hop, Session session) {
         ContainerIdToCleanDTO dto = session.newInstance(ContainerIdToCleanDTO.class);
         //Set values to persist new ContainerStatus
-        dto.setrmnodeid(hop.getRmnodeId());
-        dto.setcontainerid(hop.getContaineridId());
+        dto.sethostname(hop.getHostname());
+        dto.setcommandport(hop.getCommandport());
+        dto.setcontainerid(hop.getContainerId());
         return dto;
     }
 
     private HopContainerIdToClean createHopContainerIdToClean(ContainerIdToCleanDTO dto) {
-        HopContainerIdToClean hop = new HopContainerIdToClean(dto.getrmnodeid(), dto.getcontainerid());
+        HopContainerIdToClean hop = new HopContainerIdToClean(dto.gethostname(), dto.getcommandport(), dto.getcontainerid());
         return hop;
     }
 }

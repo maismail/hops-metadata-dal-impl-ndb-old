@@ -18,35 +18,42 @@ import se.sics.hop.metadata.yarn.tabledef.JustLaunchedContainersTableDef;
  * @author Theofilos Kakantousis <tkak@sics.se>
  */
 public class JustLaunchedContainersClusterJ implements JustLaunchedContainersTableDef, JustLaunchedContainersDataAccess<HopJustLaunchedContainers> {
-
+    
     @PersistenceCapable(table = TABLE_NAME)
     public interface JustLaunchedContainersDTO {
-
+        
         @PrimaryKey
-        @Column(name = RMNODEID)
-        int getrmnodeid();
-
-        void setrmnodeid(int rmnodeid);
-
+        @Column(name = HOSTNAME)
+        String gethostname();
+        
+        void sethostname(String hostname);
+        
+        @PrimaryKey
+        @Column(name = COMMANDPORT)
+        int getcommandport();
+        
+        void setcommandport(int commandport);
+        
         @PrimaryKey
         @Column(name = CONTAINERID)
         int getcontainerid();
-
+        
         void setcontainerid(int containerid);
-
+        
         @Column(name = CONTAINERSTATUSID)
         int getcontainerstatusid();
-
+        
         void setcontainerstatusid(int containerstatusid);
     }
     private ClusterjConnector connector = ClusterjConnector.getInstance();
-
+    
     @Override
-    public HopJustLaunchedContainers findEntry(int rmnode, int containerid) throws StorageException {
+    public HopJustLaunchedContainers findEntry(String hostname, int commandport, int containerid) throws StorageException {
         Session session = connector.obtainSession();
-        Object[] objarr = new Object[2];
-        objarr[0] = rmnode;
-        objarr[1] = containerid;
+        Object[] objarr = new Object[3];
+        objarr[0] = hostname;
+        objarr[1] = commandport;
+        objarr[2] = containerid;
         JustLaunchedContainersDTO container = null;
         if (session != null) {
             container = session.find(JustLaunchedContainersDTO.class, objarr);
@@ -54,10 +61,10 @@ public class JustLaunchedContainersClusterJ implements JustLaunchedContainersTab
         if (container == null) {
             throw new StorageException("HOP :: Error while retrieving row");
         }
-
+        
         return createJustLaunchedContainers(container);
     }
-
+    
     @Override
     public void prepare(Collection<HopJustLaunchedContainers> modified, Collection<HopJustLaunchedContainers> removed) throws StorageException {
         Session session = connector.obtainSession();
@@ -65,15 +72,16 @@ public class JustLaunchedContainersClusterJ implements JustLaunchedContainersTab
             if (removed != null) {
                 List<JustLaunchedContainersDTO> toRemove = new ArrayList<JustLaunchedContainersDTO>(removed.size());
                 for (HopJustLaunchedContainers hopContainerId : removed) {
-                    Object[] objarr = new Object[2];
-                    objarr[0] = hopContainerId.getRmnodeid();
-                    objarr[1] = hopContainerId.getContainerid();
+                    Object[] objarr = new Object[3];
+                    objarr[0] = hopContainerId.getHostname();
+                    objarr[1] = hopContainerId.getCommandport();
+                    objarr[2] = hopContainerId.getContainerid();
                     toRemove.add(session.newInstance(JustLaunchedContainersDTO.class, objarr));
                 }
                 session.deletePersistentAll(toRemove);
             }
             if (modified != null) {
-                List<JustLaunchedContainersDTO> toModify = new ArrayList<JustLaunchedContainersDTO>(removed.size());
+                List<JustLaunchedContainersDTO> toModify = new ArrayList<JustLaunchedContainersDTO>(modified.size());
                 for (HopJustLaunchedContainers hop : modified) {
                     toModify.add(createPersistable(hop, session));
                 }
@@ -83,15 +91,15 @@ public class JustLaunchedContainersClusterJ implements JustLaunchedContainersTab
             throw new StorageException(e);
         }
     }
-
+    
     @Override
     public void createJustLaunchedContainerEntry(HopJustLaunchedContainers entry) throws StorageException {
         Session session = connector.obtainSession();
         createPersistable(entry, session);
     }
-
-    private HopJustLaunchedContainers createJustLaunchedContainers(JustLaunchedContainersDTO container) {
-        HopJustLaunchedContainers hop = new HopJustLaunchedContainers(container.getcontainerid(), container.getcontainerstatusid(), container.getrmnodeid());
+    
+    private HopJustLaunchedContainers createJustLaunchedContainers(JustLaunchedContainersDTO dto) {
+        HopJustLaunchedContainers hop = new HopJustLaunchedContainers(dto.gethostname(), dto.getcommandport(), dto.getcontainerid(), dto.getcontainerstatusid());
         return hop;
     }
 
@@ -103,10 +111,11 @@ public class JustLaunchedContainersClusterJ implements JustLaunchedContainersTab
      * @return
      */
     private JustLaunchedContainersDTO createPersistable(HopJustLaunchedContainers entry, Session session) {
-        JustLaunchedContainersDTO jlcDTO = session.newInstance(JustLaunchedContainersDTO.class);
-        jlcDTO.setcontainerid(entry.getContainerid());
-        jlcDTO.setcontainerstatusid(entry.getContainerstatusid());
-        jlcDTO.setrmnodeid(entry.getRmnodeid());
-        return jlcDTO;
+        JustLaunchedContainersDTO dto = session.newInstance(JustLaunchedContainersDTO.class);
+        dto.setcontainerid(entry.getContainerid());
+        dto.setcontainerstatusid(entry.getContainerstatusid());
+        dto.sethostname(entry.getHostname());
+        dto.setcommandport(entry.getCommandport());
+        return dto;
     }
 }
