@@ -46,6 +46,14 @@ public class RMContainerClusterJ implements RMContainerTableDef, RMContainerData
         int getcontainerid();
 
         void setcontainerid(int containerid);
+        
+        @Column(name = RMCONTEXT_ID)
+        int getrmcontextid();
+        void setrmcontextid(int rmcontextid);
+        
+        @Column(name = USER)
+        String getuser();
+        void setuser(String user);
 
         @Column(name = RESERVED_RESOURCE_ID)
         int getreservedresourceid();
@@ -62,15 +70,17 @@ public class RMContainerClusterJ implements RMContainerTableDef, RMContainerData
 
         void setreservedpriorityid(int reservedpriorityid);
 
-        @Column(name = STATE)
-        String getstate();
-
-        void setstate(String state);
-
-        @Column(name = NEWLY_ALLOCATED)
-        int getnewlyallocated();
-
-        void setnewlyallocated(int newlyallocated);
+        @Column(name = STARTTIME)
+        long getstarttime();
+        void setstarttime(long starttime);
+        
+        @Column(name = FINISHTIME)
+        long getfinishtime();
+        void setfinishtime(long finishtime);
+        
+        @Column(name = CONTAINERSTATUS_ID)
+        int getcontainerstatusid();
+        void setcontainerstatusid(int containerstatusid);
     }
     private ClusterjConnector connector = ClusterjConnector.getInstance();
 
@@ -122,26 +132,32 @@ public class RMContainerClusterJ implements RMContainerTableDef, RMContainerData
                                 rMContainerDTO.getappattemptidid(),
                                 rMContainerDTO.getnodeidid(),
                                 rMContainerDTO.getcontainerid(),
+                                rMContainerDTO.getrmcontextid(),
+                                rMContainerDTO.getuser(),
                                 rMContainerDTO.getreservedresourceid(),
                                 rMContainerDTO.getreservednodeid(),
                                 rMContainerDTO.getreservedpriorityid(),
-                                rMContainerDTO.getstate(),
-                                rMContainerDTO.getnewlyallocated());
+                                rMContainerDTO.getstarttime(),
+                                rMContainerDTO.getfinishtime(),
+                                rMContainerDTO.getcontainerstatusid());
     }
 
     private RMContainerDTO createPersistable(HopRMContainer hop, Session session) {
         RMContainerClusterJ.RMContainerDTO rMContainerDTO = session.newInstance(RMContainerClusterJ.RMContainerDTO.class);
         
-        rMContainerDTO.setappattemptidid(hop.getApplicationAttemptIdID());
-        rMContainerDTO.setcontainerid(hop.getContainerID());
-        rMContainerDTO.setcontaineridid(hop.getContainerIdID());
         rMContainerDTO.setid(hop.getId());
-        rMContainerDTO.setnewlyallocated(hop.getNewlyAllocated());
+        rMContainerDTO.setcontaineridid(hop.getContainerIdID());
+        rMContainerDTO.setappattemptidid(hop.getApplicationAttemptIdID());
         rMContainerDTO.setnodeidid(hop.getNodeIdID());
+        rMContainerDTO.setcontainerid(hop.getContainerID());
+        rMContainerDTO.setrmcontextid(hop.getRmcontextID());
+        rMContainerDTO.setuser(hop.getUser());
+        rMContainerDTO.setreservedresourceid(hop.getReservedResourceID());
         rMContainerDTO.setreservednodeid(hop.getReservedNodeIdID());
         rMContainerDTO.setreservedpriorityid(hop.getReservedPriorityID());
-        rMContainerDTO.setreservedresourceid(hop.getReservedResourceID());
-        rMContainerDTO.setstate(hop.getState());
+        rMContainerDTO.setstarttime(hop.getStarttime());
+        rMContainerDTO.setfinishtime(hop.getFinishtime());
+        rMContainerDTO.setcontainerstatusid(hop.getContainerstatus_id());
         
         return rMContainerDTO;
     }

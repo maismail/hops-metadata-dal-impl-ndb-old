@@ -21,20 +21,15 @@ public class ApplicationAttemptIdClusterJ implements ApplicationAttemptIdTableDe
     public interface ApplicationAttemptIdDTO {
 
         @PrimaryKey
-        @Column(name = ID)
-        int getid();
 
-        void setid(int id);
-
-        @Column(name = ATTEMPT_ID)
+        @Column(name = ATTEMPTID)
         int getattemptid();
-
         void setattemptid(int attemptid);
 
-        @Column(name = APPLICATION_ID)
-        int getapplicationid();
+        @Column(name = APPID)
+        int getappid();
 
-        void setapplicationid(int applicationid);
+        void setappid(int appid);
     }
     private ClusterjConnector connector = ClusterjConnector.getInstance();
 
@@ -51,6 +46,31 @@ public class ApplicationAttemptIdClusterJ implements ApplicationAttemptIdTableDe
         }
 
         return createHopApplicationAttemptId(appAttemptIdDTO);
+    }
+    
+    @Override
+    public HopApplicationAttemptId findByAttemptIdAppId(int attemptId, int appId) throws StorageException {
+         ApplicationAttemptIdClusterJ.ApplicationAttemptIdDTO applicationAttemptIdDTO = null;
+        try {
+            Session session = connector.obtainSession();
+
+            Object[] objarr = new Object[2];
+            objarr[0] = attemptId;
+            objarr[1] = appId;
+
+            if (session != null) {
+                applicationAttemptIdDTO = session.find(ApplicationAttemptIdClusterJ.ApplicationAttemptIdDTO.class, objarr);
+            }
+            if (applicationAttemptIdDTO == null) {
+                throw new StorageException("HOP :: Error while retrieving row:" + attemptId + ":" + appId);
+            }
+            return createHopApplicationAttemptId(applicationAttemptIdDTO);
+        } catch (Exception e) {
+            if (e.getMessage().contains("Tuple did not exist")) {
+                throw new StorageException("HOP :: Error while retrieving row:" + attemptId + ":" + appId);
+            }
+        }
+        throw new StorageException("HOP :: Error while retrieving row:" + attemptId + ":" + appId);
     }
 
     @Override
@@ -83,15 +103,14 @@ public class ApplicationAttemptIdClusterJ implements ApplicationAttemptIdTableDe
 
     private ApplicationAttemptIdDTO createPersistable(HopApplicationAttemptId hopAppAttemptId, Session session) {
         ApplicationAttemptIdDTO appAttemptIdDTO = session.newInstance(ApplicationAttemptIdDTO.class);
-        appAttemptIdDTO.setid(hopAppAttemptId.getNdbId());
-        appAttemptIdDTO.setapplicationid(hopAppAttemptId.getApplicationidId());
+        appAttemptIdDTO.setappid(hopAppAttemptId.getAppid());
         appAttemptIdDTO.setattemptid(hopAppAttemptId.getAttemptId());
         session.savePersistent(appAttemptIdDTO);
         return appAttemptIdDTO;
     }
 
     private HopApplicationAttemptId createHopApplicationAttemptId(ApplicationAttemptIdDTO appAttemptIdDTO) {
-        HopApplicationAttemptId hop = new HopApplicationAttemptId(appAttemptIdDTO.getid(), appAttemptIdDTO.getattemptid(), appAttemptIdDTO.getapplicationid());
+        HopApplicationAttemptId hop = new HopApplicationAttemptId(appAttemptIdDTO.getattemptid(), appAttemptIdDTO.getappid());
         return hop;
     }
 }
