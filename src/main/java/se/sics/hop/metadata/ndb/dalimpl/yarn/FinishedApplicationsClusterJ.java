@@ -28,40 +28,31 @@ public class FinishedApplicationsClusterJ implements FinishedApplicationsTableDe
     public interface FinishedApplicationsDTO {
 
         @PrimaryKey
-        @Column(name = HOSTNAME)
-        String gethostname();
+        @Column(name = RMNODEID)
+        String getrmnodeid();
 
-        void sethostname(String hostname);
-
-        @PrimaryKey
-        @Column(name = COMMANDPORT)
-        int getcommandport();
-
-        void setcommandport(int commandport);
+        void setrmnodeid(String rmnodeid);
 
         @PrimaryKey
         @Column(name = APPLICATIONID)
-        int getapplicationid();
+        String getapplicationid();
 
-        void setapplicationid(int applicationid);
+        void setapplicationid(String applicationid);
     }
     private ClusterjConnector connector = ClusterjConnector.getInstance();
 
     @Override
-    public List<HopFinishedApplications> findByRMNode(String hostname, int commandport) throws StorageException {
+    public List<HopFinishedApplications> findByRMNode(String rmnodeid) throws StorageException {
         try {
             Session session = connector.obtainSession();
             QueryBuilder qb = session.getQueryBuilder();
 
             QueryDomainType<FinishedApplicationsDTO> dobj = qb.createQueryDefinition(FinishedApplicationsDTO.class);
-            Predicate pred1 = dobj.get("hostname").equal(dobj.param("hostname"));
-            Predicate pred2 = dobj.get("commandport").equal(dobj.param("commandport"));
-            pred1.and(pred2);
+            Predicate pred1 = dobj.get("rmnodeid").equal(dobj.param("rmnodeid"));
             dobj.where(pred1);
 
             Query<FinishedApplicationsDTO> query = session.createQuery(dobj);
-            query.setParameter("hostname", hostname);
-            query.setParameter("commandport", commandport);
+            query.setParameter("rmnodeid", rmnodeid);
             List<FinishedApplicationsDTO> results = query.getResultList();
             return createUpdatedContainerInfoList(results);
         } catch (Exception e) {
@@ -70,15 +61,14 @@ public class FinishedApplicationsClusterJ implements FinishedApplicationsTableDe
     }
 
     @Override
-    public HopFinishedApplications findEntry(String hostname, int commandport, int applicationId) throws StorageException {
+    public HopFinishedApplications findEntry(String rmnodeId, int applicationId) throws StorageException {
         Session session = connector.obtainSession();
-        Object[] pk = new Object[3];
-        pk[0] = hostname;
-        pk[1] = commandport;
-        pk[2] = applicationId;
+        Object[] pk = new Object[2];
+        pk[0] = rmnodeId;
+        pk[1] = applicationId;
         FinishedApplicationsDTO dto = session.find(FinishedApplicationsDTO.class, pk);
         if (dto == null) {
-            throw new StorageException("Error while retrieving finishedapplication:" + hostname + "," + commandport + "," + applicationId);
+            throw new StorageException("Error while retrieving finishedapplication:" + rmnodeId + "," + applicationId);
         }
         return createHopFinishedApplications(dto);
     }
@@ -107,13 +97,12 @@ public class FinishedApplicationsClusterJ implements FinishedApplicationsTableDe
     }
 
     private HopFinishedApplications createHopFinishedApplications(FinishedApplicationsDTO dto) {
-        return new HopFinishedApplications(dto.gethostname(), dto.getcommandport(), dto.getapplicationid());
+        return new HopFinishedApplications(dto.getrmnodeid(), dto.getapplicationid());
     }
 
     private FinishedApplicationsDTO createPersistable(HopFinishedApplications hop, Session session) {
         FinishedApplicationsDTO dto = session.newInstance(FinishedApplicationsDTO.class);
-        dto.sethostname(hop.getHostname());
-        dto.setcommandport(hop.getCommandport());
+        dto.setrmnodeid(hop.getRMNodeID());
         dto.setapplicationid(hop.getApplicationId());
         return dto;
     }

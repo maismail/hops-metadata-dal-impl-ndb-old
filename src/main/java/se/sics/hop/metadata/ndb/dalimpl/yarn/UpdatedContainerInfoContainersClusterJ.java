@@ -24,9 +24,9 @@ public class UpdatedContainerInfoContainersClusterJ implements UpdatedContainerI
 
         @PrimaryKey
         @Column(name = CONTAINERSTATUS_ID)
-        int getcontainerstatusid();
+        String getcontainerstatusid();
 
-        void setcontainerstatusid(int containerstatusid);
+        void setcontainerstatusid(String containerstatusid);
 
         @PrimaryKey
         @Column(name = UPDATEDCONTAINERINFO_ID)
