@@ -4,7 +4,9 @@ import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.entity.yarn.HopNodeHBResponse;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
@@ -21,10 +23,16 @@ public class NodeHBResponseClusterJ implements NodeHBResponseTableDef, NodeHBRes
     public interface NodeHBResponseDTO {
 
         @PrimaryKey
-        @Column(name = ID)
-        int getid();
+        @Column(name = HOSTNAME)
+        String gethostname();
 
-        void setid(int id);
+        void sethostname(String hostname);
+
+        @PrimaryKey
+        @Column(name = COMMANDPORT)
+        int getcommandport();
+
+        void setcommandport(int commandport);
 
         @Column(name = RESPONSE)
         byte[] getresponse();
@@ -34,12 +42,14 @@ public class NodeHBResponseClusterJ implements NodeHBResponseTableDef, NodeHBRes
     private ClusterjConnector connector = ClusterjConnector.getInstance();
 
     @Override
-    public HopNodeHBResponse findById(int id) throws StorageException {
+    public HopNodeHBResponse findById(String hostname, int commandport) throws StorageException {
         Session session = connector.obtainSession();
-
         NodeHBResponseDTO nodeHBresponseDTO = null;
         if (session != null) {
-            nodeHBresponseDTO = session.find(NodeHBResponseDTO.class, id);
+            Object[] pk = new Object[2];
+            pk[0] = hostname;
+            pk[1] = commandport;
+            nodeHBresponseDTO = session.find(NodeHBResponseDTO.class, pk);
         }
         if (nodeHBresponseDTO == null) {
             throw new StorageException("HOP :: Error while retrieving row");
@@ -53,16 +63,22 @@ public class NodeHBResponseClusterJ implements NodeHBResponseTableDef, NodeHBRes
         Session session = connector.obtainSession();
         try {
             if (removed != null) {
+                List<NodeHBResponseDTO> toRemove = new ArrayList<NodeHBResponseDTO>();
                 for (HopNodeHBResponse nodehbresponse : removed) {
-                    NodeHBResponseDTO persistable = session.newInstance(NodeHBResponseDTO.class, nodehbresponse.getId());
-                    session.deletePersistent(persistable);
+                    Object[] pk = new Object[2];
+                    pk[0] = nodehbresponse.getHostname();
+                    pk[1] = nodehbresponse.getCommandport();
+                    NodeHBResponseDTO persistable = session.newInstance(NodeHBResponseDTO.class, pk);
+                    toRemove.add(persistable);
                 }
+                session.deletePersistentAll(toRemove);
             }
             if (modified != null) {
+                List<NodeHBResponseDTO> toModify = new ArrayList<NodeHBResponseDTO>();
                 for (HopNodeHBResponse nodehbresponse : modified) {
-                    NodeHBResponseDTO persistable = createPersistable(nodehbresponse, session);
-                    session.savePersistent(persistable);
+                    toModify.add(createPersistable(nodehbresponse, session));
                 }
+                session.savePersistentAll(toModify);
             }
         } catch (Exception e) {
             throw new StorageException(e);
@@ -76,12 +92,13 @@ public class NodeHBResponseClusterJ implements NodeHBResponseTableDef, NodeHBRes
     }
 
     private HopNodeHBResponse createHopNodeHBResponse(NodeHBResponseDTO nodeHBresponseDTO) {
-        return new HopNodeHBResponse(nodeHBresponseDTO.getid(), nodeHBresponseDTO.getresponse());
+        return new HopNodeHBResponse(nodeHBresponseDTO.gethostname(), nodeHBresponseDTO.getcommandport(), nodeHBresponseDTO.getresponse());
     }
 
     private NodeHBResponseDTO createPersistable(HopNodeHBResponse nodehbresponse, Session session) {
         NodeHBResponseDTO nodeHBResponseDT0 = session.newInstance(NodeHBResponseDTO.class);
-        nodeHBResponseDT0.setid(nodehbresponse.getId());
+        nodeHBResponseDT0.sethostname(nodehbresponse.getHostname());
+        nodeHBResponseDT0.setcommandport(nodehbresponse.getCommandport());
         nodeHBResponseDT0.setresponse(nodehbresponse.getResponseid());
         return nodeHBResponseDT0;
     }

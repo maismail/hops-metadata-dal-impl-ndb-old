@@ -28,15 +28,16 @@ public class UpdatedContainerInfoClusterJ implements UpdatedContainerInfoTableDe
     public interface UpdatedContainerInfoDTO {
 
         @PrimaryKey
+        @Column(name = RMNODEID)
+        String getrmmnodeid();
+
+        void setrmnodeid(String rmnodeid);
+
+        @PrimaryKey
         @Column(name = ID)
         int getid();
 
         void setid(int id);
-
-        @Column(name = RMNODE_ID)
-        int getrmnodeid();
-
-        void setrmnodeid(int rmnodeid);
     }
     private ClusterjConnector connector = ClusterjConnector.getInstance();
 
@@ -53,22 +54,20 @@ public class UpdatedContainerInfoClusterJ implements UpdatedContainerInfoTableDe
     }
 
     @Override
-    public HopUpdatedContainerInfo findById(int id) throws StorageException {
+    public HopUpdatedContainerInfo findEntry(String rmnodeid, int id) throws StorageException {
         Session session = connector.obtainSession();
-
-        UpdatedContainerInfoDTO uciDTO = null;
-        if (session != null) {
-            uciDTO = session.find(UpdatedContainerInfoDTO.class, id);
+        Object[] pk = new Object[2];
+        pk[0] = rmnodeid;
+        pk[1] = id;
+        UpdatedContainerInfoDTO dto = session.find(UpdatedContainerInfoDTO.class, pk);
+        if (dto == null) {
+            throw new StorageException("Error while retrieving updatedcontainerinfo:" + id + "," + rmnodeid);
         }
-        if (uciDTO == null) {
-            throw new StorageException("HOP :: Error while retrieving row");
-        }
-
-        return createHopUpdatedContainerInfo(uciDTO);
+        return createHopUpdatedContainerInfo(dto);
     }
 
     @Override
-    public List<HopUpdatedContainerInfo> findByRMNodeId(int rmnodeid) throws StorageException {
+    public List<HopUpdatedContainerInfo> findByRMNode(String rmnodeid) throws StorageException {
         try {
             Session session = connector.obtainSession();
             QueryBuilder qb = session.getQueryBuilder();
@@ -76,9 +75,9 @@ public class UpdatedContainerInfoClusterJ implements UpdatedContainerInfoTableDe
             QueryDomainType<UpdatedContainerInfoDTO> dobj = qb.createQueryDefinition(UpdatedContainerInfoDTO.class);
             Predicate pred1 = dobj.get("rmnodeid").equal(dobj.param("rmnodeid"));
             dobj.where(pred1);
+
             Query<UpdatedContainerInfoDTO> query = session.createQuery(dobj);
             query.setParameter("rmnodeid", rmnodeid);
-
             List<UpdatedContainerInfoDTO> results = query.getResultList();
             return createUpdatedContainerInfoList(results);
         } catch (Exception e) {
@@ -109,20 +108,11 @@ public class UpdatedContainerInfoClusterJ implements UpdatedContainerInfoTableDe
         }
     }
 
-    @Override
-    public void createUpdatedContainerInfo(HopUpdatedContainerInfo updatedContainerInfo) throws StorageException {
-        Session session = connector.obtainSession();
-        session.savePersistent(createPersistable(updatedContainerInfo, session));
-    }
-
-    private UpdatedContainerInfoDTO createPersistable(HopUpdatedContainerInfo hopUCI, Session session) {
-        UpdatedContainerInfoDTO uciDTO = session.newInstance(UpdatedContainerInfoDTO.class);
-        //Set values to persist new rmnode
-        uciDTO.setid(hopUCI.getId());
-        if (hopUCI.getRmnodeid() != Integer.MIN_VALUE) {
-            uciDTO.setrmnodeid(hopUCI.getRmnodeid());
-        }
-        return uciDTO;
+    private UpdatedContainerInfoDTO createPersistable(HopUpdatedContainerInfo hop, Session session) {
+        UpdatedContainerInfoDTO dto = session.newInstance(UpdatedContainerInfoDTO.class);
+        dto.setid(hop.getId());
+        dto.setrmnodeid(hop.getRmnodeid());
+        return dto;
     }
 
     /**
@@ -131,8 +121,8 @@ public class UpdatedContainerInfoClusterJ implements UpdatedContainerInfoTableDe
      * @param rmDTO
      * @return HopRMNode
      */
-    private HopUpdatedContainerInfo createHopUpdatedContainerInfo(UpdatedContainerInfoDTO uciDTO) {
-        return new HopUpdatedContainerInfo(uciDTO.getid(), uciDTO.getrmnodeid());
+    private HopUpdatedContainerInfo createHopUpdatedContainerInfo(UpdatedContainerInfoDTO dto) {
+        return new HopUpdatedContainerInfo(dto.getrmmnodeid(), dto.getid());
     }
 
     private List<HopUpdatedContainerInfo> createUpdatedContainerInfoList(List<UpdatedContainerInfoDTO> list) throws IOException {

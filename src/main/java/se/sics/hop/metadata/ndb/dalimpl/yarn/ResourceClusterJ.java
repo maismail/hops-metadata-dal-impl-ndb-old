@@ -24,9 +24,9 @@ public class ResourceClusterJ implements ResourceTableDef, ResourceDataAccess<Ho
 
         @PrimaryKey
         @Column(name = ID)
-        int getId();
+        String getId();
 
-        void setId(int id);
+        void setId(String id);
 
         @Column(name = MEMORY)
         int getMemory();
@@ -93,7 +93,6 @@ public class ResourceClusterJ implements ResourceTableDef, ResourceDataAccess<Ho
         resourceDTO.setId(resource.getId());
         resourceDTO.setMemory(resource.getMemory());
         resourceDTO.setVirtualcores(resource.getVirtualcores());
-        //session.savePersistent(resourceDTO);
         return resourceDTO;
     }
 }

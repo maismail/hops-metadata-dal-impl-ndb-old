@@ -24,28 +24,28 @@ public class JustLaunchedContainersClusterJ implements JustLaunchedContainersTab
 
         @PrimaryKey
         @Column(name = RMNODEID)
-        int getrmnodeid();
+        String getrmnodeid();
 
-        void setrmnodeid(int rmnodeid);
+        void setrmnodeid(String rmnodeid);
 
         @PrimaryKey
         @Column(name = CONTAINERID)
-        int getcontainerid();
+        String getcontainerid();
 
-        void setcontainerid(int containerid);
+        void setcontainerid(String containerid);
 
         @Column(name = CONTAINERSTATUSID)
-        int getcontainerstatusid();
+        String getcontainerstatusid();
 
-        void setcontainerstatusid(int containerstatusid);
+        void setcontainerstatusid(String containerstatusid);
     }
     private ClusterjConnector connector = ClusterjConnector.getInstance();
 
     @Override
-    public HopJustLaunchedContainers findEntry(int rmnode, int containerid) throws StorageException {
+    public HopJustLaunchedContainers findEntry(String rmnodeid, int commandport, int containerid) throws StorageException {
         Session session = connector.obtainSession();
         Object[] objarr = new Object[2];
-        objarr[0] = rmnode;
+        objarr[0] = rmnodeid;
         objarr[1] = containerid;
         JustLaunchedContainersDTO container = null;
         if (session != null) {
@@ -73,7 +73,7 @@ public class JustLaunchedContainersClusterJ implements JustLaunchedContainersTab
                 session.deletePersistentAll(toRemove);
             }
             if (modified != null) {
-                List<JustLaunchedContainersDTO> toModify = new ArrayList<JustLaunchedContainersDTO>(removed.size());
+                List<JustLaunchedContainersDTO> toModify = new ArrayList<JustLaunchedContainersDTO>(modified.size());
                 for (HopJustLaunchedContainers hop : modified) {
                     toModify.add(createPersistable(hop, session));
                 }
@@ -90,8 +90,8 @@ public class JustLaunchedContainersClusterJ implements JustLaunchedContainersTab
         createPersistable(entry, session);
     }
 
-    private HopJustLaunchedContainers createJustLaunchedContainers(JustLaunchedContainersDTO container) {
-        HopJustLaunchedContainers hop = new HopJustLaunchedContainers(container.getcontainerid(), container.getcontainerstatusid(), container.getrmnodeid());
+    private HopJustLaunchedContainers createJustLaunchedContainers(JustLaunchedContainersDTO dto) {
+        HopJustLaunchedContainers hop = new HopJustLaunchedContainers(dto.getrmnodeid(), dto.getcontainerid(), dto.getcontainerstatusid());
         return hop;
     }
 
@@ -103,10 +103,10 @@ public class JustLaunchedContainersClusterJ implements JustLaunchedContainersTab
      * @return
      */
     private JustLaunchedContainersDTO createPersistable(HopJustLaunchedContainers entry, Session session) {
-        JustLaunchedContainersDTO jlcDTO = session.newInstance(JustLaunchedContainersDTO.class);
-        jlcDTO.setcontainerid(entry.getContainerid());
-        jlcDTO.setcontainerstatusid(entry.getContainerstatusid());
-        jlcDTO.setrmnodeid(entry.getRmnodeid());
-        return jlcDTO;
+        JustLaunchedContainersDTO dto = session.newInstance(JustLaunchedContainersDTO.class);
+        dto.setcontainerid(entry.getContainerid());
+        dto.setcontainerstatusid(entry.getContainerstatusid());
+        dto.setrmnodeid(entry.getRmnodeid());
+        return dto;
     }
 }

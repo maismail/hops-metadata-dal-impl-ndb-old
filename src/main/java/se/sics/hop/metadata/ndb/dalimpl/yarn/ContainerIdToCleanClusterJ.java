@@ -24,25 +24,25 @@ public class ContainerIdToCleanClusterJ implements ContainerIdToCleanTableDef, C
 
         @PrimaryKey
         @Column(name = RMNODEID)
-        int getrmnodeid();
+        String getrmnodeid();
 
-        void setrmnodeid(int rmnodeid);
+        void setrmnodeid(String rmnodeid);
 
         @PrimaryKey
         @Column(name = CONTAINERID)
-        int getcontainerid();
+        String getcontainerid();
 
-        void setcontainerid(int containerid);
+        void setcontainerid(String containerid);
     }
     private ClusterjConnector connector = ClusterjConnector.getInstance();
 
     @Override
-    public HopContainerIdToClean findEntry(int rmnodeid, int containerid) throws StorageException {
+    public HopContainerIdToClean findEntry(String rmnodeid, int commandport, String containerid) throws StorageException {
         Session session = connector.obtainSession();
         ContainerIdToCleanDTO dto = null;
         Object[] pk = new Object[2];
         pk[0] = rmnodeid;
-        pk[1] = containerid;
+        pk[2] = containerid;
         if (session != null) {
             dto = session.find(ContainerIdToCleanDTO.class, pk);
         }
@@ -79,8 +79,8 @@ public class ContainerIdToCleanClusterJ implements ContainerIdToCleanTableDef, C
     private ContainerIdToCleanDTO createPersistable(HopContainerIdToClean hop, Session session) {
         ContainerIdToCleanDTO dto = session.newInstance(ContainerIdToCleanDTO.class);
         //Set values to persist new ContainerStatus
-        dto.setrmnodeid(hop.getRmnodeId());
-        dto.setcontainerid(hop.getContaineridId());
+        dto.setrmnodeid(hop.getRmnodeid());
+        dto.setcontainerid(hop.getContainerId());
         return dto;
     }
 
