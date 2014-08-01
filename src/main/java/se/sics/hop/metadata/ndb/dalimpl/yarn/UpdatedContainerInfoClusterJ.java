@@ -28,22 +28,16 @@ public class UpdatedContainerInfoClusterJ implements UpdatedContainerInfoTableDe
     public interface UpdatedContainerInfoDTO {
 
         @PrimaryKey
+        @Column(name = RMNODEID)
+        String getrmmnodeid();
+
+        void setrmnodeid(String rmnodeid);
+
+        @PrimaryKey
         @Column(name = ID)
         int getid();
 
         void setid(int id);
-
-        @PrimaryKey
-        @Column(name = HOSTNAME)
-        String gethostname();
-
-        void sethostname(String hostname);
-
-        @PrimaryKey
-        @Column(name = COMMANDPORT)
-        int getcommandport();
-
-        void setcommandport(int commandport);
     }
     private ClusterjConnector connector = ClusterjConnector.getInstance();
 
@@ -60,34 +54,30 @@ public class UpdatedContainerInfoClusterJ implements UpdatedContainerInfoTableDe
     }
 
     @Override
-    public HopUpdatedContainerInfo findEntry(int id, String hostname, int commandport) throws StorageException {
+    public HopUpdatedContainerInfo findEntry(String rmnodeid, int id) throws StorageException {
         Session session = connector.obtainSession();
-        Object[] pk = new Object[3];
-        pk[0] = id;
-        pk[1] = hostname;
-        pk[2] = commandport;
+        Object[] pk = new Object[2];
+        pk[0] = rmnodeid;
+        pk[1] = id;
         UpdatedContainerInfoDTO dto = session.find(UpdatedContainerInfoDTO.class, pk);
         if (dto == null) {
-            throw new StorageException("Error while retrieving updatedcontainerinfo:" + id + "," + hostname + "," + commandport);
+            throw new StorageException("Error while retrieving updatedcontainerinfo:" + id + "," + rmnodeid);
         }
         return createHopUpdatedContainerInfo(dto);
     }
 
     @Override
-    public List<HopUpdatedContainerInfo> findByRMNode(String hostname, int commandport) throws StorageException {
+    public List<HopUpdatedContainerInfo> findByRMNode(String rmnodeid) throws StorageException {
         try {
             Session session = connector.obtainSession();
             QueryBuilder qb = session.getQueryBuilder();
 
             QueryDomainType<UpdatedContainerInfoDTO> dobj = qb.createQueryDefinition(UpdatedContainerInfoDTO.class);
-            Predicate pred1 = dobj.get("hostname").equal(dobj.param("hostname"));
-            Predicate pred2 = dobj.get("commandport").equal(dobj.param("commandport"));
-            pred1.and(pred2);
+            Predicate pred1 = dobj.get("rmnodeid").equal(dobj.param("rmnodeid"));
             dobj.where(pred1);
 
             Query<UpdatedContainerInfoDTO> query = session.createQuery(dobj);
-            query.setParameter("hostname", hostname);
-            query.setParameter("commandport", commandport);
+            query.setParameter("rmnodeid", rmnodeid);
             List<UpdatedContainerInfoDTO> results = query.getResultList();
             return createUpdatedContainerInfoList(results);
         } catch (Exception e) {
@@ -121,8 +111,7 @@ public class UpdatedContainerInfoClusterJ implements UpdatedContainerInfoTableDe
     private UpdatedContainerInfoDTO createPersistable(HopUpdatedContainerInfo hop, Session session) {
         UpdatedContainerInfoDTO dto = session.newInstance(UpdatedContainerInfoDTO.class);
         dto.setid(hop.getId());
-        dto.sethostname(hop.getHostname());
-        dto.setcommandport(hop.getCommandport());
+        dto.setrmnodeid(hop.getRmnodeid());
         return dto;
     }
 
@@ -133,7 +122,7 @@ public class UpdatedContainerInfoClusterJ implements UpdatedContainerInfoTableDe
      * @return HopRMNode
      */
     private HopUpdatedContainerInfo createHopUpdatedContainerInfo(UpdatedContainerInfoDTO dto) {
-        return new HopUpdatedContainerInfo(dto.getid(), dto.gethostname(), dto.getcommandport());
+        return new HopUpdatedContainerInfo(dto.getrmmnodeid(), dto.getid());
     }
 
     private List<HopUpdatedContainerInfo> createUpdatedContainerInfoList(List<UpdatedContainerInfoDTO> list) throws IOException {
