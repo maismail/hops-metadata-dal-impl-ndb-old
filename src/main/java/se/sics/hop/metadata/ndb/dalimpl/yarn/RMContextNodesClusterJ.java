@@ -29,7 +29,7 @@ public class RMContextNodesClusterJ implements RMContextNodesTableDef, RMContext
 
         void setnodeidid(String nodeidid);
 
-        @Column(name = RMNODE_ID)
+        @Column(name = RMNODEID)
         String getrmnodeid();
 
         void setrmnodeid(String rmnodeid);

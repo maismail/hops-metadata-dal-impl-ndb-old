@@ -64,9 +64,9 @@ public class RMNodeClusterJ implements RMNodeTableDef, RMNodeDataAccess<HopRMNod
         void setNextheartbeat(boolean nexthearbeat);
 
         @Column(name = NODEBASEID)
-        int getNodebaseid();
+        String getNodebaseid();
 
-        void setNodebaseid(int nodebaseid);
+        void setNodebaseid(String nodebaseid);
 
         @Column(name = HEALTH_REPORT)
         String getHealthreport();
@@ -96,7 +96,7 @@ public class RMNodeClusterJ implements RMNodeTableDef, RMNodeDataAccess<HopRMNod
     private ClusterjConnector connector = ClusterjConnector.getInstance();
 
     @Override
-    public HopRMNode findByNodeId(int nodeid) throws StorageException {
+    public HopRMNode findByNodeId(String nodeid) throws StorageException {
         Session session = connector.obtainSession();
         RMNodeDTO rmnodeDTO = session.find(RMNodeDTO.class, nodeid);
         if (rmnodeDTO == null) {
@@ -189,10 +189,7 @@ public class RMNodeClusterJ implements RMNodeTableDef, RMNodeDataAccess<HopRMNod
         rmDTO.setNodeaddress(hopRMNode.getNodeAddress());
         rmDTO.setHttpaddress(hopRMNode.getHttpAddress());
         rmDTO.setNextheartbeat(hopRMNode.isNextHeartbeat());
-
-        if (hopRMNode.getNodebaseId() > 0) {
-            rmDTO.setNodebaseid(hopRMNode.getNodebaseId());
-        }
+        rmDTO.setNodebaseid(hopRMNode.getNodebaseId());
         rmDTO.setHealthreport(hopRMNode.getHealthReport());
         rmDTO.setLasthealthreporttime(hopRMNode.getLastHealthReportTime());
         rmDTO.setcurrentstate(hopRMNode.getCurrentState());
