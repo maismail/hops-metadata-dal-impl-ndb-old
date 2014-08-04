@@ -23,16 +23,10 @@ public class NodeHBResponseClusterJ implements NodeHBResponseTableDef, NodeHBRes
     public interface NodeHBResponseDTO {
 
         @PrimaryKey
-        @Column(name = HOSTNAME)
-        String gethostname();
+        @Column(name = RMNODEID)
+        String getrmnodeid();
 
-        void sethostname(String hostname);
-
-        @PrimaryKey
-        @Column(name = COMMANDPORT)
-        int getcommandport();
-
-        void setcommandport(int commandport);
+        void setrmnodeid(String rmnodeid);
 
         @Column(name = RESPONSE)
         byte[] getresponse();
@@ -42,14 +36,11 @@ public class NodeHBResponseClusterJ implements NodeHBResponseTableDef, NodeHBRes
     private ClusterjConnector connector = ClusterjConnector.getInstance();
 
     @Override
-    public HopNodeHBResponse findById(String hostname, int commandport) throws StorageException {
+    public HopNodeHBResponse findById(String rmnodeId) throws StorageException {
         Session session = connector.obtainSession();
         NodeHBResponseDTO nodeHBresponseDTO = null;
         if (session != null) {
-            Object[] pk = new Object[2];
-            pk[0] = hostname;
-            pk[1] = commandport;
-            nodeHBresponseDTO = session.find(NodeHBResponseDTO.class, pk);
+            nodeHBresponseDTO = session.find(NodeHBResponseDTO.class, rmnodeId);
         }
         if (nodeHBresponseDTO == null) {
             throw new StorageException("HOP :: Error while retrieving row");
@@ -65,10 +56,7 @@ public class NodeHBResponseClusterJ implements NodeHBResponseTableDef, NodeHBRes
             if (removed != null) {
                 List<NodeHBResponseDTO> toRemove = new ArrayList<NodeHBResponseDTO>();
                 for (HopNodeHBResponse nodehbresponse : removed) {
-                    Object[] pk = new Object[2];
-                    pk[0] = nodehbresponse.getHostname();
-                    pk[1] = nodehbresponse.getCommandport();
-                    NodeHBResponseDTO persistable = session.newInstance(NodeHBResponseDTO.class, pk);
+                    NodeHBResponseDTO persistable = session.newInstance(NodeHBResponseDTO.class, nodehbresponse.getRMNodeId());
                     toRemove.add(persistable);
                 }
                 session.deletePersistentAll(toRemove);
@@ -92,13 +80,12 @@ public class NodeHBResponseClusterJ implements NodeHBResponseTableDef, NodeHBRes
     }
 
     private HopNodeHBResponse createHopNodeHBResponse(NodeHBResponseDTO nodeHBresponseDTO) {
-        return new HopNodeHBResponse(nodeHBresponseDTO.gethostname(), nodeHBresponseDTO.getcommandport(), nodeHBresponseDTO.getresponse());
+        return new HopNodeHBResponse(nodeHBresponseDTO.getrmnodeid(), nodeHBresponseDTO.getresponse());
     }
 
     private NodeHBResponseDTO createPersistable(HopNodeHBResponse nodehbresponse, Session session) {
         NodeHBResponseDTO nodeHBResponseDT0 = session.newInstance(NodeHBResponseDTO.class);
-        nodeHBResponseDT0.sethostname(nodehbresponse.getHostname());
-        nodeHBResponseDT0.setcommandport(nodehbresponse.getCommandport());
+        nodeHBResponseDT0.setrmnodeid(nodehbresponse.getRMNodeId());
         nodeHBResponseDT0.setresponse(nodehbresponse.getResponseid());
         return nodeHBResponseDT0;
     }
