@@ -28,13 +28,9 @@ public class FiCaSchedulerAppClusterJ implements FiCaSchedulerAppTableDef, FiCaS
     public interface FiCaSchedulerAppDTO {
 
         @PrimaryKey
-        @Column(name = ID)
-        int getid();
-        void setid(int id);
-
-        @Column(name = APPSCHEDULINGINFO_ID)
-        int getappschedulinginfoid();
-        void setappschedulinginfoid(int appschedulinginfoid);
+        @Column(name = APPATTEMPTID)
+        String getappattemptid();
+        void setappattemptid(String appattemptid);
         
         @Column(name = CURRENTRESERVATION_ID)
         int getcurrentreservationid();
@@ -80,7 +76,7 @@ public class FiCaSchedulerAppClusterJ implements FiCaSchedulerAppTableDef, FiCaS
         try {
             if (removed != null) {
                 for (HopFiCaSchedulerApp hop : removed) {
-                    FiCaSchedulerAppClusterJ.FiCaSchedulerAppDTO persistable = session.newInstance(FiCaSchedulerAppClusterJ.FiCaSchedulerAppDTO.class, hop.getId());
+                    FiCaSchedulerAppClusterJ.FiCaSchedulerAppDTO persistable = session.newInstance(FiCaSchedulerAppClusterJ.FiCaSchedulerAppDTO.class, hop.getAppattemptid());
                     session.deletePersistent(persistable);
                 }
             }
@@ -96,8 +92,7 @@ public class FiCaSchedulerAppClusterJ implements FiCaSchedulerAppTableDef, FiCaS
     }
     
     private HopFiCaSchedulerApp createHopFiCaSchedulerApp(FiCaSchedulerAppDTO fiCaSchedulerAppDTO) {
-        return new HopFiCaSchedulerApp(fiCaSchedulerAppDTO.getid(),
-                                       fiCaSchedulerAppDTO.getappschedulinginfoid(),
+        return new HopFiCaSchedulerApp(fiCaSchedulerAppDTO.getappattemptid(),
                                        fiCaSchedulerAppDTO.getcurrentreservationid(),
                                        fiCaSchedulerAppDTO.getresourcelimitid(),
                                        fiCaSchedulerAppDTO.getcurrentconsumptionid(),
@@ -108,8 +103,7 @@ public class FiCaSchedulerAppClusterJ implements FiCaSchedulerAppTableDef, FiCaS
     private FiCaSchedulerAppClusterJ.FiCaSchedulerAppDTO createPersistable(HopFiCaSchedulerApp hop, Session session) {
         FiCaSchedulerAppClusterJ.FiCaSchedulerAppDTO fiCaSchedulerAppDTO = session.newInstance(FiCaSchedulerAppClusterJ.FiCaSchedulerAppDTO.class);
         
-        fiCaSchedulerAppDTO.setid(hop.getId());
-        fiCaSchedulerAppDTO.setappschedulinginfoid(hop.getAppschedulinginfo_id());
+        fiCaSchedulerAppDTO.setappattemptid(hop.getAppattemptid());
         fiCaSchedulerAppDTO.setcurrentreservationid(hop.getCurrentreservation_id());
         fiCaSchedulerAppDTO.setresourcelimitid(hop.getResourcelimit_id());
         fiCaSchedulerAppDTO.setcurrentconsumptionid(hop.getCurrentconsumption_id());
@@ -117,7 +111,5 @@ public class FiCaSchedulerAppClusterJ implements FiCaSchedulerAppTableDef, FiCaS
         fiCaSchedulerAppDTO.setrmcontextid(hop.getRmcontext_id());
         
         return fiCaSchedulerAppDTO;
-    }
-    
-    
+    }   
 }

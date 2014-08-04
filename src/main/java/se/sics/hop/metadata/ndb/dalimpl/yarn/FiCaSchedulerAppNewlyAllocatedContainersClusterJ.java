@@ -29,8 +29,8 @@ public class FiCaSchedulerAppNewlyAllocatedContainersClusterJ implements FiCaSch
 
         @PrimaryKey
         @Column(name = FICASCHEDULERAPP_ID)
-        int getficaschedulerappid();
-        void setficaschedulerappid(int ficaschedulerappid);
+        String getficaschedulerappid();
+        void setficaschedulerappid(String ficaschedulerappid);
 
         @Column(name = RMCONTAINER_ID)
         int getrmcontainerid();

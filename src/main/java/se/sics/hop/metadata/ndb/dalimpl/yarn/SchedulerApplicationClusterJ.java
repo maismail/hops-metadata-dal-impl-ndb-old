@@ -28,17 +28,13 @@ public class SchedulerApplicationClusterJ implements SchedulerApplicationTableDe
     public interface SchedulerApplicationDTO {
 
     @PrimaryKey
-    @Column(name = ID)
-    int getid();
-    void setid(int id);
+    @Column(name = APPID)
+    String getappid();
+    void setappid(String appid);
 
     @Column(name = USER)
     String getuser();
     void setuser(String user);
-        
-    @Column(name = CURRENTATTEMPT_ID)
-    int getcurrentattemptid();
-    void setcurrentattemptid(int currentattemptid);
         
     }
     private final ClusterjConnector connector = ClusterjConnector.getInstance();
@@ -64,7 +60,7 @@ public class SchedulerApplicationClusterJ implements SchedulerApplicationTableDe
         try {
             if (removed != null) {
                 for (HopSchedulerApplication hop : removed) {
-                    SchedulerApplicationClusterJ.SchedulerApplicationDTO persistable = session.newInstance(SchedulerApplicationClusterJ.SchedulerApplicationDTO.class, hop.getId());
+                    SchedulerApplicationClusterJ.SchedulerApplicationDTO persistable = session.newInstance(SchedulerApplicationClusterJ.SchedulerApplicationDTO.class, hop.getAppid());
                     session.deletePersistent(persistable);
                 }
             }
@@ -80,15 +76,14 @@ public class SchedulerApplicationClusterJ implements SchedulerApplicationTableDe
     }
     
     private HopSchedulerApplication createHopSchedulerApplication(SchedulerApplicationDTO schedulerApplicationDTO) {
-        return new HopSchedulerApplication(schedulerApplicationDTO.getid(), schedulerApplicationDTO.getuser(), schedulerApplicationDTO.getcurrentattemptid());
+        return new HopSchedulerApplication(schedulerApplicationDTO.getappid(), schedulerApplicationDTO.getuser());
     }
 
     private SchedulerApplicationDTO createPersistable(HopSchedulerApplication hop, Session session) {
         SchedulerApplicationClusterJ.SchedulerApplicationDTO schedulerApplicationDTO = session.newInstance(SchedulerApplicationClusterJ.SchedulerApplicationDTO.class);
         
-        schedulerApplicationDTO.setid(hop.getId());
+        schedulerApplicationDTO.setappid(hop.getAppid());
         schedulerApplicationDTO.setuser(hop.getUser());
-        schedulerApplicationDTO.setcurrentattemptid(hop.getCurrentattempt_id());
         return schedulerApplicationDTO;
     }
     

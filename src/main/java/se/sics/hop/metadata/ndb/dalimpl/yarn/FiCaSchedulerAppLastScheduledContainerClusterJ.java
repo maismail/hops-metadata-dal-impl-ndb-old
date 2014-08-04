@@ -29,8 +29,8 @@ public class FiCaSchedulerAppLastScheduledContainerClusterJ implements FiCaSched
 
         @PrimaryKey
         @Column(name = FICASCHEDULERAPP_ID)
-        int getficaschedulerappid();
-        void setficaschedulerappid(int ficaschedulerappid);
+        String getficaschedulerappid();
+        void setficaschedulerappid(String ficaschedulerappid);
 
         @Column(name = PRIORITY_ID)
         int getpriorityid();

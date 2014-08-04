@@ -23,13 +23,13 @@ public class ApplicationAttemptIdClusterJ implements ApplicationAttemptIdTableDe
         @PrimaryKey
 
         @Column(name = ATTEMPTID)
-        int getattemptid();
-        void setattemptid(int attemptid);
+        String getattemptid();
+        void setattemptid(String attemptid);
 
         @Column(name = APPID)
-        int getappid();
+        String getappid();
 
-        void setappid(int appid);
+        void setappid(String appid);
     }
     private ClusterjConnector connector = ClusterjConnector.getInstance();
 

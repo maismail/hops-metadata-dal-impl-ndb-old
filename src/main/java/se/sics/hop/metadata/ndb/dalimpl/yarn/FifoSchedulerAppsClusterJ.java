@@ -34,12 +34,12 @@ public class FifoSchedulerAppsClusterJ implements FifoSchedulerAppsTableDef, Fif
 
         @PrimaryKey
         @Column(name = APPID)
-        int getapplicationid();
-        void setapplicationid(int applicationid);
+        String getapplicationid();
+        void setapplicationid(String applicationid);
         
         @Column(name = SCHEDULERAPPLICATION_ID)
-        int getschedulerapplicationid();
-        void setschedulerapplicationid(int schedulerapplicationid);
+        String getschedulerapplicationid();
+        void setschedulerapplicationid(String schedulerapplicationid);
     }
     
     private final ClusterjConnector connector = ClusterjConnector.getInstance();

@@ -28,8 +28,8 @@ public class FiCaSchedulerAppLiveContainersClusterJ implements FiCaSchedulerAppL
 
         @PrimaryKey
         @Column(name = FICASCHEDULERAPP_ID)
-        int getficaschedulerappid();
-        void setficaschedulerappid(int ficaschedulerappid);
+        String getficaschedulerappid();
+        void setficaschedulerappid(String ficaschedulerappid);
 
         @Column(name = CONTAINERID_ID)
         int getcontaineridid();
