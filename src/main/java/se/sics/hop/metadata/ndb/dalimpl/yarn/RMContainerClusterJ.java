@@ -22,15 +22,11 @@ public class RMContainerClusterJ implements RMContainerTableDef, RMContainerData
     public interface RMContainerDTO {
 
         @PrimaryKey
-        @Column(name = ID)
-        int getid();
-
-        void setid(int id);
 
         @Column(name = CONTAINERID_ID)
-        int getcontaineridid();
+        String getcontaineridid();
 
-        void setcontaineridid(int containeridid);
+        void setcontaineridid(String containeridid);
 
         @Column(name = APPLICATIONATTEMPTID_ID)
         int getappattemptidid();
@@ -105,7 +101,7 @@ public class RMContainerClusterJ implements RMContainerTableDef, RMContainerData
         try {
             if (removed != null) {
                 for (HopRMContainer hop : removed) {
-                    RMContainerClusterJ.RMContainerDTO persistable = session.newInstance(RMContainerClusterJ.RMContainerDTO.class, hop.getId());
+                    RMContainerClusterJ.RMContainerDTO persistable = session.newInstance(RMContainerClusterJ.RMContainerDTO.class, hop.getContainerIdID());
                     session.deletePersistent(persistable);
                 }
             }
@@ -127,7 +123,7 @@ public class RMContainerClusterJ implements RMContainerTableDef, RMContainerData
     }
     
     private HopRMContainer createHopRMContainer(RMContainerDTO rMContainerDTO) {
-        return new HopRMContainer(rMContainerDTO.getid(),
+        return new HopRMContainer(
                                 rMContainerDTO.getcontaineridid(),
                                 rMContainerDTO.getappattemptidid(),
                                 rMContainerDTO.getnodeidid(),
@@ -145,7 +141,6 @@ public class RMContainerClusterJ implements RMContainerTableDef, RMContainerData
     private RMContainerDTO createPersistable(HopRMContainer hop, Session session) {
         RMContainerClusterJ.RMContainerDTO rMContainerDTO = session.newInstance(RMContainerClusterJ.RMContainerDTO.class);
         
-        rMContainerDTO.setid(hop.getId());
         rMContainerDTO.setcontaineridid(hop.getContainerIdID());
         rMContainerDTO.setappattemptidid(hop.getApplicationAttemptIdID());
         rMContainerDTO.setnodeidid(hop.getNodeIdID());

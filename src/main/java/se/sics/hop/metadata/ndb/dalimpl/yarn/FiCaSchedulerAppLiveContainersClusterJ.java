@@ -32,12 +32,12 @@ public class FiCaSchedulerAppLiveContainersClusterJ implements FiCaSchedulerAppL
         void setficaschedulerappid(String ficaschedulerappid);
 
         @Column(name = CONTAINERID_ID)
-        int getcontaineridid();
-        void setcontaineridid(int containeridid);
+        String getcontaineridid();
+        void setcontaineridid(String containeridid);
         
         @Column(name = RMCONTAINER_ID)
-        int getrmcontainerid();
-        void setrmcontainerid(int rmcontainerid);
+        String getrmcontainerid();
+        void setrmcontainerid(String rmcontainerid);
     }
     private final ClusterjConnector connector = ClusterjConnector.getInstance();
     

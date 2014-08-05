@@ -27,12 +27,12 @@ public class FifoSchedulerNodesClusterJ implements FifoSchedulerNodesTableDef, F
 
         @PrimaryKey
         @Column(name = NODEID_ID)
-        int getnodeidid();
-        void setnodeidid(int nodeidid);
+        String getnodeidid();
+        void setnodeidid(String nodeidid);
 
         @Column(name = FICASCHEDULERNODE_ID)
-        int getficaschedulernodeid();
-        void setficaschedulernodeid(int ficaschedulernodeid);
+        String getficaschedulernodeid();
+        void setficaschedulernodeid(String ficaschedulernodeid);
     }
     private ClusterjConnector connector = ClusterjConnector.getInstance();
 

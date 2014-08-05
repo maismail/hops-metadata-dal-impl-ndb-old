@@ -41,8 +41,8 @@ public class FiCaSchedulerAppReservedContainersClusterJ implements FiCaScheduler
         void setnodeid(int nodeid);
         
         @Column(name = RMCONTAINER_ID)
-        int getrmcontainerid();
-        void setrmcontainerid(int rmcontainerid);
+        String getrmcontainerid();
+        void setrmcontainerid(String rmcontainerid);
     }
     
     private final ClusterjConnector connector = ClusterjConnector.getInstance();
