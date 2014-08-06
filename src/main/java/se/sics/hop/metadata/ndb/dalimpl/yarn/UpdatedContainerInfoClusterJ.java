@@ -29,7 +29,7 @@ public class UpdatedContainerInfoClusterJ implements UpdatedContainerInfoTableDe
 
         @PrimaryKey
         @Column(name = RMNODEID)
-        String getrmmnodeid();
+        String getrmnodeid();
 
         void setrmnodeid(String rmnodeid);
 
@@ -122,7 +122,7 @@ public class UpdatedContainerInfoClusterJ implements UpdatedContainerInfoTableDe
      * @return HopRMNode
      */
     private HopUpdatedContainerInfo createHopUpdatedContainerInfo(UpdatedContainerInfoDTO dto) {
-        return new HopUpdatedContainerInfo(dto.getrmmnodeid(), dto.getid());
+        return new HopUpdatedContainerInfo(dto.getrmnodeid(), dto.getid());
     }
 
     private List<HopUpdatedContainerInfo> createUpdatedContainerInfoList(List<UpdatedContainerInfoDTO> list) throws IOException {
