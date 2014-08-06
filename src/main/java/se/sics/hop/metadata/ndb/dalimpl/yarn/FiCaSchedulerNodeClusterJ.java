@@ -23,6 +23,11 @@ public class FiCaSchedulerNodeClusterJ implements FiCaSchedulerNodeTableDef, FiC
     public interface FiCaSchedulerNodeDTO {
 
         @PrimaryKey
+        @Column(name = RMNODEID)
+        String getrmnodeid();
+
+        void setrmnodeid(String rmnodeid);
+
         @Column(name = NODENAME)
         String getnodename();
 
@@ -32,11 +37,6 @@ public class FiCaSchedulerNodeClusterJ implements FiCaSchedulerNodeTableDef, FiC
         int getnumcontainers();
 
         void setnumcontainers(int numcontainers);
-
-        @Column(name = RMNODE_ID)
-        String getrmnodeid();
-
-        void setrmnodeid(String rmnodeid);
     }
     private ClusterjConnector connector = ClusterjConnector.getInstance();
 
@@ -62,7 +62,7 @@ public class FiCaSchedulerNodeClusterJ implements FiCaSchedulerNodeTableDef, FiC
             if (removed != null) {
                 List<FiCaSchedulerNodeDTO> toRemove = new ArrayList<FiCaSchedulerNodeDTO>();
                 for (HopFiCaSchedulerNode hop : removed) {
-                    FiCaSchedulerNodeDTO persistable = session.newInstance(FiCaSchedulerNodeDTO.class, hop.getNodeName());
+                    FiCaSchedulerNodeDTO persistable = session.newInstance(FiCaSchedulerNodeDTO.class, hop.getRmnodeId());
                     toRemove.add(persistable);
                 }
                 session.deletePersistentAll(toRemove);
@@ -87,17 +87,17 @@ public class FiCaSchedulerNodeClusterJ implements FiCaSchedulerNodeTableDef, FiC
     }
 
     private HopFiCaSchedulerNode createHopFiCaSchedulerNode(FiCaSchedulerNodeDTO ficaschedulernodeDTO) {
-        HopFiCaSchedulerNode hop = new HopFiCaSchedulerNode(ficaschedulernodeDTO.getnodename(),
-                ficaschedulernodeDTO.getnumcontainers(),
-                ficaschedulernodeDTO.getrmnodeid());
+        HopFiCaSchedulerNode hop = new HopFiCaSchedulerNode(ficaschedulernodeDTO.getrmnodeid(),
+                ficaschedulernodeDTO.getnodename(),
+                ficaschedulernodeDTO.getnumcontainers());
         return hop;
     }
 
     private FiCaSchedulerNodeDTO createPersistable(HopFiCaSchedulerNode hop, Session session) {
         FiCaSchedulerNodeDTO ficaDTO = session.newInstance(FiCaSchedulerNodeDTO.class);
+        ficaDTO.setrmnodeid(hop.getRmnodeId());
         ficaDTO.setnodename(hop.getNodeName());
         ficaDTO.setnumcontainers(hop.getNumOfContainers());
-        ficaDTO.setrmnodeid(hop.getRmNodeID());
         return ficaDTO;
     }
 }

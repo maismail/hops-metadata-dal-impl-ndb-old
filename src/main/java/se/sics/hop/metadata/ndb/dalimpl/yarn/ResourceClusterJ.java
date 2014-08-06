@@ -90,7 +90,10 @@ public class ResourceClusterJ implements ResourceTableDef, ResourceDataAccess<Ho
             if (removed != null) {
                 List<ResourceDTO> toRemove = new ArrayList<ResourceDTO>();
                 for (HopResource req : removed) {
-                    toRemove.add(session.newInstance(ResourceDTO.class, req.getId()));
+                    Object[] pk = new Object[2];
+                    pk[0] = req.getId();
+                    pk[1] = req.getType();
+                    toRemove.add(session.newInstance(ResourceDTO.class, pk));
                 }
                 session.deletePersistentAll(toRemove);
             }

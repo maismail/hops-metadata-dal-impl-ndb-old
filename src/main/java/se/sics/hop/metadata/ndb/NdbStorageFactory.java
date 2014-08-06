@@ -15,9 +15,7 @@ import se.sics.hop.metadata.ndb.dalimpl.yarn.ApplicationAttemptIdClusterJ;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.ApplicationIdClusterJ;
 
 import se.sics.hop.metadata.ndb.dalimpl.yarn.FiCaSchedulerNodeClusterJ;
-import se.sics.hop.metadata.ndb.dalimpl.yarn.NodeIdClusterJ;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.QueueMetricsClusterJ;
-import se.sics.hop.metadata.ndb.dalimpl.yarn.ResourceClusterJ;
 
 import se.sics.hop.metadata.ndb.dalimpl.yarn.ContainerIdClusterJ;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.ContainerIdToCleanClusterJ;
@@ -31,6 +29,8 @@ import se.sics.hop.metadata.ndb.dalimpl.yarn.FiCaSchedulerAppReservedContainersC
 import se.sics.hop.metadata.ndb.dalimpl.yarn.FiCaSchedulerAppSchedulingOpportunitiesClusterJ;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.FifoSchedulerAppsClusterJ;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.FifoSchedulerNodesClusterJ;
+import se.sics.hop.metadata.ndb.dalimpl.yarn.FinishedApplicationsClusterJ;
+import se.sics.hop.metadata.ndb.dalimpl.yarn.JustLaunchedContainersClusterJ;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.NodeClusterJ;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.NodeHBResponseClusterJ;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.NodeIdClusterJ;
@@ -58,9 +58,7 @@ import se.sics.hop.metadata.yarn.dal.AppSchedulingInfoDataAccess;
 import se.sics.hop.metadata.yarn.dal.ApplicationAttemptIdDataAccess;
 import se.sics.hop.metadata.yarn.dal.ApplicationIdDataAccess;
 import se.sics.hop.metadata.yarn.dal.FiCaSchedulerNodeDataAccess;
-import se.sics.hop.metadata.yarn.dal.NodeIdDataAccess;
 import se.sics.hop.metadata.yarn.dal.QueueMetricsDataAccess;
-import se.sics.hop.metadata.yarn.dal.ResourceDataAccess;
 import se.sics.hop.metadata.yarn.dal.ContainerIdDataAccess;
 import se.sics.hop.metadata.yarn.dal.ContainerIdToCleanDataAccess;
 import se.sics.hop.metadata.yarn.dal.ContainerStatusDataAccess;
@@ -73,6 +71,8 @@ import se.sics.hop.metadata.yarn.dal.FiCaSchedulerAppReservedContainersDataAcces
 import se.sics.hop.metadata.yarn.dal.FiCaSchedulerAppSchedulingOpportunitiesDataAccess;
 import se.sics.hop.metadata.yarn.dal.FifoSchedulerAppsDataAccess;
 import se.sics.hop.metadata.yarn.dal.FifoSchedulerNodesDataAccess;
+import se.sics.hop.metadata.yarn.dal.FinishedApplicationsDataAccess;
+import se.sics.hop.metadata.yarn.dal.JustLaunchedContainersDataAccess;
 import se.sics.hop.metadata.yarn.dal.NodeDataAccess;
 import se.sics.hop.metadata.yarn.dal.NodeHBResponseDataAccess;
 import se.sics.hop.metadata.yarn.dal.NodeIdDataAccess;
@@ -141,6 +141,8 @@ public class NdbStorageFactory implements DALStorageFactory {
         dataAccessMap.put(UpdatedContainerInfoDataAccess.class, new UpdatedContainerInfoClusterJ());
         dataAccessMap.put(UpdatedContainerInfoContainersDataAccess.class, new UpdatedContainerInfoContainersClusterJ());
         dataAccessMap.put(ContainerIdToCleanDataAccess.class, new ContainerIdToCleanClusterJ());
+        dataAccessMap.put(JustLaunchedContainersDataAccess.class, new JustLaunchedContainersClusterJ());
+        dataAccessMap.put(FinishedApplicationsDataAccess.class, new FinishedApplicationsClusterJ());
         dataAccessMap.put(FifoSchedulerNodesDataAccess.class, new FifoSchedulerNodesClusterJ());
         dataAccessMap.put(FifoSchedulerAppsDataAccess.class, new FifoSchedulerAppsClusterJ());
         dataAccessMap.put(FiCaSchedulerAppDataAccess.class, new FiCaSchedulerAppClusterJ());
