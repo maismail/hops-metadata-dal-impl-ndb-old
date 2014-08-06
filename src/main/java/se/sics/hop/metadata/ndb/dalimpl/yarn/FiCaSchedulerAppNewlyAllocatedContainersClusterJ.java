@@ -33,8 +33,8 @@ public class FiCaSchedulerAppNewlyAllocatedContainersClusterJ implements FiCaSch
         void setficaschedulerappid(String ficaschedulerappid);
 
         @Column(name = RMCONTAINER_ID)
-        int getrmcontainerid();
-        void setcontainerid(int containerid);    
+        String getrmcontainerid();
+        void setrmcontainerid(String rmcontainerid);    
     }
     private final ClusterjConnector connector = ClusterjConnector.getInstance();
     
@@ -83,7 +83,7 @@ public class FiCaSchedulerAppNewlyAllocatedContainersClusterJ implements FiCaSch
         FiCaSchedulerAppNewlyAllocatedContainersClusterJ.FiCaSchedulerAppNewlyAllocatedContainersDTO fiCaSchedulerAppNewlyAllocatedContainersDTO = session.newInstance(FiCaSchedulerAppNewlyAllocatedContainersClusterJ.FiCaSchedulerAppNewlyAllocatedContainersDTO.class);
         
         fiCaSchedulerAppNewlyAllocatedContainersDTO.setficaschedulerappid(hop.getFicaschedulerapp_id());
-        fiCaSchedulerAppNewlyAllocatedContainersDTO.setcontainerid(hop.getRmcontainer_id());
+        fiCaSchedulerAppNewlyAllocatedContainersDTO.setrmcontainerid(hop.getRmcontainer_id());
         
         return fiCaSchedulerAppNewlyAllocatedContainersDTO;
     }   
