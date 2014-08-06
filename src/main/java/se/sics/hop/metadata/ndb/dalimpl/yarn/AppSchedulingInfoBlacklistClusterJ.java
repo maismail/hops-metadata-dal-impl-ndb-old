@@ -29,8 +29,8 @@ public class AppSchedulingInfoBlacklistClusterJ implements AppSchedulingInfoBlac
 
         @PrimaryKey
         @Column(name = APPSCHEDULINGINFO_ID)
-        int getappschedulinginfoid();
-        void setappschedulinginfoid(int appschedulinginfoid);
+        String getappschedulinginfoid();
+        void setappschedulinginfoid(String appschedulinginfoid);
 
         @Column(name = BLACKLISTED)
         String getblacklisted();

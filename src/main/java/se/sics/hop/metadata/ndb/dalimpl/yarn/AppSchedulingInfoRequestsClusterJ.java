@@ -35,8 +35,8 @@ public class AppSchedulingInfoRequestsClusterJ implements AppSchedulingInfoReque
 
         @PrimaryKey
         @Column(name = APPSCHEDULINGINFO_ID)
-        int getappschedulinginfoid();
-        void setappschedulinginfoid(int appschedulinginfoid);
+        String getappschedulinginfoid();
+        void setappschedulinginfoid(String appschedulinginfoid);
 
         @Column(name = PRIORITY_ID)
         int getpriorityid();
@@ -45,10 +45,6 @@ public class AppSchedulingInfoRequestsClusterJ implements AppSchedulingInfoReque
         @Column(name = NAME)
         String getname();
         void setname(String name);
-        
-        @Column(name = RESOURCEREQUEST_ID)
-        int getresourcerequestid();
-        void setresourcerequestid(int resourcerequestid);
     }
     private final ClusterjConnector connector = ClusterjConnector.getInstance();
      
@@ -123,8 +119,7 @@ public class AppSchedulingInfoRequestsClusterJ implements AppSchedulingInfoReque
     private HopAppSchedulingInfoRequests createAppSchedulingInfoRequests(AppSchedulingInfoRequestsDTO entry) {
         return new HopAppSchedulingInfoRequests(entry.getappschedulinginfoid(),
                                                 entry.getpriorityid(),
-                                                entry.getname(),
-                                                entry.getresourcerequestid());
+                                                entry.getname());
     }
 
     private AppSchedulingInfoRequestsDTO createPersistable(HopAppSchedulingInfoRequests hop, Session session) {
@@ -132,9 +127,7 @@ public class AppSchedulingInfoRequestsClusterJ implements AppSchedulingInfoReque
         
         appSchedulingInfoRequestsDTO.setappschedulinginfoid(hop.getAppschedulinginfo_id());
         appSchedulingInfoRequestsDTO.setpriorityid(hop.getPriority_id());
-        appSchedulingInfoRequestsDTO.setname(hop.getName());
-        appSchedulingInfoRequestsDTO.setresourcerequestid(hop.getResourcerequest_id());
-        
+        appSchedulingInfoRequestsDTO.setname(hop.getName());        
         return appSchedulingInfoRequestsDTO;
     }
 

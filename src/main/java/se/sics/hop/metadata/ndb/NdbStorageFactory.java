@@ -11,6 +11,8 @@ import se.sics.hop.exception.StorageInitializtionException;
 
 import se.sics.hop.metadata.hdfs.dal.EntityDataAccess;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.AppSchedulingInfoClusterJ;
+import se.sics.hop.metadata.ndb.dalimpl.yarn.AppSchedulingInfoPrioritiesClusterJ;
+import se.sics.hop.metadata.ndb.dalimpl.yarn.AppSchedulingInfoRequestsClusterJ;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.ApplicationAttemptIdClusterJ;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.ApplicationIdClusterJ;
 
@@ -39,6 +41,7 @@ import se.sics.hop.metadata.ndb.dalimpl.yarn.RMContextInactiveNodesClusterJ;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.RMContextNodesClusterJ;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.RMNodeClusterJ;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.ResourceClusterJ;
+import se.sics.hop.metadata.ndb.dalimpl.yarn.ResourceRequestClusterJ;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.SchedulerApplicationClusterJ;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.UpdatedContainerInfoClusterJ;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.UpdatedContainerInfoContainersClusterJ;
@@ -53,8 +56,10 @@ import se.sics.hop.metadata.ndb.dalimpl.yarn.rmstatestore.RMStateVersionClusterJ
 import se.sics.hop.metadata.ndb.dalimpl.yarn.rmstatestore.SequenceNumberClusterJ;
 import se.sics.hop.metadata.yarn.dal.rmstatestore.RMStateVersionDataAccess;
 import se.sics.hop.metadata.ndb.mysqlserver.MysqlServerConnector;
-import se.sics.hop.metadata.yarn.dal.AppMasterRPCDataAccess;
+import se.sics.hop.metadata.yarn.dal.rmstatestore.AppMasterRPCDataAccess;
 import se.sics.hop.metadata.yarn.dal.AppSchedulingInfoDataAccess;
+import se.sics.hop.metadata.yarn.dal.AppSchedulingInfoPrioritiesDataAccess;
+import se.sics.hop.metadata.yarn.dal.AppSchedulingInfoRequestsDataAccess;
 import se.sics.hop.metadata.yarn.dal.ApplicationAttemptIdDataAccess;
 import se.sics.hop.metadata.yarn.dal.ApplicationIdDataAccess;
 import se.sics.hop.metadata.yarn.dal.FiCaSchedulerNodeDataAccess;
@@ -81,6 +86,7 @@ import se.sics.hop.metadata.yarn.dal.RMContextInactiveNodesDataAccess;
 import se.sics.hop.metadata.yarn.dal.RMContextNodesDataAccess;
 import se.sics.hop.metadata.yarn.dal.RMNodeDataAccess;
 import se.sics.hop.metadata.yarn.dal.ResourceDataAccess;
+import se.sics.hop.metadata.yarn.dal.ResourceRequestDataAccess;
 import se.sics.hop.metadata.yarn.dal.SchedulerApplicationDataAccess;
 import se.sics.hop.metadata.yarn.dal.UpdatedContainerInfoContainersDataAccess;
 import se.sics.hop.metadata.yarn.dal.UpdatedContainerInfoDataAccess;
@@ -153,6 +159,9 @@ public class NdbStorageFactory implements DALStorageFactory {
         dataAccessMap.put(FiCaSchedulerAppReservationsDataAccess.class, new FiCaSchedulerAppReservationsClusterJ());
         dataAccessMap.put(RMContainerDataAccess.class, new RMContainerClusterJ());
         dataAccessMap.put(AppSchedulingInfoDataAccess.class, new AppSchedulingInfoClusterJ());
+        dataAccessMap.put(AppSchedulingInfoPrioritiesDataAccess.class, new AppSchedulingInfoPrioritiesClusterJ());
+        dataAccessMap.put(AppSchedulingInfoRequestsDataAccess.class, new AppSchedulingInfoRequestsClusterJ());
+        dataAccessMap.put(ResourceRequestDataAccess.class, new ResourceRequestClusterJ());
     }
 
     @Override
