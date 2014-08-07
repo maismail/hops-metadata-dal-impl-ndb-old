@@ -34,6 +34,7 @@ public class AppSchedulingInfoRequestsClusterJ implements AppSchedulingInfoReque
         @PrimaryKey
         @Column(name = APPSCHEDULINGINFO_ID)
         String getappschedulinginfoid();
+        void setappschedulinginfoid(String appschedulinginfoid);
 
         void setappschedulinginfoid(String appschedulinginfoid);
 
@@ -119,17 +120,16 @@ public class AppSchedulingInfoRequestsClusterJ implements AppSchedulingInfoReque
 
     private HopAppSchedulingInfoRequests createAppSchedulingInfoRequests(AppSchedulingInfoRequestsDTO entry) {
         return new HopAppSchedulingInfoRequests(entry.getappschedulinginfoid(),
-                entry.getpriority(),
-                entry.getname());
+                                                entry.getpriorityid(),
+                                                entry.getname());
     }
 
     private AppSchedulingInfoRequestsDTO createPersistable(HopAppSchedulingInfoRequests hop, Session session) {
         AppSchedulingInfoRequestsClusterJ.AppSchedulingInfoRequestsDTO appSchedulingInfoRequestsDTO = session.newInstance(AppSchedulingInfoRequestsClusterJ.AppSchedulingInfoRequestsDTO.class);
 
         appSchedulingInfoRequestsDTO.setappschedulinginfoid(hop.getAppschedulinginfo_id());
-        appSchedulingInfoRequestsDTO.setpriority(hop.getPriority_id());
-        appSchedulingInfoRequestsDTO.setname(hop.getName());
-
+        appSchedulingInfoRequestsDTO.setpriorityid(hop.getPriority_id());
+        appSchedulingInfoRequestsDTO.setname(hop.getName());        
         return appSchedulingInfoRequestsDTO;
     }
 
