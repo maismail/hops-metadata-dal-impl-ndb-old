@@ -37,6 +37,11 @@ public class FiCaSchedulerNodeClusterJ implements FiCaSchedulerNodeTableDef, FiC
         int getnumcontainers();
 
         void setnumcontainers(int numcontainers);
+        
+        @Column(name = RMCONTAINERID)
+        String getrmcontainerid();
+
+        void setrmcontainerid(String rmcontainerid);
     }
     private ClusterjConnector connector = ClusterjConnector.getInstance();
 
@@ -89,7 +94,8 @@ public class FiCaSchedulerNodeClusterJ implements FiCaSchedulerNodeTableDef, FiC
     private HopFiCaSchedulerNode createHopFiCaSchedulerNode(FiCaSchedulerNodeDTO ficaschedulernodeDTO) {
         HopFiCaSchedulerNode hop = new HopFiCaSchedulerNode(ficaschedulernodeDTO.getrmnodeid(),
                 ficaschedulernodeDTO.getnodename(),
-                ficaschedulernodeDTO.getnumcontainers());
+                ficaschedulernodeDTO.getnumcontainers(),
+                ficaschedulernodeDTO.getrmcontainerid());
         return hop;
     }
 
@@ -98,6 +104,7 @@ public class FiCaSchedulerNodeClusterJ implements FiCaSchedulerNodeTableDef, FiC
         ficaDTO.setrmnodeid(hop.getRmnodeId());
         ficaDTO.setnodename(hop.getNodeName());
         ficaDTO.setnumcontainers(hop.getNumOfContainers());
+        ficaDTO.setrmcontainerid(hop.getRmcontainerId());
         return ficaDTO;
     }
 }

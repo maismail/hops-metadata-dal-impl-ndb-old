@@ -3,7 +3,6 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package se.sics.hop.metadata.ndb.dalimpl.yarn;
 
 import com.mysql.clusterj.Query;
@@ -27,31 +26,29 @@ import se.sics.hop.metadata.yarn.tabledef.AppSchedulingInfoRequestsTableDef;
  *
  * @author nickstanogias
  */
-public class AppSchedulingInfoRequestsClusterJ implements AppSchedulingInfoRequestsTableDef, AppSchedulingInfoRequestsDataAccess<HopAppSchedulingInfoRequests>{
-
+public class AppSchedulingInfoRequestsClusterJ implements AppSchedulingInfoRequestsTableDef, AppSchedulingInfoRequestsDataAccess<HopAppSchedulingInfoRequests> {
 
     @PersistenceCapable(table = TABLE_NAME)
     public interface AppSchedulingInfoRequestsDTO {
 
         @PrimaryKey
         @Column(name = APPSCHEDULINGINFO_ID)
-        int getappschedulinginfoid();
-        void setappschedulinginfoid(int appschedulinginfoid);
+        String getappschedulinginfoid();
 
-        @Column(name = PRIORITY_ID)
-        int getpriorityid();
-        void setpriorityid(int priorityid);
-        
+        void setappschedulinginfoid(String appschedulinginfoid);
+
+        @Column(name = PRIORITY)
+        int getpriority();
+
+        void setpriority(int priority);
+
         @Column(name = NAME)
         String getname();
+
         void setname(String name);
-        
-        @Column(name = RESOURCEREQUEST_ID)
-        int getresourcerequestid();
-        void setresourcerequestid(int resourcerequestid);
     }
     private final ClusterjConnector connector = ClusterjConnector.getInstance();
-     
+
     @Override
     public HopAppSchedulingInfoRequests findEntry(int appSchedulingInfoId, int priorityId, String name) throws StorageException {
         Session session = connector.obtainSession();
@@ -66,7 +63,7 @@ public class AppSchedulingInfoRequestsClusterJ implements AppSchedulingInfoReque
         if (entry == null) {
             throw new StorageException("HOP :: Error while retrieving row");
         }
-        
+
         return createAppSchedulingInfoRequests(entry);
     }
 
@@ -119,22 +116,20 @@ public class AppSchedulingInfoRequestsClusterJ implements AppSchedulingInfoReque
             throw new StorageException(e);
         }
     }
-    
+
     private HopAppSchedulingInfoRequests createAppSchedulingInfoRequests(AppSchedulingInfoRequestsDTO entry) {
         return new HopAppSchedulingInfoRequests(entry.getappschedulinginfoid(),
-                                                entry.getpriorityid(),
-                                                entry.getname(),
-                                                entry.getresourcerequestid());
+                entry.getpriority(),
+                entry.getname());
     }
 
     private AppSchedulingInfoRequestsDTO createPersistable(HopAppSchedulingInfoRequests hop, Session session) {
         AppSchedulingInfoRequestsClusterJ.AppSchedulingInfoRequestsDTO appSchedulingInfoRequestsDTO = session.newInstance(AppSchedulingInfoRequestsClusterJ.AppSchedulingInfoRequestsDTO.class);
-        
+
         appSchedulingInfoRequestsDTO.setappschedulinginfoid(hop.getAppschedulinginfo_id());
-        appSchedulingInfoRequestsDTO.setpriorityid(hop.getPriority_id());
+        appSchedulingInfoRequestsDTO.setpriority(hop.getPriority_id());
         appSchedulingInfoRequestsDTO.setname(hop.getName());
-        appSchedulingInfoRequestsDTO.setresourcerequestid(hop.getResourcerequest_id());
-        
+
         return appSchedulingInfoRequestsDTO;
     }
 

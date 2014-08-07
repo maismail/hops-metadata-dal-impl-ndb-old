@@ -4,7 +4,9 @@ import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.entity.yarn.HopRMContainer;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
@@ -22,7 +24,6 @@ public class RMContainerClusterJ implements RMContainerTableDef, RMContainerData
     public interface RMContainerDTO {
 
         @PrimaryKey
-
         @Column(name = CONTAINERID_ID)
         String getcontaineridid();
 
@@ -42,20 +43,22 @@ public class RMContainerClusterJ implements RMContainerTableDef, RMContainerData
         int getcontainerid();
 
         void setcontainerid(int containerid);
-        
+
         @Column(name = RMCONTEXT_ID)
         int getrmcontextid();
+
         void setrmcontextid(int rmcontextid);
-        
+
         @Column(name = USER)
         String getuser();
+
         void setuser(String user);
 
         @Column(name = RESERVED_RESOURCE_ID)
         int getreservedresourceid();
 
         void setreservedresourceid(int reservedresourceid);
-        
+
         @Column(name = RESERVED_NODEID_ID)
         int getreservednodeid();
 
@@ -68,28 +71,31 @@ public class RMContainerClusterJ implements RMContainerTableDef, RMContainerData
 
         @Column(name = STARTTIME)
         long getstarttime();
+
         void setstarttime(long starttime);
-        
+
         @Column(name = FINISHTIME)
         long getfinishtime();
+
         void setfinishtime(long finishtime);
-        
+
         @Column(name = CONTAINERSTATUS_ID)
         int getcontainerstatusid();
+
         void setcontainerstatusid(int containerstatusid);
     }
     private ClusterjConnector connector = ClusterjConnector.getInstance();
 
     @Override
-    public HopRMContainer findById(int id) throws StorageException {
+    public HopRMContainer findById(String id) throws StorageException {
         Session session = connector.obtainSession();
-        
-        RMContainerClusterJ.RMContainerDTO rMContainerDTO = null;
+
+        RMContainerDTO rMContainerDTO = null;
         if (session != null) {
-            rMContainerDTO = session.find(RMContainerClusterJ.RMContainerDTO.class, id);
+            rMContainerDTO = session.find(RMContainerDTO.class, id);
         }
         if (rMContainerDTO == null) {
-                throw new StorageException("HOP :: Error while retrieving row");
+            throw new StorageException("HOP :: Error while retrieving row");
         }
 
         return createHopRMContainer(rMContainerDTO);
@@ -100,16 +106,18 @@ public class RMContainerClusterJ implements RMContainerTableDef, RMContainerData
         Session session = connector.obtainSession();
         try {
             if (removed != null) {
+                List<RMContainerDTO> toRemove = new ArrayList<RMContainerDTO>(removed.size());
                 for (HopRMContainer hop : removed) {
-                    RMContainerClusterJ.RMContainerDTO persistable = session.newInstance(RMContainerClusterJ.RMContainerDTO.class, hop.getContainerIdID());
-                    session.deletePersistent(persistable);
+                    toRemove.add(session.newInstance(RMContainerClusterJ.RMContainerDTO.class, hop.getContainerIdID()));
                 }
+                session.deletePersistentAll(toRemove);
             }
             if (modified != null) {
+                List<RMContainerDTO> toModify = new ArrayList<RMContainerDTO>(modified.size());
                 for (HopRMContainer hop : modified) {
-                    RMContainerClusterJ.RMContainerDTO persistable = createPersistable(hop, session);
-                    session.savePersistent(persistable);
+                    toModify.add(createPersistable(hop, session));
                 }
+                session.savePersistentAll(toModify);
             }
         } catch (Exception e) {
             throw new StorageException(e);
@@ -121,26 +129,26 @@ public class RMContainerClusterJ implements RMContainerTableDef, RMContainerData
         Session session = connector.obtainSession();
         session.savePersistent(createPersistable(rmcontainer, session));
     }
-    
+
     private HopRMContainer createHopRMContainer(RMContainerDTO rMContainerDTO) {
         return new HopRMContainer(
-                                rMContainerDTO.getcontaineridid(),
-                                rMContainerDTO.getappattemptidid(),
-                                rMContainerDTO.getnodeidid(),
-                                rMContainerDTO.getcontainerid(),
-                                rMContainerDTO.getrmcontextid(),
-                                rMContainerDTO.getuser(),
-                                rMContainerDTO.getreservedresourceid(),
-                                rMContainerDTO.getreservednodeid(),
-                                rMContainerDTO.getreservedpriorityid(),
-                                rMContainerDTO.getstarttime(),
-                                rMContainerDTO.getfinishtime(),
-                                rMContainerDTO.getcontainerstatusid());
+                rMContainerDTO.getcontaineridid(),
+                rMContainerDTO.getappattemptidid(),
+                rMContainerDTO.getnodeidid(),
+                rMContainerDTO.getcontainerid(),
+                rMContainerDTO.getrmcontextid(),
+                rMContainerDTO.getuser(),
+                rMContainerDTO.getreservedresourceid(),
+                rMContainerDTO.getreservednodeid(),
+                rMContainerDTO.getreservedpriorityid(),
+                rMContainerDTO.getstarttime(),
+                rMContainerDTO.getfinishtime(),
+                rMContainerDTO.getcontainerstatusid());
     }
 
     private RMContainerDTO createPersistable(HopRMContainer hop, Session session) {
         RMContainerClusterJ.RMContainerDTO rMContainerDTO = session.newInstance(RMContainerClusterJ.RMContainerDTO.class);
-        
+
         rMContainerDTO.setcontaineridid(hop.getContainerIdID());
         rMContainerDTO.setappattemptidid(hop.getApplicationAttemptIdID());
         rMContainerDTO.setnodeidid(hop.getNodeIdID());
@@ -153,7 +161,7 @@ public class RMContainerClusterJ implements RMContainerTableDef, RMContainerData
         rMContainerDTO.setstarttime(hop.getStarttime());
         rMContainerDTO.setfinishtime(hop.getFinishtime());
         rMContainerDTO.setcontainerstatusid(hop.getContainerstatus_id());
-        
+
         return rMContainerDTO;
     }
 }
