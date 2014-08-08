@@ -37,6 +37,11 @@ public class ResourceClusterJ implements ResourceTableDef, ResourceDataAccess<Ho
 
         void setType(int type);
 
+        @Column(name = PARENT)
+        int getParent();
+
+        void setParent(int parent);
+
         @Column(name = MEMORY)
         int getMemory();
 
@@ -50,13 +55,14 @@ public class ResourceClusterJ implements ResourceTableDef, ResourceDataAccess<Ho
     private ClusterjConnector connector = ClusterjConnector.getInstance();
 
     @Override
-    public HopResource findEntry(String id, int type) throws StorageException {
+    public HopResource findEntry(String id, int type, int parent) throws StorageException {
         Session session = connector.obtainSession();
         ResourceDTO resourceDTO = null;
         if (session != null) {
-            Object[] pk = new Object[2];
+            Object[] pk = new Object[3];
             pk[0] = id;
             pk[1] = type;
+            pk[2] = parent;
             resourceDTO = session.find(ResourceDTO.class, pk);
         }
         if (resourceDTO == null) {
@@ -90,9 +96,10 @@ public class ResourceClusterJ implements ResourceTableDef, ResourceDataAccess<Ho
             if (removed != null) {
                 List<ResourceDTO> toRemove = new ArrayList<ResourceDTO>();
                 for (HopResource req : removed) {
-                    Object[] pk = new Object[2];
+                    Object[] pk = new Object[3];
                     pk[0] = req.getId();
                     pk[1] = req.getType();
+                    pk[2] = req.getParent();
                     toRemove.add(session.newInstance(ResourceDTO.class, pk));
                 }
                 session.deletePersistentAll(toRemove);
@@ -116,13 +123,14 @@ public class ResourceClusterJ implements ResourceTableDef, ResourceDataAccess<Ho
     }
 
     private HopResource createHopResource(ResourceDTO resourceDTO) {
-        return new HopResource(resourceDTO.getId(), resourceDTO.getType(), resourceDTO.getMemory(), resourceDTO.getVirtualcores());
+        return new HopResource(resourceDTO.getId(), resourceDTO.getType(), resourceDTO.getParent(), resourceDTO.getMemory(), resourceDTO.getVirtualcores());
     }
 
     private ResourceDTO createPersistable(HopResource resource, Session session) {
         ResourceDTO resourceDTO = session.newInstance(ResourceDTO.class);
         resourceDTO.setId(resource.getId());
         resourceDTO.setType(resource.getType());
+        resourceDTO.setParent(resource.getParent());
         resourceDTO.setMemory(resource.getMemory());
         resourceDTO.setVirtualcores(resource.getVirtualcores());
         return resourceDTO;
