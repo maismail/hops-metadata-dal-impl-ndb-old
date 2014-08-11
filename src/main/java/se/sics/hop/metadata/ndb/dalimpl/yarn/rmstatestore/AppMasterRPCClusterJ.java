@@ -19,7 +19,7 @@ import java.util.List;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.entity.yarn.appmasterrpc.HopAppMasterRPC;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
-import se.sics.hop.metadata.yarn.dal.AppMasterRPCDataAccess;
+import se.sics.hop.metadata.yarn.dal.rmstatestore.AppMasterRPCDataAccess;
 import se.sics.hop.metadata.yarn.tabledef.appmasterrpc.AppMasterRPCTableDef;
 
 /**

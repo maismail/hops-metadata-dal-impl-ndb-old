@@ -28,9 +28,9 @@ public class NodeClusterJ implements NodeTableDef, NodeDataAccess<HopNode> {
 
         @PrimaryKey
         @Column(name = ID)
-        int getId();
+        String getId();
 
-        void setId(int id);
+        void setId(String id);
 
         @Column(name = NAME)
         String getName();
@@ -48,14 +48,14 @@ public class NodeClusterJ implements NodeTableDef, NodeDataAccess<HopNode> {
         void setLevel(int level);
 
         @Column(name = PARENT)
-        int getParent();
+        String getParent();
 
-        void setParent(int parent);
+        void setParent(String parent);
     }
     private ClusterjConnector connector = ClusterjConnector.getInstance();
 
     @Override
-    public HopNode findById(int id) throws StorageException {
+    public HopNode findById(String id) throws StorageException {
         Session session = connector.obtainSession();
 
         NodeDTO nodeDTO = null;
@@ -117,21 +117,11 @@ public class NodeClusterJ implements NodeTableDef, NodeDataAccess<HopNode> {
     }
 
     @Override
-    public void deleteAll(int startId, int endId) throws StorageException {
-        Session session = connector.obtainSession();
-        for (int i = startId; i < endId; i++) {
-            NodeDTO rmnodeDTO = session.find(NodeDTO.class, i);
-            session.deletePersistent(rmnodeDTO);
-        }
-        //session.deletePersistentAll(NodeDTO.class);
-    }
-
-    @Override
     public void createNode(HopNode node) throws StorageException {
         Session session = connector.obtainSession();
-        
-            session.savePersistent(createPersistable(node, session));
-        
+
+        session.savePersistent(createPersistable(node, session));
+
     }
 
     private NodeDTO createPersistable(HopNode hopNode, Session session) {
@@ -142,7 +132,6 @@ public class NodeClusterJ implements NodeTableDef, NodeDataAccess<HopNode> {
         nodeDTO.setLocation(hopNode.getLocation());
         nodeDTO.setLevel(hopNode.getLevel());
         nodeDTO.setParent(hopNode.getParent());
-        //session.savePersistent(nodeDTO);
         return nodeDTO;
     }
 

@@ -27,26 +27,26 @@ public class LaunchedContainersClusterJ implements LaunchedContainersTableDef, L
     public interface LaunchedContainersDTO {
 
         @PrimaryKey
-        @Column(name = RMCONTAINER_ID)
-        int getrmcontainerid();
+        @Column(name = FICASCHEDULERNODE_ID)
+        String getficaschedulernodeid();
 
-        void setrmcontainerid(int rmcontainerid);
+        void setficaschedulernodeid(String ficaschedulernodeid);
 
         @PrimaryKey
         @Column(name = CONTAINERID_ID)
-        int getcontaineridid();
+        String getcontaineridid();
 
-        void setcontaineridid(int containeridid);
+        void setcontaineridid(String containeridid);
 
-        @Column(name = FICASCHEDULERNODE_ID)
-        int getficaschedulernodeid();
+        @Column(name = RMCONTAINER_ID)
+        String getrmcontainerid();
 
-        void setficaschedulernodeid(int ficaschedulernodeid);
+        void setrmcontainerid(String rmcontainerid);
     }
     private ClusterjConnector connector = ClusterjConnector.getInstance();
 
     @Override
-    public HopLaunchedContainers findEntry(int ficaschedulernodeId, int containeridId) throws StorageException {
+    public HopLaunchedContainers findEntry(String ficaschedulernodeId, String containeridId) throws StorageException {
         Session session = connector.obtainSession();
         Object[] objarr = new Object[2];
         objarr[0] = ficaschedulernodeId;
@@ -63,7 +63,7 @@ public class LaunchedContainersClusterJ implements LaunchedContainersTableDef, L
     }
 
     @Override
-    public List<HopLaunchedContainers> findByFiCaSchedulerNode(int ficaschedulernodeId) throws StorageException {
+    public List<HopLaunchedContainers> findByFiCaSchedulerNode(String ficaschedulernodeId) throws StorageException {
         try {
             Session session = connector.obtainSession();
             QueryBuilder qb = session.getQueryBuilder();
@@ -86,19 +86,21 @@ public class LaunchedContainersClusterJ implements LaunchedContainersTableDef, L
         Session session = connector.obtainSession();
         try {
             if (removed != null) {
+                List<LaunchedContainersDTO> toRemove = new ArrayList<LaunchedContainersDTO>(removed.size());
                 for (HopLaunchedContainers hopContainerId : removed) {
                     Object[] objarr = new Object[2];
                     objarr[0] = hopContainerId.getFicaSchedulerNodeID();
                     objarr[1] = hopContainerId.getContainerIdID();
-                    LaunchedContainersDTO persistable = session.newInstance(LaunchedContainersDTO.class, objarr);
-                    session.deletePersistent(persistable);
+                    toRemove.add(session.newInstance(LaunchedContainersDTO.class, objarr));
                 }
+                session.deletePersistentAll(toRemove);
             }
             if (modified != null) {
+                List<LaunchedContainersDTO> toModify = new ArrayList<LaunchedContainersDTO>(modified.size());
                 for (HopLaunchedContainers id : modified) {
-                    LaunchedContainersDTO persistable = createPersistable(id, session);
-                    session.savePersistent(persistable);
+                    toModify.add(createPersistable(id, session));
                 }
+                session.savePersistentAll(toModify);
             }
         } catch (Exception e) {
             throw new StorageException(e);
@@ -127,7 +129,6 @@ public class LaunchedContainersClusterJ implements LaunchedContainersTableDef, L
         persistable.setficaschedulernodeid(entry.getFicaSchedulerNodeID());
         persistable.setcontaineridid(entry.getContainerIdID());
         persistable.setrmcontainerid(entry.getRmContainerID());
-        session.savePersistent(persistable);
         return persistable;
     }
 

@@ -28,15 +28,11 @@ public class AppSchedulingInfoClusterJ implements AppSchedulingInfoTableDef, App
     public interface AppSchedulingInfoDTO {
 
         @PrimaryKey
-        @Column(name = ID)
-        int getid();
-        void setid(int id);
-
-        @Column(name = APPLICATIONATTEMPTID_ID)
-        int getapplicationattemptidid();
-        void setapplicationattemptidid(int applicationattemptidid);
+        @Column(name = APPATTEMPTID)
+        String getapplicationattemptid();
+        void setapplicationattemptid(String applicationattemptid);
         
-        @Column(name = QUEUE_NAME)
+        @Column(name = QUEUENAME)
         String getqueuename();
         void setqueuename(String queuename);
         
@@ -45,8 +41,12 @@ public class AppSchedulingInfoClusterJ implements AppSchedulingInfoTableDef, App
         void setuser(String user);
         
         @Column(name = CONTAINERIDCOUNTER)
-        String getcontaineridcounter();
-        void setcontaineridcounter(String containeridcounter);
+        int getcontaineridcounter();
+        void setcontaineridcounter(int containeridcounter);
+        
+        @Column(name = PENDING)
+        boolean getpending();
+        void setpending(boolean pending);
     }
     private final ClusterjConnector connector = ClusterjConnector.getInstance();
     
@@ -71,7 +71,7 @@ public class AppSchedulingInfoClusterJ implements AppSchedulingInfoTableDef, App
         try {
             if (removed != null) {
                 for (HopAppSchedulingInfo hop : removed) {
-                    AppSchedulingInfoClusterJ.AppSchedulingInfoDTO persistable = session.newInstance(AppSchedulingInfoClusterJ.AppSchedulingInfoDTO.class, hop.getId());
+                    AppSchedulingInfoClusterJ.AppSchedulingInfoDTO persistable = session.newInstance(AppSchedulingInfoClusterJ.AppSchedulingInfoDTO.class, hop.getAppattemptid());
                     session.deletePersistent(persistable);
                 }
             }
@@ -87,21 +87,21 @@ public class AppSchedulingInfoClusterJ implements AppSchedulingInfoTableDef, App
     }
     
     private HopAppSchedulingInfo createHopAppSchedulingInfo(AppSchedulingInfoDTO appSchedulingInfoDTO) {
-        return new HopAppSchedulingInfo(appSchedulingInfoDTO.getid(),
-                                        appSchedulingInfoDTO.getapplicationattemptidid(),
+        return new HopAppSchedulingInfo(appSchedulingInfoDTO.getapplicationattemptid(),
                                         appSchedulingInfoDTO.getqueuename(),
                                         appSchedulingInfoDTO.getuser(),
-                                        appSchedulingInfoDTO.getcontaineridcounter());
+                                        appSchedulingInfoDTO.getcontaineridcounter(),
+                                        appSchedulingInfoDTO.getpending());
     }
 
     private AppSchedulingInfoDTO createPersistable(HopAppSchedulingInfo hop, Session session) {
         AppSchedulingInfoClusterJ.AppSchedulingInfoDTO appSchedulingInfoDTO = session.newInstance(AppSchedulingInfoClusterJ.AppSchedulingInfoDTO.class);
         
-        appSchedulingInfoDTO.setapplicationattemptidid(hop.getApplicationattemptid_id());
+        appSchedulingInfoDTO.setapplicationattemptid(hop.getAppattemptid());
         appSchedulingInfoDTO.setcontaineridcounter(hop.getContaineridcounter());
-        appSchedulingInfoDTO.setid(hop.getId());
-        appSchedulingInfoDTO.setqueuename(hop.getQueue_name());
+        appSchedulingInfoDTO.setqueuename(hop.getQueuename());
         appSchedulingInfoDTO.setuser(hop.getUser());
+        appSchedulingInfoDTO.setpending(hop.isPending());
         
         return appSchedulingInfoDTO;
     }

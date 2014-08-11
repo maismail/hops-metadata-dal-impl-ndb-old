@@ -21,21 +21,19 @@ public class ContainerClusterJ implements ContainerTableDef, ContainerDataAccess
     public interface ContainerDTO {
 
         @PrimaryKey
-        @Column(name = ID)
-        int getid();
-
-        void setid(int id);
-
         @Column(name = CONTAINERID_ID)
-        int getcontaineridid();
-
-        void setcontaineridid(int containeridid);
+        String getcontaineridid();
+        void setcontaineridid(String containeridid);
 
         @Column(name = NODEID_ID)
         int getnodeidid();
 
         void setnodeidid(int nodeidid);
 
+        @Column(name = NODEHTTPADDRESS)
+        String getnodehttpaddress();
+        void setnodehttpaddress(String nodehttpaddress);
+        
         @Column(name = PRIORITY_ID)
         int getpriorityid();
 
@@ -75,7 +73,7 @@ public class ContainerClusterJ implements ContainerTableDef, ContainerDataAccess
             if (removed != null) {
                 for (HopContainer hopContainer : removed) {
 
-                    ContainerDTO persistable = session.newInstance(ContainerDTO.class, hopContainer.getId());
+                    ContainerDTO persistable = session.newInstance(ContainerDTO.class, hopContainer.getContainerIdID());
                     session.deletePersistent(persistable);
                 }
             }
@@ -97,9 +95,9 @@ public class ContainerClusterJ implements ContainerTableDef, ContainerDataAccess
     }
 
     private HopContainer createHopContainer(ContainerDTO containerDTO) {
-        HopContainer hop = new HopContainer(containerDTO.getid(),
-                containerDTO.getcontaineridid(),
+        HopContainer hop = new HopContainer(containerDTO.getcontaineridid(),
                 containerDTO.getnodeidid(),
+                containerDTO.getnodehttpaddress(),
                 containerDTO.getresourceid(),
                 containerDTO.getpriorityid(),
                 containerDTO.gettokenid());
@@ -108,9 +106,9 @@ public class ContainerClusterJ implements ContainerTableDef, ContainerDataAccess
 
     private ContainerDTO createPersistable(HopContainer hopContainer, Session session) {
         ContainerDTO containerDTO = session.newInstance(ContainerDTO.class);
-        containerDTO.setid(hopContainer.getId());
         containerDTO.setcontaineridid(hopContainer.getContainerIdID());
         containerDTO.setnodeidid(hopContainer.getNodeIdID());
+        containerDTO.setnodehttpaddress(hopContainer.getNodehttpaddress());
         containerDTO.setpriorityid(hopContainer.getPriorityID());
         containerDTO.setresourceid(hopContainer.getResourceID());
         containerDTO.settokenid(hopContainer.getTokenID());

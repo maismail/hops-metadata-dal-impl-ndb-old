@@ -31,24 +31,16 @@ public class ApplicationIdClusterJ implements ApplicationIdTableDef, Application
 
         @PrimaryKey
         @Column(name = ID)
-        int getid();
-
-        void setid(int id);
-
+        String getid();
+        void setid(String id);
+                
         @Column(name = APP_ID)
         int getappid();
-
         void setappid(int appid);
 
         @Column(name = CLUSTER_TIMESTAMP)
         long getclustertimestamp();
-
         void setclustertimestamp(long clustertimestamp);
-
-//        @Column(name = FINISHED)
-//        int getfinished();
-//
-//        void setfinished(int finished);
     }
     private ClusterjConnector connector = ClusterjConnector.getInstance();
 
@@ -137,7 +129,7 @@ public class ApplicationIdClusterJ implements ApplicationIdTableDef, Application
             if (removed != null) {
                 for (HopApplicationId hopApplicationId : removed) {
 
-                    ApplicationIdDTO persistable = session.newInstance(ApplicationIdDTO.class, hopApplicationId.getNdbId());
+                    ApplicationIdDTO persistable = session.newInstance(ApplicationIdDTO.class, hopApplicationId.getId());
                     session.deletePersistent(persistable);
                 }
             }
@@ -171,7 +163,7 @@ public class ApplicationIdClusterJ implements ApplicationIdTableDef, Application
         for (HopApplicationId hop : list) {
             ApplicationIdDTO appidDTO = session.newInstance(ApplicationIdDTO.class);
             appidDTO.setid(hop.getId());
-            appidDTO.setappid(hop.getId());
+            appidDTO.setappid(hop.getAppid());
             appidDTO.setclustertimestamp(hop.getClustertimestamp());
            // appidDTO.setfinished(hop.getFinished());
         }
@@ -203,8 +195,8 @@ public class ApplicationIdClusterJ implements ApplicationIdTableDef, Application
 
     private ApplicationIdDTO createPersistable(HopApplicationId hopApplicationId, Session session) {
         ApplicationIdDTO applicationIdDTO = session.newInstance(ApplicationIdDTO.class);
-        applicationIdDTO.setid(hopApplicationId.getNdbId());
-        applicationIdDTO.setappid(hopApplicationId.getId());
+        applicationIdDTO.setid(hopApplicationId.getId());
+        applicationIdDTO.setappid(hopApplicationId.getAppid());
         applicationIdDTO.setclustertimestamp(hopApplicationId.getClustertimestamp());
         //applicationIdDTO.setfinished(hopApplicationId.getFinished());
         session.savePersistent(applicationIdDTO);

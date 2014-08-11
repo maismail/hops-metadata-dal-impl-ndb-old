@@ -4,7 +4,9 @@ import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.entity.yarn.HopNodeHBResponse;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
@@ -21,25 +23,24 @@ public class NodeHBResponseClusterJ implements NodeHBResponseTableDef, NodeHBRes
     public interface NodeHBResponseDTO {
 
         @PrimaryKey
-        @Column(name = ID)
-        int getid();
+        @Column(name = RMNODEID)
+        String getrmnodeid();
 
-        void setid(int id);
+        void setrmnodeid(String rmnodeid);
 
-        @Column(name = RESPONSE_ID)
-        int getresponseid();
+        @Column(name = RESPONSE)
+        byte[] getresponse();
 
-        void setresponseid(int responseid);
+        void setresponse(byte[] responseid);
     }
     private ClusterjConnector connector = ClusterjConnector.getInstance();
 
     @Override
-    public HopNodeHBResponse findById(int id) throws StorageException {
+    public HopNodeHBResponse findById(String rmnodeId) throws StorageException {
         Session session = connector.obtainSession();
-
         NodeHBResponseDTO nodeHBresponseDTO = null;
         if (session != null) {
-            nodeHBresponseDTO = session.find(NodeHBResponseDTO.class, id);
+            nodeHBresponseDTO = session.find(NodeHBResponseDTO.class, rmnodeId);
         }
         if (nodeHBresponseDTO == null) {
             throw new StorageException("HOP :: Error while retrieving row");
@@ -53,17 +54,19 @@ public class NodeHBResponseClusterJ implements NodeHBResponseTableDef, NodeHBRes
         Session session = connector.obtainSession();
         try {
             if (removed != null) {
+                List<NodeHBResponseDTO> toRemove = new ArrayList<NodeHBResponseDTO>();
                 for (HopNodeHBResponse nodehbresponse : removed) {
-
-                    NodeHBResponseDTO persistable = session.newInstance(NodeHBResponseDTO.class, nodehbresponse.getId());
-                    session.deletePersistent(persistable);
+                    NodeHBResponseDTO persistable = session.newInstance(NodeHBResponseDTO.class, nodehbresponse.getRMNodeId());
+                    toRemove.add(persistable);
                 }
+                session.deletePersistentAll(toRemove);
             }
             if (modified != null) {
+                List<NodeHBResponseDTO> toModify = new ArrayList<NodeHBResponseDTO>();
                 for (HopNodeHBResponse nodehbresponse : modified) {
-                    NodeHBResponseDTO persistable = createPersistable(nodehbresponse, session);
-                    session.savePersistent(persistable);
+                    toModify.add(createPersistable(nodehbresponse, session));
                 }
+                session.savePersistentAll(toModify);
             }
         } catch (Exception e) {
             throw new StorageException(e);
@@ -77,14 +80,13 @@ public class NodeHBResponseClusterJ implements NodeHBResponseTableDef, NodeHBRes
     }
 
     private HopNodeHBResponse createHopNodeHBResponse(NodeHBResponseDTO nodeHBresponseDTO) {
-        return new HopNodeHBResponse(nodeHBresponseDTO.getid(), nodeHBresponseDTO.getresponseid());
+        return new HopNodeHBResponse(nodeHBresponseDTO.getrmnodeid(), nodeHBresponseDTO.getresponse());
     }
 
     private NodeHBResponseDTO createPersistable(HopNodeHBResponse nodehbresponse, Session session) {
         NodeHBResponseDTO nodeHBResponseDT0 = session.newInstance(NodeHBResponseDTO.class);
-        nodeHBResponseDT0.setid(nodehbresponse.getId());
-        nodeHBResponseDT0.setresponseid(nodehbresponse.getResponseid());
-        session.savePersistent(nodeHBResponseDT0);
+        nodeHBResponseDT0.setrmnodeid(nodehbresponse.getRMNodeId());
+        nodeHBResponseDT0.setresponse(nodehbresponse.getResponseid());
         return nodeHBResponseDT0;
     }
 }

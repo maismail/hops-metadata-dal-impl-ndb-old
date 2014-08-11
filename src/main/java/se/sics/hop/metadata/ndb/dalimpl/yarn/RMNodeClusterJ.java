@@ -1,9 +1,13 @@
 package se.sics.hop.metadata.ndb.dalimpl.yarn;
 
+import com.mysql.clusterj.Query;
 import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
+import com.mysql.clusterj.query.Predicate;
+import com.mysql.clusterj.query.QueryBuilder;
+import com.mysql.clusterj.query.QueryDomainType;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -25,9 +29,9 @@ public class RMNodeClusterJ implements RMNodeTableDef, RMNodeDataAccess<HopRMNod
 
         @PrimaryKey
         @Column(name = NODEID)
-        int getNodeid();
+        String getNodeid();
 
-        void setNodeid(int nodeid);
+        void setNodeid(String nodeid);
 
         @Column(name = HOST_NAME)
         String getHostname();
@@ -59,25 +63,15 @@ public class RMNodeClusterJ implements RMNodeTableDef, RMNodeDataAccess<HopRMNod
 
         void setNextheartbeat(boolean nexthearbeat);
 
-        @Column(name = RESOURCE_ID)
-        int getResourceid();
-
-        void setResourceid(int resourceid);
-
         @Column(name = NODEBASEID)
-        int getNodebaseid();
+        String getNodebaseid();
 
-        void setNodebaseid(int nodebaseid);
+        void setNodebaseid(String nodebaseid);
 
         @Column(name = HEALTH_REPORT)
         String getHealthreport();
 
         void setHealthreport(String healthreport);
-
-        @Column(name = RMCONTEXT_ID)
-        int getRMContextid();
-
-        void setRMContextid(int rmcontextid);
 
         @Column(name = LAST_HEALTH_REPORT_TIME)
         long getLasthealthreporttime();
@@ -88,11 +82,21 @@ public class RMNodeClusterJ implements RMNodeTableDef, RMNodeDataAccess<HopRMNod
         String getcurrentstate();
 
         void setcurrentstate(String currentstate);
+
+        @Column(name = OVERCOMMIT_TIMEOUT)
+        int getovercommittimeout();
+
+        void setovercommittimeout(int overcommittimeout);
+
+        @Column(name = NODEMANAGER_VERSION)
+        String getnodemanagerversion();
+
+        void setnodemanagerversion(String nodemanagerversion);
     }
     private ClusterjConnector connector = ClusterjConnector.getInstance();
 
     @Override
-    public HopRMNode findByNodeId(int nodeid) throws StorageException {
+    public HopRMNode findByNodeId(String nodeid) throws StorageException {
         Session session = connector.obtainSession();
         RMNodeDTO rmnodeDTO = session.find(RMNodeDTO.class, nodeid);
         if (rmnodeDTO == null) {
@@ -104,14 +108,21 @@ public class RMNodeClusterJ implements RMNodeTableDef, RMNodeDataAccess<HopRMNod
     @Override
     public HopRMNode findByHostNameCommandPort(String hostName, int commandPort) throws StorageException {
         Session session = connector.obtainSession();
-        Object[] objarr = new Object[2];
-        objarr[0] = hostName;
-        objarr[1] = commandPort;
-        RMNodeDTO rmnodeDTO = session.find(RMNodeDTO.class, objarr);
-        if (rmnodeDTO == null) {
-            throw new StorageException("HOP :: Error while retrieving row:" + hostName + ":" + commandPort);
+        QueryBuilder qb = session.getQueryBuilder();
+        QueryDomainType<RMNodeDTO> dobj = qb.createQueryDefinition(RMNodeDTO.class);
+        Predicate pred1 = dobj.get("hostname").equal(dobj.param("hostname"));
+        Predicate pred2 = dobj.get("commandport").equal(dobj.param("commandport"));
+        pred1 = pred1.and(pred2);
+        dobj.where(pred1);
+        Query<RMNodeDTO> query = session.createQuery(dobj);
+        query.setParameter("hostname", hostName);
+        query.setParameter("commandport", commandPort);
+        List<RMNodeDTO> results = query.getResultList();
+        if (results != null && !results.isEmpty()) {
+            return createHopRMNode(results.get(0));
+        } else {
+            throw new StorageException("HOP :: RMNode with host:" + hostName + ", cmport:" + commandPort + " was not found");
         }
-        return createHopRMNode(rmnodeDTO);
     }
 
     @Override
@@ -170,7 +181,6 @@ public class RMNodeClusterJ implements RMNodeTableDef, RMNodeDataAccess<HopRMNod
 
     private RMNodeDTO createPersistable(HopRMNode hopRMNode, Session session) {
         RMNodeDTO rmDTO = session.newInstance(RMNodeDTO.class);
-
         //Set values to persist new rmnode
         rmDTO.setNodeid(hopRMNode.getNodeId());
         rmDTO.setHostname(hopRMNode.getHostName());
@@ -179,18 +189,12 @@ public class RMNodeClusterJ implements RMNodeTableDef, RMNodeDataAccess<HopRMNod
         rmDTO.setNodeaddress(hopRMNode.getNodeAddress());
         rmDTO.setHttpaddress(hopRMNode.getHttpAddress());
         rmDTO.setNextheartbeat(hopRMNode.isNextHeartbeat());
-        if (hopRMNode.getResourceId() > 0) {
-            rmDTO.setResourceid(hopRMNode.getResourceId());
-        }
-        if (hopRMNode.getNodebaseId() > 0) {
-            rmDTO.setNodebaseid(hopRMNode.getNodebaseId());
-        }
+        rmDTO.setNodebaseid(hopRMNode.getNodebaseId());
         rmDTO.setHealthreport(hopRMNode.getHealthReport());
-        rmDTO.setRMContextid(hopRMNode.getRmcontextId());
         rmDTO.setLasthealthreporttime(hopRMNode.getLastHealthReportTime());
         rmDTO.setcurrentstate(hopRMNode.getCurrentState());
-        ////////////////////////////////////
-        //session.savePersistent(rmDTO);
+        rmDTO.setovercommittimeout(hopRMNode.getOvercommittimeout());
+        rmDTO.setnodemanagerversion(hopRMNode.getNodemanagerVersion());
         return rmDTO;
     }
 
@@ -201,6 +205,6 @@ public class RMNodeClusterJ implements RMNodeTableDef, RMNodeDataAccess<HopRMNod
      * @return HopRMNode
      */
     private HopRMNode createHopRMNode(RMNodeDTO rmDTO) {
-        return new HopRMNode(rmDTO.getNodeid(), rmDTO.getHostname(), rmDTO.getCommandport(), rmDTO.getHttpport(), rmDTO.getNodeaddress(), rmDTO.getHttpaddress(), rmDTO.getNextheartbeat(), rmDTO.getResourceid(), rmDTO.getNodebaseid(), rmDTO.getHealthreport(), rmDTO.getRMContextid(), rmDTO.getLasthealthreporttime(), rmDTO.getcurrentstate());
+        return new HopRMNode(rmDTO.getNodeid(), rmDTO.getHostname(), rmDTO.getCommandport(), rmDTO.getHttpport(), rmDTO.getNodeaddress(), rmDTO.getHttpaddress(), rmDTO.getNextheartbeat(), rmDTO.getNodebaseid(), rmDTO.getHealthreport(), /*rmDTO.getRMContextid(),*/ rmDTO.getLasthealthreporttime(), rmDTO.getcurrentstate(), rmDTO.getnodemanagerversion(), rmDTO.getovercommittimeout());
     }
 }
