@@ -3,12 +3,13 @@ package se.sics.hop.metadata.ndb.mysqlserver;
 import com.mysql.clusterj.Constants;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Properties;
 import org.apache.log4j.Logger;
 import se.sics.hop.StorageConnector;
-import se.sics.hop.metadata.hdfs.dal.EntityDataAccess;
 import se.sics.hop.exception.StorageException;
+import se.sics.hop.metadata.hdfs.dal.EntityDataAccess;
 
 /**
  * This class presents a singleton connector to Mysql Server.
@@ -87,6 +88,18 @@ public class MysqlServerConnector implements StorageConnector<Connection> {
       }
     }
   }
+
+public static void truncateTable(String tableName) throws StorageException, SQLException{
+  MysqlServerConnector connector = MysqlServerConnector.getInstance();
+  try {
+    Connection conn = connector.obtainSession();
+    PreparedStatement s = conn.prepareStatement("delete from "+tableName);
+    s.executeUpdate();
+  } finally {
+  connector.closeSession();
+  }
+}
+
 
   @Override
   public void beginTransaction() throws StorageException {
