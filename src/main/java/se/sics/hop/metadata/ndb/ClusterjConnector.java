@@ -265,7 +265,7 @@ public class ClusterjConnector implements StorageConnector<Session> {
             MysqlServerConnector.truncateTable(VersionTableDef.TABLE_NAME);
           }else if(e==YarnVariablesDataAccess.class){
             session.deletePersistentAll(YarnVariablesClusterJ.YarnVariablesDTO.class);
-            for(int j=1;j<=13; j++){
+            for(int j=0;j<=18; j++){
               YarnVariablesClusterJ.YarnVariablesDTO vd = session.newInstance(YarnVariablesClusterJ.YarnVariablesDTO.class);
               vd.setid(j);
               vd.setvalue(0);
