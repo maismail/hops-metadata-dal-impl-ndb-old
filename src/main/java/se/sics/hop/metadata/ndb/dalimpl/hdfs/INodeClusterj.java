@@ -326,6 +326,8 @@ public class INodeClusterj implements INodeTableDef, INodeDataAccess<HopINode> {
     persistable.setGenerationStamp(inode.getGenerationStamp());
     persistable.setHeader(inode.getHeader());
     persistable.setSymlink(inode.getSymlink());
+    persistable.setSubtreeLocked(inode.isSubtreeLocked());
+    persistable.setSubtreeLockOwner(inode.getSubtreeLockOwner());
   }
 
   private void explain(Query<InodeDTO> query){
