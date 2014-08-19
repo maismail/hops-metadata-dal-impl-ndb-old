@@ -85,6 +85,11 @@ public class BlockInfoClusterj implements BlockInfoTableDef, BlockInfoDataAccess
   }
 
   @Override
+  public int countAllCompleteBlocks() throws StorageException {
+    return CountHelper.countWithCriterion(TABLE_NAME, String.format("%s=%d", BLOCK_UNDER_CONSTRUCTION_STATE, 0));
+  }
+  
+  @Override
   public void prepare(Collection<HopBlockInfo> removed, Collection<HopBlockInfo> news, Collection<HopBlockInfo> modified) throws StorageException {
     try {
       List<BlockInfoDTO> blkChanges = new ArrayList<BlockInfoDTO>();
