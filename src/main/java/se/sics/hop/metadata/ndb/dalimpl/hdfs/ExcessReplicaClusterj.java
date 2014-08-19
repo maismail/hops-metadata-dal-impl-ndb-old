@@ -1,5 +1,6 @@
 package se.sics.hop.metadata.ndb.dalimpl.hdfs;
 
+import com.google.common.primitives.Ints;
 import com.mysql.clusterj.Query;
 import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
@@ -126,6 +127,22 @@ public class ExcessReplicaClusterj implements ExcessReplicaTableDef, ExcessRepli
     }
   }
 
+  @Override
+  public List<HopExcessReplica> findExcessReplicaByINodeIds(int[] inodeIds) throws StorageException {
+    try {
+      Session session = connector.obtainSession();
+      QueryBuilder qb = session.getQueryBuilder();
+      QueryDomainType<ExcessReplicaDTO> qdt = qb.createQueryDefinition(ExcessReplicaDTO.class);
+      Predicate pred1 = qdt.get("iNodeId").in(qdt.param("iNodeIdParam"));
+      qdt.where(pred1);
+      Query<ExcessReplicaDTO> query = session.createQuery(qdt);
+      query.setParameter("iNodeIdParam", Ints.asList(inodeIds));
+      return createList(query.getResultList());
+    } catch (Exception e) {
+      throw new StorageException(e);
+    }
+  }
+      
   @Override
   public HopExcessReplica findByPK(long bId, int sId, int inodeId) throws StorageException {
     try {

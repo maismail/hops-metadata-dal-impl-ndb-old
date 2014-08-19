@@ -1,5 +1,6 @@
 package se.sics.hop.metadata.ndb.dalimpl.hdfs;
 
+import com.google.common.primitives.Ints;
 import com.mysql.clusterj.Query;
 import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
@@ -121,6 +122,22 @@ public class InvalidatedBlockClusterj implements InvalidatedBlockTableDef, Inval
     }
   }
 
+  @Override
+  public List<HopInvalidatedBlock> findInvalidatedBlocksByINodeIds(int[] inodeIds) throws StorageException {
+       try {
+      Session session = connector.obtainSession();
+      QueryBuilder qb = session.getQueryBuilder();
+      QueryDomainType<InvalidateBlocksDTO> qdt = qb.createQueryDefinition(InvalidateBlocksDTO.class);
+      Predicate pred1 = qdt.get("iNodeId").in(qdt.param("iNodeIdParam"));
+      qdt.where(pred1);
+      Query<InvalidateBlocksDTO> query = session.createQuery(qdt);
+      query.setParameter("iNodeIdParam", Ints.asList(inodeIds));
+      return createList(query.getResultList());
+    } catch (Exception e) {
+      throw new StorageException(e);
+    }
+  }
+  
   @Override
   public HopInvalidatedBlock findInvBlockByPkey(long blockId, int storageId, int inodeId) throws StorageException {
     try {

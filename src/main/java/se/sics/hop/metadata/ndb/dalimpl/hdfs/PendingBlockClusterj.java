@@ -1,5 +1,6 @@
 package se.sics.hop.metadata.ndb.dalimpl.hdfs;
 
+import com.google.common.primitives.Ints;
 import com.mysql.clusterj.Query;
 import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
@@ -48,6 +49,26 @@ public class PendingBlockClusterj implements PendingBlockTableDef, PendingBlockD
      
       List<PendingBlockDTO> results = query.getResultList();
  
+      return createList(query.getResultList());
+    } catch (Exception e) {
+      throw new StorageException(e);
+    }
+  }
+
+  @Override
+  public List<HopPendingBlockInfo> findByINodeIds(int[] inodeIds) throws StorageException {
+    try {
+      Session session = connector.obtainSession();
+
+      QueryBuilder qb = session.getQueryBuilder();
+      QueryDomainType<PendingBlockDTO> qdt = qb.createQueryDefinition(PendingBlockDTO.class);
+
+      Predicate pred1 = qdt.get("iNodeId").in(qdt.param("idParam"));
+      qdt.where(pred1);
+
+      Query<PendingBlockDTO> query = session.createQuery(qdt);
+      query.setParameter("idParam", Ints.asList(inodeIds));
+
       return createList(query.getResultList());
     } catch (Exception e) {
       throw new StorageException(e);

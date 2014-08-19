@@ -1,5 +1,6 @@
 package se.sics.hop.metadata.ndb.dalimpl.hdfs;
 
+import com.google.common.primitives.Ints;
 import com.mysql.clusterj.Query;
 import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
@@ -148,6 +149,21 @@ public class CorruptReplicaClusterj implements CorruptReplicaTableDef, CorruptRe
     }
   }
 
+  @Override
+  public List<HopCorruptReplica> findByINodeIds(int[] inodeIds) throws StorageException {
+    try {
+      Session session = connector.obtainSession();
+      QueryBuilder qb = session.getQueryBuilder();
+      QueryDomainType<CorruptReplicaDTO> dobj = qb.createQueryDefinition(CorruptReplicaDTO.class);
+      Predicate pred1 = dobj.get("iNodeId").in(dobj.param("iNodeIdParam"));
+      dobj.where(pred1);
+      Query<CorruptReplicaDTO> query = session.createQuery(dobj);
+      query.setParameter("iNodeIdParam", Ints.asList(inodeIds));
+      return createCorruptReplicaList(query.getResultList());
+    } catch (Exception e) {
+      throw new StorageException(e);
+    }
+  }
 
   private HopCorruptReplica createReplica(CorruptReplicaDTO corruptReplicaTable) {
     return new HopCorruptReplica(corruptReplicaTable.getBlockId(), corruptReplicaTable.getStorageId(), corruptReplicaTable.getINodeId());

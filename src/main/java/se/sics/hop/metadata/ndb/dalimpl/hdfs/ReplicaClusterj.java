@@ -1,5 +1,6 @@
 package se.sics.hop.metadata.ndb.dalimpl.hdfs;
 
+import com.google.common.primitives.Ints;
 import com.mysql.clusterj.Query;
 import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
@@ -90,6 +91,22 @@ public class ReplicaClusterj implements ReplicaTableDef, ReplicaDataAccess<HopIn
   }
   
 
+  @Override
+  public List<HopIndexedReplica> findReplicasByINodeIds(int[] inodeIds) throws StorageException {
+     try {
+      Session session = connector.obtainSession();
+      QueryBuilder qb = session.getQueryBuilder();
+      QueryDomainType<ReplicaDTO> dobj = qb.createQueryDefinition(ReplicaDTO.class);
+      Predicate pred1 = dobj.get("iNodeId").in(dobj.param("iNodeIdParam"));
+      dobj.where(pred1);
+      Query<ReplicaDTO> query = session.createQuery(dobj);
+      query.setParameter("iNodeIdParam", Ints.asList(inodeIds));
+      return createReplicaList(query.getResultList());
+    } catch (Exception e) {
+      throw new StorageException(e);
+    }
+  }
+  
   @Override
   public List<HopIndexedReplica> findReplicasByPKS(long[] blockIds, int[] inodeIds, int[] sids) throws StorageException {
     try {

@@ -1,5 +1,6 @@
 package se.sics.hop.metadata.ndb.dalimpl.hdfs;
 
+import com.google.common.primitives.Ints;
 import com.mysql.clusterj.Query;
 import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
@@ -182,6 +183,22 @@ public class UnderReplicatedBlockClusterj implements UnderReplicatedBlockTableDe
     }
   }
 
+  @Override
+  public List<HopUnderReplicatedBlock> findByINodeIds(int[] inodeIds) throws StorageException {
+    try {
+      Session session = connector.obtainSession();
+      QueryBuilder qb = session.getQueryBuilder();
+      QueryDomainType<UnderReplicatedBlocksDTO> qdt = qb.createQueryDefinition(UnderReplicatedBlocksDTO.class);
+      Predicate pred1 = qdt.get("iNodeId").in(qdt.param("idParam"));
+      qdt.where(pred1);
+      Query<UnderReplicatedBlocksDTO> query = session.createQuery(qdt);
+      query.setParameter("idParam", Ints.asList(inodeIds));
+      return createUrBlockList(query.getResultList());
+    } catch (Exception e) {
+      throw new StorageException(e);
+    }
+  }
+  
   @Override
   public void removeAll() throws StorageException {
     Session session = connector.obtainSession();

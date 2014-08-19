@@ -1,9 +1,9 @@
 package se.sics.hop.metadata.ndb.dalimpl.hdfs;
 
+import com.google.common.primitives.Ints;
 import com.mysql.clusterj.Query;
 import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
-import com.mysql.clusterj.annotation.Index;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
 import com.mysql.clusterj.query.Predicate;
@@ -174,6 +174,22 @@ public class BlockInfoClusterj implements BlockInfoTableDef, BlockInfoDataAccess
     }
   }
 
+  @Override
+  public List<HopBlockInfo> findByInodeIds(int[] inodeIds) throws StorageException {
+     try {
+      Session session = connector.obtainSession();
+      QueryBuilder qb = session.getQueryBuilder();
+      QueryDomainType<BlockInfoClusterj.BlockInfoDTO> dobj = qb.createQueryDefinition(BlockInfoClusterj.BlockInfoDTO.class);
+      Predicate pred1 = dobj.get("iNodeId").in(dobj.param("iNodeParam"));
+      dobj.where(pred1);
+      Query<BlockInfoClusterj.BlockInfoDTO> query = session.createQuery(dobj);
+      query.setParameter("iNodeParam", Ints.asList(inodeIds));
+      return createBlockInfoList(query.getResultList());
+    } catch (Exception e) {
+      throw new StorageException(e);
+    }
+  }
+    
   public HopBlockInfo scanByBlockId(long blockId) throws StorageException {
     try {
       Session session = connector.obtainSession();
