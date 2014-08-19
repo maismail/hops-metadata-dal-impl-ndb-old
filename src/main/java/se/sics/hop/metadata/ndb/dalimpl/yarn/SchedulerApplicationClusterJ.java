@@ -40,7 +40,7 @@ public class SchedulerApplicationClusterJ implements SchedulerApplicationTableDe
     private final ClusterjConnector connector = ClusterjConnector.getInstance();
     
     @Override
-    public HopSchedulerApplication findById(int id) throws StorageException {
+    public HopSchedulerApplication findById(String id) throws StorageException {
         Session session = connector.obtainSession();
 
         SchedulerApplicationClusterJ.SchedulerApplicationDTO schedulerApplicationDTO = null;
