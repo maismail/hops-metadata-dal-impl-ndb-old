@@ -6,11 +6,19 @@
 
 package se.sics.hop.metadata.ndb.dalimpl.yarn;
 
+import com.mysql.clusterj.Query;
 import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
+import com.mysql.clusterj.query.QueryBuilder;
+import com.mysql.clusterj.query.QueryDomainType;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.entity.yarn.HopSchedulerApplication;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
@@ -52,6 +60,29 @@ public class SchedulerApplicationClusterJ implements SchedulerApplicationTableDe
         }
 
         return createHopSchedulerApplication(schedulerApplicationDTO);
+    }
+    
+    @Override
+    public List<HopSchedulerApplication> findAll() throws StorageException {
+      Session session = connector.obtainSession();
+        QueryBuilder qb = session.getQueryBuilder();
+        QueryDomainType<SchedulerApplicationClusterJ.SchedulerApplicationDTO> dobj = qb.createQueryDefinition(SchedulerApplicationClusterJ.SchedulerApplicationDTO.class);
+        Query<SchedulerApplicationClusterJ.SchedulerApplicationDTO> query = session.createQuery(dobj);
+        List<SchedulerApplicationClusterJ.SchedulerApplicationDTO> results = query.getResultList();
+        try {
+            return createApplicationIdList(results);
+        } catch (IOException ex) {
+            Logger.getLogger(SchedulerApplicationClusterJ.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return null;
+    }
+
+    private List<HopSchedulerApplication> createApplicationIdList(List<SchedulerApplicationClusterJ.SchedulerApplicationDTO> list) throws IOException {
+        List<HopSchedulerApplication> schedulerApplications = new ArrayList<HopSchedulerApplication>();
+        for (SchedulerApplicationClusterJ.SchedulerApplicationDTO persistable : list) {
+            schedulerApplications.add(createHopSchedulerApplication(persistable));
+        }
+        return schedulerApplications;
     }
 
     @Override

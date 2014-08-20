@@ -13,9 +13,12 @@ import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
 import com.mysql.clusterj.query.QueryBuilder;
 import com.mysql.clusterj.query.QueryDomainType;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.entity.yarn.HopFifoSchedulerApps;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
@@ -63,6 +66,29 @@ public class FifoSchedulerAppsClusterJ implements FifoSchedulerAppsTableDef, Fif
         } catch (Exception e) {
             throw new StorageException(e);
         }
+    }
+    
+    @Override
+    public List<HopFifoSchedulerApps> findAll() throws StorageException {
+        Session session = connector.obtainSession();
+        QueryBuilder qb = session.getQueryBuilder();
+        QueryDomainType<FifoSchedulerAppsClusterJ.FifoSchedulerAppsDTO> dobj = qb.createQueryDefinition(FifoSchedulerAppsClusterJ.FifoSchedulerAppsDTO.class);
+        Query<FifoSchedulerAppsClusterJ.FifoSchedulerAppsDTO> query = session.createQuery(dobj);
+        List<FifoSchedulerAppsClusterJ.FifoSchedulerAppsDTO> results = query.getResultList();
+        try {
+            return createFifoSchedulerAppsList(results);
+        } catch (IOException ex) {
+            Logger.getLogger(FifoSchedulerAppsClusterJ.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return null;
+    }
+
+    private List<HopFifoSchedulerApps> createFifoSchedulerAppsList(List<FifoSchedulerAppsClusterJ.FifoSchedulerAppsDTO> list) throws IOException {
+        List<HopFifoSchedulerApps> fifoSchedulerApps = new ArrayList<HopFifoSchedulerApps>();
+        for (FifoSchedulerAppsClusterJ.FifoSchedulerAppsDTO persistable : list) {
+            fifoSchedulerApps.add(createHopFifoSchedulerApps(persistable));
+        }
+        return fifoSchedulerApps;
     }
     
     @Override
@@ -116,13 +142,5 @@ public class FifoSchedulerAppsClusterJ implements FifoSchedulerAppsTableDef, Fif
         fifoSchedulerAppsDTO.setapplicationid(hop.getApplicationid());
         fifoSchedulerAppsDTO.setschedulerapplicationid(hop.getSchedulerapplication_id());
         return fifoSchedulerAppsDTO;
-    }
-    
-    private List<HopFifoSchedulerApps> createFifoSchedulerAppsList(List<FifoSchedulerAppsClusterJ.FifoSchedulerAppsDTO> results) {
-        List<HopFifoSchedulerApps> fifoSchedulerApps = new ArrayList<HopFifoSchedulerApps>();
-        for (FifoSchedulerAppsClusterJ.FifoSchedulerAppsDTO persistable : results) {
-            fifoSchedulerApps.add(createFifoSchedulerApps(persistable));
-        }
-        return fifoSchedulerApps;
-    }   
+    }  
 }

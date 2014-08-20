@@ -448,7 +448,7 @@ public class ClusterjConnector implements StorageConnector<Session> {
   }
 
   private void truncate(String tableName) throws StorageException, SQLException{
-    MysqlServerConnector.truncateTable(tableName)
+    MysqlServerConnector.truncateTable(tableName);
   }
 
   @Override

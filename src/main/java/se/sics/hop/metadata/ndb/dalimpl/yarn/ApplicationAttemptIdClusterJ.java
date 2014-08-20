@@ -1,10 +1,18 @@
 package se.sics.hop.metadata.ndb.dalimpl.yarn;
 
+import com.mysql.clusterj.Query;
 import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
+import com.mysql.clusterj.query.QueryBuilder;
+import com.mysql.clusterj.query.QueryDomainType;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.entity.yarn.HopApplicationAttemptId;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
@@ -46,6 +54,29 @@ public class ApplicationAttemptIdClusterJ implements ApplicationAttemptIdTableDe
         }
 
         return createHopApplicationAttemptId(appAttemptIdDTO);
+    }
+    
+    @Override
+    public List<HopApplicationAttemptId> findAll() throws StorageException {
+        Session session = connector.obtainSession();
+        QueryBuilder qb = session.getQueryBuilder();
+        QueryDomainType<ApplicationAttemptIdClusterJ.ApplicationAttemptIdDTO> dobj = qb.createQueryDefinition(ApplicationAttemptIdClusterJ.ApplicationAttemptIdDTO.class);
+        Query<ApplicationAttemptIdClusterJ.ApplicationAttemptIdDTO> query = session.createQuery(dobj);
+        List<ApplicationAttemptIdClusterJ.ApplicationAttemptIdDTO> results = query.getResultList();
+        try {
+            return createApplicationAttemptIdList(results);
+        } catch (IOException ex) {
+            Logger.getLogger(ApplicationAttemptIdClusterJ.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return null;
+    }
+
+    private List<HopApplicationAttemptId> createApplicationAttemptIdList(List<ApplicationAttemptIdClusterJ.ApplicationAttemptIdDTO> list) throws IOException {
+        List<HopApplicationAttemptId> applicationAttemptIds = new ArrayList<HopApplicationAttemptId>();
+        for (ApplicationAttemptIdClusterJ.ApplicationAttemptIdDTO persistable : list) {
+            applicationAttemptIds.add(createHopApplicationAttemptId(persistable));
+        }
+        return applicationAttemptIds;
     }
     
     @Override

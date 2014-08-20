@@ -25,29 +25,9 @@ public class ContainerClusterJ implements ContainerTableDef, ContainerDataAccess
         String getcontaineridid();
         void setcontaineridid(String containeridid);
 
-        @Column(name = NODEID_ID)
-        int getnodeidid();
-
-        void setnodeidid(int nodeidid);
-
-        @Column(name = NODEHTTPADDRESS)
-        String getnodehttpaddress();
-        void setnodehttpaddress(String nodehttpaddress);
-        
-        @Column(name = PRIORITY_ID)
-        int getpriorityid();
-
-        void setpriorityid(int priorityid);
-
-        @Column(name = RESOURCE_ID)
-        int getresourceid();
-
-        void setresourceid(int resourceid);
-
-        @Column(name = TOKEN_ID)
-        int gettokenid();
-
-        void settokenid(int tokenid);
+        @Column(name = CONTAINERSTATE)
+        byte[] getcontainerstate();
+        void setcontainerstate(byte[] containerstate);      
     }
     private ClusterjConnector connector = ClusterjConnector.getInstance();
 
@@ -91,28 +71,20 @@ public class ContainerClusterJ implements ContainerTableDef, ContainerDataAccess
     @Override
     public void createContainer(HopContainer container) throws StorageException {
         Session session = connector.obtainSession();
-        createPersistable(container, session);
+        session.savePersistent(createPersistable(container, session));
     }
 
     private HopContainer createHopContainer(ContainerDTO containerDTO) {
         HopContainer hop = new HopContainer(containerDTO.getcontaineridid(),
-                containerDTO.getnodeidid(),
-                containerDTO.getnodehttpaddress(),
-                containerDTO.getresourceid(),
-                containerDTO.getpriorityid(),
-                containerDTO.gettokenid());
+                containerDTO.getcontainerstate());
         return hop;
     }
 
     private ContainerDTO createPersistable(HopContainer hopContainer, Session session) {
         ContainerDTO containerDTO = session.newInstance(ContainerDTO.class);
         containerDTO.setcontaineridid(hopContainer.getContainerIdID());
-        containerDTO.setnodeidid(hopContainer.getNodeIdID());
-        containerDTO.setnodehttpaddress(hopContainer.getNodehttpaddress());
-        containerDTO.setpriorityid(hopContainer.getPriorityID());
-        containerDTO.setresourceid(hopContainer.getResourceID());
-        containerDTO.settokenid(hopContainer.getTokenID());
-        session.savePersistent(containerDTO);
+        containerDTO.setcontainerstate(hopContainer.getContainerstate());
+        
         return containerDTO;
     }
 }
