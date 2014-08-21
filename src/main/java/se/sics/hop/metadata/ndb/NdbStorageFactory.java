@@ -10,6 +10,7 @@ import se.sics.hop.StorageConnector;
 import se.sics.hop.exception.StorageInitializtionException;
 
 import se.sics.hop.metadata.hdfs.dal.EntityDataAccess;
+import se.sics.hop.metadata.ndb.dalimpl.yarn.AppSchedulingInfoBlacklistClusterJ;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.AppSchedulingInfoClusterJ;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.AppSchedulingInfoPrioritiesClusterJ;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.AppSchedulingInfoRequestsClusterJ;
@@ -58,6 +59,7 @@ import se.sics.hop.metadata.ndb.dalimpl.yarn.rmstatestore.RMStateVersionClusterJ
 import se.sics.hop.metadata.ndb.dalimpl.yarn.rmstatestore.SequenceNumberClusterJ;
 import se.sics.hop.metadata.yarn.dal.rmstatestore.RMStateVersionDataAccess;
 import se.sics.hop.metadata.ndb.mysqlserver.MysqlServerConnector;
+import se.sics.hop.metadata.yarn.dal.AppSchedulingInfoBlacklistDataAccess;
 
 import se.sics.hop.metadata.yarn.dal.AppSchedulingInfoDataAccess;
 import se.sics.hop.metadata.yarn.dal.AppSchedulingInfoPrioritiesDataAccess;
@@ -171,6 +173,7 @@ public class NdbStorageFactory implements DALStorageFactory {
         dataAccessMap.put(AppSchedulingInfoDataAccess.class, new AppSchedulingInfoClusterJ());
         dataAccessMap.put(AppSchedulingInfoPrioritiesDataAccess.class, new AppSchedulingInfoPrioritiesClusterJ());
         dataAccessMap.put(AppSchedulingInfoRequestsDataAccess.class, new AppSchedulingInfoRequestsClusterJ());
+        dataAccessMap.put(AppSchedulingInfoBlacklistDataAccess.class, new AppSchedulingInfoBlacklistClusterJ());
         dataAccessMap.put(ResourceRequestDataAccess.class, new ResourceRequestClusterJ());
     }
 
