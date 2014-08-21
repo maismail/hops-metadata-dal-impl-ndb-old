@@ -15,6 +15,7 @@ import se.sics.hop.metadata.ndb.dalimpl.yarn.AppSchedulingInfoPrioritiesClusterJ
 import se.sics.hop.metadata.ndb.dalimpl.yarn.AppSchedulingInfoRequestsClusterJ;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.ApplicationAttemptIdClusterJ;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.ApplicationIdClusterJ;
+import se.sics.hop.metadata.ndb.dalimpl.yarn.ContainerClusterJ;
 
 import se.sics.hop.metadata.ndb.dalimpl.yarn.FiCaSchedulerNodeClusterJ;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.QueueMetricsClusterJ;
@@ -63,6 +64,7 @@ import se.sics.hop.metadata.yarn.dal.AppSchedulingInfoPrioritiesDataAccess;
 import se.sics.hop.metadata.yarn.dal.AppSchedulingInfoRequestsDataAccess;
 import se.sics.hop.metadata.yarn.dal.ApplicationAttemptIdDataAccess;
 import se.sics.hop.metadata.yarn.dal.ApplicationIdDataAccess;
+import se.sics.hop.metadata.yarn.dal.ContainerDataAccess;
 import se.sics.hop.metadata.yarn.dal.FiCaSchedulerNodeDataAccess;
 import se.sics.hop.metadata.yarn.dal.QueueMetricsDataAccess;
 import se.sics.hop.metadata.yarn.dal.ContainerIdDataAccess;
@@ -164,6 +166,8 @@ public class NdbStorageFactory implements DALStorageFactory {
         dataAccessMap.put(FiCaSchedulerAppReservedContainersDataAccess.class, new FiCaSchedulerAppReservedContainersClusterJ());
         dataAccessMap.put(FiCaSchedulerAppReservationsDataAccess.class, new FiCaSchedulerAppReservationsClusterJ());
         dataAccessMap.put(RMContainerDataAccess.class, new RMContainerClusterJ());
+        dataAccessMap.put(ContainerDataAccess.class, new ContainerClusterJ());
+        dataAccessMap.put(ContainerIdDataAccess.class, new ContainerIdClusterJ());
         dataAccessMap.put(AppSchedulingInfoDataAccess.class, new AppSchedulingInfoClusterJ());
         dataAccessMap.put(AppSchedulingInfoPrioritiesDataAccess.class, new AppSchedulingInfoPrioritiesClusterJ());
         dataAccessMap.put(AppSchedulingInfoRequestsDataAccess.class, new AppSchedulingInfoRequestsClusterJ());

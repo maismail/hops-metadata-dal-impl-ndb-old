@@ -12,7 +12,6 @@ import se.sics.hop.metadata.hdfs.entity.yarn.HopRMContainer;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
 import se.sics.hop.metadata.yarn.dal.RMContainerDataAccess;
 import se.sics.hop.metadata.yarn.tabledef.RMContainerTableDef;
-import static se.sics.hop.metadata.yarn.tabledef.RMContainerTableDef.RESERVED_RESOURCE_ID;
 
 /**
  *
@@ -44,15 +43,10 @@ public class RMContainerClusterJ implements RMContainerTableDef, RMContainerData
 
         void setuser(String user);
 
-        @Column(name = RESERVED_RESOURCE_ID)
-        int getreservedresourceid();
-
-        void setreservedresourceid(int reservedresourceid);
-
         @Column(name = RESERVED_NODEID_ID)
-        int getreservednodeid();
+        String getreservednodeid();
 
-        void setreservednodeid(int reservednodeid);
+        void setreservednodeid(String reservednodeid);
 
         @Column(name = RESERVED_PRIORITY_ID)
         int getreservedpriorityid();
@@ -121,7 +115,6 @@ public class RMContainerClusterJ implements RMContainerTableDef, RMContainerData
                 rMContainerDTO.getappattemptidid(),
                 rMContainerDTO.getnodeidid(),
                 rMContainerDTO.getuser(),
-                rMContainerDTO.getreservedresourceid(),
                 rMContainerDTO.getreservednodeid(),
                 rMContainerDTO.getreservedpriorityid(),
                 rMContainerDTO.getstarttime(),
@@ -135,7 +128,6 @@ public class RMContainerClusterJ implements RMContainerTableDef, RMContainerData
         rMContainerDTO.setappattemptidid(hop.getApplicationAttemptIdID());
         rMContainerDTO.setnodeidid(hop.getNodeIdID());
         rMContainerDTO.setuser(hop.getUser());
-        rMContainerDTO.setreservedresourceid(hop.getReservedResourceID());
         rMContainerDTO.setreservednodeid(hop.getReservedNodeIdID());
         rMContainerDTO.setreservedpriorityid(hop.getReservedPriorityID());
         rMContainerDTO.setstarttime(hop.getStarttime());
