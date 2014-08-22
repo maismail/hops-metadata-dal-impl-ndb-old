@@ -23,15 +23,19 @@ public class ContainerIdClusterJ implements ContainerIdTableDef, ContainerIdData
     public interface ContainerIdDTO {
 
         @PrimaryKey
+        @Column(name = ID)
+        String getid();
+        void setid(String id);
+        
         @Column(name = CONTAINERID)
         int getcontid();
 
         void setcontid(int contid);
 
         @Column(name = APPLICATIONATTEMPT_ID)
-        int getapplicationattemptid();
+        String getapplicationattemptid();
 
-        void setapplicationattemptid(int applicationattemptid);
+        void setapplicationattemptid(String applicationattemptid);
     }
     private ClusterjConnector connector = ClusterjConnector.getInstance();
 
@@ -81,13 +85,14 @@ public class ContainerIdClusterJ implements ContainerIdTableDef, ContainerIdData
     private ContainerIdDTO createPersistable(HopContainerId hopContainerId, Session session) {
         ContainerIdDTO containerIdDTO = session.newInstance(ContainerIdDTO.class);
         //Set values to persist new ContainerStatus
+        containerIdDTO.setid(hopContainerId.getId());
         containerIdDTO.setcontid(hopContainerId.getContainerId());
         containerIdDTO.setapplicationattemptid(hopContainerId.getApplicationAttemptId());
         return containerIdDTO;
     }
 
     private HopContainerId createHopContainerId(ContainerIdDTO containerIdDTO) {
-        HopContainerId hop = new HopContainerId(containerIdDTO.getcontid(), containerIdDTO.getapplicationattemptid());
+        HopContainerId hop = new HopContainerId(containerIdDTO.getid(), containerIdDTO.getcontid(), containerIdDTO.getapplicationattemptid());
         return hop;
     }
 }
