@@ -3,14 +3,19 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package se.sics.hop.metadata.ndb.dalimpl.yarn;
 
+import com.mysql.clusterj.Query;
 import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
+import com.mysql.clusterj.query.QueryBuilder;
+import com.mysql.clusterj.query.QueryDomainType;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.entity.yarn.HopAppSchedulingInfo;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
@@ -21,89 +26,123 @@ import se.sics.hop.metadata.yarn.tabledef.AppSchedulingInfoTableDef;
  *
  * @author nickstanogias
  */
-public class AppSchedulingInfoClusterJ implements AppSchedulingInfoTableDef, AppSchedulingInfoDataAccess<HopAppSchedulingInfo>{
+public class AppSchedulingInfoClusterJ implements AppSchedulingInfoTableDef, AppSchedulingInfoDataAccess<HopAppSchedulingInfo> {
 
+  @PersistenceCapable(table = TABLE_NAME)
+  public interface AppSchedulingInfoDTO {
 
-    @PersistenceCapable(table = TABLE_NAME)
-    public interface AppSchedulingInfoDTO {
+    @PrimaryKey
+    @Column(name = APPID)
+    int getappid();
 
-        @PrimaryKey
-        @Column(name = APPATTEMPTID)
-        String getapplicationattemptid();
-        void setapplicationattemptid(String applicationattemptid);
-        
-        @Column(name = QUEUENAME)
-        String getqueuename();
-        void setqueuename(String queuename);
-        
-        @Column(name = USER)
-        String getuser();
-        void setuser(String user);
-        
-        @Column(name = CONTAINERIDCOUNTER)
-        int getcontaineridcounter();
-        void setcontaineridcounter(int containeridcounter);
-        
-        @Column(name = PENDING)
-        boolean getpending();
-        void setpending(boolean pending);
-    }
-    private final ClusterjConnector connector = ClusterjConnector.getInstance();
+    void setappid(int appid);
+
+    @Column(name = ATTEMPTID)
+    int getattemptid();
+
+    void setattemptid(int attemptid);
     
-    @Override
-    public HopAppSchedulingInfo findById(int id) throws StorageException {
-        Session session = connector.obtainSession();
+    @Column(name = QUEUENAME)
+    String getqueuename();
 
-        AppSchedulingInfoClusterJ.AppSchedulingInfoDTO appSchedulingInfoDTO = null;
-        if (session != null) {
-            appSchedulingInfoDTO = session.find(AppSchedulingInfoClusterJ.AppSchedulingInfoDTO.class, id);
+    void setqueuename(String queuename);
+
+    @Column(name = USER)
+    String getuser();
+
+    void setuser(String user);
+
+    @Column(name = CONTAINERIDCOUNTER)
+    int getcontaineridcounter();
+
+    void setcontaineridcounter(int containeridcounter);
+
+    @Column(name = PENDING)
+    boolean getPending();
+
+    void setPending(boolean pending);
+  }
+  private final ClusterjConnector connector = ClusterjConnector.getInstance();
+
+  @Override
+  public HopAppSchedulingInfo findById(int id) throws StorageException {
+    Session session = connector.obtainSession();
+
+    AppSchedulingInfoClusterJ.AppSchedulingInfoDTO appSchedulingInfoDTO = null;
+    if (session != null) {
+      appSchedulingInfoDTO = session.find(AppSchedulingInfoClusterJ.AppSchedulingInfoDTO.class, id);
+    }
+    if (appSchedulingInfoDTO == null) {
+      throw new StorageException("HOP :: Error while retrieving row");
+    }
+
+    return createHopAppSchedulingInfo(appSchedulingInfoDTO);
+  }
+
+  @Override
+  public List<HopAppSchedulingInfo> findAll() throws StorageException, IOException {
+    Session session = connector.obtainSession();
+    QueryBuilder qb = session.getQueryBuilder();
+    QueryDomainType<AppSchedulingInfoClusterJ.AppSchedulingInfoDTO> dobj = qb.createQueryDefinition(AppSchedulingInfoClusterJ.AppSchedulingInfoDTO.class);
+    Query<AppSchedulingInfoClusterJ.AppSchedulingInfoDTO> query = session.createQuery(dobj);
+    List<AppSchedulingInfoClusterJ.AppSchedulingInfoDTO> results = query.getResultList();
+
+    return createHopAppSchedulingInfoList(results);
+
+  }
+
+  private List<HopAppSchedulingInfo> createHopAppSchedulingInfoList(List<AppSchedulingInfoClusterJ.AppSchedulingInfoDTO> list) throws IOException {
+    List<HopAppSchedulingInfo> queueMetricsList = new ArrayList<HopAppSchedulingInfo>();
+    for (AppSchedulingInfoClusterJ.AppSchedulingInfoDTO persistable : list) {
+      queueMetricsList.add(createHopAppSchedulingInfo(persistable));
+    }
+    return queueMetricsList;
+  }
+
+  @Override
+  public void prepare(Collection<HopAppSchedulingInfo> modified, Collection<HopAppSchedulingInfo> removed) throws StorageException {
+    Session session = connector.obtainSession();
+    try {
+      if (removed != null) {
+        for (HopAppSchedulingInfo hop : removed) {
+          AppSchedulingInfoClusterJ.AppSchedulingInfoDTO persistable = 
+                  session.newInstance(AppSchedulingInfoClusterJ.AppSchedulingInfoDTO.class, 
+                          hop.getAppId());
+          session.deletePersistent(persistable);
         }
-        if (appSchedulingInfoDTO == null) {
-                throw new StorageException("HOP :: Error while retrieving row");
+      }
+      if (modified != null) {
+        for (HopAppSchedulingInfo hop : modified) {
+          AppSchedulingInfoClusterJ.AppSchedulingInfoDTO persistable = createPersistable(hop, session);
+          session.savePersistent(persistable);
         }
+      }
+    } catch (Exception e) {
+      throw new StorageException(e);
+    }
+  }
 
-        return createHopAppSchedulingInfo(appSchedulingInfoDTO);
-    }
-    
-    @Override
-    public void prepare(Collection<HopAppSchedulingInfo> modified, Collection<HopAppSchedulingInfo> removed) throws StorageException {
-        Session session = connector.obtainSession();
-        try {
-            if (removed != null) {
-                for (HopAppSchedulingInfo hop : removed) {
-                    AppSchedulingInfoClusterJ.AppSchedulingInfoDTO persistable = session.newInstance(AppSchedulingInfoClusterJ.AppSchedulingInfoDTO.class, hop.getAppattemptid());
-                    session.deletePersistent(persistable);
-                }
-            }
-            if (modified != null) {
-                for (HopAppSchedulingInfo hop : modified) {
-                    AppSchedulingInfoClusterJ.AppSchedulingInfoDTO persistable = createPersistable(hop, session);
-                    session.savePersistent(persistable);
-                }
-            }
-        } catch (Exception e) {
-            throw new StorageException(e);
-        }
-    }
-    
-    private HopAppSchedulingInfo createHopAppSchedulingInfo(AppSchedulingInfoDTO appSchedulingInfoDTO) {
-        return new HopAppSchedulingInfo(appSchedulingInfoDTO.getapplicationattemptid(),
-                                        appSchedulingInfoDTO.getqueuename(),
-                                        appSchedulingInfoDTO.getuser(),
-                                        appSchedulingInfoDTO.getcontaineridcounter(),
-                                        appSchedulingInfoDTO.getpending());
-    }
+  private HopAppSchedulingInfo createHopAppSchedulingInfo(AppSchedulingInfoDTO appSchedulingInfoDTO) {
+    return new HopAppSchedulingInfo(appSchedulingInfoDTO.getappid(),
+            appSchedulingInfoDTO.getattemptid(),
+            appSchedulingInfoDTO.getqueuename(),
+            appSchedulingInfoDTO.getuser(),
+            appSchedulingInfoDTO.getcontaineridcounter(),
+            appSchedulingInfoDTO.getPending());
+  }
 
-    private AppSchedulingInfoDTO createPersistable(HopAppSchedulingInfo hop, Session session) {
-        AppSchedulingInfoClusterJ.AppSchedulingInfoDTO appSchedulingInfoDTO = session.newInstance(AppSchedulingInfoClusterJ.AppSchedulingInfoDTO.class);
-        
-        appSchedulingInfoDTO.setapplicationattemptid(hop.getAppattemptid());
-        appSchedulingInfoDTO.setcontaineridcounter(hop.getContaineridcounter());
-        appSchedulingInfoDTO.setqueuename(hop.getQueuename());
-        appSchedulingInfoDTO.setuser(hop.getUser());
-        appSchedulingInfoDTO.setpending(hop.isPending());
-        
-        return appSchedulingInfoDTO;
-    }
-    
+  private AppSchedulingInfoDTO createPersistable(HopAppSchedulingInfo hop, Session session) {
+    AppSchedulingInfoClusterJ.AppSchedulingInfoDTO appSchedulingInfoDTO = 
+            session.newInstance(AppSchedulingInfoClusterJ.AppSchedulingInfoDTO.class);
+
+    appSchedulingInfoDTO.setappid(hop.getAppId());
+    appSchedulingInfoDTO.setattemptid(hop.getAttemptId());
+    appSchedulingInfoDTO.setcontaineridcounter(hop.getContaineridcounter());
+    appSchedulingInfoDTO.setqueuename(hop.getQueuename());
+    appSchedulingInfoDTO.setuser(hop.getUser());
+    appSchedulingInfoDTO.setPending(hop.isPending());
+
+    return appSchedulingInfoDTO;
+  }
+
 }
