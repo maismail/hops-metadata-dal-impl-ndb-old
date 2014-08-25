@@ -42,7 +42,7 @@ public class ApplicationAttemptIdClusterJ implements ApplicationAttemptIdTableDe
     private ClusterjConnector connector = ClusterjConnector.getInstance();
 
     @Override
-    public HopApplicationAttemptId findById(int id) throws StorageException {
+    public HopApplicationAttemptId findById(String id) throws StorageException {
         Session session = connector.obtainSession();
 
         ApplicationAttemptIdDTO appAttemptIdDTO = null;

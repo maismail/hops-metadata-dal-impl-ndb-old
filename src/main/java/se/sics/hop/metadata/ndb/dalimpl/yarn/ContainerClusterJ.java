@@ -32,7 +32,7 @@ public class ContainerClusterJ implements ContainerTableDef, ContainerDataAccess
     private ClusterjConnector connector = ClusterjConnector.getInstance();
 
     @Override
-    public HopContainer findById(int id) throws StorageException {
+    public HopContainer findById(String id) throws StorageException {
         Session session = connector.obtainSession();
 
         ContainerDTO containerDTO = null;

@@ -45,7 +45,7 @@ public class NodeIdClusterJ implements NodeIdTableDef, NodeIdDataAccess<HopNodeI
     private ClusterjConnector connector = ClusterjConnector.getInstance();
 
     @Override
-    public HopNodeId findById(int id) throws StorageException {
+    public HopNodeId findById(String id) throws StorageException {
         NodeIdDTO nodeidDTO = null;
         try {
             Session session = connector.obtainSession();

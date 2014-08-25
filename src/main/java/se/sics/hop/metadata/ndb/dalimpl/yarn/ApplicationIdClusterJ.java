@@ -45,7 +45,7 @@ public class ApplicationIdClusterJ implements ApplicationIdTableDef, Application
     private ClusterjConnector connector = ClusterjConnector.getInstance();
 
     @Override
-    public HopApplicationId findById(int id) throws StorageException {
+    public HopApplicationId findById(String id) throws StorageException {
         Session session = connector.obtainSession();
 
         ApplicationIdDTO applicationIdDTO = null;
