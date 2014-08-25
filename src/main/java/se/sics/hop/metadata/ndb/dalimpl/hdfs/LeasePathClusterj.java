@@ -21,6 +21,7 @@ import se.sics.hop.metadata.hdfs.tabledef.LeasePathTableDef;
 /**
  *
  * @author Hooman <hooman@sics.se>
+ * @author Salman <salman@sics.se>
  */
 public class LeasePathClusterj implements LeasePathTableDef, LeasePathDataAccess<HopLeasePath> {
 
@@ -29,14 +30,17 @@ public class LeasePathClusterj implements LeasePathTableDef, LeasePathDataAccess
 
     @Column(name = HOLDER_ID)
     int getHolderId();
-
     void setHolderId(int holder_id);
 
     @PrimaryKey
     @Column(name = PATH)
     String getPath();
-
     void setPath(String path);
+    
+    @PrimaryKey
+    @Column(name = PART_KEY)
+    int getPartKey();
+    void setPartKey(int partKey);
   }
   private ClusterjConnector connector = ClusterjConnector.getInstance();
 
@@ -59,7 +63,10 @@ public class LeasePathClusterj implements LeasePathTableDef, LeasePathDataAccess
       }
 
       for (HopLeasePath lp : removed) {
-        LeasePathsDTO lTable = session.newInstance(LeasePathsDTO.class, lp.getPath());
+        Object[] key = new Object[2];
+        key[0] = lp.getPath();
+        key[1] = PART_KEY_VAL;
+        LeasePathsDTO lTable = session.newInstance(LeasePathsDTO.class, key);
         deletions.add(lTable);
       }
       session.deletePersistentAll(deletions);
@@ -75,9 +82,12 @@ public class LeasePathClusterj implements LeasePathTableDef, LeasePathDataAccess
       Session session = connector.obtainSession();
       QueryBuilder qb = session.getQueryBuilder();
       QueryDomainType<LeasePathsDTO> dobj = qb.createQueryDefinition(LeasePathsDTO.class);
-      dobj.where(dobj.get("holderId").equal(dobj.param("param")));
+      Predicate pred1 = dobj.get("holderId").equal(dobj.param("param1"));
+      Predicate pred2 = dobj.get("partKey").equal(dobj.param("param2"));
+      dobj.where(pred1);
       Query<LeasePathsDTO> query = session.createQuery(dobj);
-      query.setParameter("param", holderId);
+      query.setParameter("param1", holderId);
+      query.setParameter("param2", PART_KEY_VAL);
       return createList(query.getResultList());
     } catch (Exception e) {
       throw new StorageException(e);
@@ -87,8 +97,11 @@ public class LeasePathClusterj implements LeasePathTableDef, LeasePathDataAccess
   @Override
   public HopLeasePath findByPKey(String path) throws StorageException {
     try {
+      Object[] key = new Object[2];
+      key[0] = path;
+      key[1] = PART_KEY_VAL;
       Session session = connector.obtainSession();
-      LeasePathsDTO lPTable = session.find(LeasePathsDTO.class, path);
+      LeasePathsDTO lPTable = session.find(LeasePathsDTO.class, key);
       HopLeasePath lPath = null;
       if (lPTable != null) {
         lPath = createLeasePath(lPTable);
@@ -108,10 +121,11 @@ public class LeasePathClusterj implements LeasePathTableDef, LeasePathDataAccess
       PredicateOperand propertyPredicate = dobj.get("path");
       String param = "prefix";
       PredicateOperand propertyLimit = dobj.param(param);
-      Predicate like = propertyPredicate.like(propertyLimit);
+      Predicate like = propertyPredicate.like(propertyLimit).and(dobj.get("partKey").equal(dobj.param("partKeyParam")));
       dobj.where(like);
       Query query = session.createQuery(dobj);
       query.setParameter(param, prefix + "%");
+      query.setParameter("partKeyParam", PART_KEY_VAL);
       return createList(query.getResultList());
     } catch (Exception e) {
       throw new StorageException(e);
@@ -124,7 +138,10 @@ public class LeasePathClusterj implements LeasePathTableDef, LeasePathDataAccess
       Session session = connector.obtainSession();
       QueryBuilder qb = session.getQueryBuilder();
       QueryDomainType dobj = qb.createQueryDefinition(LeasePathsDTO.class);
+      Predicate pred = dobj.get("partKey").equal(dobj.param("param"));
+      dobj.where(pred);
       Query query = session.createQuery(dobj);
+      query.setParameter("param", PART_KEY_VAL);
       return createList(query.getResultList());
     } catch (Exception e) {
       throw new StorageException(e);
@@ -156,5 +173,6 @@ public class LeasePathClusterj implements LeasePathTableDef, LeasePathDataAccess
   private void createPersistableLeasePathInstance(HopLeasePath lp, LeasePathsDTO lTable) {
     lTable.setHolderId(lp.getHolderId());
     lTable.setPath(lp.getPath());
+    lTable.setPartKey(PART_KEY_VAL);
   }
 }
