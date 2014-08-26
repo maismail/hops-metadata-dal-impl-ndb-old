@@ -28,9 +28,9 @@ public class LaunchedContainersClusterJ implements LaunchedContainersTableDef, L
 
         @PrimaryKey
         @Column(name = FICASCHEDULERNODE_ID)
-        String getficaschedulernodeid();
+        String getficaschedulernode_id();
 
-        void setficaschedulernodeid(String ficaschedulernodeid);
+        void setficaschedulernode_id(String ficaschedulernode_id);
 
         @PrimaryKey
         @Column(name = CONTAINERID_ID)
@@ -63,7 +63,7 @@ public class LaunchedContainersClusterJ implements LaunchedContainersTableDef, L
     }
 
     @Override
-    public List<HopLaunchedContainers> findByFiCaSchedulerNode(String ficaschedulernodeId) throws StorageException {
+    public List<HopLaunchedContainers> findByFiCaSchedulerNode(String ficaschedulernode_id) throws StorageException {
         try {
             Session session = connector.obtainSession();
             QueryBuilder qb = session.getQueryBuilder();
@@ -72,7 +72,7 @@ public class LaunchedContainersClusterJ implements LaunchedContainersTableDef, L
             Predicate pred1 = dobj.get("ficaschedulernode_id").equal(dobj.param("ficaschedulernode_id"));
             dobj.where(pred1);
             Query<LaunchedContainersDTO> query = session.createQuery(dobj);
-            query.setParameter("ficaschedulernode_id", ficaschedulernodeId);
+            query.setParameter("ficaschedulernode_id", ficaschedulernode_id);
 
             List<LaunchedContainersDTO> results = query.getResultList();
             return createLaunchedContainersList(results);
@@ -115,7 +115,7 @@ public class LaunchedContainersClusterJ implements LaunchedContainersTableDef, L
 
     private HopLaunchedContainers createLaunchedContainersEntry(LaunchedContainersDTO dto) {
         HopLaunchedContainers hop = new HopLaunchedContainers(
-                dto.getficaschedulernodeid(),
+                dto.getficaschedulernode_id(),
                 dto.getcontaineridid(),
                 dto.getrmcontainerid());
         return hop;
@@ -126,7 +126,7 @@ public class LaunchedContainersClusterJ implements LaunchedContainersTableDef, L
         objarr[0] = entry.getFicaSchedulerNodeID();
         objarr[1] = entry.getContainerIdID();
         LaunchedContainersDTO persistable = session.newInstance(LaunchedContainersDTO.class, objarr);
-        persistable.setficaschedulernodeid(entry.getFicaSchedulerNodeID());
+        persistable.setficaschedulernode_id(entry.getFicaSchedulerNodeID());
         persistable.setcontaineridid(entry.getContainerIdID());
         persistable.setrmcontainerid(entry.getRmContainerID());
         return persistable;

@@ -5,6 +5,7 @@ import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
+import com.mysql.clusterj.query.Predicate;
 import com.mysql.clusterj.query.QueryBuilder;
 import com.mysql.clusterj.query.QueryDomainType;
 import java.io.IOException;
@@ -42,18 +43,22 @@ public class ApplicationAttemptIdClusterJ implements ApplicationAttemptIdTableDe
     private ClusterjConnector connector = ClusterjConnector.getInstance();
 
     @Override
-    public HopApplicationAttemptId findById(String id) throws StorageException {
-        Session session = connector.obtainSession();
+    public List<HopApplicationAttemptId> findByAttemptId(String attemptid) throws StorageException {
+        try {
+            Session session = connector.obtainSession();
+            QueryBuilder qb = session.getQueryBuilder();
 
-        ApplicationAttemptIdDTO appAttemptIdDTO = null;
-        if (session != null) {
-            appAttemptIdDTO = session.find(ApplicationAttemptIdDTO.class, id);
-        }
-        if (appAttemptIdDTO == null) {
-            throw new StorageException("HOP :: Error while retrieving row");
-        }
+            QueryDomainType<ApplicationAttemptIdClusterJ.ApplicationAttemptIdDTO> dobj = qb.createQueryDefinition(ApplicationAttemptIdClusterJ.ApplicationAttemptIdDTO.class);
+            Predicate pred1 = dobj.get("attemptid").equal(dobj.param("attemptid"));
+            dobj.where(pred1);
 
-        return createHopApplicationAttemptId(appAttemptIdDTO);
+            Query<ApplicationAttemptIdClusterJ.ApplicationAttemptIdDTO> query = session.createQuery(dobj);
+            query.setParameter("attemptid", attemptid);
+            List<ApplicationAttemptIdClusterJ.ApplicationAttemptIdDTO> results = query.getResultList();
+            return createApplicationAttemptIdList(results);
+        } catch (Exception e) {
+            throw new StorageException(e);
+        }
     }
     
     @Override
