@@ -23,15 +23,15 @@ public class ContainerStatusClusterJ implements ContainerStatusTableDef, Contain
     public interface ContainerStatusDTO {
 
         @PrimaryKey
-        @Column(name = CONTAINER_ID)
+        @Column(name = CONTAINERID)
         String getcontainerid();
+
+        void setcontainerid(String containerid);
 
         @Column(name = STATE)
         String getstate();
 
         void setstate(String state);
-
-        void setcontainerid(String containerid);
 
         @Column(name = DIAGNOSTICS)
         String getdiagnostics();
@@ -86,7 +86,7 @@ public class ContainerStatusClusterJ implements ContainerStatusTableDef, Contain
     @Override
     public void createContainerStatus(HopContainerStatus containerstatus) throws StorageException {
         Session session = connector.obtainSession();
-        createPersistable(containerstatus, session);
+        session.savePersistent(createPersistable(containerstatus, session));
     }
 
     private ContainerStatusDTO createPersistable(HopContainerStatus hopCS, Session session) {

@@ -1,9 +1,13 @@
 package se.sics.hop.metadata.ndb.dalimpl.yarn;
 
+import com.mysql.clusterj.Query;
 import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
+import com.mysql.clusterj.query.Predicate;
+import com.mysql.clusterj.query.QueryBuilder;
+import com.mysql.clusterj.query.QueryDomainType;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -61,6 +65,24 @@ public class UpdatedContainerInfoContainersClusterJ implements UpdatedContainerI
     }
 
     @Override
+    public List<HopUpdatedContainerInfoContainers> findByUpdatedContainerInfoId(int uciId) throws StorageException {
+        try {
+            Session session = connector.obtainSession();
+            QueryBuilder qb = session.getQueryBuilder();
+
+            QueryDomainType<UpdatedContainerInfoContainersDTO> dobj = qb.createQueryDefinition(UpdatedContainerInfoContainersDTO.class);
+            Predicate pred = dobj.get("updatedcontainerinfo_id").equal(dobj.param("updatedcontainerinfo_id"));
+            dobj.where(pred);
+            Query<UpdatedContainerInfoContainersDTO> query = session.createQuery(dobj);
+            query.setParameter("updatedcontainerinfo_id", uciId);
+            List<UpdatedContainerInfoContainersDTO> results = query.getResultList();
+            return createHopUpdatedContainerInfoContainersList(results);
+        } catch (Exception e) {
+            throw new StorageException(e);
+        }
+    }
+
+    @Override
     public void prepare(Collection<HopUpdatedContainerInfoContainers> modified, Collection<HopUpdatedContainerInfoContainers> removed) throws StorageException {
         Session session = connector.obtainSession();
         try {
@@ -100,5 +122,13 @@ public class UpdatedContainerInfoContainersClusterJ implements UpdatedContainerI
         dto.setupdatedcontainerinfoid(hop.getUpdatedcontainerinfoId());
         dto.settype(hop.getType());
         return dto;
+    }
+
+    private List<HopUpdatedContainerInfoContainers> createHopUpdatedContainerInfoContainersList(List<UpdatedContainerInfoContainersDTO> results) {
+        List<HopUpdatedContainerInfoContainers> hopList = new ArrayList<HopUpdatedContainerInfoContainers>();
+        for (UpdatedContainerInfoContainersDTO persistable : results) {
+            hopList.add(createHopUpdatedContainerInfoContainers(persistable));
+        }
+        return hopList;
     }
 }

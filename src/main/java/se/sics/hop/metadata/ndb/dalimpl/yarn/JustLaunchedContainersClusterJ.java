@@ -1,9 +1,13 @@
 package se.sics.hop.metadata.ndb.dalimpl.yarn;
 
+import com.mysql.clusterj.Query;
 import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
+import com.mysql.clusterj.query.Predicate;
+import com.mysql.clusterj.query.QueryBuilder;
+import com.mysql.clusterj.query.QueryDomainType;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -85,6 +89,40 @@ public class JustLaunchedContainersClusterJ implements JustLaunchedContainersTab
     }
 
     @Override
+    public List<HopJustLaunchedContainers> findAll() throws StorageException {
+        try {
+            Session session = connector.obtainSession();
+            QueryBuilder qb = session.getQueryBuilder();
+
+            QueryDomainType<JustLaunchedContainersDTO> dobj = qb.createQueryDefinition(JustLaunchedContainersDTO.class);
+            Query<JustLaunchedContainersDTO> query = session.createQuery(dobj);
+
+            List<JustLaunchedContainersDTO> results = query.getResultList();
+            return createJustLaunchedContainersList(results);
+        } catch (Exception e) {
+            throw new StorageException(e);
+        }
+    }
+
+    @Override
+    public List<HopJustLaunchedContainers> findByRMNode(String rmnodeId) throws StorageException {
+        try {
+            Session session = connector.obtainSession();
+            QueryBuilder qb = session.getQueryBuilder();
+
+            QueryDomainType<JustLaunchedContainersDTO> dobj = qb.createQueryDefinition(JustLaunchedContainersDTO.class);
+            Predicate pred = dobj.get("rmnodeid").equal(dobj.param("rmnodeid"));
+            dobj.where(pred);
+            Query<JustLaunchedContainersDTO> query = session.createQuery(dobj);
+            query.setParameter("rmnodeid", rmnodeId);
+            List<JustLaunchedContainersDTO> results = query.getResultList();
+            return createJustLaunchedContainersList(results);
+        } catch (Exception e) {
+            throw new StorageException(e);
+        }
+    }
+
+    @Override
     public void createJustLaunchedContainerEntry(HopJustLaunchedContainers entry) throws StorageException {
         Session session = connector.obtainSession();
         createPersistable(entry, session);
@@ -108,5 +146,13 @@ public class JustLaunchedContainersClusterJ implements JustLaunchedContainersTab
         dto.setcontainerstatusid(entry.getContainerstatusid());
         dto.setrmnodeid(entry.getRmnodeid());
         return dto;
+    }
+
+    private List<HopJustLaunchedContainers> createJustLaunchedContainersList(List<JustLaunchedContainersDTO> results) {
+        List<HopJustLaunchedContainers> justLaunchedContainers = new ArrayList<HopJustLaunchedContainers>();
+        for (JustLaunchedContainersDTO persistable : results) {
+            justLaunchedContainers.add(createJustLaunchedContainers(persistable));
+        }
+        return justLaunchedContainers;
     }
 }
