@@ -32,15 +32,14 @@ public class AppSchedulingInfoClusterJ implements AppSchedulingInfoTableDef, App
   public interface AppSchedulingInfoDTO {
 
     @PrimaryKey
+    @Column(name = FICASCHEDULERAPP_ID)
+    String getficaschedulerapp_id();
+    void setficaschedulerapp_id(String ficaschedulerapp_id);
+    
     @Column(name = APPID)
     int getappid();
 
     void setappid(int appid);
-
-    @Column(name = ATTEMPTID)
-    int getattemptid();
-
-    void setattemptid(int attemptid);
     
     @Column(name = QUEUENAME)
     String getqueuename();
@@ -65,7 +64,7 @@ public class AppSchedulingInfoClusterJ implements AppSchedulingInfoTableDef, App
   private final ClusterjConnector connector = ClusterjConnector.getInstance();
 
   @Override
-  public HopAppSchedulingInfo findById(int id) throws StorageException {
+  public HopAppSchedulingInfo findById(String id) throws StorageException {
     Session session = connector.obtainSession();
 
     AppSchedulingInfoClusterJ.AppSchedulingInfoDTO appSchedulingInfoDTO = null;
@@ -123,8 +122,7 @@ public class AppSchedulingInfoClusterJ implements AppSchedulingInfoTableDef, App
   }
 
   private HopAppSchedulingInfo createHopAppSchedulingInfo(AppSchedulingInfoDTO appSchedulingInfoDTO) {
-    return new HopAppSchedulingInfo(appSchedulingInfoDTO.getappid(),
-            appSchedulingInfoDTO.getattemptid(),
+    return new HopAppSchedulingInfo(appSchedulingInfoDTO.getficaschedulerapp_id(), appSchedulingInfoDTO.getappid(),
             appSchedulingInfoDTO.getqueuename(),
             appSchedulingInfoDTO.getuser(),
             appSchedulingInfoDTO.getcontaineridcounter(),
@@ -135,8 +133,8 @@ public class AppSchedulingInfoClusterJ implements AppSchedulingInfoTableDef, App
     AppSchedulingInfoClusterJ.AppSchedulingInfoDTO appSchedulingInfoDTO = 
             session.newInstance(AppSchedulingInfoClusterJ.AppSchedulingInfoDTO.class);
 
+    appSchedulingInfoDTO.setficaschedulerapp_id(hop.getFicaAppId());
     appSchedulingInfoDTO.setappid(hop.getAppId());
-    appSchedulingInfoDTO.setattemptid(hop.getAttemptId());
     appSchedulingInfoDTO.setcontaineridcounter(hop.getContaineridcounter());
     appSchedulingInfoDTO.setqueuename(hop.getQueuename());
     appSchedulingInfoDTO.setuser(hop.getUser());

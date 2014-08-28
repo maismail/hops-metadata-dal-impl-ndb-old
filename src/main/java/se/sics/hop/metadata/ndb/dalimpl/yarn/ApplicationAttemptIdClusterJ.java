@@ -62,6 +62,25 @@ public class ApplicationAttemptIdClusterJ implements ApplicationAttemptIdTableDe
     }
     
     @Override
+    public List<HopApplicationAttemptId> findByAppId(String appid) throws StorageException {
+        try {
+            Session session = connector.obtainSession();
+            QueryBuilder qb = session.getQueryBuilder();
+
+            QueryDomainType<ApplicationAttemptIdClusterJ.ApplicationAttemptIdDTO> dobj = qb.createQueryDefinition(ApplicationAttemptIdClusterJ.ApplicationAttemptIdDTO.class);
+            Predicate pred1 = dobj.get("appid").equal(dobj.param("appid"));
+            dobj.where(pred1);
+
+            Query<ApplicationAttemptIdClusterJ.ApplicationAttemptIdDTO> query = session.createQuery(dobj);
+            query.setParameter("appid", appid);
+            List<ApplicationAttemptIdClusterJ.ApplicationAttemptIdDTO> results = query.getResultList();
+            return createApplicationAttemptIdList(results);
+        } catch (Exception e) {
+            throw new StorageException(e);
+        }
+    }
+    
+    @Override
     public List<HopApplicationAttemptId> findAll() throws StorageException {
         Session session = connector.obtainSession();
         QueryBuilder qb = session.getQueryBuilder();

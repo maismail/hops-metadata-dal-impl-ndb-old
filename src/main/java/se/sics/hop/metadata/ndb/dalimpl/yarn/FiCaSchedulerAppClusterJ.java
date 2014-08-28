@@ -18,7 +18,6 @@ import se.sics.hop.metadata.hdfs.entity.yarn.HopFiCaSchedulerApp;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
 import se.sics.hop.metadata.yarn.dal.FiCaSchedulerAppDataAccess;
 import se.sics.hop.metadata.yarn.tabledef.FiCaSchedulerAppTableDef;
-import static se.sics.hop.metadata.yarn.tabledef.FiCaSchedulerAppTableDef.RESOURCELIMIT_ID;
 
 /**
  *
@@ -31,30 +30,14 @@ public class FiCaSchedulerAppClusterJ implements FiCaSchedulerAppTableDef, FiCaS
     public interface FiCaSchedulerAppDTO {
 
         @PrimaryKey
+        @Column(name = FICASCHEDULERAPP_ID)
+        String getficaschedulerapp_id();
+        void setficaschedulerapp_id(String ficaschedulerapp_id);
+        
         @Column(name = APPID)
         int getAppId();
 
         void setAppId(int appId);
-        
-        @Column(name = ATTEMPTID)
-        int getAttemptid();
-
-        void setAttemptid(int appattemptid);
-
-        @Column(name = CURRENTRESERVATION_ID)
-        int getcurrentreservationid();
-
-        void setcurrentreservationid(int currentreservationid);
-
-        @Column(name = RESOURCELIMIT_ID)
-        int getresourcelimitid();
-
-        void setresourcelimitid(int resourcelimitid);
-
-        @Column(name = CURRENTCONSUMPTION_ID)
-        int getcurrentconsumptionid();
-
-        void setcurrentconsumptionid(int currentconsumptionid);
 
         @Column(name = ISSTOPPED)
         boolean getIsstopped();
@@ -64,7 +47,7 @@ public class FiCaSchedulerAppClusterJ implements FiCaSchedulerAppTableDef, FiCaS
     private final ClusterjConnector connector = ClusterjConnector.getInstance();
 
     @Override
-    public HopFiCaSchedulerApp findById(int id) throws StorageException {
+    public HopFiCaSchedulerApp findById(String id) throws StorageException {
         Session session = connector.obtainSession();
 
         FiCaSchedulerAppClusterJ.FiCaSchedulerAppDTO fiCaSchedulerAppDTO = null;
@@ -125,22 +108,15 @@ public class FiCaSchedulerAppClusterJ implements FiCaSchedulerAppTableDef, FiCaS
     }
 
     private HopFiCaSchedulerApp createHopFiCaSchedulerApp(FiCaSchedulerAppDTO fiCaSchedulerAppDTO) {
-        return new HopFiCaSchedulerApp(fiCaSchedulerAppDTO.getAppId(),
-                fiCaSchedulerAppDTO.getAttemptid(),
-                fiCaSchedulerAppDTO.getcurrentreservationid(),
-                fiCaSchedulerAppDTO.getresourcelimitid(),
-                fiCaSchedulerAppDTO.getcurrentconsumptionid(),
+        return new HopFiCaSchedulerApp(fiCaSchedulerAppDTO.getficaschedulerapp_id(),fiCaSchedulerAppDTO.getAppId(),
                 fiCaSchedulerAppDTO.getIsstopped());
     }
 
     private FiCaSchedulerAppClusterJ.FiCaSchedulerAppDTO createPersistable(HopFiCaSchedulerApp hop, Session session) {
         FiCaSchedulerAppClusterJ.FiCaSchedulerAppDTO fiCaSchedulerAppDTO = session.newInstance(FiCaSchedulerAppClusterJ.FiCaSchedulerAppDTO.class);
 
+        fiCaSchedulerAppDTO.setficaschedulerapp_id(hop.getFicaAppId());
         fiCaSchedulerAppDTO.setAppId(hop.getAppId());
-        fiCaSchedulerAppDTO.setAttemptid(hop.getAttemptId());
-        fiCaSchedulerAppDTO.setcurrentreservationid(hop.getCurrentreservation_id());
-        fiCaSchedulerAppDTO.setresourcelimitid(hop.getResourcelimit_id());
-        fiCaSchedulerAppDTO.setcurrentconsumptionid(hop.getCurrentconsumption_id());
         fiCaSchedulerAppDTO.setIsstopped(hop.isIsstoped());
 
         return fiCaSchedulerAppDTO;

@@ -6,10 +6,14 @@
 
 package se.sics.hop.metadata.ndb.dalimpl.yarn;
 
+import com.mysql.clusterj.Query;
 import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
+import com.mysql.clusterj.query.Predicate;
+import com.mysql.clusterj.query.QueryBuilder;
+import com.mysql.clusterj.query.QueryDomainType;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -30,8 +34,8 @@ public class ResourceRequestClusterJ implements ResourceRequestTableDef, Resourc
 
         @PrimaryKey
         @Column(name = APPSCHEDULINGINFO_ID)
-        String getappschedulinginfoid();
-        void setappschedulinginfoid(String appschedulinginfoid);
+        String getappschedulinginfo_id();
+        void setappschedulinginfo_id(String appschedulinginfo_id);
 
         @Column(name = PRIORITY)
         int getpriority();
@@ -44,17 +48,22 @@ public class ResourceRequestClusterJ implements ResourceRequestTableDef, Resourc
     private final ClusterjConnector connector = ClusterjConnector.getInstance();
     
     @Override
-    public HopResourceRequest findById(int id) throws StorageException {
-        Session session = connector.obtainSession();
+    public List<HopResourceRequest> findById(String id) throws StorageException {
+        try {
+            Session session = connector.obtainSession();
+            QueryBuilder qb = session.getQueryBuilder();
 
-        ResourceRequestClusterJ.ResourceRequestDTO resourceRequestDTO = null;
-        if (session != null) {
-            resourceRequestDTO = session.find(ResourceRequestClusterJ.ResourceRequestDTO.class, id);
+            QueryDomainType<ResourceRequestClusterJ.ResourceRequestDTO> dobj = qb.createQueryDefinition(ResourceRequestClusterJ.ResourceRequestDTO.class);
+            Predicate pred1 = dobj.get("appschedulinginfo_id").equal(dobj.param("appschedulinginfo_id"));
+            dobj.where(pred1);
+            Query<ResourceRequestClusterJ.ResourceRequestDTO> query = session.createQuery(dobj);
+            query.setParameter("appschedulinginfo_id", id);
+
+            List<ResourceRequestClusterJ.ResourceRequestDTO> results = query.getResultList();
+            return createResourceRequestList(results);
+        } catch (Exception e) {
+            throw new StorageException(e);
         }
-        if (resourceRequestDTO == null) {
-            throw new StorageException("HOP :: Error while retrieving row");
-        }
-        return createHopResourceRequest(resourceRequestDTO);
     }
 
     @Override
@@ -81,7 +90,7 @@ public class ResourceRequestClusterJ implements ResourceRequestTableDef, Resourc
     }
     
     private HopResourceRequest createHopResourceRequest(ResourceRequestDTO resourceRequestDTO) {
-        return new HopResourceRequest(resourceRequestDTO.getappschedulinginfoid(),
+        return new HopResourceRequest(resourceRequestDTO.getappschedulinginfo_id(),
                                         resourceRequestDTO.getpriority(),
                                         resourceRequestDTO.getresourcerequeststate());
     }
@@ -89,10 +98,18 @@ public class ResourceRequestClusterJ implements ResourceRequestTableDef, Resourc
     private ResourceRequestDTO createPersistable(HopResourceRequest hop, Session session) {
         ResourceRequestClusterJ.ResourceRequestDTO resourceRequestDTO = session.newInstance(ResourceRequestClusterJ.ResourceRequestDTO.class);
         
-        resourceRequestDTO.setappschedulinginfoid(hop.getId());
+        resourceRequestDTO.setappschedulinginfo_id(hop.getId());
         resourceRequestDTO.setpriority(hop.getPriority());
         resourceRequestDTO.setresourcerequeststate(hop.getResourcerequeststate());
         
         return resourceRequestDTO;
-    }  
+    }
+    
+    private List<HopResourceRequest> createResourceRequestList(List<ResourceRequestClusterJ.ResourceRequestDTO> results) {
+        List<HopResourceRequest> resourceRequests = new ArrayList<HopResourceRequest>();
+        for (ResourceRequestClusterJ.ResourceRequestDTO persistable : results) {
+            resourceRequests.add(createHopResourceRequest(persistable));
+        }
+        return resourceRequests;
+    }
 }

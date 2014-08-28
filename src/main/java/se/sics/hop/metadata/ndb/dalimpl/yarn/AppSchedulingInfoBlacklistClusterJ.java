@@ -6,13 +6,20 @@
 
 package se.sics.hop.metadata.ndb.dalimpl.yarn;
 
+import com.mysql.clusterj.Query;
 import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
+import com.mysql.clusterj.query.Predicate;
+import com.mysql.clusterj.query.QueryBuilder;
+import com.mysql.clusterj.query.QueryDomainType;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.entity.yarn.HopAppSchedulingInfoBlacklist;
+import se.sics.hop.metadata.hdfs.entity.yarn.HopLaunchedContainers;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
 import se.sics.hop.metadata.yarn.dal.AppSchedulingInfoBlacklistDataAccess;
 import se.sics.hop.metadata.yarn.tabledef.AppSchedulingInfoBlacklistTableDef;
@@ -29,8 +36,8 @@ public class AppSchedulingInfoBlacklistClusterJ implements AppSchedulingInfoBlac
 
         @PrimaryKey
         @Column(name = APPSCHEDULINGINFO_ID)
-        String getappschedulinginfoid();
-        void setappschedulinginfoid(String appschedulinginfoid);
+        String getappschedulinginfo_id();
+        void setappschedulinginfo_id(String appschedulinginfoid);
 
         @Column(name = BLACKLISTED)
         String getblacklisted();
@@ -40,18 +47,22 @@ public class AppSchedulingInfoBlacklistClusterJ implements AppSchedulingInfoBlac
     private final ClusterjConnector connector = ClusterjConnector.getInstance();
     
     @Override
-    public HopAppSchedulingInfoBlacklist findById(int id) throws StorageException {
-        Session session = connector.obtainSession();
+    public List<HopAppSchedulingInfoBlacklist> findById(String id) throws StorageException {
+        try {
+            Session session = connector.obtainSession();
+            QueryBuilder qb = session.getQueryBuilder();
 
-        AppSchedulingInfoBlacklistClusterJ.AppSchedulingInfoBlacklistDTO appSchedulingInfoBlacklistDTO = null;
-        if (session != null) {
-            appSchedulingInfoBlacklistDTO = session.find(AppSchedulingInfoBlacklistClusterJ.AppSchedulingInfoBlacklistDTO.class, id);
-        }
-        if (appSchedulingInfoBlacklistDTO == null) {
-                throw new StorageException("HOP :: Error while retrieving row");
-        }
+            QueryDomainType<AppSchedulingInfoBlacklistClusterJ.AppSchedulingInfoBlacklistDTO> dobj = qb.createQueryDefinition(AppSchedulingInfoBlacklistClusterJ.AppSchedulingInfoBlacklistDTO.class);
+            Predicate pred1 = dobj.get("appschedulinginfo_id").equal(dobj.param("appschedulinginfo_id"));
+            dobj.where(pred1);
+            Query<AppSchedulingInfoBlacklistClusterJ.AppSchedulingInfoBlacklistDTO> query = session.createQuery(dobj);
+            query.setParameter("appschedulinginfo_id", id);
 
-        return createHopAppSchedulingInfoBlacklist(appSchedulingInfoBlacklistDTO);
+            List<AppSchedulingInfoBlacklistClusterJ.AppSchedulingInfoBlacklistDTO> results = query.getResultList();
+            return createAppSchedulingInfoBlackList(results);
+        } catch (Exception e) {
+            throw new StorageException(e);
+        }
     }
 
     @Override
@@ -76,17 +87,25 @@ public class AppSchedulingInfoBlacklistClusterJ implements AppSchedulingInfoBlac
     }
     
     private HopAppSchedulingInfoBlacklist createHopAppSchedulingInfoBlacklist(AppSchedulingInfoBlacklistDTO appSchedulingInfoBlacklistDTO) {
-        return new HopAppSchedulingInfoBlacklist(appSchedulingInfoBlacklistDTO.getappschedulinginfoid(),
+        return new HopAppSchedulingInfoBlacklist(appSchedulingInfoBlacklistDTO.getappschedulinginfo_id(),
                                                 appSchedulingInfoBlacklistDTO.getblacklisted());
     }
 
     private AppSchedulingInfoBlacklistDTO createPersistable(HopAppSchedulingInfoBlacklist hop, Session session) {
         AppSchedulingInfoBlacklistClusterJ.AppSchedulingInfoBlacklistDTO appSchedulingInfoBlacklistDTO = session.newInstance(AppSchedulingInfoBlacklistClusterJ.AppSchedulingInfoBlacklistDTO.class);
         
-        appSchedulingInfoBlacklistDTO.setappschedulinginfoid(hop.getAppschedulinginfo_id());
+        appSchedulingInfoBlacklistDTO.setappschedulinginfo_id(hop.getAppschedulinginfo_id());
         appSchedulingInfoBlacklistDTO.setblacklisted(hop.getBlacklisted());
         
         return appSchedulingInfoBlacklistDTO;
+    }
+    
+    private List<HopAppSchedulingInfoBlacklist> createAppSchedulingInfoBlackList(List<AppSchedulingInfoBlacklistClusterJ.AppSchedulingInfoBlacklistDTO> results) {
+        List<HopAppSchedulingInfoBlacklist> blackList = new ArrayList<HopAppSchedulingInfoBlacklist>();
+        for (AppSchedulingInfoBlacklistClusterJ.AppSchedulingInfoBlacklistDTO persistable : results) {
+            blackList.add(createHopAppSchedulingInfoBlacklist(persistable));
+        }
+        return blackList;
     }
     
 }
