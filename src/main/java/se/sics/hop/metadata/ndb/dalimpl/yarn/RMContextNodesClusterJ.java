@@ -1,9 +1,12 @@
 package se.sics.hop.metadata.ndb.dalimpl.yarn;
 
+import com.mysql.clusterj.Query;
 import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
+import com.mysql.clusterj.query.QueryBuilder;
+import com.mysql.clusterj.query.QueryDomainType;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -50,6 +53,22 @@ public class RMContextNodesClusterJ implements RMContextNodesTableDef, RMContext
     }
 
     @Override
+    public List<HopRMContextNodes> findAll() throws StorageException {
+        try {
+            Session session = connector.obtainSession();
+            QueryBuilder qb = session.getQueryBuilder();
+
+            QueryDomainType<RMContextNodesDTO> dobj = qb.createQueryDefinition(RMContextNodesDTO.class);
+            Query<RMContextNodesDTO> query = session.createQuery(dobj);
+
+            List<RMContextNodesDTO> results = query.getResultList();
+            return createRMContextNodesList(results);
+        } catch (Exception e) {
+            throw new StorageException(e);
+        }
+    }
+
+    @Override
     public void prepare(Collection<HopRMContextNodes> modified, Collection<HopRMContextNodes> removed) throws StorageException {
         Session session = connector.obtainSession();
         try {
@@ -88,5 +107,13 @@ public class RMContextNodesClusterJ implements RMContextNodesTableDef, RMContext
         persistable.setrmnodeid(entry.getRmnodeId());
         //session.savePersistent(persistable);
         return persistable;
+    }
+
+    private List<HopRMContextNodes> createRMContextNodesList(List<RMContextNodesDTO> results) {
+        List<HopRMContextNodes> rmcontextNodes = new ArrayList<HopRMContextNodes>();
+        for (RMContextNodesDTO persistable : results) {
+            rmcontextNodes.add(createRMContextNodesEntry(persistable));
+        }
+        return rmcontextNodes;
     }
 }
