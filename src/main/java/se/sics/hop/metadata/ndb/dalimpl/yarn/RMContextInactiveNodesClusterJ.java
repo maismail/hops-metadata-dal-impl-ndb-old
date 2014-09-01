@@ -1,9 +1,12 @@
 package se.sics.hop.metadata.ndb.dalimpl.yarn;
 
+import com.mysql.clusterj.Query;
 import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
+import com.mysql.clusterj.query.QueryBuilder;
+import com.mysql.clusterj.query.QueryDomainType;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -51,6 +54,22 @@ public class RMContextInactiveNodesClusterJ implements RMContextInactiveNodesTab
     }
 
     @Override
+    public List<HopRMContextInactiveNodes> findAll() throws StorageException {
+        try {
+            Session session = connector.obtainSession();
+            QueryBuilder qb = session.getQueryBuilder();
+
+            QueryDomainType<RMContextInactiveNodesDTO> dobj = qb.createQueryDefinition(RMContextInactiveNodesDTO.class);
+            Query<RMContextInactiveNodesDTO> query = session.createQuery(dobj);
+
+            List<RMContextInactiveNodesDTO> results = query.getResultList();
+            return createRMContextInactiveNodesList(results);
+        } catch (Exception e) {
+            throw new StorageException(e);
+        }
+    }
+
+    @Override
     public void prepare(Collection<HopRMContextInactiveNodes> modified, Collection<HopRMContextInactiveNodes> removed) throws StorageException {
         Session session = connector.obtainSession();
         try {
@@ -76,7 +95,7 @@ public class RMContextInactiveNodesClusterJ implements RMContextInactiveNodesTab
     @Override
     public void createRMContextInactiveNodesEntry(HopRMContextInactiveNodes entry) throws StorageException {
         Session session = connector.obtainSession();
-        createPersistable(entry, session);
+        session.savePersistent(createPersistable(entry, session));
     }
 
     private HopRMContextInactiveNodes createRMContextInactiveNodesEntry(RMContextInactiveNodesDTO entry) {
@@ -88,5 +107,13 @@ public class RMContextInactiveNodesClusterJ implements RMContextInactiveNodesTab
         persistable.sethost(entry.getHost());
         persistable.setrmnodeid(entry.getRmnodeid());
         return persistable;
+    }
+
+    private List<HopRMContextInactiveNodes> createRMContextInactiveNodesList(List<RMContextInactiveNodesDTO> results) {
+        List<HopRMContextInactiveNodes> rmcontextInactiveNodes = new ArrayList<HopRMContextInactiveNodes>();
+        for (RMContextInactiveNodesDTO persistable : results) {
+            rmcontextInactiveNodes.add(createRMContextInactiveNodesEntry(persistable));
+        }
+        return rmcontextInactiveNodes;
     }
 }
