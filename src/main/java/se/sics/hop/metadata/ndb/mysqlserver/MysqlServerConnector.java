@@ -4,6 +4,7 @@ import com.mysql.clusterj.Constants;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Properties;
 import org.apache.log4j.Logger;
@@ -88,17 +89,17 @@ public class MysqlServerConnector implements StorageConnector<Connection> {
       }
     }
   }
-
-public static void truncateTable(String tableName) throws StorageException, SQLException{
-  MysqlServerConnector connector = MysqlServerConnector.getInstance();
-  try {
-    Connection conn = connector.obtainSession();
-    PreparedStatement s = conn.prepareStatement("delete from "+tableName);
-    s.executeUpdate();
-  } finally {
-  connector.closeSession();
+  
+  public static void truncateTable(String tableName) throws StorageException, SQLException{
+    MysqlServerConnector connector = MysqlServerConnector.getInstance();
+    try {
+      Connection conn = connector.obtainSession();
+      PreparedStatement s = conn.prepareStatement("delete from "+tableName);
+      s.executeUpdate();
+    } finally {
+      connector.closeSession();
+    }
   }
-}
 
 
   @Override
@@ -126,7 +127,7 @@ public static void truncateTable(String tableName) throws StorageException, SQLE
   }
   
   @Override
-  public boolean isTransactionActive() {
+  public boolean isTransactionActive()  {
     throw new UnsupportedOperationException("Not supported yet.");
   }
 

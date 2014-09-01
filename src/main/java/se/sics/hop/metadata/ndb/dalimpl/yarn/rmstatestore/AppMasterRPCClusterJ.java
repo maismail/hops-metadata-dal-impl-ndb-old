@@ -105,7 +105,7 @@ public class AppMasterRPCClusterJ implements AppMasterRPCTableDef, AppMasterRPCD
     }
     
     private HopAppMasterRPC createHopAppMasterRPC(AppMasterRPCDTO appMasterRPCDTO) {
-        return new HopAppMasterRPC(appMasterRPCDTO.getid(), appMasterRPCDTO.gettype(), appMasterRPCDTO.getrpc());
+        return new HopAppMasterRPC(appMasterRPCDTO.getid(), HopAppMasterRPC.Type.valueOf(appMasterRPCDTO.gettype()), appMasterRPCDTO.getrpc());
     }
     
     private List<HopAppMasterRPC> createHopAppMasterRPCList(List<AppMasterRPCClusterJ.AppMasterRPCDTO> list) {
@@ -120,7 +120,7 @@ public class AppMasterRPCClusterJ implements AppMasterRPCTableDef, AppMasterRPCD
     private AppMasterRPCDTO createPersistable(HopAppMasterRPC hop, Session session) {
         AppMasterRPCClusterJ.AppMasterRPCDTO appMasterRPCDTO = session.newInstance(AppMasterRPCClusterJ.AppMasterRPCDTO.class);
         appMasterRPCDTO.setid(hop.getId());
-        appMasterRPCDTO.settype(hop.getType());
+        appMasterRPCDTO.settype(hop.getType().name());
         appMasterRPCDTO.setrpc(hop.getRpc());
         
         return appMasterRPCDTO;

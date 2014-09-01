@@ -42,23 +42,35 @@ public class UnderReplicatedBlockClusterj implements UnderReplicatedBlockTableDe
   public interface UnderReplicatedBlocksDTO {
 
     @PrimaryKey
+    @Column(name = INODE_ID)
+    int getINodeId();
+    void setINodeId(int inodeId);
+    
+    @PrimaryKey
     @Column(name = BLOCK_ID)
     long getBlockId();
-
     void setBlockId(long bid);
 
     @Column(name = LEVEL)
     int getLevel();
 
     void setLevel(int level);
+    
+    @Column(name = TIMESTAMP)
+    long getTimestamp();
+    void setTimestamp(long timestamp);
   }
   private ClusterjConnector connector = ClusterjConnector.getInstance();
 
   @Override
-  public HopUnderReplicatedBlock findByBlockId(long blockId) throws StorageException {
+  public HopUnderReplicatedBlock findByPk(long blockId, int inodeId) throws StorageException {
     try {
       Session session = connector.obtainSession();
-      UnderReplicatedBlocksDTO urbt = session.find(UnderReplicatedBlocksDTO.class, blockId);
+      Object[] pk = new Object[2];
+        pk[0] = inodeId;
+        pk[1] = blockId;
+        
+      UnderReplicatedBlocksDTO urbt = session.find(UnderReplicatedBlocksDTO.class, pk);
       if (urbt == null) {
         return null;
       }
@@ -71,30 +83,38 @@ public class UnderReplicatedBlockClusterj implements UnderReplicatedBlockTableDe
   @Override
   public void prepare(Collection<HopUnderReplicatedBlock> removed, Collection<HopUnderReplicatedBlock> newed, Collection<HopUnderReplicatedBlock> modified) throws StorageException {
     Session session = connector.obtainSession();
+    List<UnderReplicatedBlocksDTO> changes = new ArrayList<UnderReplicatedBlocksDTO>();
+    List<UnderReplicatedBlocksDTO> deletions = new ArrayList<UnderReplicatedBlocksDTO>();
     for (HopUnderReplicatedBlock urBlock : removed) {
-      session.deletePersistent(UnderReplicatedBlocksDTO.class, urBlock.getBlockId());
+      UnderReplicatedBlocksDTO newInstance = session.newInstance(UnderReplicatedBlocksDTO.class);
+      createPersistable(urBlock, newInstance);
+      deletions.add(newInstance);
     }
 
     for (HopUnderReplicatedBlock urBlock : newed) {
       UnderReplicatedBlocksDTO newInstance = session.newInstance(UnderReplicatedBlocksDTO.class);
       createPersistable(urBlock, newInstance);
-      session.savePersistent(newInstance);
+      changes.add(newInstance);
     }
 
     for (HopUnderReplicatedBlock urBlock : modified) {
       UnderReplicatedBlocksDTO newInstance = session.newInstance(UnderReplicatedBlocksDTO.class);
       createPersistable(urBlock, newInstance);
-      session.savePersistent(newInstance);
+      changes.add(newInstance);
     }
+    session.deletePersistentAll(deletions);
+    session.savePersistentAll(changes);
   }
 
   private void createPersistable(HopUnderReplicatedBlock block, UnderReplicatedBlocksDTO persistable) {
     persistable.setBlockId(block.getBlockId());
     persistable.setLevel(block.getLevel());
+    persistable.setINodeId(block.getInodeId());
+    persistable.setTimestamp(System.currentTimeMillis());
   }
 
   private HopUnderReplicatedBlock createUrBlock(UnderReplicatedBlocksDTO bit) {
-    HopUnderReplicatedBlock block = new HopUnderReplicatedBlock(bit.getLevel(), bit.getBlockId());
+    HopUnderReplicatedBlock block = new HopUnderReplicatedBlock(bit.getLevel(), bit.getBlockId(), bit.getINodeId());
     return block;
   }
 
@@ -118,8 +138,8 @@ public class UnderReplicatedBlockClusterj implements UnderReplicatedBlockTableDe
       QueryBuilder qb = session.getQueryBuilder();
       QueryDomainType<UnderReplicatedBlocksDTO> dobj = qb.createQueryDefinition(UnderReplicatedBlocksDTO.class);
       Query<UnderReplicatedBlocksDTO> query = session.createQuery(dobj);
-      List<UnderReplicatedBlocksDTO> urbks = query.getResultList();
-      List<HopUnderReplicatedBlock> blocks = createUrBlockList(urbks);
+      query.setOrdering(Query.Ordering.ASCENDING, "level", "timestamp");
+      List<HopUnderReplicatedBlock> blocks = createUrBlockList(query.getResultList());
       return blocks;
     } catch (Exception e) {
       throw new StorageException(e);
@@ -128,7 +148,7 @@ public class UnderReplicatedBlockClusterj implements UnderReplicatedBlockTableDe
 
   @Override
   public List<HopUnderReplicatedBlock> findByLevel(int level) throws StorageException {
-    try {
+     try {
       Session session = connector.obtainSession();
       QueryBuilder qb = session.getQueryBuilder();
       QueryDomainType<UnderReplicatedBlocksDTO> dobj = qb.createQueryDefinition(UnderReplicatedBlocksDTO.class);
@@ -136,6 +156,7 @@ public class UnderReplicatedBlockClusterj implements UnderReplicatedBlockTableDe
       dobj.where(pred);
       Query<UnderReplicatedBlocksDTO> query = session.createQuery(dobj);
       query.setParameter("level", level);
+      query.setOrdering(Query.Ordering.ASCENDING,"level","timestamp");
       return createUrBlockList(query.getResultList());
     } catch (Exception e) {
       throw new StorageException(e);
@@ -143,16 +164,18 @@ public class UnderReplicatedBlockClusterj implements UnderReplicatedBlockTableDe
   }
 
   @Override
-  public List<HopUnderReplicatedBlock> findAllLessThanLevel(int level) throws StorageException {
+  public List<HopUnderReplicatedBlock> findByINodeId(int inodeId) throws StorageException {
     try {
       Session session = connector.obtainSession();
       QueryBuilder qb = session.getQueryBuilder();
-      QueryDomainType<UnderReplicatedBlocksDTO> dobj = qb.createQueryDefinition(UnderReplicatedBlocksDTO.class);
-      Predicate pred = dobj.get("level").lessThan(dobj.param("level"));
-      dobj.where(pred);
-      Query<UnderReplicatedBlocksDTO> query = session.createQuery(dobj);
-      query.setParameter("level", level);
-
+      QueryDomainType<UnderReplicatedBlocksDTO> qdt = qb.createQueryDefinition(UnderReplicatedBlocksDTO.class);
+      Predicate pred1 = qdt.get("iNodeId").equal(qdt.param("idParam"));
+      qdt.where(pred1);
+      Query<UnderReplicatedBlocksDTO> query = session.createQuery(qdt);
+      query.setParameter("idParam", inodeId);
+      //FIXME[M]: it throws ClusterJUserException: There is no index containing the ordering fields.
+      //http://bugs.mysql.com/bug.php?id=67765
+      //query.setOrdering(Query.Ordering.ASCENDING, "level", "timestamp");
       return createUrBlockList(query.getResultList());
     } catch (Exception e) {
       throw new StorageException(e);

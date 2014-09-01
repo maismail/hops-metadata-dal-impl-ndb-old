@@ -54,7 +54,7 @@ public class DelegationTokenClusterJ implements DelegationTokenTableDef, Delegat
     }
 
     @Override
-    public void createDelegationTokenEntry(HopDelegationToken hopDelegationToken) {
+    public void createDelegationTokenEntry(HopDelegationToken hopDelegationToken) throws StorageException{
         Session session = connector.obtainSession();
         session.savePersistent(createPersistable(hopDelegationToken, session));
     }

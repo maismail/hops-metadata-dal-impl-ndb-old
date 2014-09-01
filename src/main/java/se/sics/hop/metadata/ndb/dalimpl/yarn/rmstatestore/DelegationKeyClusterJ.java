@@ -77,7 +77,7 @@ public class DelegationKeyClusterJ implements DelegationKeyTableDef, DelegationK
     }
 
     @Override
-    public void createDTMasterKeyEntry(HopDelegationKey hopDelegationKey) {
+    public void createDTMasterKeyEntry(HopDelegationKey hopDelegationKey) throws StorageException{
         Session session = connector.obtainSession();
         session.savePersistent(createPersistable(hopDelegationKey, session));
     }
