@@ -126,7 +126,7 @@ public class ClusterjConnector implements StorageConnector<Session> {
     try {
     Session session = obtainSession();
       if (session.currentTransaction().isActive()) {
-      LOG.debug("Can not start Tx inside another Tx");
+      LOG.fatal("Can not start Tx inside another Tx");
       System.exit(-1);
     }
     session.currentTransaction().begin();
