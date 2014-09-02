@@ -125,8 +125,13 @@ public class ClusterjConnector implements StorageConnector<Session> {
   public void beginTransaction() throws StorageException {
     try {
     Session session = obtainSession();
-      if (session.currentTransaction().isActive()) {
-      LOG.fatal("Can not start Tx inside another Tx:\n" + Thread.currentThread().getStackTrace());
+    if (session.currentTransaction().isActive()) {
+      StringBuilder msg = new StringBuilder();
+      msg.append("Can not start Tx inside another Tx:\n");
+      for (StackTraceElement element : Thread.currentThread().getStackTrace()) {
+        msg.append("\t"  + element + "\n");
+      }
+      LOG.fatal(msg);
       System.exit(-1);
     }
     session.currentTransaction().begin();
