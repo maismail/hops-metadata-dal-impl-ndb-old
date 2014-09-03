@@ -94,11 +94,11 @@ public class AppMasterRPCClusterJ implements AppMasterRPCTableDef, AppMasterRPCD
             Query<AppMasterRPCClusterJ.AppMasterRPCDTO> query = session.createQuery(dobj);
             //query.setParameter("applicationid", applicationid);
             List<AppMasterRPCClusterJ.AppMasterRPCDTO> results = query.getResultList();
-            if (results != null && !results.isEmpty()) {
+//            if (results != null && !results.isEmpty()) {
                 return createHopAppMasterRPCList(results);
-            } else {
-                throw new StorageException("HOP :: Error retrieving AppMasterRPCs");
-            }
+//            } else {
+           
+//            }
         } catch (Exception e) {
             throw new StorageException(e);
         }
