@@ -19,7 +19,6 @@ import java.util.Collection;
 import java.util.List;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.entity.yarn.HopAppSchedulingInfoBlacklist;
-import se.sics.hop.metadata.hdfs.entity.yarn.HopLaunchedContainers;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
 import se.sics.hop.metadata.yarn.dal.AppSchedulingInfoBlacklistDataAccess;
 import se.sics.hop.metadata.yarn.tabledef.AppSchedulingInfoBlacklistTableDef;
@@ -70,10 +69,14 @@ public class AppSchedulingInfoBlacklistClusterJ implements AppSchedulingInfoBlac
         Session session = connector.obtainSession();
         try {
             if (removed != null) {
+                List<AppSchedulingInfoBlacklistClusterJ.AppSchedulingInfoBlacklistDTO> toRemove = new ArrayList<AppSchedulingInfoBlacklistClusterJ.AppSchedulingInfoBlacklistDTO>();
                 for (HopAppSchedulingInfoBlacklist hop : removed) {
-                    AppSchedulingInfoBlacklistClusterJ.AppSchedulingInfoBlacklistDTO persistable = session.newInstance(AppSchedulingInfoBlacklistClusterJ.AppSchedulingInfoBlacklistDTO.class, hop.getAppschedulinginfo_id());
-                    session.deletePersistent(persistable);
+                    Object[] objarr = new Object[2];
+                    objarr[0] = hop.getAppschedulinginfo_id();
+                    objarr[1] = hop.getBlacklisted();
+                    toRemove.add(session.newInstance(AppSchedulingInfoBlacklistClusterJ.AppSchedulingInfoBlacklistDTO.class, objarr));
                 }
+                session.deletePersistentAll(toRemove);
             }
             if (modified != null) {
                 for (HopAppSchedulingInfoBlacklist hop : modified) {
