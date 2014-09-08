@@ -149,8 +149,8 @@ public class ClusterjConnector implements StorageConnector<Session> {
 
     tx.commit();
     session.flush();
-//    sessionPool.remove();
-//    session.close();
+    sessionPool.remove();
+    session.close();
     } catch (Exception e) {
       throw new StorageException(e);
     }
@@ -167,8 +167,8 @@ public class ClusterjConnector implements StorageConnector<Session> {
     if (tx.isActive()) {
       tx.rollback();
     }
-    //sessionPool.remove();
-    //session.close();
+    sessionPool.remove();
+    session.close();
     } catch (Exception e) {
       throw new StorageException(e);
     }
