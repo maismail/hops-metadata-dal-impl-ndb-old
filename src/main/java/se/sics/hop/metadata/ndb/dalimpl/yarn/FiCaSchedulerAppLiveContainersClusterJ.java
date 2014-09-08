@@ -71,10 +71,14 @@ public class FiCaSchedulerAppLiveContainersClusterJ implements FiCaSchedulerAppL
         Session session = connector.obtainSession();
         try {
             if (removed != null) {
+                List<FiCaSchedulerAppLiveContainersClusterJ.FiCaSchedulerAppLiveContainersDTO> toRemove = new ArrayList<FiCaSchedulerAppLiveContainersClusterJ.FiCaSchedulerAppLiveContainersDTO>();
                 for (HopFiCaSchedulerAppLiveContainers hop : removed) {
-                    FiCaSchedulerAppLiveContainersClusterJ.FiCaSchedulerAppLiveContainersDTO persistable = session.newInstance(FiCaSchedulerAppLiveContainersClusterJ.FiCaSchedulerAppLiveContainersDTO.class, hop.getFicaschedulerapp_id());
-                    session.deletePersistent(persistable);
+                    Object[] objarr = new Object[2];
+                    objarr[0] = hop.getFicaschedulerapp_id();
+                    objarr[1] = hop.getContainerid_id();
+                    toRemove.add(session.newInstance(FiCaSchedulerAppLiveContainersClusterJ.FiCaSchedulerAppLiveContainersDTO.class, objarr));
                 }
+                session.deletePersistentAll(toRemove);
             }
             if (modified != null) {
                 for (HopFiCaSchedulerAppLiveContainers hop : modified) {

@@ -11,10 +11,13 @@ import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import se.sics.hop.exception.StorageException;
+import se.sics.hop.metadata.hdfs.entity.yarn.HopAppSchedulingInfoBlacklist;
 import se.sics.hop.metadata.hdfs.entity.yarn.HopAppSchedulingInfoPriorities;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
 import se.sics.hop.metadata.ndb.mysqlserver.MysqlServerConnector;
@@ -63,10 +66,14 @@ public class AppSchedulingInfoPrioritiesClusterJ implements AppSchedulingInfoPri
         Session session = connector.obtainSession();
         try {
             if (removed != null) {
+                List<AppSchedulingInfoPrioritiesClusterJ.AppSchedulingInfoPrioritiesDTO> toRemove = new ArrayList<AppSchedulingInfoPrioritiesClusterJ.AppSchedulingInfoPrioritiesDTO>();
                 for (HopAppSchedulingInfoPriorities hop : removed) {
-                    AppSchedulingInfoPrioritiesClusterJ.AppSchedulingInfoPrioritiesDTO persistable = session.newInstance(AppSchedulingInfoPrioritiesClusterJ.AppSchedulingInfoPrioritiesDTO.class, hop.getAppschedulinginfo_id());
-                    session.deletePersistent(persistable);
+                    Object[] objarr = new Object[2];
+                    objarr[0] = hop.getAppschedulinginfo_id();
+                    objarr[1] = hop.getPriority_id();
+                    toRemove.add(session.newInstance(AppSchedulingInfoPrioritiesClusterJ.AppSchedulingInfoPrioritiesDTO.class, objarr));
                 }
+                session.deletePersistentAll(toRemove);
             }
             if (modified != null) {
                 for (HopAppSchedulingInfoPriorities hop : modified) {

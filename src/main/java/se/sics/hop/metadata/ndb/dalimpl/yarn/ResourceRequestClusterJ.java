@@ -73,7 +73,10 @@ public class ResourceRequestClusterJ implements ResourceRequestTableDef, Resourc
             if (removed != null) {
                 List<ResourceRequestClusterJ.ResourceRequestDTO> toRemove = new ArrayList<ResourceRequestClusterJ.ResourceRequestDTO>();
                 for (HopResourceRequest hop : removed) {
-                    toRemove.add(session.newInstance(ResourceRequestClusterJ.ResourceRequestDTO.class, hop.getId())); 
+                    Object[] objarr = new Object[2];
+                    objarr[0] = hop.getId();
+                    objarr[1] = hop.getPriority();
+                    toRemove.add(session.newInstance(ResourceRequestClusterJ.ResourceRequestDTO.class, objarr));
                 }
                 session.deletePersistentAll(toRemove);
             }

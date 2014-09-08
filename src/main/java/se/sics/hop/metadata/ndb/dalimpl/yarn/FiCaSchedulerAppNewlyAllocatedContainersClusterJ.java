@@ -68,10 +68,14 @@ public class FiCaSchedulerAppNewlyAllocatedContainersClusterJ implements FiCaSch
         Session session = connector.obtainSession();
         try {
             if (removed != null) {
+                List<FiCaSchedulerAppNewlyAllocatedContainersClusterJ.FiCaSchedulerAppNewlyAllocatedContainersDTO> toRemove = new ArrayList<FiCaSchedulerAppNewlyAllocatedContainersClusterJ.FiCaSchedulerAppNewlyAllocatedContainersDTO>();
                 for (HopFiCaSchedulerAppNewlyAllocatedContainers hop : removed) {
-                    FiCaSchedulerAppNewlyAllocatedContainersClusterJ.FiCaSchedulerAppNewlyAllocatedContainersDTO persistable = session.newInstance(FiCaSchedulerAppNewlyAllocatedContainersClusterJ.FiCaSchedulerAppNewlyAllocatedContainersDTO.class, hop.getFicaschedulerapp_id());
-                    session.deletePersistent(persistable);
+                    Object[] objarr = new Object[2];
+                    objarr[0] = hop.getFicaschedulerapp_id();
+                    objarr[1] = hop.getRmcontainer_id();
+                    toRemove.add(session.newInstance(FiCaSchedulerAppNewlyAllocatedContainersClusterJ.FiCaSchedulerAppNewlyAllocatedContainersDTO.class, objarr));
                 }
+                session.deletePersistentAll(toRemove);
             }
             if (modified != null) {
                 for (HopFiCaSchedulerAppNewlyAllocatedContainers hop : modified) {
