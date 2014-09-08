@@ -204,6 +204,7 @@ public class ClusterjConnector implements StorageConnector<Session> {
   public Session obtainSession() throws StorageException {
     try {
     Session session = sessionPool.get();
+    System.out.println("obtainSession for thread " + Thread.currentThread().getId());
     if (session == null) {
       session = sessionFactory.getSession();
       LOG.info("New session object being obtained.-" + session);
@@ -219,11 +220,12 @@ public class ClusterjConnector implements StorageConnector<Session> {
    * begin a transaction.
    */
   @Override
-  public void beginTransaction() throws StorageException {
+  public void beginTransaction(String name) throws StorageException {
     try {
     Session session = obtainSession();
-      if (session.currentTransaction().isActive()) {
-      LOG.debug("Can not start Tx inside another Tx");
+    LOG.error(name + " begin transaction for thread " + Thread.currentThread().getId()); 
+    if (session.currentTransaction().isActive()) {
+      LOG.error("Can not start Tx inside another Tx");
       System.exit(0);
     }
     session.currentTransaction().begin();
@@ -246,6 +248,7 @@ public class ClusterjConnector implements StorageConnector<Session> {
 
     tx.commit();
     session.flush();
+    System.out.println("end transaction for thread " + Thread.currentThread().getId());
 //    sessionPool.remove();
 //    session.close();
     } catch (Exception e) {

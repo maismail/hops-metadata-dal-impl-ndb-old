@@ -181,7 +181,7 @@ public class QueueMetricsClusterJ implements QueueMetricsTableDef, QueueMetricsD
     QueryDomainType<QueueMetricsClusterJ.QueueMetricsDTO> dobj = qb.createQueryDefinition(QueueMetricsClusterJ.QueueMetricsDTO.class);
     Query<QueueMetricsClusterJ.QueueMetricsDTO> query = session.createQuery(dobj);
     List<QueueMetricsClusterJ.QueueMetricsDTO> results = query.getResultList();
-
+    session.flush();
     return createHopQueueMetricsList(results);
 
   }
