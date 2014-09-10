@@ -54,7 +54,7 @@ public class DelegationTokenClusterJ implements DelegationTokenTableDef, Delegat
     }
 
     @Override
-    public void createDelegationTokenEntry(HopDelegationToken hopDelegationToken) throws StorageException{
+    public void createDelegationTokenEntry(HopDelegationToken hopDelegationToken) throws StorageException {
         Session session = connector.obtainSession();
         session.savePersistent(createPersistable(hopDelegationToken, session));
     }
@@ -67,11 +67,9 @@ public class DelegationTokenClusterJ implements DelegationTokenTableDef, Delegat
             QueryDomainType<DelegationTokenDTO> dobj = qb.createQueryDefinition(DelegationTokenDTO.class);
             Query<DelegationTokenDTO> query = session.createQuery(dobj);
             List<DelegationTokenDTO> results = query.getResultList();
-            if (results != null && !results.isEmpty()) {
-                return createHopDelegationTokenList(results);
-            } else {
-                throw new StorageException("HOP :: Error retrieving DelegationTokens");
-            }
+
+            return createHopDelegationTokenList(results);
+
         } catch (Exception e) {
             throw new StorageException(e);
         }
