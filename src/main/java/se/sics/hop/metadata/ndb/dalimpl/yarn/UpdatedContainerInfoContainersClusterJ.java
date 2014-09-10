@@ -71,10 +71,10 @@ public class UpdatedContainerInfoContainersClusterJ implements UpdatedContainerI
             QueryBuilder qb = session.getQueryBuilder();
 
             QueryDomainType<UpdatedContainerInfoContainersDTO> dobj = qb.createQueryDefinition(UpdatedContainerInfoContainersDTO.class);
-            Predicate pred = dobj.get("updatedcontainerinfo_id").equal(dobj.param("updatedcontainerinfo_id"));
+            Predicate pred = dobj.get("updatedcontainerinfoid").equal(dobj.param("updatedcontainerinfoid"));
             dobj.where(pred);
             Query<UpdatedContainerInfoContainersDTO> query = session.createQuery(dobj);
-            query.setParameter("updatedcontainerinfo_id", uciId);
+            query.setParameter("updatedcontainerinfoid", uciId);
             List<UpdatedContainerInfoContainersDTO> results = query.getResultList();
             return createHopUpdatedContainerInfoContainersList(results);
         } catch (Exception e) {
