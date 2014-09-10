@@ -40,6 +40,10 @@ public class ResourceRequestClusterJ implements ResourceRequestTableDef, Resourc
         @Column(name = PRIORITY)
         int getpriority();
         void setpriority(int priority);
+        
+        @Column(name = NAME)
+        String getname();
+        void setname(String name);
 
         @Column(name = RESOURCEREQUESTSTATE)
         byte[] getresourcerequeststate();
@@ -73,9 +77,10 @@ public class ResourceRequestClusterJ implements ResourceRequestTableDef, Resourc
             if (removed != null) {
                 List<ResourceRequestClusterJ.ResourceRequestDTO> toRemove = new ArrayList<ResourceRequestClusterJ.ResourceRequestDTO>();
                 for (HopResourceRequest hop : removed) {
-                    Object[] objarr = new Object[2];
+                    Object[] objarr = new Object[3];
                     objarr[0] = hop.getId();
                     objarr[1] = hop.getPriority();
+                    objarr[2] = hop.getName();
                     toRemove.add(session.newInstance(ResourceRequestClusterJ.ResourceRequestDTO.class, objarr));
                 }
                 session.deletePersistentAll(toRemove);
@@ -95,6 +100,7 @@ public class ResourceRequestClusterJ implements ResourceRequestTableDef, Resourc
     private HopResourceRequest createHopResourceRequest(ResourceRequestDTO resourceRequestDTO) {
         return new HopResourceRequest(resourceRequestDTO.getappschedulinginfo_id(),
                                         resourceRequestDTO.getpriority(),
+                                        resourceRequestDTO.getname(),
                                         resourceRequestDTO.getresourcerequeststate());
     }
 
@@ -103,6 +109,7 @@ public class ResourceRequestClusterJ implements ResourceRequestTableDef, Resourc
         
         resourceRequestDTO.setappschedulinginfo_id(hop.getId());
         resourceRequestDTO.setpriority(hop.getPriority());
+        resourceRequestDTO.setname(hop.getName());
         resourceRequestDTO.setresourcerequeststate(hop.getResourcerequeststate());
         
         return resourceRequestDTO;

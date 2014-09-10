@@ -60,7 +60,7 @@ public class ContainerIdClusterJ implements ContainerIdTableDef, ContainerIdData
             if (removed != null) {
                 List<ContainerIdDTO> toRemove = new ArrayList<ContainerIdDTO>();
                 for (HopContainerId hopContainerId : removed) {
-                    toRemove.add(session.newInstance(ContainerIdDTO.class, hopContainerId.getContainerId()));
+                    toRemove.add(session.newInstance(ContainerIdDTO.class, hopContainerId.getId()));
                 }
                 session.deletePersistentAll(toRemove);
             }

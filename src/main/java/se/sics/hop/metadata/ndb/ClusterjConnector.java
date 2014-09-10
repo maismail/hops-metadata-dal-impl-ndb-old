@@ -62,8 +62,6 @@ import se.sics.hop.metadata.ndb.dalimpl.hdfs.VariableClusterj;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.YarnVariablesClusterJ;
 import se.sics.hop.metadata.yarn.dal.AppSchedulingInfoBlacklistDataAccess;
 import se.sics.hop.metadata.yarn.dal.AppSchedulingInfoDataAccess;
-import se.sics.hop.metadata.yarn.dal.AppSchedulingInfoPrioritiesDataAccess;
-import se.sics.hop.metadata.yarn.dal.AppSchedulingInfoRequestsDataAccess;
 import se.sics.hop.metadata.yarn.dal.ApplicationAttemptIdDataAccess;
 import se.sics.hop.metadata.yarn.dal.rmstatestore.AppMasterRPCDataAccess;
 import se.sics.hop.metadata.yarn.dal.ApplicationIdDataAccess;
@@ -223,7 +221,7 @@ public class ClusterjConnector implements StorageConnector<Session> {
   public void beginTransaction(String name) throws StorageException {
     try {
     Session session = obtainSession();
-    LOG.error(name + " begin transaction for thread " + Thread.currentThread().getId()); 
+    LOG.debug(name + " begin transaction for thread " + Thread.currentThread().getId()); 
     if (session.currentTransaction().isActive()) {
       LOG.error("Can not start Tx inside another Tx");
       System.exit(0);
@@ -291,7 +289,6 @@ public class ClusterjConnector implements StorageConnector<Session> {
             DelegationTokenDataAccess.class, ApplicationIdDataAccess.class, SequenceNumberDataAccess.class,
             RMStateVersionDataAccess.class, YarnVariablesDataAccess.class, ApplicationAttemptIdDataAccess.class,
             AppSchedulingInfoDataAccess.class, AppSchedulingInfoBlacklistDataAccess.class,
-            AppSchedulingInfoPrioritiesDataAccess.class, AppSchedulingInfoRequestsDataAccess.class,
             ContainerDataAccess.class, ContainerIdDataAccess.class, ContainerIdToCleanDataAccess.class,
             ContainerStatusDataAccess.class, FiCaSchedulerAppDataAccess.class, FiCaSchedulerAppLastScheduledContainerDataAccess.class,
             FiCaSchedulerAppLiveContainersDataAccess.class, FiCaSchedulerAppNewlyAllocatedContainersDataAccess.class,
@@ -390,10 +387,6 @@ public class ClusterjConnector implements StorageConnector<Session> {
             truncate(AppSchedulingInfoTableDef.TABLE_NAME);
           } else if (e == AppSchedulingInfoBlacklistDataAccess.class) {
             truncate(AppSchedulingInfoBlacklistTableDef.TABLE_NAME);
-          } else if (e == AppSchedulingInfoPrioritiesDataAccess.class) {
-            truncate(AppSchedulingInfoPrioritiesTableDef.TABLE_NAME);
-          } else if (e == AppSchedulingInfoRequestsDataAccess.class) {
-            truncate(AppSchedulingInfoRequestsTableDef.TABLE_NAME);
           } else if (e == ContainerDataAccess.class) {
             truncate(ContainerTableDef.TABLE_NAME);
           } else if (e == ContainerIdDataAccess.class) {
