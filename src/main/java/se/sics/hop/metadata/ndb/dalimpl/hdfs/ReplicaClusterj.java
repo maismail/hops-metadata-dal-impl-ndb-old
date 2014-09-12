@@ -21,6 +21,7 @@ import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
 import se.sics.hop.metadata.hdfs.tabledef.ReplicaTableDef;
 import se.sics.hop.metadata.ndb.mysqlserver.CountHelper;
+import se.sics.hop.util.Slicer;
 
 /**
  *
@@ -108,23 +109,32 @@ public class ReplicaClusterj implements ReplicaTableDef, ReplicaDataAccess<HopIn
   }
   
   @Override
-  public List<HopIndexedReplica> findReplicasByPKS(long[] blockIds, int[] inodeIds, int[] sids) throws StorageException {
+  public List<HopIndexedReplica> findReplicasByPKS(final long[] blockIds, final int[] inodeIds, final int[] sids) throws StorageException {
     try {
-      Session session = connector.obtainSession();
-      List<ReplicaDTO> dtos = new ArrayList<ReplicaDTO>();
-      for (int i = 0; i < blockIds.length; i++) {
-        ReplicaDTO newInstance = session.newInstance(ReplicaDTO.class, new Object[]{inodeIds[i], blockIds[i], sids[i]});
-        newInstance.setIndex(NOT_FOUND_ROW);
-        newInstance = session.load(newInstance);
-        dtos.add(newInstance);
-      }
-      session.flush();
+      final List<ReplicaDTO> dtos = new ArrayList<ReplicaDTO>();
+      Slicer.slice(blockIds.length, connector.getBatchSize(), new Slicer.OperationHandler() {
+        @Override
+        public void handle(int startIndex, int endIndex) throws Exception {
+          Session session = connector.obtainSession();
+          for (int i = startIndex; i < endIndex; i++) {
+            ReplicaDTO newInstance = session.newInstance(ReplicaDTO.class, new Object[]{inodeIds[i], blockIds[i], sids[i]});
+            newInstance.setIndex(NOT_FOUND_ROW);
+            newInstance = session.load(newInstance);
+            dtos.add(newInstance);
+          }
+          session.flush();
+          
+          session.currentTransaction().commit();
+          session.currentTransaction().begin();
+        }
+      });
+
       return createReplicaList(dtos);
     } catch (Exception e) {
       throw new StorageException(e);
     }
   }
-   
+
   
   @Override
   public void prepare(Collection<HopIndexedReplica> removed, Collection<HopIndexedReplica> newed, Collection<HopIndexedReplica> modified) throws StorageException {

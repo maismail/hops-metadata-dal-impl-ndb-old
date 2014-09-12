@@ -19,6 +19,7 @@ import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
 import se.sics.hop.metadata.ndb.mysqlserver.CountHelper;
 import se.sics.hop.metadata.hdfs.tabledef.InvalidatedBlockTableDef;
+import se.sics.hop.util.Slicer;
 
 /**
  *
@@ -158,17 +159,27 @@ public class InvalidatedBlockClusterj implements InvalidatedBlockTableDef, Inval
   }
 
   @Override
-  public List<HopInvalidatedBlock> findInvalidatedBlocksbyPKS(long[] blockIds, int[] inodesIds, int[] storageIds) throws StorageException {
+  public List<HopInvalidatedBlock> findInvalidatedBlocksbyPKS(final long[] blockIds, final int[] inodesIds, final int[] storageIds) throws StorageException {
     try {
-      Session session = connector.obtainSession();
-      List<InvalidateBlocksDTO> invBlocks = new ArrayList<InvalidateBlocksDTO>();
-      for (int i = 0; i < blockIds.length; i++) {
-        InvalidateBlocksDTO invTable = session.newInstance(InvalidateBlocksDTO.class, new Object[]{inodesIds[i], blockIds[i], storageIds[i]});
-        invTable.setGenerationStamp(NOT_FOUND_ROW);
-        invTable = session.load(invTable);
-        invBlocks.add(invTable);
-      }
-      session.flush();
+      final List<InvalidateBlocksDTO> invBlocks = new ArrayList<InvalidateBlocksDTO>();
+
+      Slicer.slice(blockIds.length, connector.getBatchSize(), new Slicer.OperationHandler() {
+        @Override
+        public void handle(int startIndex, int endIndex) throws Exception {
+          Session session = connector.obtainSession();
+          for (int i = startIndex; i < endIndex; i++) {
+            InvalidateBlocksDTO invTable = session.newInstance(InvalidateBlocksDTO.class, new Object[]{inodesIds[i], blockIds[i], storageIds[i]});
+            invTable.setGenerationStamp(NOT_FOUND_ROW);
+            invTable = session.load(invTable);
+            invBlocks.add(invTable);
+          }
+          session.flush();
+
+          session.currentTransaction().commit();
+          session.currentTransaction().begin();
+        }
+      });
+
       return createList(invBlocks);
     } catch (Exception e) {
       throw new StorageException(e);

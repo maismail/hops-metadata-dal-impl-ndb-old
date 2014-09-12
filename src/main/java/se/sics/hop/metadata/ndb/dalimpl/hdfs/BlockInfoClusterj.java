@@ -11,7 +11,9 @@ import com.mysql.clusterj.query.QueryBuilder;
 import com.mysql.clusterj.query.QueryDomainType;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import se.sics.hop.metadata.hdfs.dal.BlockInfoDataAccess;
 import se.sics.hop.metadata.hdfs.entity.hdfs.HopBlockInfo;
 import se.sics.hop.exception.StorageException;
@@ -19,6 +21,7 @@ import se.sics.hop.metadata.hdfs.entity.hop.HopBlockLookUp;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
 import se.sics.hop.metadata.ndb.mysqlserver.CountHelper;
 import se.sics.hop.metadata.hdfs.tabledef.BlockInfoTableDef;
+import se.sics.hop.util.Slicer;
 
 /**
  *
@@ -229,7 +232,7 @@ public class BlockInfoClusterj implements BlockInfoTableDef, BlockInfoDataAccess
         blockIds[i] = replicas.get(i).getBlockId();
       }
 
-      List<HopBlockInfo> ret = readBlockInfoBatch(session, blockIds);
+      List<HopBlockInfo> ret = readBlockInfoBatch(session, blockIds, false);
       session.currentTransaction().commit();
       return ret;
     } catch (Exception e) {
@@ -241,18 +244,18 @@ public class BlockInfoClusterj implements BlockInfoTableDef, BlockInfoDataAccess
   public List<HopBlockInfo> findByIds(long[] blockIds, int[] inodeIds) throws StorageException {
     try {
       Session session = connector.obtainSession();
-      return readBlockInfoBatch(session, inodeIds, blockIds);
+      return readBlockInfoBatch(session, inodeIds, blockIds, true);
     } catch (Exception e) {
       throw new StorageException(e);
     }
   }
 
   @Override
-  public List<Long> findByStorageIdOnlyIds(int storageId) throws StorageException {
+  public Set<Long> findByStorageIdOnlyIds(int storageId) throws StorageException {
     try {
       Session session = connector.obtainSession();
       List<ReplicaClusterj.ReplicaDTO> replicas = getReplicas(session, storageId);
-      List<Long> blockIds = new ArrayList<Long>();
+      Set<Long> blockIds = new HashSet<Long>();
       for (ReplicaClusterj.ReplicaDTO r : replicas) {
         blockIds.add(r.getBlockId());
       }
@@ -271,38 +274,31 @@ public class BlockInfoClusterj implements BlockInfoTableDef, BlockInfoDataAccess
     return query.getResultList();
   }
 
-  private List<HopBlockInfo> readBlockInfoBatch(Session session, long[] blockIds) {
-    int[] inodeIds = readInodeIds(session, blockIds);
-    return readBlockInfoBatch(session, inodeIds, blockIds);
-  }
-
-  private int[] readInodeIds(Session session, long[] blockIds) {
-    List<BlockLookUpClusterj.BlockLookUpDTO> bldtos = new ArrayList<BlockLookUpClusterj.BlockLookUpDTO>();
-    int[] inodeIds = new int[blockIds.length];
-    for (long blockId : blockIds) {
-      BlockLookUpClusterj.BlockLookUpDTO bldto = session.newInstance(BlockLookUpClusterj.BlockLookUpDTO.class, blockId);
-      bldto.setINodeId(NOT_FOUND_ROW);
-      bldto = session.load(bldto);
-      bldtos.add(bldto);
-    }
-    session.flush();
-    for (int i = 0; i < bldtos.size(); i++) {
-      BlockLookUpClusterj.BlockLookUpDTO bld = bldtos.get(i);
-      inodeIds[i] = bld.getINodeId();
-    }
-    return inodeIds;
+  private List<HopBlockInfo> readBlockInfoBatch(final Session session, final long[] blockIds, final boolean commitAfterFlush) throws Exception {
+    int[] inodeIds = BlockLookUpClusterj.readINodeIdsByBlockIds(session, blockIds);
+    return readBlockInfoBatch(session, inodeIds, blockIds, commitAfterFlush);
   }
   
-  private List<HopBlockInfo> readBlockInfoBatch(Session session, int[] inodeIds, long[] blockIds) {
-    List<BlockInfoClusterj.BlockInfoDTO> bdtos = new ArrayList<BlockInfoDTO>();
-    for (int i = 0; i < blockIds.length; i++) {
-      Object[] pk = new Object[]{inodeIds[i], blockIds[i]};
-      BlockInfoClusterj.BlockInfoDTO bdto = session.newInstance(BlockInfoClusterj.BlockInfoDTO.class, pk);
-      bdto.setBlockIndex(NOT_FOUND_ROW);
-      bdto = session.load(bdto);
-      bdtos.add(bdto);
-    }
-    session.flush();
+  private List<HopBlockInfo> readBlockInfoBatch(final Session session, final int[] inodeIds, final long[] blockIds, final boolean commitAfterFlush) throws Exception {
+    final List<BlockInfoClusterj.BlockInfoDTO> bdtos = new ArrayList<BlockInfoDTO>();
+    Slicer.slice(blockIds.length, connector.getBatchSize(), new Slicer.OperationHandler() {
+      @Override
+      public void handle(int startIndex, int endIndex) throws Exception {
+        for (int i = startIndex; i < endIndex; i++) {
+          Object[] pk = new Object[]{inodeIds[i], blockIds[i]};
+          BlockInfoClusterj.BlockInfoDTO bdto = session.newInstance(BlockInfoClusterj.BlockInfoDTO.class, pk);
+          bdto.setBlockIndex(NOT_FOUND_ROW);
+          bdto = session.load(bdto);
+          bdtos.add(bdto);
+        }
+        session.flush();
+        if (commitAfterFlush) {
+          session.currentTransaction().commit();
+          session.currentTransaction().begin();
+        }
+      }
+    });
+
     return createBlockInfoList(bdtos);
   }
   
