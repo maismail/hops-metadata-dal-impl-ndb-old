@@ -47,7 +47,6 @@ import se.sics.hop.metadata.hdfs.tabledef.ReplicaUnderConstructionTableDef;
 import se.sics.hop.metadata.hdfs.tabledef.StorageIdMapTableDef;
 import se.sics.hop.metadata.hdfs.tabledef.UnderReplicatedBlockTableDef;
 import se.sics.hop.metadata.ndb.dalimpl.hdfs.BlockInfoClusterj;
-import se.sics.hop.metadata.ndb.dalimpl.hdfs.BlockLookUpClusterj;
 import se.sics.hop.metadata.ndb.dalimpl.hdfs.CorruptReplicaClusterj;
 import se.sics.hop.metadata.ndb.dalimpl.hdfs.ExcessReplicaClusterj;
 import se.sics.hop.metadata.ndb.dalimpl.hdfs.INodeAttributesClusterj;
@@ -58,7 +57,6 @@ import se.sics.hop.metadata.ndb.dalimpl.hdfs.LeasePathClusterj;
 import se.sics.hop.metadata.ndb.dalimpl.hdfs.PendingBlockClusterj;
 import se.sics.hop.metadata.ndb.dalimpl.hdfs.ReplicaClusterj;
 import se.sics.hop.metadata.ndb.dalimpl.hdfs.ReplicaUnderConstructionClusterj;
-import se.sics.hop.metadata.ndb.dalimpl.hdfs.StorageIdMapClusterj;
 import se.sics.hop.metadata.ndb.dalimpl.hdfs.UnderReplicatedBlockClusterj;
 import se.sics.hop.metadata.ndb.dalimpl.hdfs.VariableClusterj;
 import se.sics.hop.metadata.ndb.mysqlserver.MysqlServerConnector;
@@ -70,6 +68,9 @@ public class ClusterjConnector implements StorageConnector<Session> {
   static SessionFactory sessionFactory;
   static ThreadLocal<Session> sessionPool = new ThreadLocal<Session>();
   static final Log LOG = LogFactory.getLog(ClusterjConnector.class);
+  
+  private static final String PROPERTY_HOP_CLUSTER_BATCHSIZE="hop.metadata.ndb.batchSize";
+  private int batchSize;
   
   private ClusterjConnector(){
     
@@ -88,9 +89,11 @@ public class ClusterjConnector implements StorageConnector<Session> {
       LOG.warn("SessionFactory is already initialized");
       return;
     }
+    batchSize = Integer.valueOf((String)conf.get(PROPERTY_HOP_CLUSTER_BATCHSIZE));
     LOG.info("Database connect string: " + conf.get(Constants.PROPERTY_CLUSTER_CONNECTSTRING));
     LOG.info("Database name: " + conf.get(Constants.PROPERTY_CLUSTER_DATABASE));
     LOG.info("Max Transactions: " + conf.get(Constants.PROPERTY_CLUSTER_MAX_TRANSACTIONS));
+    LOG.info("HOPS Cluster BatchSize: " + batchSize);
     
     try {
       sessionFactory = ClusterJHelper.getSessionFactory(conf);
@@ -179,89 +182,12 @@ public class ClusterjConnector implements StorageConnector<Session> {
    */
   @Override
   public boolean formatStorage() throws StorageException {
-    return formatStorage(INodeDataAccess.class, BlockInfoDataAccess.class,
-            LeaseDataAccess.class, LeasePathDataAccess.class, ReplicaDataAccess.class,
-            ReplicaUnderConstructionDataAccess.class, InvalidateBlockDataAccess.class,
-            ExcessReplicaDataAccess.class, PendingBlockDataAccess.class, CorruptReplicaDataAccess.class,
-            UnderReplicatedBlockDataAccess.class, LeaderDataAccess.class, 
-            INodeAttributesDataAccess.class, VariableDataAccess.class, StorageIdMapDataAccess.class, 
-            BlockLookUpDataAccess.class);
+    return format(true);
   }
 
   @Override
   public boolean formatStorage(Class<? extends EntityDataAccess>... das) throws StorageException {
-    Session session = obtainSession();
-    Transaction tx = session.currentTransaction();
-    session.setLockMode(LockMode.READ_COMMITTED);
-    final int RETRIES = 5; // in test 
-    for (int i = 0; i < RETRIES; i++) {
-      try {
-        tx.begin();
-        for (Class e : das) {
-          if (e == INodeDataAccess.class) {
-            MysqlServerConnector.truncateTable(INodeTableDef.TABLE_NAME);
-
-          } else if (e == BlockInfoDataAccess.class) {
-            MysqlServerConnector.truncateTable(BlockInfoTableDef.TABLE_NAME);
-
-          } else if (e == LeaseDataAccess.class) {
-            MysqlServerConnector.truncateTable(LeaseTableDef.TABLE_NAME);
-            
-          } else if (e == LeasePathDataAccess.class) {
-            MysqlServerConnector.truncateTable(LeasePathTableDef.TABLE_NAME);
-
-          } else if (e == ReplicaDataAccess.class) {
-            MysqlServerConnector.truncateTable(ReplicaTableDef.TABLE_NAME);
-
-          } else if (e == ReplicaUnderConstructionDataAccess.class) {
-            MysqlServerConnector.truncateTable(ReplicaUnderConstructionTableDef.TABLE_NAME);
-
-          } else if (e == InvalidateBlockDataAccess.class) {
-            MysqlServerConnector.truncateTable(InvalidatedBlockTableDef.TABLE_NAME);
-
-          } else if (e == ExcessReplicaDataAccess.class) {
-            MysqlServerConnector.truncateTable(ExcessReplicaTableDef.TABLE_NAME);
-
-          } else if (e == PendingBlockDataAccess.class) {
-            MysqlServerConnector.truncateTable(PendingBlockTableDef.TABLE_NAME);
-
-          } else if (e == CorruptReplicaDataAccess.class) {
-            MysqlServerConnector.truncateTable(CorruptReplicaTableDef.TABLE_NAME);
-
-          } else if (e == UnderReplicatedBlockDataAccess.class) {
-            MysqlServerConnector.truncateTable(UnderReplicatedBlockTableDef.TABLE_NAME);
-
-          } else if (e == LeaderDataAccess.class) {
-            MysqlServerConnector.truncateTable(LeaderTableDef.TABLE_NAME);
-            
-          } else if (e == INodeAttributesDataAccess.class) {
-            MysqlServerConnector.truncateTable(INodeAttributesTableDef.TABLE_NAME);
-
-          } else if (e == VariableDataAccess.class) {
-            session.deletePersistentAll(VariableClusterj.VariableDTO.class);
-            for (HopVariable.Finder varType : HopVariable.Finder.values()) {
-              VariableClusterj.VariableDTO vd = session.newInstance(VariableClusterj.VariableDTO.class);
-              vd.setId(varType.getId());
-              vd.setValue(varType.getDefaultValue());
-              session.savePersistent(vd);
-            }
-          }else if(e == StorageIdMapDataAccess.class){
-            MysqlServerConnector.truncateTable(StorageIdMapTableDef.TABLE_NAME);
-          }else if(e == BlockLookUpDataAccess.class){
-            MysqlServerConnector.truncateTable(BlockLookUpTableDef.TABLE_NAME);
-          }
-        }
-        MysqlServerConnector.truncateTable("path_memcached");
-        tx.commit();
-        session.flush();
-        return true;
-
-      } catch (Exception ex) {
-        LOG.error(ex.getMessage(), ex);
-        tx.rollback();
-      }
-    } // end retry loop
-    return false;
+    return format(true, das);
   }
   
   @Override
@@ -346,5 +272,99 @@ public class ClusterjConnector implements StorageConnector<Session> {
     } catch (Exception e) {
       throw new StorageException(e);
     }
+  }
+  
+  public int getBatchSize(){
+    return batchSize;
+  }
+
+  @Override
+  public boolean formatStorageNonTransactional() throws StorageException {
+    return format(false);
+  }
+
+  private boolean format(boolean transactional) throws StorageException{
+     return format(transactional, INodeDataAccess.class, BlockInfoDataAccess.class,
+            LeaseDataAccess.class, LeasePathDataAccess.class, ReplicaDataAccess.class,
+            ReplicaUnderConstructionDataAccess.class, InvalidateBlockDataAccess.class,
+            ExcessReplicaDataAccess.class, PendingBlockDataAccess.class, CorruptReplicaDataAccess.class,
+            UnderReplicatedBlockDataAccess.class, LeaderDataAccess.class,
+            INodeAttributesDataAccess.class, VariableDataAccess.class, StorageIdMapDataAccess.class,
+            BlockLookUpDataAccess.class);
+  }
+  
+  private boolean format(boolean transactional, Class<? extends EntityDataAccess>... das) throws StorageException {
+    Session session = obtainSession();
+    Transaction tx = session.currentTransaction();
+    session.setLockMode(LockMode.READ_COMMITTED);
+    final int RETRIES = 5; // in test 
+    for (int i = 0; i < RETRIES; i++) {
+      try {
+        tx.begin();
+        for (Class e : das) {
+          if (e == INodeDataAccess.class) {
+            MysqlServerConnector.truncateTable(transactional, INodeTableDef.TABLE_NAME);
+
+          } else if (e == BlockInfoDataAccess.class) {
+            MysqlServerConnector.truncateTable(transactional, BlockInfoTableDef.TABLE_NAME);
+
+          } else if (e == LeaseDataAccess.class) {
+            MysqlServerConnector.truncateTable(transactional, LeaseTableDef.TABLE_NAME);
+
+          } else if (e == LeasePathDataAccess.class) {
+            MysqlServerConnector.truncateTable(transactional, LeasePathTableDef.TABLE_NAME);
+
+          } else if (e == ReplicaDataAccess.class) {
+            MysqlServerConnector.truncateTable(transactional, ReplicaTableDef.TABLE_NAME);
+
+          } else if (e == ReplicaUnderConstructionDataAccess.class) {
+            MysqlServerConnector.truncateTable(transactional, ReplicaUnderConstructionTableDef.TABLE_NAME);
+
+          } else if (e == InvalidateBlockDataAccess.class) {
+            MysqlServerConnector.truncateTable(transactional, InvalidatedBlockTableDef.TABLE_NAME);
+
+          } else if (e == ExcessReplicaDataAccess.class) {
+            MysqlServerConnector.truncateTable(transactional, ExcessReplicaTableDef.TABLE_NAME);
+
+          } else if (e == PendingBlockDataAccess.class) {
+            MysqlServerConnector.truncateTable(transactional, PendingBlockTableDef.TABLE_NAME);
+
+          } else if (e == CorruptReplicaDataAccess.class) {
+            MysqlServerConnector.truncateTable(transactional, CorruptReplicaTableDef.TABLE_NAME);
+
+          } else if (e == UnderReplicatedBlockDataAccess.class) {
+            MysqlServerConnector.truncateTable(transactional, UnderReplicatedBlockTableDef.TABLE_NAME);
+
+          } else if (e == LeaderDataAccess.class) {
+            MysqlServerConnector.truncateTable(transactional, LeaderTableDef.TABLE_NAME);
+
+          } else if (e == INodeAttributesDataAccess.class) {
+            MysqlServerConnector.truncateTable(transactional,INodeAttributesTableDef.TABLE_NAME);
+
+          } else if (e == VariableDataAccess.class) {
+            session.deletePersistentAll(VariableClusterj.VariableDTO.class);
+            for (HopVariable.Finder varType : HopVariable.Finder.values()) {
+              VariableClusterj.VariableDTO vd = session.newInstance(VariableClusterj.VariableDTO.class);
+              vd.setId(varType.getId());
+              vd.setValue(varType.getDefaultValue());
+              session.savePersistent(vd);
+            }
+          } else if (e == StorageIdMapDataAccess.class) {
+            MysqlServerConnector.truncateTable(transactional, StorageIdMapTableDef.TABLE_NAME);
+          } else if (e == BlockLookUpDataAccess.class) {
+            MysqlServerConnector.truncateTable(transactional, BlockLookUpTableDef.TABLE_NAME);
+          }
+        }
+        MysqlServerConnector.truncateTable(transactional, "path_memcached");
+        tx.commit();
+        session.flush();
+        return true;
+
+      } catch (Exception ex) {
+        LOG.error(ex.getMessage(), ex);
+        tx.rollback();
+      }
+    } // end retry loop
+    return false;
   }
 }
