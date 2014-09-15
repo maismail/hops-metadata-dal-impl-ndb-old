@@ -251,6 +251,16 @@ public class BlockInfoClusterj implements BlockInfoTableDef, BlockInfoDataAccess
   }
 
   @Override
+  public List<HopBlockInfo> findByIdsNoCommit(long[] blockIds, int[] inodeIds) throws StorageException {
+    try {
+      Session session = connector.obtainSession();
+      return readBlockInfoBatch(session, inodeIds, blockIds, false);
+    } catch (Exception e) {
+      throw new StorageException(e);
+    }
+  }
+
+  @Override
   public Set<Long> findByStorageIdOnlyIds(int storageId) throws StorageException {
     try {
       Session session = connector.obtainSession();

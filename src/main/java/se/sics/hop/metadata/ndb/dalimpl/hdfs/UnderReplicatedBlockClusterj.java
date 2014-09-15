@@ -165,6 +165,24 @@ public class UnderReplicatedBlockClusterj implements UnderReplicatedBlockTableDe
   }
 
   @Override
+  public List<HopUnderReplicatedBlock> findByLevel(int level, int offset, int count) throws StorageException {
+    try {
+      Session session = connector.obtainSession();
+      QueryBuilder qb = session.getQueryBuilder();
+      QueryDomainType<UnderReplicatedBlocksDTO> dobj = qb.createQueryDefinition(UnderReplicatedBlocksDTO.class);
+      Predicate pred = dobj.get("level").equal(dobj.param("level"));
+      dobj.where(pred);
+      Query<UnderReplicatedBlocksDTO> query = session.createQuery(dobj);
+      query.setParameter("level", level);
+      query.setOrdering(Query.Ordering.ASCENDING, "level", "timestamp");
+      query.setLimits(offset, count);
+      return createUrBlockList(query.getResultList());
+    } catch (Exception e) {
+      throw new StorageException(e);
+    }
+  }
+    
+  @Override
   public List<HopUnderReplicatedBlock> findByINodeId(int inodeId) throws StorageException {
     try {
       Session session = connector.obtainSession();
