@@ -205,6 +205,10 @@ public class RMNodeClusterJ implements RMNodeTableDef, RMNodeDataAccess<HopRMNod
      * @return HopRMNode
      */
     private HopRMNode createHopRMNode(RMNodeDTO rmDTO) {
-        return new HopRMNode(rmDTO.getNodeid(), rmDTO.getHostname(), rmDTO.getCommandport(), rmDTO.getHttpport(), rmDTO.getNodeaddress(), rmDTO.getHttpaddress(), rmDTO.getNextheartbeat(), rmDTO.getNodebaseid(), rmDTO.getHealthreport(), /*rmDTO.getRMContextid(),*/ rmDTO.getLasthealthreporttime(), rmDTO.getcurrentstate(), rmDTO.getnodemanagerversion(), rmDTO.getovercommittimeout());
+        return new HopRMNode(rmDTO.getNodeid(), rmDTO.getHostname(), rmDTO.getCommandport(), 
+                rmDTO.getHttpport(), rmDTO.getNodeaddress(), rmDTO.getHttpaddress(), 
+                rmDTO.getNextheartbeat(), rmDTO.getNodebaseid(), rmDTO.getHealthreport(), 
+                /*rmDTO.getRMContextid(),*/ rmDTO.getLasthealthreporttime(), rmDTO.getcurrentstate(), 
+                rmDTO.getnodemanagerversion(), rmDTO.getovercommittimeout());
     }
 }

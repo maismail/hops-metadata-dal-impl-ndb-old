@@ -46,9 +46,6 @@ public class DelegationKeyClusterJ implements DelegationKeyTableDef, DelegationK
         if (session != null) {
             delegationKeyDTO = session.find(DelegationKeyClusterJ.DelegationKeyDTO.class, key);
         }
-        if (delegationKeyDTO == null) {
-            throw new StorageException("HOP :: Error while retrieving delegationKey:"+key);
-        }
 
         return createHopDelegationKey(delegationKeyDTO);
     }
@@ -90,11 +87,9 @@ public class DelegationKeyClusterJ implements DelegationKeyTableDef, DelegationK
             QueryDomainType<DelegationKeyDTO> dobj = qb.createQueryDefinition(DelegationKeyDTO.class);
             Query<DelegationKeyDTO> query = session.createQuery(dobj);
             List<DelegationKeyDTO> results = query.getResultList();
-            if (results != null && !results.isEmpty()) {
+            
                 return createHopDelegationKeyList(results);
-            } else {
-                throw new StorageException("HOP :: Error retrieving DelegationKeys");
-            }
+           
         } catch (Exception e) {
             throw new StorageException(e);
         }

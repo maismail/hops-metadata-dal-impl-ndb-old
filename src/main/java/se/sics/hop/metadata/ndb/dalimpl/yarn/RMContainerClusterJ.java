@@ -19,120 +19,161 @@ import se.sics.hop.metadata.yarn.tabledef.RMContainerTableDef;
  */
 public class RMContainerClusterJ implements RMContainerTableDef, RMContainerDataAccess<HopRMContainer> {
 
-    @PersistenceCapable(table = TABLE_NAME)
-    public interface RMContainerDTO {
+  @PersistenceCapable(table = TABLE_NAME)
+  public interface RMContainerDTO {
 
-        @PrimaryKey
-        @Column(name = CONTAINERID_ID)
-        String getcontaineridid();
+    @PrimaryKey
+    @Column(name = CONTAINERID_ID)
+    String getcontaineridid();
 
-        void setcontaineridid(String containeridid);
+    void setcontaineridid(String containeridid);
 
-        @Column(name = APPLICATIONATTEMPTID_ID)
-        String getappattemptidid();
+    @Column(name = APPLICATIONATTEMPTID_ID)
+    String getappattemptidid();
 
-        void setappattemptidid(String appattemptidid);
+    void setappattemptidid(String appattemptidid);
 
-        @Column(name = NODEID_ID)
-        String getnodeidid();
+    @Column(name = NODEID_ID)
+    String getnodeidid();
 
-        void setnodeidid(String nodeidid);
+    void setnodeidid(String nodeidid);
 
-        @Column(name = USER)
-        String getuser();
+    @Column(name = USER)
+    String getuser();
 
-        void setuser(String user);
+    void setuser(String user);
 
-        @Column(name = RESERVED_NODEID_ID)
-        String getreservednodeid();
+//    @Column(name = RESERVED_NODEID_ID)
+//    String getreservednodeid();
+//
+//    void setreservednodeid(String reservednodeid);
 
-        void setreservednodeid(String reservednodeid);
+//    @Column(name = RESERVED_PRIORITY_ID)
+//    int getreservedpriorityid();
+//
+//    void setreservedpriorityid(int reservedpriorityid);
 
-        @Column(name = RESERVED_PRIORITY_ID)
-        int getreservedpriorityid();
+    @Column(name = STARTTIME)
+    long getstarttime();
 
-        void setreservedpriorityid(int reservedpriorityid);
+    void setstarttime(long starttime);
 
-        @Column(name = STARTTIME)
-        long getstarttime();
+    @Column(name = FINISHTIME)
+    long getfinishtime();
 
-        void setstarttime(long starttime);
+    void setfinishtime(long finishtime);
 
-        @Column(name = FINISHTIME)
-        long getfinishtime();
+    @Column(name = STATE)
+    String getstate();
 
-        void setfinishtime(long finishtime);
+    void setstate(String state);
+
+    @Column(name = FINISHEDSTATUSSTATE)
+    String getfinishedstatusstate();
+
+    void setfinishedstatusstate(String finishedstatusstate);
+
+    @Column(name = EXITSTATUS)
+    int getexitstatus();
+
+    void setexitstatus(int exitstatus);
+
+  }
+  private ClusterjConnector connector = ClusterjConnector.getInstance();
+
+  @Override
+  public HopRMContainer findById(String id) throws StorageException {
+    Session session = connector.obtainSession();
+
+    RMContainerDTO rMContainerDTO = null;
+    if (session != null) {
+      rMContainerDTO = session.find(RMContainerDTO.class, id);
     }
-    private ClusterjConnector connector = ClusterjConnector.getInstance();
+    NodeIdClusterJ.NodeIdDTO nodeIdDto = null;
+//    if (rMContainerDTO != null && rMContainerDTO.getreservednodeid() != null) {
+//      nodeIdDto = session.find(NodeIdClusterJ.NodeIdDTO.class, rMContainerDTO.getreservednodeid());
+//    }
 
-    @Override
-    public HopRMContainer findById(String id) throws StorageException {
-        Session session = connector.obtainSession();
+    return createHopRMContainer(rMContainerDTO, nodeIdDto);
+  }
 
-        RMContainerDTO rMContainerDTO = null;
-        if (session != null) {
-            rMContainerDTO = session.find(RMContainerDTO.class, id);
+  @Override
+  public void prepare(Collection<HopRMContainer> modified, Collection<HopRMContainer> removed) throws StorageException {
+    Session session = connector.obtainSession();
+    try {
+      if (removed != null) {
+        List<RMContainerDTO> toRemove = new ArrayList<RMContainerDTO>(removed.size());
+        for (HopRMContainer hop : removed) {
+          toRemove.add(session.newInstance(RMContainerClusterJ.RMContainerDTO.class, hop.getContainerIdID()));
         }
-        if (rMContainerDTO == null) {
-            throw new StorageException("HOP :: Error while retrieving row");
+        session.deletePersistentAll(toRemove);
+      }
+      if (modified != null) {
+        List<RMContainerDTO> toModify = new ArrayList<RMContainerDTO>(modified.size());
+        for (HopRMContainer hop : modified) {
+          toModify.add(createPersistable(hop, session));
         }
-
-        return createHopRMContainer(rMContainerDTO);
+        session.savePersistentAll(toModify);
+      }
+    } catch (Exception e) {
+      throw new StorageException(e);
     }
+  }
 
-    @Override
-    public void prepare(Collection<HopRMContainer> modified, Collection<HopRMContainer> removed) throws StorageException {
-        Session session = connector.obtainSession();
-        try {
-            if (removed != null) {
-                List<RMContainerDTO> toRemove = new ArrayList<RMContainerDTO>(removed.size());
-                for (HopRMContainer hop : removed) {
-                    toRemove.add(session.newInstance(RMContainerClusterJ.RMContainerDTO.class, hop.getContainerIdID()));
-                }
-                session.deletePersistentAll(toRemove);
-            }
-            if (modified != null) {
-                List<RMContainerDTO> toModify = new ArrayList<RMContainerDTO>(modified.size());
-                for (HopRMContainer hop : modified) {
-                    toModify.add(createPersistable(hop, session));
-                }
-                session.savePersistentAll(toModify);
-            }
-        } catch (Exception e) {
-            throw new StorageException(e);
-        }
+  @Override
+  public void createRMContainer(HopRMContainer rmcontainer) throws StorageException {
+    Session session = connector.obtainSession();
+    session.savePersistent(createPersistable(rmcontainer, session));
+  }
+
+  private HopRMContainer createHopRMContainer(RMContainerDTO rMContainerDTO,
+          NodeIdClusterJ.NodeIdDTO nodeIdDTO) {
+    if (nodeIdDTO == null) {
+      return new HopRMContainer(
+              rMContainerDTO.getcontaineridid(),
+              rMContainerDTO.getappattemptidid(),
+              rMContainerDTO.getnodeidid(),
+              rMContainerDTO.getuser(),
+//              rMContainerDTO.getreservednodeid(),
+//              rMContainerDTO.getreservedpriorityid(),
+              rMContainerDTO.getstarttime(),
+              rMContainerDTO.getfinishtime(),
+              rMContainerDTO.getstate(), /*null, null,*/
+              rMContainerDTO.getfinishedstatusstate(),
+              rMContainerDTO.getexitstatus());
+    } else {
+      return new HopRMContainer(
+              rMContainerDTO.getcontaineridid(),
+              rMContainerDTO.getappattemptidid(),
+              rMContainerDTO.getnodeidid(),
+              rMContainerDTO.getuser(),
+//              rMContainerDTO.getreservednodeid(),
+//              rMContainerDTO.getreservedpriorityid(),
+              rMContainerDTO.getstarttime(),
+              rMContainerDTO.getfinishtime(),
+              rMContainerDTO.getstate(),
+              /*nodeIdDTO.getHost(),
+              nodeIdDTO.getPort(),*/
+              rMContainerDTO.getfinishedstatusstate(),
+              rMContainerDTO.getexitstatus());
     }
+  }
 
-    @Override
-    public void createRMContainer(HopRMContainer rmcontainer) throws StorageException {
-        Session session = connector.obtainSession();
-        session.savePersistent(createPersistable(rmcontainer, session));
-    }
+  private RMContainerDTO createPersistable(HopRMContainer hop, Session session) {
+    RMContainerClusterJ.RMContainerDTO rMContainerDTO = session.newInstance(RMContainerClusterJ.RMContainerDTO.class);
 
-    private HopRMContainer createHopRMContainer(RMContainerDTO rMContainerDTO) {
-        return new HopRMContainer(
-                rMContainerDTO.getcontaineridid(),
-                rMContainerDTO.getappattemptidid(),
-                rMContainerDTO.getnodeidid(),
-                rMContainerDTO.getuser(),
-                rMContainerDTO.getreservednodeid(),
-                rMContainerDTO.getreservedpriorityid(),
-                rMContainerDTO.getstarttime(),
-                rMContainerDTO.getfinishtime());
-    }
+    rMContainerDTO.setcontaineridid(hop.getContainerIdID());
+    rMContainerDTO.setappattemptidid(hop.getApplicationAttemptIdID());
+    rMContainerDTO.setnodeidid(hop.getNodeIdID());
+    rMContainerDTO.setuser(hop.getUser());
+//    rMContainerDTO.setreservednodeid(hop.getReservedNodeIdID());
+//    rMContainerDTO.setreservedpriorityid(hop.getReservedPriorityID());
+    rMContainerDTO.setstarttime(hop.getStarttime());
+    rMContainerDTO.setfinishtime(hop.getFinishtime());
+    rMContainerDTO.setstate(hop.getState());
+    rMContainerDTO.setfinishedstatusstate(hop.getFinishedStatusState());
+    rMContainerDTO.setexitstatus(hop.getExitStatus());
 
-    private RMContainerDTO createPersistable(HopRMContainer hop, Session session) {
-        RMContainerClusterJ.RMContainerDTO rMContainerDTO = session.newInstance(RMContainerClusterJ.RMContainerDTO.class);
-
-        rMContainerDTO.setcontaineridid(hop.getContainerIdID());
-        rMContainerDTO.setappattemptidid(hop.getApplicationAttemptIdID());
-        rMContainerDTO.setnodeidid(hop.getNodeIdID());
-        rMContainerDTO.setuser(hop.getUser());
-        rMContainerDTO.setreservednodeid(hop.getReservedNodeIdID());
-        rMContainerDTO.setreservedpriorityid(hop.getReservedPriorityID());
-        rMContainerDTO.setstarttime(hop.getStarttime());
-        rMContainerDTO.setfinishtime(hop.getFinishtime());
-
-        return rMContainerDTO;
-    }
+    return rMContainerDTO;
+  }
 }

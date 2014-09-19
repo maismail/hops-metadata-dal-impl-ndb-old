@@ -43,9 +43,6 @@ public class RMStateVersionClusterJ implements VersionTableDef, RMStateVersionDa
         if (session != null) {
             versionDTO = session.find(RMStateVersionClusterJ.VersionDTO.class, id);
         }
-        if (versionDTO == null) {
-            throw new StorageException("HOP :: Error while retrieving RMStateVersion with id=" + id);
-        }
 
         return createHopVersion(versionDTO);
     }
@@ -74,7 +71,11 @@ public class RMStateVersionClusterJ implements VersionTableDef, RMStateVersionDa
     }
 
     private HopRMStateVersion createHopVersion(VersionDTO versionDTO) {
+      if(versionDTO!=null){
         return new HopRMStateVersion(versionDTO.getid(), versionDTO.getversion());
+      }else{
+        return null;
+      }
     }
 
     private VersionDTO createPersistable(HopRMStateVersion hop, Session session) {
