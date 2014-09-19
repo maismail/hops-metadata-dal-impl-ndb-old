@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-package se.sics.hop.metadata.ndb.dalimpl.yarn;
+package se.sics.hop.metadata.ndb.dalimpl.yarn.capacity;
 
 import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
@@ -12,11 +12,11 @@ import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
 import java.util.Collection;
 import se.sics.hop.exception.StorageException;
-import se.sics.hop.metadata.hdfs.entity.yarn.HopFiCaSchedulerAppReservedContainers;
+import se.sics.hop.metadata.hdfs.entity.yarn.capacity.HopFiCaSchedulerAppReservedContainers;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
-import se.sics.hop.metadata.yarn.dal.FiCaSchedulerAppReservedContainersDataAccess;
-import se.sics.hop.metadata.yarn.tabledef.FiCaSchedulerAppReservedContainersTableDef;
-import static se.sics.hop.metadata.yarn.tabledef.FiCaSchedulerAppReservedContainersTableDef.PRIORITY_ID;
+import se.sics.hop.metadata.yarn.dal.capacity.FiCaSchedulerAppReservedContainersDataAccess;
+import se.sics.hop.metadata.yarn.tabledef.capacity.FiCaSchedulerAppReservedContainersTableDef;
+import static se.sics.hop.metadata.yarn.tabledef.capacity.FiCaSchedulerAppReservedContainersTableDef.PRIORITY_ID;
 
 /**
  *
