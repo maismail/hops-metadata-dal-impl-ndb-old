@@ -199,7 +199,7 @@ public class InvalidatedBlockClusterj implements InvalidatedBlockTableDef, Inval
   @Override
   public void removeAllByStorageId(int storageId) throws StorageException {
     try {
-      Session session = connector.obtainSession();
+    Session session = connector.obtainSession();
       QueryBuilder qb = session.getQueryBuilder();
       QueryDomainType<InvalidateBlocksDTO> qdt = qb.createQueryDefinition(InvalidateBlocksDTO.class);
       qdt.where(qdt.get("storageId").equal(qdt.param("param")));
@@ -208,10 +208,10 @@ public class InvalidatedBlockClusterj implements InvalidatedBlockTableDef, Inval
       query.deletePersistentAll();
     } catch (Exception e) {
       throw new StorageException(e);
-    }
+  }
   }
 
-   
+
   private List<HopInvalidatedBlock> createList(List<InvalidateBlocksDTO> dtoList) {
     List<HopInvalidatedBlock> list = new ArrayList<HopInvalidatedBlock>();
     for (InvalidateBlocksDTO dto : dtoList) {

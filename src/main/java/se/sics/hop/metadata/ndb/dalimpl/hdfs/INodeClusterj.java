@@ -9,16 +9,18 @@ import com.mysql.clusterj.annotation.PrimaryKey;
 import com.mysql.clusterj.query.Predicate;
 import com.mysql.clusterj.query.QueryBuilder;
 import com.mysql.clusterj.query.QueryDomainType;
+import se.sics.hop.exception.StorageException;
+import se.sics.hop.metadata.INodeIdentifier;
+import se.sics.hop.metadata.hdfs.dal.INodeDataAccess;
+import se.sics.hop.metadata.hdfs.entity.hdfs.HopINode;
+import se.sics.hop.metadata.hdfs.tabledef.INodeTableDef;
+import se.sics.hop.metadata.ndb.ClusterjConnector;
+import se.sics.hop.metadata.ndb.mysqlserver.CountHelper;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import se.sics.hop.metadata.hdfs.dal.INodeDataAccess;
-import se.sics.hop.metadata.hdfs.entity.hdfs.HopINode;
-import se.sics.hop.exception.StorageException;
-import se.sics.hop.metadata.ndb.ClusterjConnector;
-import se.sics.hop.metadata.ndb.mysqlserver.CountHelper;
-import se.sics.hop.metadata.hdfs.tabledef.INodeTableDef;
 
 /**
  *
@@ -51,18 +53,6 @@ public class INodeClusterj implements INodeTableDef, INodeDataAccess<HopINode> {
     @Index(name = "parent_idx")
     int getParentId();     // id of the inode
     void setParentId(int parentid);
-     
-    // marker for InodeDirectory
-    @Column(name = IS_DIR)
-    int getIsDir();
-
-    void setIsDir(int isDir);
-
-    // marker for InodeDirectoryWithQuota
-    @Column(name = IS_DIR_WITH_QUOTA)
-    int getIsDirWithQuota();
-
-    void setIsDirWithQuota(int isDirWithQuota);
 
     // Inode
     @Column(name = MODIFICATION_TIME)
@@ -81,12 +71,6 @@ public class INodeClusterj implements INodeTableDef, INodeDataAccess<HopINode> {
     byte[] getPermission();
 
     void setPermission(byte[] permission);
-
-    //  marker for InodeFileUnderConstruction
-    @Column(name = IS_UNDER_CONSTRUCTION)
-    int getIsUnderConstruction();
-
-    void setIsUnderConstruction(int isUnderConstruction);
 
     // InodeFileUnderConstruction
     @Column(name = CLIENT_NAME)
@@ -122,9 +106,35 @@ public class INodeClusterj implements INodeTableDef, INodeDataAccess<HopINode> {
     String getSymlink();
 
     void setSymlink(String symlink);
+
+    @Column(name = DIR)
+    boolean getDir();
+
+    void setDir(boolean dir);
+
+    @Column(name = QUOTA_ENABLED)
+    boolean getQuotaEnabled();
+
+    void setQuotaEnabled(boolean quotaEnabled);
+
+    @Column(name = UNDER_CONSTRUCTION)
+    boolean getUnderConstruction();
+
+    void setUnderConstruction(boolean underConstruction);
+
+    @Column(name = SUBTREE_LOCKED)
+    boolean getSubtreeLocked();
+
+    void setSubtreeLocked(boolean locked);
+
+    @Column(name = SUBTREE_LOCK_OWNER)
+    long getSubtreeLockOwner();
+
+    void setSubtreeLockOwner(long leaderId);
   }
   private ClusterjConnector connector = ClusterjConnector.getInstance();
-
+  private final static int NOT_FOUND_ROW = -1000;
+  
   @Override
   public void prepare(Collection<HopINode> removed, Collection<HopINode> newEntries, Collection<HopINode> modified) throws StorageException {
     Session session = connector.obtainSession();
@@ -230,51 +240,96 @@ public class INodeClusterj implements INodeTableDef, INodeDataAccess<HopINode> {
 
   }
 
+  @Override
+  public List<HopINode> getINodesPkBatched(String[] names, int[] parentIds) throws StorageException {
+    try {
+      Session session = connector.obtainSession();
+      List<InodeDTO> dtos = new ArrayList<InodeDTO>();
+      for (int i = 0; i < names.length; i++) {
+        InodeDTO dto = session.newInstance(InodeDTO.class, new Object[]{parentIds[i], names[i]});
+        dto.setId(NOT_FOUND_ROW);
+        dto = session.load(dto);
+        dtos.add(dto);
+      }
+      session.flush();
+      return createInodeList(dtos);
+    } catch (Exception e) {
+      throw new StorageException(e);
+    }
+  }
+  
+  @Override
+  public List<INodeIdentifier> getAllINodeFiles() throws StorageException {
+    try {
+      Session session = connector.obtainSession();
+      QueryBuilder qb = session.getQueryBuilder();
+      QueryDomainType<InodeDTO> dobj = qb.createQueryDefinition(InodeDTO.class);
+      Predicate pred = dobj.get("dir").equal(dobj.param("isDirParam"));
+      dobj.where(pred);
+      Query<InodeDTO> query = session.createQuery(dobj);
+      query.setParameter("isDirParam", false);
+      List<InodeDTO> dtos = query.getResultList();
+      List<INodeIdentifier> res = new ArrayList<INodeIdentifier>();
+      for(InodeDTO dto : dtos){
+        res.add(new INodeIdentifier(dto.getId(), dto.getParentId(), dto.getName()));
+      }
+      return res;
+    } catch (Exception e) {
+      throw new StorageException(e);
+    }
+  }
+    
   private List<HopINode> createInodeList(List<InodeDTO> list) throws IOException {
     List<HopINode> inodes = new ArrayList<HopINode>();
     for (InodeDTO persistable : list) {
-      inodes.add(createInode(persistable));
+      if(persistable.getId() != NOT_FOUND_ROW){
+        inodes.add(createInode(persistable));
+      }
     }
     return inodes;
   }
 
   private HopINode createInode(InodeDTO persistable) throws IOException {
     return new HopINode(
-            persistable.getId(),
-            persistable.getName(),
-            persistable.getParentId(),
-            persistable.getIsDir(),
-            persistable.getIsDirWithQuota(),
-            persistable.getModificationTime(),
-            persistable.getATime(),
-            persistable.getPermission(),
-            persistable.getIsUnderConstruction(),
-            persistable.getClientName(),
-            persistable.getClientMachine(),
-            persistable.getClientNode(),
-            persistable.getGenerationStamp(),
-            persistable.getHeader(),
-            persistable.getSymlink());
+        persistable.getId(),
+        persistable.getName(),
+        persistable.getParentId(),
+        persistable.getDir(),
+        persistable.getQuotaEnabled(),
+        persistable.getModificationTime(),
+        persistable.getATime(),
+        persistable.getPermission(),
+        persistable.getUnderConstruction(),
+        persistable.getClientName(),
+        persistable.getClientMachine(),
+        persistable.getClientNode(),
+        persistable.getGenerationStamp(),
+        persistable.getHeader(),
+        persistable.getSymlink(),
+        persistable.getSubtreeLocked(),
+        persistable.getSubtreeLockOwner());
   }
 
   private void createPersistable(HopINode inode, InodeDTO persistable) {
     persistable.setId(inode.getId());
     persistable.setName(inode.getName());
     persistable.setParentId(inode.getParentId());
-    persistable.setIsDir(inode.getIsDir());
-    persistable.setIsDirWithQuota(inode.getIsDirWithQuota());
+    persistable.setDir(inode.isDir());
+    persistable.setQuotaEnabled(inode.isDirWithQuota());
     persistable.setModificationTime(inode.getModificationTime());
     persistable.setATime(inode.getAccessTime());
     persistable.setPermission(inode.getPermission());
-    persistable.setIsUnderConstruction(inode.getIsUnderConstruction());
+    persistable.setUnderConstruction(inode.isUnderConstruction());
     persistable.setClientName(inode.getClientName());
     persistable.setClientMachine(inode.getClientMachine());
     persistable.setClientNode(inode.getClientNode());
     persistable.setGenerationStamp(inode.getGenerationStamp());
     persistable.setHeader(inode.getHeader());
     persistable.setSymlink(inode.getSymlink());
+    persistable.setSubtreeLocked(inode.isSubtreeLocked());
+    persistable.setSubtreeLockOwner(inode.getSubtreeLockOwner());
   }
-  
+
   private void explain(Query<InodeDTO> query){
 //      Map<String,Object> map = query.explain();
 //      System.out.println("Explain");

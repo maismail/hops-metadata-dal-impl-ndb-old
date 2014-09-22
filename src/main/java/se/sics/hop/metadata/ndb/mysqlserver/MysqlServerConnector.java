@@ -127,7 +127,7 @@ public class MysqlServerConnector implements StorageConnector<Connection> {
   }
   
   @Override
-  public boolean isTransactionActive() {
+  public boolean isTransactionActive()  {
     throw new UnsupportedOperationException("Not supported yet.");
   }
 

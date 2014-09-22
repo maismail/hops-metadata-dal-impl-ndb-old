@@ -101,7 +101,7 @@ public class EncodingStatusClusterj implements EncodingStatusTableDef, EncodingS
   }
 
   @Override
-  public void add(HopEncodingStatus status) {
+  public void add(HopEncodingStatus status) throws StorageException {
     LOG.info("ADD " + status.toString());
     Session session = clusterjConnector.obtainSession();
     EncodingStatusDto dto = session.newInstance(EncodingStatusDto.class);
