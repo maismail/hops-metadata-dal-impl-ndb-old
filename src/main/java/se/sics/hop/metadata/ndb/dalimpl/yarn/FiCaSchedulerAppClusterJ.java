@@ -30,9 +30,9 @@ public class FiCaSchedulerAppClusterJ implements FiCaSchedulerAppTableDef, FiCaS
     public interface FiCaSchedulerAppDTO {
 
         @PrimaryKey
-        @Column(name = FICASCHEDULERAPP_ID)
-        String getficaschedulerapp_id();
-        void setficaschedulerapp_id(String ficaschedulerapp_id);
+        @Column(name = SCHEDULERAPP_ID)
+        String getschedulerapp_id();
+        void setschedulerapp_id(String schedulerapp_id);
         
         @Column(name = APPID)
         int getAppId();
@@ -108,14 +108,14 @@ public class FiCaSchedulerAppClusterJ implements FiCaSchedulerAppTableDef, FiCaS
     }
 
     private HopFiCaSchedulerApp createHopFiCaSchedulerApp(FiCaSchedulerAppDTO fiCaSchedulerAppDTO) {
-        return new HopFiCaSchedulerApp(fiCaSchedulerAppDTO.getficaschedulerapp_id(),fiCaSchedulerAppDTO.getAppId(),
+        return new HopFiCaSchedulerApp(fiCaSchedulerAppDTO.getschedulerapp_id(),fiCaSchedulerAppDTO.getAppId(),
                 fiCaSchedulerAppDTO.getIsstopped());
     }
 
     private FiCaSchedulerAppClusterJ.FiCaSchedulerAppDTO createPersistable(HopFiCaSchedulerApp hop, Session session) {
         FiCaSchedulerAppClusterJ.FiCaSchedulerAppDTO fiCaSchedulerAppDTO = session.newInstance(FiCaSchedulerAppClusterJ.FiCaSchedulerAppDTO.class);
 
-        fiCaSchedulerAppDTO.setficaschedulerapp_id(hop.getFicaAppId());
+        fiCaSchedulerAppDTO.setschedulerapp_id(hop.getSchedulerAppId());
         fiCaSchedulerAppDTO.setAppId(hop.getAppId());
         fiCaSchedulerAppDTO.setIsstopped(hop.isIsstoped());
 

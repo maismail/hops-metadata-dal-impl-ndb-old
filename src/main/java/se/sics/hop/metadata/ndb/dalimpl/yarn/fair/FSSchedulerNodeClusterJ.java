@@ -18,6 +18,7 @@ import se.sics.hop.metadata.hdfs.entity.yarn.fair.HopFSSchedulerNode;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
 import se.sics.hop.metadata.yarn.dal.fair.FSSchedulerNodeDataAccess;
 import se.sics.hop.metadata.yarn.tabledef.fair.FSSchedulerNodeTableDef;
+import static se.sics.hop.metadata.yarn.tabledef.fair.FSSchedulerNodeTableDef.RMNODEID;
 
 /**
  *
@@ -36,6 +37,15 @@ public class FSSchedulerNodeClusterJ implements FSSchedulerNodeTableDef, FSSched
         @Column(name = NUMCONTAINERS)
         int getnumcontainers();
         void setnumcontainers(int numcontainers);
+        
+        @Column(name = RESERVEDCONTAINER_ID)
+        String getreservedcontainerid();
+        void setreservedcontainerid(String reservedcontainerid);
+                
+        @Column(name = RESERVEDAPPSCHEDULABLE_ID)
+        String getreservedappschedulableid();
+        void setreservedappschedulableid(String reservedappschedulableid);
+            
     }
     private ClusterjConnector connector = ClusterjConnector.getInstance();
     
@@ -86,7 +96,8 @@ public class FSSchedulerNodeClusterJ implements FSSchedulerNodeTableDef, FSSched
     }
     
     private HopFSSchedulerNode createHopFSSchedulerNode(FSSchedulerNodeDTO fsschedulernodeDTO) {
-        HopFSSchedulerNode hop = new HopFSSchedulerNode(fsschedulernodeDTO.getrmnodeid(), fsschedulernodeDTO.getnumcontainers());
+        HopFSSchedulerNode hop = new HopFSSchedulerNode(fsschedulernodeDTO.getrmnodeid(), fsschedulernodeDTO.getnumcontainers(),
+                                                        fsschedulernodeDTO.getreservedcontainerid(), fsschedulernodeDTO.getreservedappschedulableid());
         
         return hop;
     }
@@ -95,6 +106,8 @@ public class FSSchedulerNodeClusterJ implements FSSchedulerNodeTableDef, FSSched
         FSSchedulerNodeDTO fssDTO = session.newInstance(FSSchedulerNodeDTO.class);
         fssDTO.setrmnodeid(hop.getRmnodeid());
         fssDTO.setnumcontainers(hop.getNumcontainers());
+        fssDTO.setreservedcontainerid(hop.getReservedcontainerId());
+        fssDTO.setreservedappschedulableid(hop.getReservedappschedulableId());
         
         return fssDTO;
     }

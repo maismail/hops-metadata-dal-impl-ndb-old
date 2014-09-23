@@ -28,9 +28,9 @@ public class FiCaSchedulerAppReservedContainersClusterJ implements FiCaScheduler
     public interface FiCaSchedulerAppReservedContainersDTO {
 
         @PrimaryKey
-        @Column(name = FICASCHEDULERAPP_ID)
-        String getficaschedulerappid();
-        void setficaschedulerappid(String ficaschedulerappid);
+        @Column(name = SCHEDULERAPP_ID)
+        String getschedulerappid();
+        void setschedulerappid(String schedulerappid);
 
         @Column(name = PRIORITY_ID)
         int getpriorityid();
@@ -68,7 +68,7 @@ public class FiCaSchedulerAppReservedContainersClusterJ implements FiCaScheduler
         try {
             if (removed != null) {
                 for (HopFiCaSchedulerAppReservedContainers hop : removed) {
-                    FiCaSchedulerAppReservedContainersClusterJ.FiCaSchedulerAppReservedContainersDTO persistable = session.newInstance(FiCaSchedulerAppReservedContainersClusterJ.FiCaSchedulerAppReservedContainersDTO.class, hop.getFicaschedulerapp_id());
+                    FiCaSchedulerAppReservedContainersClusterJ.FiCaSchedulerAppReservedContainersDTO persistable = session.newInstance(FiCaSchedulerAppReservedContainersClusterJ.FiCaSchedulerAppReservedContainersDTO.class, hop.getSchedulerapp_id());
                     session.deletePersistent(persistable);
                 }
             }
@@ -84,7 +84,7 @@ public class FiCaSchedulerAppReservedContainersClusterJ implements FiCaScheduler
     }
     
     private HopFiCaSchedulerAppReservedContainers createHopFiCaSchedulerAppReservedContainers(FiCaSchedulerAppReservedContainersDTO fiCaSchedulerAppReservedContainersDTO) {
-        return new HopFiCaSchedulerAppReservedContainers(fiCaSchedulerAppReservedContainersDTO.getficaschedulerappid(),
+        return new HopFiCaSchedulerAppReservedContainers(fiCaSchedulerAppReservedContainersDTO.getschedulerappid(),
                                                          fiCaSchedulerAppReservedContainersDTO.getpriorityid(),
                                                          fiCaSchedulerAppReservedContainersDTO.getnodeid(),
                                                          fiCaSchedulerAppReservedContainersDTO.getrmcontainerid());
@@ -93,7 +93,7 @@ public class FiCaSchedulerAppReservedContainersClusterJ implements FiCaScheduler
     private FiCaSchedulerAppReservedContainersDTO createPersistable(HopFiCaSchedulerAppReservedContainers hop, Session session) {
         FiCaSchedulerAppReservedContainersClusterJ.FiCaSchedulerAppReservedContainersDTO fiCaSchedulerAppReservedContainersDTO = session.newInstance(FiCaSchedulerAppReservedContainersClusterJ.FiCaSchedulerAppReservedContainersDTO.class);
         
-        fiCaSchedulerAppReservedContainersDTO.setficaschedulerappid(hop.getFicaschedulerapp_id());
+        fiCaSchedulerAppReservedContainersDTO.setschedulerappid(hop.getSchedulerapp_id());
         fiCaSchedulerAppReservedContainersDTO.setpriorityid(hop.getPriority_id());
         fiCaSchedulerAppReservedContainersDTO.setnodeid(hop.getNodeid());
         fiCaSchedulerAppReservedContainersDTO.setrmcontainerid(hop.getRmcontainer_id());

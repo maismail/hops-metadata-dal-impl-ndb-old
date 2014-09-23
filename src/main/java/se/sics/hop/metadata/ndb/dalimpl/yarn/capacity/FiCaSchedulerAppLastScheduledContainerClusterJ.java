@@ -28,9 +28,9 @@ public class FiCaSchedulerAppLastScheduledContainerClusterJ implements FiCaSched
     public interface FiCaSchedulerAppLastScheduledContainerDTO {
 
         @PrimaryKey
-        @Column(name = FICASCHEDULERAPP_ID)
-        String getficaschedulerappid();
-        void setficaschedulerappid(String ficaschedulerappid);
+        @Column(name = SCHEDULERAPP_ID)
+        String getschedulerappid();
+        void setschedulerappid(String schedulerappid);
 
         @Column(name = PRIORITY_ID)
         int getpriorityid();
@@ -63,7 +63,7 @@ public class FiCaSchedulerAppLastScheduledContainerClusterJ implements FiCaSched
         try {
             if (removed != null) {
                 for (HopFiCaSchedulerAppLastScheduledContainer hop : removed) {
-                    FiCaSchedulerAppLastScheduledContainerClusterJ.FiCaSchedulerAppLastScheduledContainerDTO persistable = session.newInstance(FiCaSchedulerAppLastScheduledContainerClusterJ.FiCaSchedulerAppLastScheduledContainerDTO.class, hop.getFicaschedulerapp_id());
+                    FiCaSchedulerAppLastScheduledContainerClusterJ.FiCaSchedulerAppLastScheduledContainerDTO persistable = session.newInstance(FiCaSchedulerAppLastScheduledContainerClusterJ.FiCaSchedulerAppLastScheduledContainerDTO.class, hop.getSchedulerapp_id());
                     session.deletePersistent(persistable);
                 }
             }
@@ -79,7 +79,7 @@ public class FiCaSchedulerAppLastScheduledContainerClusterJ implements FiCaSched
     }
     
     private HopFiCaSchedulerAppLastScheduledContainer createHopFiCaSchedulerAppLastScheduledContainer(FiCaSchedulerAppLastScheduledContainerDTO fiCaSchedulerAppLastScheduledContainerDTO) {
-        return new HopFiCaSchedulerAppLastScheduledContainer(fiCaSchedulerAppLastScheduledContainerDTO.getficaschedulerappid(),
+        return new HopFiCaSchedulerAppLastScheduledContainer(fiCaSchedulerAppLastScheduledContainerDTO.getschedulerappid(),
                                                               fiCaSchedulerAppLastScheduledContainerDTO.getpriorityid(),
                                                                 fiCaSchedulerAppLastScheduledContainerDTO.gettime());
     }
@@ -87,7 +87,7 @@ public class FiCaSchedulerAppLastScheduledContainerClusterJ implements FiCaSched
     private FiCaSchedulerAppLastScheduledContainerDTO createPersistable(HopFiCaSchedulerAppLastScheduledContainer hop, Session session) {
         FiCaSchedulerAppLastScheduledContainerClusterJ.FiCaSchedulerAppLastScheduledContainerDTO fiCaSchedulerAppLastScheduledContainerDTO = session.newInstance(FiCaSchedulerAppLastScheduledContainerClusterJ.FiCaSchedulerAppLastScheduledContainerDTO.class);
         
-        fiCaSchedulerAppLastScheduledContainerDTO.setficaschedulerappid(hop.getFicaschedulerapp_id());
+        fiCaSchedulerAppLastScheduledContainerDTO.setschedulerappid(hop.getSchedulerapp_id());
         fiCaSchedulerAppLastScheduledContainerDTO.setpriorityid(hop.getPriority_id());
         fiCaSchedulerAppLastScheduledContainerDTO.settime(hop.getTime());
         

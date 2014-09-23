@@ -27,10 +27,10 @@ public class LaunchedContainersClusterJ implements LaunchedContainersTableDef, L
     public interface LaunchedContainersDTO {
 
         @PrimaryKey
-        @Column(name = FICASCHEDULERNODE_ID)
-        String getficaschedulernode_id();
+        @Column(name = SCHEDULERNODE_ID)
+        String getschedulernode_id();
 
-        void setficaschedulernode_id(String ficaschedulernode_id);
+        void setschedulernode_id(String schedulernode_id);
 
         @PrimaryKey
         @Column(name = CONTAINERID_ID)
@@ -46,10 +46,10 @@ public class LaunchedContainersClusterJ implements LaunchedContainersTableDef, L
     private ClusterjConnector connector = ClusterjConnector.getInstance();
 
     @Override
-    public HopLaunchedContainers findEntry(String ficaschedulernodeId, String containeridId) throws StorageException {
+    public HopLaunchedContainers findEntry(String schedulernodeId, String containeridId) throws StorageException {
         Session session = connector.obtainSession();
         Object[] objarr = new Object[2];
-        objarr[0] = ficaschedulernodeId;
+        objarr[0] = schedulernodeId;
         objarr[1] = containeridId;
         LaunchedContainersDTO dto = null;
         if (session != null) {
@@ -63,16 +63,16 @@ public class LaunchedContainersClusterJ implements LaunchedContainersTableDef, L
     }
 
     @Override
-    public List<HopLaunchedContainers> findByFiCaSchedulerNode(String ficaschedulernode_id) throws StorageException {
+    public List<HopLaunchedContainers> findByFiCaSchedulerNode(String schedulernode_id) throws StorageException {
         try {
             Session session = connector.obtainSession();
             QueryBuilder qb = session.getQueryBuilder();
 
             QueryDomainType<LaunchedContainersDTO> dobj = qb.createQueryDefinition(LaunchedContainersDTO.class);
-            Predicate pred1 = dobj.get("ficaschedulernode_id").equal(dobj.param("ficaschedulernode_id"));
+            Predicate pred1 = dobj.get("schedulernode_id").equal(dobj.param("schedulernode_id"));
             dobj.where(pred1);
             Query<LaunchedContainersDTO> query = session.createQuery(dobj);
-            query.setParameter("ficaschedulernode_id", ficaschedulernode_id);
+            query.setParameter("schedulernode_id", schedulernode_id);
 
             List<LaunchedContainersDTO> results = query.getResultList();
             return createLaunchedContainersList(results);
@@ -89,7 +89,7 @@ public class LaunchedContainersClusterJ implements LaunchedContainersTableDef, L
                 List<LaunchedContainersDTO> toRemove = new ArrayList<LaunchedContainersDTO>(removed.size());
                 for (HopLaunchedContainers hopContainerId : removed) {
                     Object[] objarr = new Object[2];
-                    objarr[0] = hopContainerId.getFicaSchedulerNodeID();
+                    objarr[0] = hopContainerId.getSchedulerNodeID();
                     objarr[1] = hopContainerId.getContainerIdID();
                     toRemove.add(session.newInstance(LaunchedContainersDTO.class, objarr));
                 }
@@ -115,7 +115,7 @@ public class LaunchedContainersClusterJ implements LaunchedContainersTableDef, L
 
     private HopLaunchedContainers createLaunchedContainersEntry(LaunchedContainersDTO dto) {
         HopLaunchedContainers hop = new HopLaunchedContainers(
-                dto.getficaschedulernode_id(),
+                dto.getschedulernode_id(),
                 dto.getcontaineridid(),
                 dto.getrmcontainerid());
         return hop;
@@ -123,10 +123,10 @@ public class LaunchedContainersClusterJ implements LaunchedContainersTableDef, L
 
     private LaunchedContainersDTO createPersistable(HopLaunchedContainers entry, Session session) {
         Object[] objarr = new Object[2];
-        objarr[0] = entry.getFicaSchedulerNodeID();
+        objarr[0] = entry.getSchedulerNodeID();
         objarr[1] = entry.getContainerIdID();
         LaunchedContainersDTO persistable = session.newInstance(LaunchedContainersDTO.class, objarr);
-        persistable.setficaschedulernode_id(entry.getFicaSchedulerNodeID());
+        persistable.setschedulernode_id(entry.getSchedulerNodeID());
         persistable.setcontaineridid(entry.getContainerIdID());
         persistable.setrmcontainerid(entry.getRmContainerID());
         return persistable;

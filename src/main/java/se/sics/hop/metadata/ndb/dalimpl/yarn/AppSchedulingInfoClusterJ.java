@@ -32,9 +32,9 @@ public class AppSchedulingInfoClusterJ implements AppSchedulingInfoTableDef, App
   public interface AppSchedulingInfoDTO {
 
     @PrimaryKey
-    @Column(name = FICASCHEDULERAPP_ID)
-    String getficaschedulerapp_id();
-    void setficaschedulerapp_id(String ficaschedulerapp_id);
+    @Column(name = SCHEDULERAPP_ID)
+    String getschedulerapp_id();
+    void setschedulerapp_id(String schedulerapp_id);
     
     @Column(name = APPID)
     int getappid();
@@ -122,7 +122,7 @@ public class AppSchedulingInfoClusterJ implements AppSchedulingInfoTableDef, App
   }
 
   private HopAppSchedulingInfo createHopAppSchedulingInfo(AppSchedulingInfoDTO appSchedulingInfoDTO) {
-    return new HopAppSchedulingInfo(appSchedulingInfoDTO.getficaschedulerapp_id(), appSchedulingInfoDTO.getappid(),
+    return new HopAppSchedulingInfo(appSchedulingInfoDTO.getschedulerapp_id(), appSchedulingInfoDTO.getappid(),
             appSchedulingInfoDTO.getqueuename(),
             appSchedulingInfoDTO.getuser(),
             appSchedulingInfoDTO.getcontaineridcounter(),
@@ -133,7 +133,7 @@ public class AppSchedulingInfoClusterJ implements AppSchedulingInfoTableDef, App
     AppSchedulingInfoClusterJ.AppSchedulingInfoDTO appSchedulingInfoDTO = 
             session.newInstance(AppSchedulingInfoClusterJ.AppSchedulingInfoDTO.class);
 
-    appSchedulingInfoDTO.setficaschedulerapp_id(hop.getFicaAppId());
+    appSchedulingInfoDTO.setschedulerapp_id(hop.getSchedulerappId());
     appSchedulingInfoDTO.setappid(hop.getAppId());
     appSchedulingInfoDTO.setcontaineridcounter(hop.getContaineridcounter());
     appSchedulingInfoDTO.setqueuename(hop.getQueuename());

@@ -33,9 +33,9 @@ public class FiCaSchedulerAppLiveContainersClusterJ implements FiCaSchedulerAppL
     public interface FiCaSchedulerAppLiveContainersDTO {
 
         @PrimaryKey
-        @Column(name = FICASCHEDULERAPP_ID)
-        String getficaschedulerapp_id();
-        void setficaschedulerapp_id(String ficaschedulerapp_id);
+        @Column(name = SCHEDULERAPP_ID)
+        String getschedulerapp_id();
+        void setschedulerapp_id(String schedulerapp_id);
 
         @Column(name = CONTAINERID_ID)
         String getcontaineridid();
@@ -74,7 +74,7 @@ public class FiCaSchedulerAppLiveContainersClusterJ implements FiCaSchedulerAppL
                 List<FiCaSchedulerAppLiveContainersClusterJ.FiCaSchedulerAppLiveContainersDTO> toRemove = new ArrayList<FiCaSchedulerAppLiveContainersClusterJ.FiCaSchedulerAppLiveContainersDTO>();
                 for (HopFiCaSchedulerAppLiveContainers hop : removed) {
                     Object[] objarr = new Object[2];
-                    objarr[0] = hop.getFicaschedulerapp_id();
+                    objarr[0] = hop.getSchedulerapp_id();
                     objarr[1] = hop.getContainerid_id();
                     toRemove.add(session.newInstance(FiCaSchedulerAppLiveContainersClusterJ.FiCaSchedulerAppLiveContainersDTO.class, objarr));
                 }
@@ -92,7 +92,7 @@ public class FiCaSchedulerAppLiveContainersClusterJ implements FiCaSchedulerAppL
     }
     
     private HopFiCaSchedulerAppLiveContainers createHopFiCaSchedulerAppLiveContainers(FiCaSchedulerAppLiveContainersDTO fiCaSchedulerAppLiveContainersDTO) {
-        return new HopFiCaSchedulerAppLiveContainers(fiCaSchedulerAppLiveContainersDTO.getficaschedulerapp_id(),
+        return new HopFiCaSchedulerAppLiveContainers(fiCaSchedulerAppLiveContainersDTO.getschedulerapp_id(),
                                                     fiCaSchedulerAppLiveContainersDTO.getcontaineridid(),
                                                     fiCaSchedulerAppLiveContainersDTO.getrmcontainerid());
     }
@@ -100,7 +100,7 @@ public class FiCaSchedulerAppLiveContainersClusterJ implements FiCaSchedulerAppL
     private FiCaSchedulerAppLiveContainersDTO createPersistable(HopFiCaSchedulerAppLiveContainers hop, Session session) {
         FiCaSchedulerAppLiveContainersClusterJ.FiCaSchedulerAppLiveContainersDTO fiCaSchedulerAppLiveContainersDTO = session.newInstance(FiCaSchedulerAppLiveContainersClusterJ.FiCaSchedulerAppLiveContainersDTO.class);
         
-        fiCaSchedulerAppLiveContainersDTO.setficaschedulerapp_id(hop.getFicaschedulerapp_id());
+        fiCaSchedulerAppLiveContainersDTO.setschedulerapp_id(hop.getSchedulerapp_id());
         fiCaSchedulerAppLiveContainersDTO.setcontaineridid(hop.getContainerid_id());
         fiCaSchedulerAppLiveContainersDTO.setrmcontainerid(hop.getRmcontainer_id());
         

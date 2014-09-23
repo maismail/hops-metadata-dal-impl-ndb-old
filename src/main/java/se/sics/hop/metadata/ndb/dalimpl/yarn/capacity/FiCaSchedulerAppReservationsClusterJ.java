@@ -27,9 +27,9 @@ public class FiCaSchedulerAppReservationsClusterJ implements FiCaSchedulerAppRes
     public interface FiCaSchedulerAppReservationsDTO {
 
         @PrimaryKey
-        @Column(name = FICASCHEDULERAPP_ID)
-        String getficaschedulerappid();
-        void setficaschedulerappid(String ficaschedulerappid);
+        @Column(name = SCHEDULERAPP_ID)
+        String getschedulerappid();
+        void setschedulerappid(String schedulerappid);
 
         @Column(name = PRIORITY_ID)
         int getpriorityid();
@@ -58,7 +58,7 @@ public class FiCaSchedulerAppReservationsClusterJ implements FiCaSchedulerAppRes
         try {
             if (removed != null) {
                 for (HopFiCaSchedulerAppReservations hop : removed) {
-                    FiCaSchedulerAppReservationsClusterJ.FiCaSchedulerAppReservationsDTO persistable = session.newInstance(FiCaSchedulerAppReservationsClusterJ.FiCaSchedulerAppReservationsDTO.class, hop.getFicaschedulerapp_id());
+                    FiCaSchedulerAppReservationsClusterJ.FiCaSchedulerAppReservationsDTO persistable = session.newInstance(FiCaSchedulerAppReservationsClusterJ.FiCaSchedulerAppReservationsDTO.class, hop.getSchedulerapp_id());
                     session.deletePersistent(persistable);
                 }
             }
@@ -75,14 +75,14 @@ public class FiCaSchedulerAppReservationsClusterJ implements FiCaSchedulerAppRes
     
     
     private HopFiCaSchedulerAppReservations createHopFiCaSchedulerAppReservations(FiCaSchedulerAppReservationsDTO fiCaSchedulerAppReservationsDTO) {
-        return new HopFiCaSchedulerAppReservations(fiCaSchedulerAppReservationsDTO.getficaschedulerappid(),
+        return new HopFiCaSchedulerAppReservations(fiCaSchedulerAppReservationsDTO.getschedulerappid(),
                                                     fiCaSchedulerAppReservationsDTO.getpriorityid());
     }
 
     private FiCaSchedulerAppReservationsDTO createPersistable(HopFiCaSchedulerAppReservations hop, Session session) {
         FiCaSchedulerAppReservationsClusterJ.FiCaSchedulerAppReservationsDTO fiCaSchedulerAppReservationsDTO = session.newInstance(FiCaSchedulerAppReservationsClusterJ.FiCaSchedulerAppReservationsDTO.class);
         
-        fiCaSchedulerAppReservationsDTO.setficaschedulerappid(hop.getFicaschedulerapp_id());
+        fiCaSchedulerAppReservationsDTO.setschedulerappid(hop.getSchedulerapp_id());
         fiCaSchedulerAppReservationsDTO.setpriorityid(hop.getPriority_id());
         
         return fiCaSchedulerAppReservationsDTO;

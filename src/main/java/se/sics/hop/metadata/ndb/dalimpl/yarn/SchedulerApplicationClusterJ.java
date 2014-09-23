@@ -43,7 +43,11 @@ public class SchedulerApplicationClusterJ implements SchedulerApplicationTableDe
     @Column(name = USER)
     String getuser();
     void setuser(String user);
-        
+    
+    @Column(name = QUEUENAME)
+    String getqueuename();
+    void setqueuename(String queuename);
+    
     }
     private final ClusterjConnector connector = ClusterjConnector.getInstance();
     
@@ -107,7 +111,7 @@ public class SchedulerApplicationClusterJ implements SchedulerApplicationTableDe
     }
     
     private HopSchedulerApplication createHopSchedulerApplication(SchedulerApplicationDTO schedulerApplicationDTO) {
-        return new HopSchedulerApplication(schedulerApplicationDTO.getappid(), schedulerApplicationDTO.getuser());
+        return new HopSchedulerApplication(schedulerApplicationDTO.getappid(), schedulerApplicationDTO.getuser(), schedulerApplicationDTO.getqueuename());
     }
 
     private SchedulerApplicationDTO createPersistable(HopSchedulerApplication hop, Session session) {
@@ -115,6 +119,7 @@ public class SchedulerApplicationClusterJ implements SchedulerApplicationTableDe
         
         schedulerApplicationDTO.setappid(hop.getAppid());
         schedulerApplicationDTO.setuser(hop.getUser());
+        schedulerApplicationDTO.setqueuename(hop.getQueuename());
         return schedulerApplicationDTO;
     }
     

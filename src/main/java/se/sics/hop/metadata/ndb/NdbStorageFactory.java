@@ -76,6 +76,7 @@ import se.sics.hop.metadata.ndb.dalimpl.yarn.SchedulerApplicationClusterJ;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.UpdatedContainerInfoClusterJ;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.UpdatedContainerInfoContainersClusterJ;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.YarnVariablesClusterJ;
+import se.sics.hop.metadata.ndb.dalimpl.yarn.fair.FSSchedulerNodeClusterJ;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.rmstatestore.AppMasterRPCClusterJ;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.rmstatestore.ApplicationAttemptStateClusterJ;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.rmstatestore.ApplicationStateClusterJ;
@@ -119,6 +120,7 @@ import se.sics.hop.metadata.yarn.dal.SchedulerApplicationDataAccess;
 import se.sics.hop.metadata.yarn.dal.UpdatedContainerInfoContainersDataAccess;
 import se.sics.hop.metadata.yarn.dal.UpdatedContainerInfoDataAccess;
 import se.sics.hop.metadata.yarn.dal.YarnVariablesDataAccess;
+import se.sics.hop.metadata.yarn.dal.fair.FSSchedulerNodeDataAccess;
 import se.sics.hop.metadata.yarn.dal.rmstatestore.AppMasterRPCDataAccess;
 import se.sics.hop.metadata.yarn.dal.rmstatestore.ApplicationAttemptStateDataAccess;
 import se.sics.hop.metadata.yarn.dal.rmstatestore.ApplicationStateDataAccess;
@@ -212,6 +214,8 @@ public class NdbStorageFactory implements DALStorageFactory {
     dataAccessMap.put(VariableDataAccess.class, new VariableClusterj());
     dataAccessMap.put(StorageIdMapDataAccess.class, new StorageIdMapClusterj());
     dataAccessMap.put(BlockLookUpDataAccess.class, new BlockLookUpClusterj());
+    
+    dataAccessMap.put(FSSchedulerNodeDataAccess.class, new FSSchedulerNodeClusterJ());
   }
 
   @Override

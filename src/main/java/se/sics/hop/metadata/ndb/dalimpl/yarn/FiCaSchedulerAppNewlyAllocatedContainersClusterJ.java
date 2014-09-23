@@ -34,9 +34,9 @@ public class FiCaSchedulerAppNewlyAllocatedContainersClusterJ implements FiCaSch
     public interface FiCaSchedulerAppNewlyAllocatedContainersDTO {
 
         @PrimaryKey
-        @Column(name = FICASCHEDULERAPP_ID)
-        String getficaschedulerapp_id();
-        void setficaschedulerapp_id(String ficaschedulerapp_id);
+        @Column(name = SCHEDULERAPP_ID)
+        String getschedulerapp_id();
+        void setschedulerapp_id(String schedulerapp_id);
 
         @Column(name = RMCONTAINER_ID)
         String getrmcontainerid();
@@ -71,7 +71,7 @@ public class FiCaSchedulerAppNewlyAllocatedContainersClusterJ implements FiCaSch
                 List<FiCaSchedulerAppNewlyAllocatedContainersClusterJ.FiCaSchedulerAppNewlyAllocatedContainersDTO> toRemove = new ArrayList<FiCaSchedulerAppNewlyAllocatedContainersClusterJ.FiCaSchedulerAppNewlyAllocatedContainersDTO>();
                 for (HopFiCaSchedulerAppNewlyAllocatedContainers hop : removed) {
                     Object[] objarr = new Object[2];
-                    objarr[0] = hop.getFicaschedulerapp_id();
+                    objarr[0] = hop.getSchedulerapp_id();
                     objarr[1] = hop.getRmcontainer_id();
                     toRemove.add(session.newInstance(FiCaSchedulerAppNewlyAllocatedContainersClusterJ.FiCaSchedulerAppNewlyAllocatedContainersDTO.class, objarr));
                 }
@@ -89,14 +89,14 @@ public class FiCaSchedulerAppNewlyAllocatedContainersClusterJ implements FiCaSch
     }
     
     private HopFiCaSchedulerAppNewlyAllocatedContainers createHopFiCaSchedulerAppNewlyAllocatedContainers(FiCaSchedulerAppNewlyAllocatedContainersDTO fiCaSchedulerAppNewlyAllocatedContainersDTO) {
-        return new HopFiCaSchedulerAppNewlyAllocatedContainers(fiCaSchedulerAppNewlyAllocatedContainersDTO.getficaschedulerapp_id(),
+        return new HopFiCaSchedulerAppNewlyAllocatedContainers(fiCaSchedulerAppNewlyAllocatedContainersDTO.getschedulerapp_id(),
                                                                fiCaSchedulerAppNewlyAllocatedContainersDTO.getrmcontainerid());
     }
 
     private FiCaSchedulerAppNewlyAllocatedContainersDTO createPersistable(HopFiCaSchedulerAppNewlyAllocatedContainers hop, Session session) {
         FiCaSchedulerAppNewlyAllocatedContainersClusterJ.FiCaSchedulerAppNewlyAllocatedContainersDTO fiCaSchedulerAppNewlyAllocatedContainersDTO = session.newInstance(FiCaSchedulerAppNewlyAllocatedContainersClusterJ.FiCaSchedulerAppNewlyAllocatedContainersDTO.class);
         
-        fiCaSchedulerAppNewlyAllocatedContainersDTO.setficaschedulerapp_id(hop.getFicaschedulerapp_id());
+        fiCaSchedulerAppNewlyAllocatedContainersDTO.setschedulerapp_id(hop.getSchedulerapp_id());
         fiCaSchedulerAppNewlyAllocatedContainersDTO.setrmcontainerid(hop.getRmcontainer_id());
         
         return fiCaSchedulerAppNewlyAllocatedContainersDTO;

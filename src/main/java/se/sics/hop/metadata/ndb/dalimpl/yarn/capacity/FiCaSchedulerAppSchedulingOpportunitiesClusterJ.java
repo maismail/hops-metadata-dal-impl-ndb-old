@@ -28,9 +28,9 @@ public class FiCaSchedulerAppSchedulingOpportunitiesClusterJ implements FiCaSche
     public interface FiCaSchedulerAppSchedulingOpportunitiesDTO {
 
         @PrimaryKey
-        @Column(name = FICASCHEDULERAPP_ID)
-        String getficaschedulerappid();
-        void setficaschedulerappid(String ficaschedulerappid);
+        @Column(name = SCHEDULERAPP_ID)
+        String getschedulerappid();
+        void setschedulerappid(String schedulerappid);
 
         @Column(name = PRIORITY_ID)
         int getpriorityid();
@@ -59,7 +59,7 @@ public class FiCaSchedulerAppSchedulingOpportunitiesClusterJ implements FiCaSche
         try {
             if (removed != null) {
                 for (HopFiCaSchedulerAppSchedulingOpportunities hop : removed) {
-                    FiCaSchedulerAppSchedulingOpportunitiesClusterJ.FiCaSchedulerAppSchedulingOpportunitiesDTO persistable = session.newInstance(FiCaSchedulerAppSchedulingOpportunitiesClusterJ.FiCaSchedulerAppSchedulingOpportunitiesDTO.class, hop.getFicaschedulerapp_id());
+                    FiCaSchedulerAppSchedulingOpportunitiesClusterJ.FiCaSchedulerAppSchedulingOpportunitiesDTO persistable = session.newInstance(FiCaSchedulerAppSchedulingOpportunitiesClusterJ.FiCaSchedulerAppSchedulingOpportunitiesDTO.class, hop.getSchedulerapp_id());
                     session.deletePersistent(persistable);
                 }
             }
@@ -75,14 +75,14 @@ public class FiCaSchedulerAppSchedulingOpportunitiesClusterJ implements FiCaSche
     }
     
    private HopFiCaSchedulerAppSchedulingOpportunities createHopFiCaSchedulerAppSchedulingOpportunities(FiCaSchedulerAppSchedulingOpportunitiesDTO fiCaSchedulerAppSchedulingOpportunitiesDTO) {
-       return new HopFiCaSchedulerAppSchedulingOpportunities(fiCaSchedulerAppSchedulingOpportunitiesDTO.getficaschedulerappid(),
+       return new HopFiCaSchedulerAppSchedulingOpportunities(fiCaSchedulerAppSchedulingOpportunitiesDTO.getschedulerappid(),
                                                             fiCaSchedulerAppSchedulingOpportunitiesDTO.getpriorityid());
    }
 
     private FiCaSchedulerAppSchedulingOpportunitiesDTO createPersistable(HopFiCaSchedulerAppSchedulingOpportunities hop, Session session) {
         FiCaSchedulerAppSchedulingOpportunitiesClusterJ.FiCaSchedulerAppSchedulingOpportunitiesDTO fiCaSchedulerAppSchedulingOpportunitiesDTO = session.newInstance(FiCaSchedulerAppSchedulingOpportunitiesClusterJ.FiCaSchedulerAppSchedulingOpportunitiesDTO.class);
         
-        fiCaSchedulerAppSchedulingOpportunitiesDTO.setficaschedulerappid(hop.getFicaschedulerapp_id());
+        fiCaSchedulerAppSchedulingOpportunitiesDTO.setschedulerappid(hop.getSchedulerapp_id());
         fiCaSchedulerAppSchedulingOpportunitiesDTO.setpriorityid(hop.getPriority_id());
         
         return fiCaSchedulerAppSchedulingOpportunitiesDTO;
