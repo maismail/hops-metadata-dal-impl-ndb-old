@@ -43,9 +43,7 @@ public class SequenceNumberClusterJ implements SequenceNumberTableDef, SequenceN
         if (session != null) {
             sequenceNumberDTO = session.find(SequenceNumberDTO.class, id);
         }
-        if (sequenceNumberDTO == null) {
-            throw new StorageException("HOP :: Error while retrieving sequence number with id="+id);
-        }
+        
 
         return createHopSequenceNumber(sequenceNumberDTO);
     }
@@ -74,7 +72,11 @@ public class SequenceNumberClusterJ implements SequenceNumberTableDef, SequenceN
     }
 
     private HopSequenceNumber createHopSequenceNumber(SequenceNumberDTO sequenceNumberDTO) {
+      if(sequenceNumberDTO !=null){
         return new HopSequenceNumber(sequenceNumberDTO.getid(), sequenceNumberDTO.getsequencenumber());
+      } else{
+        return null;
+      }
     }
 
     private SequenceNumberDTO createPersistable(HopSequenceNumber hop, Session session) {

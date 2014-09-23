@@ -46,9 +46,7 @@ public class ApplicationStateClusterJ implements ApplicationStateTableDef, Appli
         if (session != null) {
             appStateDTO = session.find(ApplicationStateDTO.class, id);
         }
-        if (appStateDTO == null) {
-            throw new StorageException("HOP :: Error while retrieving applicationState with id=" + id);
-        }
+       
         return createHopApplicationState(appStateDTO);
     }
 
@@ -63,11 +61,7 @@ public class ApplicationStateClusterJ implements ApplicationStateTableDef, Appli
             Query<ApplicationStateDTO> query = session.createQuery(dobj);
             //query.setParameter("applicationid", applicationid);
             List<ApplicationStateDTO> results = query.getResultList();
-            if (results != null && !results.isEmpty()) {
                 return createHopApplicationStateList(results);
-            } else {
-                throw new StorageException("HOP :: Error retrieving ApplicationStates");
-            }
         } catch (Exception e) {
             throw new StorageException(e);
         }
@@ -98,8 +92,12 @@ public class ApplicationStateClusterJ implements ApplicationStateTableDef, Appli
     }
 
     private HopApplicationState createHopApplicationState(ApplicationStateDTO appStateDTO) {
+      if(appStateDTO!=null){
         return new HopApplicationState(appStateDTO.getapplicationid(),
                 appStateDTO.getappstate());
+      }else{
+        return null;
+      }
     }
 
     private List<HopApplicationState> createHopApplicationStateList(List<ApplicationStateDTO> list) {
