@@ -54,10 +54,10 @@ public class FiCaSchedulerAppLiveContainersClusterJ implements FiCaSchedulerAppL
             QueryBuilder qb = session.getQueryBuilder();
 
             QueryDomainType<FiCaSchedulerAppLiveContainersClusterJ.FiCaSchedulerAppLiveContainersDTO> dobj = qb.createQueryDefinition(FiCaSchedulerAppLiveContainersClusterJ.FiCaSchedulerAppLiveContainersDTO.class);
-            Predicate pred1 = dobj.get("ficaschedulerapp_id").equal(dobj.param("ficaschedulerapp_id"));
+            Predicate pred1 = dobj.get("schedulerapp_id").equal(dobj.param("schedulerapp_id"));
             dobj.where(pred1);
             Query<FiCaSchedulerAppLiveContainersClusterJ.FiCaSchedulerAppLiveContainersDTO> query = session.createQuery(dobj);
-            query.setParameter("ficaschedulerapp_id", ficaId);
+            query.setParameter("schedulerapp_id", ficaId);
 
             List<FiCaSchedulerAppLiveContainersClusterJ.FiCaSchedulerAppLiveContainersDTO> results = query.getResultList();
             return createFiCaSchedulerAppLiveContainersList(results);
