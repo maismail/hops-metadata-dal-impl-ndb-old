@@ -56,10 +56,10 @@ public class LeaderClusterj implements LeaderTableDef, LeaderDataAccess<HopLeade
 
     void setHostname(String hostname);
 
-    @Column(name = AVG_REQUEST_PROCESSING_LATENCY)
-    int getAvgRequestProcessingLatency();
+    @Column(name = HTTP_ADDRESS)
+    String getHttpAddress();
 
-    void setAvgRequestProcessingLatency(int avgRequestProcessingLatency);
+    void setHttpAddress(String httpAddress);
   }
   private ClusterjConnector connector = ClusterjConnector.getInstance();
 
@@ -237,7 +237,7 @@ public class LeaderClusterj implements LeaderTableDef, LeaderDataAccess<HopLeade
             lTable.getCounter(),
             lTable.getTimestamp(),
             lTable.getHostname(),
-            lTable.getAvgRequestProcessingLatency(),
+            lTable.getHttpAddress(),
             lTable.getPartitionVal());
   }
 
@@ -246,7 +246,7 @@ public class LeaderClusterj implements LeaderTableDef, LeaderDataAccess<HopLeade
     lTable.setCounter(leader.getCounter());
     lTable.setHostname(leader.getHostName());
     lTable.setTimestamp(leader.getTimeStamp());
-    lTable.setAvgRequestProcessingLatency(leader.getAvgRequestProcessingLatency());
+    lTable.setHttpAddress(leader.getHttpAddress());
     lTable.setPartitionVal(leader.getPartitionVal());
   }
 }
