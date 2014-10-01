@@ -3,6 +3,8 @@ package se.sics.hop.metadata.ndb.dalimpl.hdfs;
 import com.mysql.clusterj.Query;
 import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
+import com.mysql.clusterj.annotation.Index;
+import com.mysql.clusterj.annotation.PartitionKey;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
 import com.mysql.clusterj.query.Predicate;
@@ -26,6 +28,8 @@ import se.sics.hop.metadata.hdfs.tabledef.LeasePathTableDef;
 public class LeasePathClusterj implements LeasePathTableDef, LeasePathDataAccess<HopLeasePath> {
 
     @PersistenceCapable(table = TABLE_NAME)
+    @PartitionKey(column=PART_KEY)
+    @Index(name="holder_idx")
     public interface LeasePathsDTO {
 
         @Column(name = HOLDER_ID)

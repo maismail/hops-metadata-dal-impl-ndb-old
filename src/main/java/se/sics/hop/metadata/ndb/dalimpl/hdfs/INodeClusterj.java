@@ -4,6 +4,7 @@ import com.mysql.clusterj.Query;
 import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.Index;
+import com.mysql.clusterj.annotation.PartitionKey;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
 import com.mysql.clusterj.query.Predicate;
@@ -35,10 +36,11 @@ public class INodeClusterj implements INodeTableDef, INodeDataAccess<HopINode> {
   }
 
   @PersistenceCapable(table = TABLE_NAME)
+  @PartitionKey(column=PARENT_ID)
+  @Index(name = "inode_idx")
   public interface InodeDTO {
 
     @Column(name = ID)
-    @Index(name = "inode_idx")
     int getId();     // id of the inode
     void setId(int id);
 

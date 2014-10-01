@@ -4,6 +4,7 @@ import com.mysql.clusterj.Query;
 import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.Index;
+import com.mysql.clusterj.annotation.PartitionKey;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
 import com.mysql.clusterj.query.Predicate;
@@ -28,6 +29,8 @@ public class ExcessReplicaClusterj implements ExcessReplicaTableDef, ExcessRepli
 
 
   @PersistenceCapable(table = TABLE_NAME)
+  @PartitionKey(column = INODE_ID)
+  @Index(name = STORAGE_IDX)
   public interface ExcessReplicaDTO {
 
     @PrimaryKey
@@ -42,7 +45,6 @@ public class ExcessReplicaClusterj implements ExcessReplicaTableDef, ExcessRepli
 
     @PrimaryKey
     @Column(name = STORAGE_ID)
-    @Index(name = STORAGE_IDX)
     int getStorageId();
     void setStorageId(int storageId);
   }

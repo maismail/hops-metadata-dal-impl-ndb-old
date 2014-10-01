@@ -3,6 +3,8 @@ package se.sics.hop.metadata.ndb.dalimpl.hdfs;
 import com.mysql.clusterj.Query;
 import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
+import com.mysql.clusterj.annotation.Index;
+import com.mysql.clusterj.annotation.PartitionKey;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
 import com.mysql.clusterj.query.Predicate;
@@ -26,6 +28,8 @@ public class CorruptReplicaClusterj implements CorruptReplicaTableDef, CorruptRe
 
 
   @PersistenceCapable(table = TABLE_NAME)
+  @PartitionKey(column=INODE_ID)
+  @Index(name="timestamp")
   public interface CorruptReplicaDTO {
     @PrimaryKey
     @Column(name = INODE_ID)

@@ -4,6 +4,7 @@ import com.mysql.clusterj.Query;
 import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.Index;
+import com.mysql.clusterj.annotation.PartitionKey;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
 import com.mysql.clusterj.query.Predicate;
@@ -27,23 +28,21 @@ import se.sics.hop.metadata.hdfs.tabledef.BlockInfoTableDef;
 public class BlockInfoClusterj implements BlockInfoTableDef, BlockInfoDataAccess<HopBlockInfo> {
 
   @PersistenceCapable(table = TABLE_NAME)
+  @PartitionKey(column = INODE_ID)
   public interface BlockInfoDTO {
 
     @PrimaryKey
     @Column(name = INODE_ID)
     int getINodeId();
-
     void setINodeId(int iNodeID);
 
     @PrimaryKey
     @Column(name = BLOCK_ID)
     long getBlockId();
-
     void setBlockId(long bid);
 
     @Column(name = BLOCK_INDEX)
     int getBlockIndex();
-
     void setBlockIndex(int idx);
 
     @Column(name = NUM_BYTES)

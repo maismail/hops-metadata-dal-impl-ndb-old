@@ -3,6 +3,7 @@ package se.sics.hop.metadata.ndb.dalimpl.hdfs;
 import com.mysql.clusterj.Query;
 import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
+import com.mysql.clusterj.annotation.PartitionKey;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
 import com.mysql.clusterj.query.Predicate;
@@ -27,6 +28,7 @@ import se.sics.hop.metadata.hdfs.tabledef.LeaderTableDef;
 public class LeaderClusterj implements LeaderTableDef, LeaderDataAccess<HopLeader> {
 
   @PersistenceCapable(table = TABLE_NAME)
+  @PartitionKey(column=PARTITION_VAL)
   public interface LeaderDTO {
 
     @PrimaryKey

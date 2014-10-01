@@ -4,6 +4,7 @@ import com.mysql.clusterj.Query;
 import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.Index;
+import com.mysql.clusterj.annotation.PartitionKey;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
 import com.mysql.clusterj.query.Predicate;
@@ -29,6 +30,8 @@ public class ReplicaClusterj implements ReplicaTableDef, ReplicaDataAccess<HopIn
   static final Log LOG = LogFactory.getLog(ReplicaClusterj.class);
 
   @PersistenceCapable(table = TABLE_NAME)
+  @PartitionKey(column=INODE_ID)
+  @Index(name = "storage_idx")
   public interface ReplicaDTO {
 
     @PrimaryKey
@@ -42,8 +45,7 @@ public class ReplicaClusterj implements ReplicaTableDef, ReplicaDataAccess<HopIn
     void setBlockId(long bid);
 
     @PrimaryKey
-    @Column(name = STORAGE_ID)
-    @Index(name = "storage_idx")
+    @Column(name = STORAGE_ID)    
     int getStorageId();
     void setStorageId(int id);
 
