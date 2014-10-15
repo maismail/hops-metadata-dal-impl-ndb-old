@@ -21,6 +21,7 @@ import se.sics.hop.metadata.hdfs.entity.yarn.HopAppSchedulingInfo;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
 import se.sics.hop.metadata.yarn.dal.AppSchedulingInfoDataAccess;
 import se.sics.hop.metadata.yarn.tabledef.AppSchedulingInfoTableDef;
+import static se.sics.hop.metadata.yarn.tabledef.AppSchedulingInfoTableDef.PENDING;
 
 /**
  *
@@ -31,11 +32,11 @@ public class AppSchedulingInfoClusterJ implements AppSchedulingInfoTableDef, App
   @PersistenceCapable(table = TABLE_NAME)
   public interface AppSchedulingInfoDTO {
 
-    @PrimaryKey
     @Column(name = SCHEDULERAPP_ID)
     String getschedulerapp_id();
     void setschedulerapp_id(String schedulerapp_id);
     
+    @PrimaryKey
     @Column(name = APPID)
     int getappid();
 
@@ -60,6 +61,11 @@ public class AppSchedulingInfoClusterJ implements AppSchedulingInfoTableDef, App
     boolean getPending();
 
     void setPending(boolean pending);
+    
+     @Column(name = STOPED)
+    boolean getStoped();
+
+    void setStoped(boolean stoped);
   }
   private final ClusterjConnector connector = ClusterjConnector.getInstance();
 
@@ -126,20 +132,22 @@ public class AppSchedulingInfoClusterJ implements AppSchedulingInfoTableDef, App
             appSchedulingInfoDTO.getqueuename(),
             appSchedulingInfoDTO.getuser(),
             appSchedulingInfoDTO.getcontaineridcounter(),
-            appSchedulingInfoDTO.getPending());
+            appSchedulingInfoDTO.getPending(),
+            appSchedulingInfoDTO.getStoped());
   }
 
   private AppSchedulingInfoDTO createPersistable(HopAppSchedulingInfo hop, Session session) {
     AppSchedulingInfoClusterJ.AppSchedulingInfoDTO appSchedulingInfoDTO = 
             session.newInstance(AppSchedulingInfoClusterJ.AppSchedulingInfoDTO.class);
 
-    appSchedulingInfoDTO.setschedulerapp_id(hop.getSchedulerappId());
+    appSchedulingInfoDTO.setschedulerapp_id(hop.getSchedulerAppId());
     appSchedulingInfoDTO.setappid(hop.getAppId());
     appSchedulingInfoDTO.setcontaineridcounter(hop.getContaineridcounter());
     appSchedulingInfoDTO.setqueuename(hop.getQueuename());
     appSchedulingInfoDTO.setuser(hop.getUser());
     appSchedulingInfoDTO.setPending(hop.isPending());
-
+    appSchedulingInfoDTO.setStoped(hop.isStoped());
+    
     return appSchedulingInfoDTO;
   }
 
