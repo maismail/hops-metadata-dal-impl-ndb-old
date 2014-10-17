@@ -73,7 +73,6 @@ import se.sics.hop.metadata.yarn.dal.capacity.FiCaSchedulerAppReservationsDataAc
 import se.sics.hop.metadata.yarn.dal.capacity.FiCaSchedulerAppReservedContainersDataAccess;
 import se.sics.hop.metadata.yarn.dal.capacity.FiCaSchedulerAppSchedulingOpportunitiesDataAccess;
 import se.sics.hop.metadata.yarn.dal.FiCaSchedulerNodeDataAccess;
-import se.sics.hop.metadata.yarn.dal.FifoSchedulerNodesDataAccess;
 import se.sics.hop.metadata.yarn.dal.FinishedApplicationsDataAccess;
 import se.sics.hop.metadata.yarn.dal.JustLaunchedContainersDataAccess;
 import se.sics.hop.metadata.yarn.dal.LaunchedContainersDataAccess;
@@ -107,7 +106,6 @@ import se.sics.hop.metadata.yarn.tabledef.capacity.FiCaSchedulerAppReservationsT
 import se.sics.hop.metadata.yarn.tabledef.capacity.FiCaSchedulerAppReservedContainersTableDef;
 import se.sics.hop.metadata.yarn.tabledef.capacity.FiCaSchedulerAppSchedulingOpportunitiesTableDef;
 import se.sics.hop.metadata.yarn.tabledef.FiCaSchedulerNodeTableDef;
-import se.sics.hop.metadata.yarn.tabledef.FifoSchedulerNodesTableDef;
 import se.sics.hop.metadata.yarn.tabledef.FinishedApplicationsTableDef;
 import se.sics.hop.metadata.yarn.tabledef.JustLaunchedContainersTableDef;
 import se.sics.hop.metadata.yarn.tabledef.LaunchedContainersTableDef;
@@ -279,7 +277,6 @@ public class ClusterjConnector implements StorageConnector<Session> {
             FiCaSchedulerAppLiveContainersDataAccess.class, FiCaSchedulerAppNewlyAllocatedContainersDataAccess.class,
             FiCaSchedulerAppReservationsDataAccess.class, FiCaSchedulerAppReservedContainersDataAccess.class,
             FiCaSchedulerAppSchedulingOpportunitiesDataAccess.class, FiCaSchedulerNodeDataAccess.class,
-            FifoSchedulerNodesDataAccess.class,
             JustLaunchedContainersDataAccess.class, LaunchedContainersDataAccess.class,
             NodeDataAccess.class, QueueMetricsDataAccess.class,
             ResourceDataAccess.class, ResourceRequestDataAccess.class, RMContainerDataAccess.class,
@@ -388,8 +385,6 @@ public class ClusterjConnector implements StorageConnector<Session> {
             truncate(FiCaSchedulerAppSchedulingOpportunitiesTableDef.TABLE_NAME);
           } else if (e == FiCaSchedulerNodeDataAccess.class) {
             truncate(FiCaSchedulerNodeTableDef.TABLE_NAME);
-          } else if (e == FifoSchedulerNodesDataAccess.class) {
-            truncate(FifoSchedulerNodesTableDef.TABLE_NAME);
           } else if (e == JustLaunchedContainersDataAccess.class) {
             truncate(JustLaunchedContainersTableDef.TABLE_NAME);
           } else if (e == LaunchedContainersDataAccess.class) {

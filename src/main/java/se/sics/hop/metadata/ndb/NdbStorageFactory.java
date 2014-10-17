@@ -53,7 +53,6 @@ import se.sics.hop.metadata.ndb.dalimpl.yarn.capacity.FiCaSchedulerAppReservatio
 import se.sics.hop.metadata.ndb.dalimpl.yarn.capacity.FiCaSchedulerAppReservedContainersClusterJ;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.capacity.FiCaSchedulerAppSchedulingOpportunitiesClusterJ;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.FiCaSchedulerNodeClusterJ;
-import se.sics.hop.metadata.ndb.dalimpl.yarn.FifoSchedulerNodesClusterJ;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.FinishedApplicationsClusterJ;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.JustLaunchedContainersClusterJ;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.LaunchedContainersClusterJ;
@@ -90,7 +89,6 @@ import se.sics.hop.metadata.yarn.dal.capacity.FiCaSchedulerAppReservationsDataAc
 import se.sics.hop.metadata.yarn.dal.capacity.FiCaSchedulerAppReservedContainersDataAccess;
 import se.sics.hop.metadata.yarn.dal.capacity.FiCaSchedulerAppSchedulingOpportunitiesDataAccess;
 import se.sics.hop.metadata.yarn.dal.FiCaSchedulerNodeDataAccess;
-import se.sics.hop.metadata.yarn.dal.FifoSchedulerNodesDataAccess;
 import se.sics.hop.metadata.yarn.dal.FinishedApplicationsDataAccess;
 import se.sics.hop.metadata.yarn.dal.JustLaunchedContainersDataAccess;
 import se.sics.hop.metadata.yarn.dal.LaunchedContainersDataAccess;
@@ -162,7 +160,6 @@ public class NdbStorageFactory implements DALStorageFactory {
     dataAccessMap.put(JustLaunchedContainersDataAccess.class, new JustLaunchedContainersClusterJ());
     dataAccessMap.put(LaunchedContainersDataAccess.class, new LaunchedContainersClusterJ());
     dataAccessMap.put(FinishedApplicationsDataAccess.class, new FinishedApplicationsClusterJ());
-    dataAccessMap.put(FifoSchedulerNodesDataAccess.class, new FifoSchedulerNodesClusterJ());
     dataAccessMap.put(SchedulerApplicationDataAccess.class, new SchedulerApplicationClusterJ());
     dataAccessMap.put(FiCaSchedulerAppNewlyAllocatedContainersDataAccess.class, new FiCaSchedulerAppNewlyAllocatedContainersClusterJ());
     dataAccessMap.put(FiCaSchedulerAppSchedulingOpportunitiesDataAccess.class, new FiCaSchedulerAppSchedulingOpportunitiesClusterJ());

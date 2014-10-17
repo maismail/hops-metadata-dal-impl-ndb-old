@@ -27,15 +27,11 @@ public class RMContextActiveNodesClusterJ implements RMContextActiveNodesTableDe
     public interface RMContextNodesDTO {
 
         @PrimaryKey
-        @Column(name = NODEID_ID)
+        @Column(name = RMNODEID)
         String getnodeidid();
 
         void setnodeidid(String nodeidid);
 
-        @Column(name = RMNODEID)
-        String getrmnodeid();
-
-        void setrmnodeid(String rmnodeid);
     }
     private ClusterjConnector connector = ClusterjConnector.getInstance();
 
@@ -98,13 +94,12 @@ public class RMContextActiveNodesClusterJ implements RMContextActiveNodesTableDe
     }
 
     private HopRMContextActiveNodes createRMContextNodesEntry(RMContextNodesDTO entry) {
-        return new HopRMContextActiveNodes(entry.getnodeidid(), entry.getrmnodeid());
+        return new HopRMContextActiveNodes(entry.getnodeidid());
     }
 
     private RMContextNodesDTO createPersistable(HopRMContextActiveNodes entry, Session session) {
         RMContextNodesDTO persistable = session.newInstance(RMContextNodesDTO.class, entry.getNodeidId());
         persistable.setnodeidid(entry.getNodeidId());
-        persistable.setrmnodeid(entry.getRmnodeId());
         //session.savePersistent(persistable);
         return persistable;
     }
