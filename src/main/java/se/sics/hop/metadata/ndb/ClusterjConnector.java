@@ -63,9 +63,7 @@ import se.sics.hop.metadata.ndb.dalimpl.yarn.YarnVariablesClusterJ;
 import se.sics.hop.metadata.yarn.dal.AppSchedulingInfoBlacklistDataAccess;
 import se.sics.hop.metadata.yarn.dal.AppSchedulingInfoDataAccess;
 import se.sics.hop.metadata.yarn.dal.rmstatestore.AppMasterRPCDataAccess;
-import se.sics.hop.metadata.yarn.dal.ApplicationIdDataAccess;
 import se.sics.hop.metadata.yarn.dal.ContainerDataAccess;
-import se.sics.hop.metadata.yarn.dal.ContainerIdDataAccess;
 import se.sics.hop.metadata.yarn.dal.ContainerIdToCleanDataAccess;
 import se.sics.hop.metadata.yarn.dal.ContainerStatusDataAccess;
 import se.sics.hop.metadata.yarn.dal.capacity.FiCaSchedulerAppLastScheduledContainerDataAccess;
@@ -80,17 +78,15 @@ import se.sics.hop.metadata.yarn.dal.FinishedApplicationsDataAccess;
 import se.sics.hop.metadata.yarn.dal.JustLaunchedContainersDataAccess;
 import se.sics.hop.metadata.yarn.dal.LaunchedContainersDataAccess;
 import se.sics.hop.metadata.yarn.dal.NodeDataAccess;
-import se.sics.hop.metadata.yarn.dal.NodeIdDataAccess;
 import se.sics.hop.metadata.yarn.dal.QueueMetricsDataAccess;
 import se.sics.hop.metadata.yarn.dal.RMContainerDataAccess;
 import se.sics.hop.metadata.yarn.dal.RMContextInactiveNodesDataAccess;
-import se.sics.hop.metadata.yarn.dal.RMContextNodesDataAccess;
+import se.sics.hop.metadata.yarn.dal.RMContextActiveNodesDataAccess;
 import se.sics.hop.metadata.yarn.dal.RMNodeDataAccess;
 import se.sics.hop.metadata.yarn.dal.ResourceDataAccess;
 import se.sics.hop.metadata.yarn.dal.ResourceRequestDataAccess;
 import se.sics.hop.metadata.yarn.dal.SchedulerApplicationDataAccess;
 import se.sics.hop.metadata.yarn.dal.TokenDataAccess;
-import se.sics.hop.metadata.yarn.dal.UpdatedContainerInfoContainersDataAccess;
 import se.sics.hop.metadata.yarn.dal.UpdatedContainerInfoDataAccess;
 import se.sics.hop.metadata.yarn.dal.YarnVariablesDataAccess;
 import se.sics.hop.metadata.yarn.dal.rmstatestore.ApplicationAttemptStateDataAccess;
@@ -101,8 +97,6 @@ import se.sics.hop.metadata.yarn.dal.rmstatestore.RMStateVersionDataAccess;
 import se.sics.hop.metadata.yarn.dal.rmstatestore.SequenceNumberDataAccess;
 import se.sics.hop.metadata.yarn.tabledef.AppSchedulingInfoBlacklistTableDef;
 import se.sics.hop.metadata.yarn.tabledef.AppSchedulingInfoTableDef;
-import se.sics.hop.metadata.yarn.tabledef.ApplicationIdTableDef;
-import se.sics.hop.metadata.yarn.tabledef.ContainerIdTableDef;
 import se.sics.hop.metadata.yarn.tabledef.ContainerIdToCleanTableDef;
 import se.sics.hop.metadata.yarn.tabledef.ContainerStatusTableDef;
 import se.sics.hop.metadata.yarn.tabledef.ContainerTableDef;
@@ -117,18 +111,16 @@ import se.sics.hop.metadata.yarn.tabledef.FifoSchedulerNodesTableDef;
 import se.sics.hop.metadata.yarn.tabledef.FinishedApplicationsTableDef;
 import se.sics.hop.metadata.yarn.tabledef.JustLaunchedContainersTableDef;
 import se.sics.hop.metadata.yarn.tabledef.LaunchedContainersTableDef;
-import se.sics.hop.metadata.yarn.tabledef.NodeIdTableDef;
 import se.sics.hop.metadata.yarn.tabledef.NodeTableDef;
 import se.sics.hop.metadata.yarn.tabledef.QueueMetricsTableDef;
 import se.sics.hop.metadata.yarn.tabledef.RMContainerTableDef;
 import se.sics.hop.metadata.yarn.tabledef.RMContextInactiveNodesTableDef;
-import se.sics.hop.metadata.yarn.tabledef.RMContextNodesTableDef;
+import se.sics.hop.metadata.yarn.tabledef.RMContextActiveNodesTableDef;
 import se.sics.hop.metadata.yarn.tabledef.RMNodeTableDef;
 import se.sics.hop.metadata.yarn.tabledef.ResourceRequestTableDef;
 import se.sics.hop.metadata.yarn.tabledef.ResourceTableDef;
 import se.sics.hop.metadata.yarn.tabledef.SchedulerApplicationTableDef;
 import se.sics.hop.metadata.yarn.tabledef.TokenTableDef;
-import se.sics.hop.metadata.yarn.tabledef.UpdatedContainerInfoContainersTableDef;
 import se.sics.hop.metadata.yarn.tabledef.UpdatedContainerInfoTableDef;
 import se.sics.hop.metadata.yarn.tabledef.appmasterrpc.AppMasterRPCTableDef;
 import se.sics.hop.metadata.yarn.tabledef.rmstatestore.ApplicationAttemptStateTableDef;
@@ -279,21 +271,21 @@ public class ClusterjConnector implements StorageConnector<Session> {
              INodeAttributesDataAccess.class, VariableDataAccess.class, StorageIdMapDataAccess.class, 
              BlockLookUpDataAccess.class*/VariableDataAccess.class, AppMasterRPCDataAccess.class,
             ApplicationStateDataAccess.class, ApplicationAttemptStateDataAccess.class, DelegationKeyDataAccess.class,
-            DelegationTokenDataAccess.class, ApplicationIdDataAccess.class, SequenceNumberDataAccess.class,
+            DelegationTokenDataAccess.class, SequenceNumberDataAccess.class,
             RMStateVersionDataAccess.class, YarnVariablesDataAccess.class,
             AppSchedulingInfoDataAccess.class, AppSchedulingInfoBlacklistDataAccess.class,
-            ContainerDataAccess.class, ContainerIdDataAccess.class, ContainerIdToCleanDataAccess.class,
+            ContainerDataAccess.class,  ContainerIdToCleanDataAccess.class,
             ContainerStatusDataAccess.class, FiCaSchedulerAppLastScheduledContainerDataAccess.class,
             FiCaSchedulerAppLiveContainersDataAccess.class, FiCaSchedulerAppNewlyAllocatedContainersDataAccess.class,
             FiCaSchedulerAppReservationsDataAccess.class, FiCaSchedulerAppReservedContainersDataAccess.class,
             FiCaSchedulerAppSchedulingOpportunitiesDataAccess.class, FiCaSchedulerNodeDataAccess.class,
             FifoSchedulerNodesDataAccess.class,
             JustLaunchedContainersDataAccess.class, LaunchedContainersDataAccess.class,
-            NodeDataAccess.class, NodeIdDataAccess.class, QueueMetricsDataAccess.class,
+            NodeDataAccess.class, QueueMetricsDataAccess.class,
             ResourceDataAccess.class, ResourceRequestDataAccess.class, RMContainerDataAccess.class,
             RMNodeDataAccess.class, SchedulerApplicationDataAccess.class, SequenceNumberDataAccess.class,
-            UpdatedContainerInfoContainersDataAccess.class, FinishedApplicationsDataAccess.class,
-            TokenDataAccess.class, RMContextInactiveNodesDataAccess.class, RMContextNodesDataAccess.class,
+             FinishedApplicationsDataAccess.class,
+            TokenDataAccess.class, RMContextInactiveNodesDataAccess.class, RMContextActiveNodesDataAccess.class,
             UpdatedContainerInfoDataAccess.class);
   }
 
@@ -368,8 +360,6 @@ public class ClusterjConnector implements StorageConnector<Session> {
             MysqlServerConnector.truncateTable(DelegationKeyTableDef.TABLE_NAME);
           } else if (e == DelegationTokenDataAccess.class) {
             MysqlServerConnector.truncateTable(DelegationTokenTableDef.TABLE_NAME);
-          } else if (e == ApplicationIdDataAccess.class) {
-            MysqlServerConnector.truncateTable(ApplicationIdTableDef.TABLE_NAME);
           } else if (e == SequenceNumberDataAccess.class) {
             MysqlServerConnector.truncateTable(SequenceNumberTableDef.TABLE_NAME);
           } else if (e == RMStateVersionDataAccess.class) {
@@ -380,8 +370,6 @@ public class ClusterjConnector implements StorageConnector<Session> {
             truncate(AppSchedulingInfoBlacklistTableDef.TABLE_NAME);
           } else if (e == ContainerDataAccess.class) {
             truncate(ContainerTableDef.TABLE_NAME);
-          } else if (e == ContainerIdDataAccess.class) {
-            truncate(ContainerIdTableDef.TABLE_NAME);
           } else if (e == ContainerIdToCleanDataAccess.class) {
             truncate(ContainerIdToCleanTableDef.TABLE_NAME);
           } else if (e == ContainerStatusDataAccess.class) {
@@ -408,8 +396,6 @@ public class ClusterjConnector implements StorageConnector<Session> {
             truncate(LaunchedContainersTableDef.TABLE_NAME);
           } else if (e == NodeDataAccess.class) {
             truncate(NodeTableDef.TABLE_NAME);
-          } else if (e == NodeIdDataAccess.class) {
-            truncate(NodeIdTableDef.TABLE_NAME);
           } else if (e == QueueMetricsDataAccess.class) {
             truncate(QueueMetricsTableDef.TABLE_NAME);
           } else if (e == ResourceDataAccess.class) {
@@ -424,16 +410,14 @@ public class ClusterjConnector implements StorageConnector<Session> {
             truncate(SchedulerApplicationTableDef.TABLE_NAME);
           } else if (e == SequenceNumberDataAccess.class) {
             truncate(SequenceNumberTableDef.TABLE_NAME);
-          } else if (e == UpdatedContainerInfoContainersDataAccess.class) {
-            truncate(UpdatedContainerInfoContainersTableDef.TABLE_NAME);
           } else if (e == FinishedApplicationsDataAccess.class) {
             truncate(FinishedApplicationsTableDef.TABLE_NAME);
           } else if (e == TokenDataAccess.class) {
             truncate(TokenTableDef.TABLE_NAME);
           } else if (e == RMContextInactiveNodesDataAccess.class) {
             truncate(RMContextInactiveNodesTableDef.TABLE_NAME);
-          } else if (e == RMContextNodesDataAccess.class) {
-            truncate(RMContextNodesTableDef.TABLE_NAME);
+          } else if (e == RMContextActiveNodesDataAccess.class) {
+            truncate(RMContextActiveNodesTableDef.TABLE_NAME);
           } else if (e == UpdatedContainerInfoDataAccess.class) {
             truncate(UpdatedContainerInfoTableDef.TABLE_NAME);
           } else if (e == YarnVariablesDataAccess.class) {

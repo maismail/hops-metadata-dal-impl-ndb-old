@@ -81,7 +81,7 @@ public class InvokeRequestClusterJ implements InvokeRequestTableDef, InvokeReque
         try {
             return createHopInvokeRequestsList(results, numberOfRequests);
         } catch (IOException ex) {
-            Logger.getLogger(ApplicationIdClusterJ.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(InvokeRequestClusterJ.class.getName()).log(Level.SEVERE, null, ex);
         }
         return null;
     }

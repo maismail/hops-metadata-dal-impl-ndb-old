@@ -42,6 +42,11 @@ public class ContainerStatusClusterJ implements ContainerStatusTableDef, Contain
         int getexitstatus();
 
         void setexitstatus(int exitstatus);
+        
+        @Column(name= RMNODEID)
+        String getrmnodeid();
+        
+        void setrmnodeid(String rmnodeid);
     }
     private ClusterjConnector connector = ClusterjConnector.getInstance();
 
@@ -96,12 +101,13 @@ public class ContainerStatusClusterJ implements ContainerStatusTableDef, Contain
         csDTO.setstate(hopCS.getState());
         csDTO.setdiagnostics(hopCS.getDiagnostics());
         csDTO.setexitstatus(hopCS.getExitstatus());
-
+        csDTO.setrmnodeid(hopCS.getRMNodeId());
         return csDTO;
     }
 
     private HopContainerStatus createHopContainerStatus(ContainerStatusDTO csDTO) {
-        HopContainerStatus hop = new HopContainerStatus(csDTO.getcontainerid(), csDTO.getstate(), csDTO.getdiagnostics(), csDTO.getexitstatus());
+        HopContainerStatus hop = new HopContainerStatus(csDTO.getcontainerid(), csDTO.getstate(), csDTO.getdiagnostics(), csDTO.getexitstatus(),
+        csDTO.getrmnodeid());
         return hop;
     }
 

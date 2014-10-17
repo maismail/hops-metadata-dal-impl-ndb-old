@@ -89,12 +89,8 @@ public class RMContainerClusterJ implements RMContainerTableDef, RMContainerData
     if (session != null) {
       rMContainerDTO = session.find(RMContainerDTO.class, id);
     }
-    NodeIdClusterJ.NodeIdDTO nodeIdDto = null;
-//    if (rMContainerDTO != null && rMContainerDTO.getreservednodeid() != null) {
-//      nodeIdDto = session.find(NodeIdClusterJ.NodeIdDTO.class, rMContainerDTO.getreservednodeid());
-//    }
 
-    return createHopRMContainer(rMContainerDTO, nodeIdDto);
+    return createHopRMContainer(rMContainerDTO);
   }
 
   @Override
@@ -126,9 +122,8 @@ public class RMContainerClusterJ implements RMContainerTableDef, RMContainerData
     session.savePersistent(createPersistable(rmcontainer, session));
   }
 
-  private HopRMContainer createHopRMContainer(RMContainerDTO rMContainerDTO,
-          NodeIdClusterJ.NodeIdDTO nodeIdDTO) {
-    if (nodeIdDTO == null) {
+  private HopRMContainer createHopRMContainer(RMContainerDTO rMContainerDTO) {
+  
       return new HopRMContainer(
               rMContainerDTO.getcontaineridid(),
               rMContainerDTO.getappattemptidid(),
@@ -141,22 +136,7 @@ public class RMContainerClusterJ implements RMContainerTableDef, RMContainerData
               rMContainerDTO.getstate(), /*null, null,*/
               rMContainerDTO.getfinishedstatusstate(),
               rMContainerDTO.getexitstatus());
-    } else {
-      return new HopRMContainer(
-              rMContainerDTO.getcontaineridid(),
-              rMContainerDTO.getappattemptidid(),
-              rMContainerDTO.getnodeidid(),
-              rMContainerDTO.getuser(),
-//              rMContainerDTO.getreservednodeid(),
-//              rMContainerDTO.getreservedpriorityid(),
-              rMContainerDTO.getstarttime(),
-              rMContainerDTO.getfinishtime(),
-              rMContainerDTO.getstate(),
-              /*nodeIdDTO.getHost(),
-              nodeIdDTO.getPort(),*/
-              rMContainerDTO.getfinishedstatusstate(),
-              rMContainerDTO.getexitstatus());
-    }
+    
   }
 
   private RMContainerDTO createPersistable(HopRMContainer hop, Session session) {

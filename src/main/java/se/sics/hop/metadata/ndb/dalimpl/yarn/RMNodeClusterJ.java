@@ -63,11 +63,6 @@ public class RMNodeClusterJ implements RMNodeTableDef, RMNodeDataAccess<HopRMNod
 
         void setNextheartbeat(boolean nexthearbeat);
 
-        @Column(name = NODEBASEID)
-        String getNodebaseid();
-
-        void setNodebaseid(String nodebaseid);
-
         @Column(name = HEALTH_REPORT)
         String getHealthreport();
 
@@ -189,7 +184,6 @@ public class RMNodeClusterJ implements RMNodeTableDef, RMNodeDataAccess<HopRMNod
         rmDTO.setNodeaddress(hopRMNode.getNodeAddress());
         rmDTO.setHttpaddress(hopRMNode.getHttpAddress());
         rmDTO.setNextheartbeat(hopRMNode.isNextHeartbeat());
-        rmDTO.setNodebaseid(hopRMNode.getNodebaseId());
         rmDTO.setHealthreport(hopRMNode.getHealthReport());
         rmDTO.setLasthealthreporttime(hopRMNode.getLastHealthReportTime());
         rmDTO.setcurrentstate(hopRMNode.getCurrentState());
@@ -207,7 +201,7 @@ public class RMNodeClusterJ implements RMNodeTableDef, RMNodeDataAccess<HopRMNod
     private HopRMNode createHopRMNode(RMNodeDTO rmDTO) {
         return new HopRMNode(rmDTO.getNodeid(), rmDTO.getHostname(), rmDTO.getCommandport(), 
                 rmDTO.getHttpport(), rmDTO.getNodeaddress(), rmDTO.getHttpaddress(), 
-                rmDTO.getNextheartbeat(), rmDTO.getNodebaseid(), rmDTO.getHealthreport(), 
+                rmDTO.getNextheartbeat(), rmDTO.getHealthreport(), 
                 /*rmDTO.getRMContextid(),*/ rmDTO.getLasthealthreporttime(), rmDTO.getcurrentstate(), 
                 rmDTO.getnodemanagerversion(), rmDTO.getovercommittimeout());
     }

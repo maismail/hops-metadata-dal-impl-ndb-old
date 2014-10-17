@@ -9,4 +9,14 @@
                 <goal>assembly:assembly</goal>
             </goals>
         </action>
+        <action>
+            <actionName>rebuild</actionName>
+            <packagings>
+                <packaging>*</packaging>
+            </packagings>
+            <goals>
+                <goal>clean</goal>
+                <goal>assembly:assembly</goal>
+            </goals>
+        </action>
     </actions>
