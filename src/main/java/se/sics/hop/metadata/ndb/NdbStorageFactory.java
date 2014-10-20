@@ -7,6 +7,9 @@ import java.util.Map;
 import java.util.Properties;
 import se.sics.hop.DALStorageFactory;
 import se.sics.hop.StorageConnector;
+import se.sics.hop.metadata.hdfs.dal.*;
+import se.sics.hop.exception.StorageInitializtionException;
+import se.sics.hop.metadata.ndb.dalimpl.hdfs.*;
 import se.sics.hop.exception.StorageInitializtionException;
 import se.sics.hop.metadata.hdfs.dal.BlockInfoDataAccess;
 import se.sics.hop.metadata.hdfs.dal.BlockLookUpDataAccess;
@@ -216,6 +219,7 @@ public class NdbStorageFactory implements DALStorageFactory {
     dataAccessMap.put(BlockLookUpDataAccess.class, new BlockLookUpClusterj());
     
     dataAccessMap.put(FSSchedulerNodeDataAccess.class, new FSSchedulerNodeClusterJ());
+    dataAccessMap.put(QuotaUpdateDataAccess.class, new QuotaUpdateClusterj());
   }
 
   @Override

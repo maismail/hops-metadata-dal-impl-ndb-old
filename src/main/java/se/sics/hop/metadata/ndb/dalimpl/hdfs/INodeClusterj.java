@@ -121,6 +121,16 @@ public class INodeClusterj implements INodeTableDef, INodeDataAccess<HopINode> {
     boolean getUnderConstruction();
 
     void setUnderConstruction(boolean underConstruction);
+
+    @Column(name = SUBTREE_LOCKED)
+    boolean getSubtreeLocked();
+
+    void setSubtreeLocked(boolean locked);
+
+    @Column(name = SUBTREE_LOCK_OWNER)
+    long getSubtreeLockOwner();
+
+    void setSubtreeLockOwner(long leaderId);
   }
   private ClusterjConnector connector = ClusterjConnector.getInstance();
   private final static int NOT_FOUND_ROW = -1000;
@@ -281,21 +291,23 @@ public class INodeClusterj implements INodeTableDef, INodeDataAccess<HopINode> {
 
   private HopINode createInode(InodeDTO persistable) throws IOException {
     return new HopINode(
-            persistable.getId(),
-            persistable.getName(),
-            persistable.getParentId(),
-            persistable.getDir(),
-            persistable.getQuotaEnabled(),
-            persistable.getModificationTime(),
-            persistable.getATime(),
-            persistable.getPermission(),
-            persistable.getUnderConstruction(),
-            persistable.getClientName(),
-            persistable.getClientMachine(),
-            persistable.getClientNode(),
-            persistable.getGenerationStamp(),
-            persistable.getHeader(),
-            persistable.getSymlink());
+        persistable.getId(),
+        persistable.getName(),
+        persistable.getParentId(),
+        persistable.getDir(),
+        persistable.getQuotaEnabled(),
+        persistable.getModificationTime(),
+        persistable.getATime(),
+        persistable.getPermission(),
+        persistable.getUnderConstruction(),
+        persistable.getClientName(),
+        persistable.getClientMachine(),
+        persistable.getClientNode(),
+        persistable.getGenerationStamp(),
+        persistable.getHeader(),
+        persistable.getSymlink(),
+        persistable.getSubtreeLocked(),
+        persistable.getSubtreeLockOwner());
   }
 
   private void createPersistable(HopINode inode, InodeDTO persistable) {
@@ -314,6 +326,15 @@ public class INodeClusterj implements INodeTableDef, INodeDataAccess<HopINode> {
     persistable.setGenerationStamp(inode.getGenerationStamp());
     persistable.setHeader(inode.getHeader());
     persistable.setSymlink(inode.getSymlink());
+    persistable.setSubtreeLocked(inode.isSubtreeLocked());
+    persistable.setSubtreeLockOwner(inode.getSubtreeLockOwner());
+  }
+
+  private void explain(Query<InodeDTO> query){
+//      Map<String,Object> map = query.explain();
+//      System.out.println("Explain");
+//      System.out.println("keys " +Arrays.toString(map.keySet().toArray()));
+//      System.out.println("values "+ Arrays.toString(map.values().toArray()));
   }
 
   private void explain(Query<InodeDTO> query){
