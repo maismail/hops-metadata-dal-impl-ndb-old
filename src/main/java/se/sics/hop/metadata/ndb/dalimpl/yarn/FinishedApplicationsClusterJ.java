@@ -42,7 +42,7 @@ public class FinishedApplicationsClusterJ implements FinishedApplicationsTableDe
     private ClusterjConnector connector = ClusterjConnector.getInstance();
 
     @Override
-    public List<HopFinishedApplications> findByRMNode(String rmnodeid) throws StorageException {
+    public List<HopFinishedApplications> findByRMNode(String rmnodeid) throws StorageException {//TORECOVER we should have an index
         try {
             Session session = connector.obtainSession();
             QueryBuilder qb = session.getQueryBuilder();

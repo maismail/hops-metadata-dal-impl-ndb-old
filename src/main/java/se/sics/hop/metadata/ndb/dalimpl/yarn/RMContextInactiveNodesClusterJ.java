@@ -26,11 +26,6 @@ public class RMContextInactiveNodesClusterJ implements RMContextInactiveNodesTab
     public interface RMContextInactiveNodesDTO {
 
         @PrimaryKey
-        @Column(name = HOST)
-        String gethost();
-
-        void sethost(String host);
-
         @Column(name = RMNODEID)
         String getrmnodeid();
 
@@ -76,7 +71,7 @@ public class RMContextInactiveNodesClusterJ implements RMContextInactiveNodesTab
             if (removed != null) {
                 List<RMContextInactiveNodesDTO> toRemove = new ArrayList<RMContextInactiveNodesDTO>();
                 for (HopRMContextInactiveNodes entry : removed) {
-                    toRemove.add(session.newInstance(RMContextInactiveNodesDTO.class, entry.getHost()));
+                    toRemove.add(session.newInstance(RMContextInactiveNodesDTO.class));
                 }
                 session.deletePersistentAll(toRemove);
             }
@@ -99,12 +94,11 @@ public class RMContextInactiveNodesClusterJ implements RMContextInactiveNodesTab
     }
 
     private HopRMContextInactiveNodes createRMContextInactiveNodesEntry(RMContextInactiveNodesDTO entry) {
-        return new HopRMContextInactiveNodes(entry.gethost(), entry.getrmnodeid());
+        return new HopRMContextInactiveNodes( entry.getrmnodeid());
     }
 
     private RMContextInactiveNodesDTO createPersistable(HopRMContextInactiveNodes entry, Session session) {
         RMContextInactiveNodesDTO persistable = session.newInstance(RMContextInactiveNodesDTO.class);
-        persistable.sethost(entry.getHost());
         persistable.setrmnodeid(entry.getRmnodeid());
         return persistable;
     }

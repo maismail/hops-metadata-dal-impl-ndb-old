@@ -58,7 +58,7 @@ public class ContainerIdToCleanClusterJ implements ContainerIdToCleanTableDef, C
     }
 
     @Override
-    public List<HopContainerIdToClean> findByRMNode(String rmnodeId) throws StorageException {
+    public List<HopContainerIdToClean> findByRMNode(String rmnodeId) throws StorageException { //TORECOVER we should have an index
         try {
             Session session = connector.obtainSession();
             QueryBuilder qb = session.getQueryBuilder();

@@ -1,13 +1,17 @@
 package se.sics.hop.metadata.ndb.dalimpl.yarn;
 
+import com.mysql.clusterj.Query;
 import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
+import com.mysql.clusterj.query.QueryBuilder;
+import com.mysql.clusterj.query.QueryDomainType;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import se.sics.hop.exception.StorageException;
+import se.sics.hop.metadata.hdfs.entity.yarn.HopFiCaSchedulerNode;
 import se.sics.hop.metadata.hdfs.entity.yarn.HopFiCaSchedulerNode;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
 import se.sics.hop.metadata.yarn.dal.FiCaSchedulerNodeDataAccess;
@@ -37,11 +41,7 @@ public class FiCaSchedulerNodeClusterJ implements FiCaSchedulerNodeTableDef, FiC
         int getnumcontainers();
 
         void setnumcontainers(int numcontainers);
-        
-        @Column(name = RMCONTAINERID)
-        String getrmcontainerid();
 
-        void setrmcontainerid(String rmcontainerid);
     }
     private ClusterjConnector connector = ClusterjConnector.getInstance();
 
@@ -94,8 +94,7 @@ public class FiCaSchedulerNodeClusterJ implements FiCaSchedulerNodeTableDef, FiC
     private HopFiCaSchedulerNode createHopFiCaSchedulerNode(FiCaSchedulerNodeDTO ficaschedulernodeDTO) {
         HopFiCaSchedulerNode hop = new HopFiCaSchedulerNode(ficaschedulernodeDTO.getrmnodeid(),
                 ficaschedulernodeDTO.getnodename(),
-                ficaschedulernodeDTO.getnumcontainers(),
-                ficaschedulernodeDTO.getrmcontainerid());
+                ficaschedulernodeDTO.getnumcontainers());
         return hop;
     }
 
@@ -104,7 +103,35 @@ public class FiCaSchedulerNodeClusterJ implements FiCaSchedulerNodeTableDef, FiC
         ficaDTO.setrmnodeid(hop.getRmnodeId());
         ficaDTO.setnodename(hop.getNodeName());
         ficaDTO.setnumcontainers(hop.getNumOfContainers());
-        ficaDTO.setrmcontainerid(hop.getRmcontainerId());
         return ficaDTO;
+    }
+
+    @Override
+    public List<HopFiCaSchedulerNode> getAll() throws StorageException {
+        try {
+            Session session = connector.obtainSession();
+            QueryBuilder qb = session.getQueryBuilder();
+
+            QueryDomainType<FiCaSchedulerNodeClusterJ.FiCaSchedulerNodeDTO> dobj = qb.createQueryDefinition(FiCaSchedulerNodeClusterJ.FiCaSchedulerNodeDTO.class);
+            Query<FiCaSchedulerNodeClusterJ.FiCaSchedulerNodeDTO> query = session.createQuery(dobj);
+
+            List<FiCaSchedulerNodeClusterJ.FiCaSchedulerNodeDTO> results = query.getResultList();
+            return createFiCaSchedulerNodeList(results);
+        } catch (Exception e) {
+            throw new StorageException(e);
+        }
+    }
+
+    private List<HopFiCaSchedulerNode> createFiCaSchedulerNodeList(List<FiCaSchedulerNodeClusterJ.FiCaSchedulerNodeDTO> results) {
+        List<HopFiCaSchedulerNode> fifoSchedulerNodes = new ArrayList<HopFiCaSchedulerNode>();
+        for (FiCaSchedulerNodeClusterJ.FiCaSchedulerNodeDTO persistable : results) {
+            fifoSchedulerNodes.add(createFiCaSchedulerNode(persistable));
+        }
+        return fifoSchedulerNodes;
+    }
+
+    private HopFiCaSchedulerNode createFiCaSchedulerNode(FiCaSchedulerNodeDTO entry) {
+        HopFiCaSchedulerNode hop = new HopFiCaSchedulerNode(entry.getrmnodeid(), entry.getnodename(), entry.getnumcontainers());
+        return hop;
     }
 }

@@ -38,10 +38,6 @@ public class JustLaunchedContainersClusterJ implements JustLaunchedContainersTab
 
         void setcontainerid(String containerid);
 
-        @Column(name = CONTAINERSTATUSID)
-        String getcontainerstatusid();
-
-        void setcontainerstatusid(String containerstatusid);
     }
     private ClusterjConnector connector = ClusterjConnector.getInstance();
 
@@ -71,7 +67,7 @@ public class JustLaunchedContainersClusterJ implements JustLaunchedContainersTab
                 for (HopJustLaunchedContainers hopContainerId : removed) {
                     Object[] objarr = new Object[2];
                     objarr[0] = hopContainerId.getRmnodeid();
-                    objarr[1] = hopContainerId.getContainerid();
+                    objarr[1] = hopContainerId.getContainerId();
                     toRemove.add(session.newInstance(JustLaunchedContainersDTO.class, objarr));
                 }
                 session.deletePersistentAll(toRemove);
@@ -129,7 +125,7 @@ public class JustLaunchedContainersClusterJ implements JustLaunchedContainersTab
     }
 
     private HopJustLaunchedContainers createJustLaunchedContainers(JustLaunchedContainersDTO dto) {
-        HopJustLaunchedContainers hop = new HopJustLaunchedContainers(dto.getrmnodeid(), dto.getcontainerid(), dto.getcontainerstatusid());
+        HopJustLaunchedContainers hop = new HopJustLaunchedContainers(dto.getrmnodeid(), dto.getcontainerid());
         return hop;
     }
 
@@ -142,8 +138,7 @@ public class JustLaunchedContainersClusterJ implements JustLaunchedContainersTab
      */
     private JustLaunchedContainersDTO createPersistable(HopJustLaunchedContainers entry, Session session) {
         JustLaunchedContainersDTO dto = session.newInstance(JustLaunchedContainersDTO.class);
-        dto.setcontainerid(entry.getContainerid());
-        dto.setcontainerstatusid(entry.getContainerstatusid());
+        dto.setcontainerid(entry.getContainerId());
         dto.setrmnodeid(entry.getRmnodeid());
         return dto;
     }

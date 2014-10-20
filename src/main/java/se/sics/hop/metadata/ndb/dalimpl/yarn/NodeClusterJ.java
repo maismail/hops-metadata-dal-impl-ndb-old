@@ -27,10 +27,10 @@ public class NodeClusterJ implements NodeTableDef, NodeDataAccess<HopNode> {
     public interface NodeDTO {
 
         @PrimaryKey
-        @Column(name = ID)
-        String getId();
+        @Column(name = NODEID)
+        String getnodeid();
 
-        void setId(String id);
+        void setnodeid(String id);
 
         @Column(name = NAME)
         String getName();
@@ -127,7 +127,7 @@ public class NodeClusterJ implements NodeTableDef, NodeDataAccess<HopNode> {
     private NodeDTO createPersistable(HopNode hopNode, Session session) {
         NodeDTO nodeDTO = session.newInstance(NodeDTO.class);
         //Set values to persist new rmnode
-        nodeDTO.setId(hopNode.getId());
+        nodeDTO.setnodeid(hopNode.getId());
         nodeDTO.setName(hopNode.getName());
         nodeDTO.setLocation(hopNode.getLocation());
         nodeDTO.setLevel(hopNode.getLevel());
@@ -142,6 +142,6 @@ public class NodeClusterJ implements NodeTableDef, NodeDataAccess<HopNode> {
      * @return HopRMNode
      */
     private HopNode createHopNode(NodeDTO nodeDTO) {
-        return new HopNode(nodeDTO.getId(), nodeDTO.getName(), nodeDTO.getLocation(), nodeDTO.getLevel(), nodeDTO.getParent());
+        return new HopNode(nodeDTO.getnodeid(), nodeDTO.getName(), nodeDTO.getLocation(), nodeDTO.getLevel(), nodeDTO.getParent());
     }
 }

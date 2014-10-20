@@ -32,12 +32,13 @@ public class UpdatedContainerInfoClusterJ implements UpdatedContainerInfoTableDe
         String getrmnodeid();
 
         void setrmnodeid(String rmnodeid);
-
+        
         @PrimaryKey
-        @Column(name = ID)
-        int getid();
+        @Column(name = CONTAINERID)
+        String getcontainerid();
+        
+        void setcontainerid(String containerid);
 
-        void setid(int id);
     }
     private ClusterjConnector connector = ClusterjConnector.getInstance();
 
@@ -47,7 +48,7 @@ public class UpdatedContainerInfoClusterJ implements UpdatedContainerInfoTableDe
         Session session = connector.obtainSession();
         for (HopUpdatedContainerInfo hop : list) {
             UpdatedContainerInfoDTO uci = session.newInstance(UpdatedContainerInfoDTO.class);
-            uci.setid(hop.getId());
+            uci.setrmnodeid(hop.getRmnodeid());
             toRemove.add(uci);
         }
         session.deletePersistentAll(toRemove);
@@ -110,8 +111,8 @@ public class UpdatedContainerInfoClusterJ implements UpdatedContainerInfoTableDe
 
     private UpdatedContainerInfoDTO createPersistable(HopUpdatedContainerInfo hop, Session session) {
         UpdatedContainerInfoDTO dto = session.newInstance(UpdatedContainerInfoDTO.class);
-        dto.setid(hop.getId());
         dto.setrmnodeid(hop.getRmnodeid());
+        dto.setcontainerid(hop.getContainerId());
         return dto;
     }
 
@@ -122,7 +123,7 @@ public class UpdatedContainerInfoClusterJ implements UpdatedContainerInfoTableDe
      * @return HopRMNode
      */
     private HopUpdatedContainerInfo createHopUpdatedContainerInfo(UpdatedContainerInfoDTO dto) {
-        return new HopUpdatedContainerInfo(dto.getrmnodeid(), dto.getid());
+        return new HopUpdatedContainerInfo(dto.getrmnodeid(), dto.getcontainerid());
     }
 
     private List<HopUpdatedContainerInfo> createUpdatedContainerInfoList(List<UpdatedContainerInfoDTO> list) throws IOException {
