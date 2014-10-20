@@ -64,14 +64,12 @@ import se.sics.hop.metadata.ndb.dalimpl.hdfs.VariableClusterj;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.YarnVariablesClusterJ;
 import se.sics.hop.metadata.yarn.dal.AppSchedulingInfoBlacklistDataAccess;
 import se.sics.hop.metadata.yarn.dal.AppSchedulingInfoDataAccess;
-import se.sics.hop.metadata.yarn.dal.ApplicationAttemptIdDataAccess;
 import se.sics.hop.metadata.yarn.dal.rmstatestore.AppMasterRPCDataAccess;
 import se.sics.hop.metadata.yarn.dal.ApplicationIdDataAccess;
 import se.sics.hop.metadata.yarn.dal.ContainerDataAccess;
 import se.sics.hop.metadata.yarn.dal.ContainerIdDataAccess;
 import se.sics.hop.metadata.yarn.dal.ContainerIdToCleanDataAccess;
 import se.sics.hop.metadata.yarn.dal.ContainerStatusDataAccess;
-import se.sics.hop.metadata.yarn.dal.FiCaSchedulerAppDataAccess;
 import se.sics.hop.metadata.yarn.dal.capacity.FiCaSchedulerAppLastScheduledContainerDataAccess;
 import se.sics.hop.metadata.yarn.dal.FiCaSchedulerAppLiveContainersDataAccess;
 import se.sics.hop.metadata.yarn.dal.FiCaSchedulerAppNewlyAllocatedContainersDataAccess;
@@ -79,7 +77,6 @@ import se.sics.hop.metadata.yarn.dal.capacity.FiCaSchedulerAppReservationsDataAc
 import se.sics.hop.metadata.yarn.dal.capacity.FiCaSchedulerAppReservedContainersDataAccess;
 import se.sics.hop.metadata.yarn.dal.capacity.FiCaSchedulerAppSchedulingOpportunitiesDataAccess;
 import se.sics.hop.metadata.yarn.dal.FiCaSchedulerNodeDataAccess;
-import se.sics.hop.metadata.yarn.dal.FifoSchedulerAppsDataAccess;
 import se.sics.hop.metadata.yarn.dal.FifoSchedulerNodesDataAccess;
 import se.sics.hop.metadata.yarn.dal.FinishedApplicationsDataAccess;
 import se.sics.hop.metadata.yarn.dal.JustLaunchedContainersDataAccess;
@@ -106,7 +103,6 @@ import se.sics.hop.metadata.yarn.dal.rmstatestore.RMStateVersionDataAccess;
 import se.sics.hop.metadata.yarn.dal.rmstatestore.SequenceNumberDataAccess;
 import se.sics.hop.metadata.yarn.tabledef.AppSchedulingInfoBlacklistTableDef;
 import se.sics.hop.metadata.yarn.tabledef.AppSchedulingInfoTableDef;
-import se.sics.hop.metadata.yarn.tabledef.ApplicationAttemptIdTableDef;
 import se.sics.hop.metadata.yarn.tabledef.ApplicationIdTableDef;
 import se.sics.hop.metadata.yarn.tabledef.ContainerIdTableDef;
 import se.sics.hop.metadata.yarn.tabledef.ContainerIdToCleanTableDef;
@@ -118,9 +114,7 @@ import se.sics.hop.metadata.yarn.tabledef.FiCaSchedulerAppNewlyAllocatedContaine
 import se.sics.hop.metadata.yarn.tabledef.capacity.FiCaSchedulerAppReservationsTableDef;
 import se.sics.hop.metadata.yarn.tabledef.capacity.FiCaSchedulerAppReservedContainersTableDef;
 import se.sics.hop.metadata.yarn.tabledef.capacity.FiCaSchedulerAppSchedulingOpportunitiesTableDef;
-import se.sics.hop.metadata.yarn.tabledef.FiCaSchedulerAppTableDef;
 import se.sics.hop.metadata.yarn.tabledef.FiCaSchedulerNodeTableDef;
-import se.sics.hop.metadata.yarn.tabledef.FifoSchedulerAppsTableDef;
 import se.sics.hop.metadata.yarn.tabledef.FifoSchedulerNodesTableDef;
 import se.sics.hop.metadata.yarn.tabledef.FinishedApplicationsTableDef;
 import se.sics.hop.metadata.yarn.tabledef.JustLaunchedContainersTableDef;
@@ -276,14 +270,14 @@ public class ClusterjConnector implements StorageConnector<Session> {
             BlockLookUpDataAccess.class, QuotaUpdateDataAccess.class, AppMasterRPCDataAccess.class,
             ApplicationStateDataAccess.class, ApplicationAttemptStateDataAccess.class, DelegationKeyDataAccess.class,
             DelegationTokenDataAccess.class, ApplicationIdDataAccess.class, SequenceNumberDataAccess.class,
-            RMStateVersionDataAccess.class, YarnVariablesDataAccess.class, ApplicationAttemptIdDataAccess.class,
+            RMStateVersionDataAccess.class, YarnVariablesDataAccess.class,
             AppSchedulingInfoDataAccess.class, AppSchedulingInfoBlacklistDataAccess.class,
             ContainerDataAccess.class, ContainerIdDataAccess.class, ContainerIdToCleanDataAccess.class,
-            ContainerStatusDataAccess.class, FiCaSchedulerAppDataAccess.class, FiCaSchedulerAppLastScheduledContainerDataAccess.class,
+            ContainerStatusDataAccess.class, FiCaSchedulerAppLastScheduledContainerDataAccess.class,
             FiCaSchedulerAppLiveContainersDataAccess.class, FiCaSchedulerAppNewlyAllocatedContainersDataAccess.class,
             FiCaSchedulerAppReservationsDataAccess.class, FiCaSchedulerAppReservedContainersDataAccess.class,
             FiCaSchedulerAppSchedulingOpportunitiesDataAccess.class, FiCaSchedulerNodeDataAccess.class,
-            FifoSchedulerAppsDataAccess.class, FifoSchedulerNodesDataAccess.class,
+            FifoSchedulerNodesDataAccess.class,
             JustLaunchedContainersDataAccess.class, LaunchedContainersDataAccess.class,
             NodeDataAccess.class, NodeIdDataAccess.class, QueueMetricsDataAccess.class,
             ResourceDataAccess.class, ResourceRequestDataAccess.class, RMContainerDataAccess.class,
@@ -372,8 +366,6 @@ public class ClusterjConnector implements StorageConnector<Session> {
             MysqlServerConnector.truncateTable(SequenceNumberTableDef.TABLE_NAME);
           } else if (e == RMStateVersionDataAccess.class) {
             MysqlServerConnector.truncateTable(VersionTableDef.TABLE_NAME);
-          } else if (e == ApplicationAttemptIdDataAccess.class) {
-            MysqlServerConnector.truncateTable(ApplicationAttemptIdTableDef.TABLE_NAME);
           } else if (e == AppSchedulingInfoDataAccess.class) {
             truncate(AppSchedulingInfoTableDef.TABLE_NAME);
           } else if (e == AppSchedulingInfoBlacklistDataAccess.class) {
@@ -386,8 +378,6 @@ public class ClusterjConnector implements StorageConnector<Session> {
             truncate(ContainerIdToCleanTableDef.TABLE_NAME);
           } else if (e == ContainerStatusDataAccess.class) {
             truncate(ContainerStatusTableDef.TABLE_NAME);
-          } else if (e == FiCaSchedulerAppDataAccess.class) {
-            truncate(FiCaSchedulerAppTableDef.TABLE_NAME);
           } else if (e == FiCaSchedulerAppLastScheduledContainerDataAccess.class) {
             truncate(FiCaSchedulerAppLastScheduledContainerTableDef.TABLE_NAME);
           } else if (e == FiCaSchedulerAppLiveContainersDataAccess.class) {
@@ -402,8 +392,6 @@ public class ClusterjConnector implements StorageConnector<Session> {
             truncate(FiCaSchedulerAppSchedulingOpportunitiesTableDef.TABLE_NAME);
           } else if (e == FiCaSchedulerNodeDataAccess.class) {
             truncate(FiCaSchedulerNodeTableDef.TABLE_NAME);
-          } else if (e == FifoSchedulerAppsDataAccess.class) {
-            truncate(FifoSchedulerAppsTableDef.TABLE_NAME);
           } else if (e == FifoSchedulerNodesDataAccess.class) {
             truncate(FifoSchedulerNodesTableDef.TABLE_NAME);
           } else if (e == JustLaunchedContainersDataAccess.class) {
