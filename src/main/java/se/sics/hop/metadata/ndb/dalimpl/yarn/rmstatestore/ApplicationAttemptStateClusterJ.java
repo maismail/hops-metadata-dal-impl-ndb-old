@@ -63,32 +63,6 @@ public class ApplicationAttemptStateClusterJ implements ApplicationAttemptStateT
     }
 
     @Override
-    public List<String> findApplicationAttemptIdStrByApplicationId(String applicationid) throws StorageException {
-        try {
-            Session session = connector.obtainSession();
-            QueryBuilder qb = session.getQueryBuilder();
-            QueryDomainType<ApplicationAttemptStateDTO> dobj = qb.createQueryDefinition(ApplicationAttemptStateDTO.class);
-            Predicate pred1 = dobj.get("applicationid").equal(dobj.param("applicationid"));
-            dobj.where(pred1);
-            Query<ApplicationAttemptStateDTO> query = session.createQuery(dobj);
-            query.setParameter("applicationid", applicationid);
-            List<ApplicationAttemptStateDTO> results = query.getResultList();
-            List<String> appAttemptIds;
-            if (results != null && !results.isEmpty()) {
-                appAttemptIds = new ArrayList<String>();
-                for (ApplicationAttemptStateDTO dto : results) {
-                    appAttemptIds.add(dto.getapplicationattemptid());
-                }
-                return appAttemptIds;
-            } else {
-                throw new StorageException("HOP :: findApplicationAttemptIdStrByApplicationId - attempt with appId:" + applicationid + " was not found");
-            }
-        } catch (Exception e) {
-            throw new StorageException(e);
-        }
-    }
-
-    @Override
     public List<HopApplicationAttemptState> findApplicationAttemptIdByApplicationId(String applicationid) throws StorageException {
         try {
             Session session = connector.obtainSession();
