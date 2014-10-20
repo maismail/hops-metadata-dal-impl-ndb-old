@@ -29,6 +29,7 @@ import se.sics.hop.metadata.hdfs.dal.VariableDataAccess;
 import se.sics.hop.metadata.hdfs.entity.hop.var.HopVariable;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.dal.BlockLookUpDataAccess;
+import se.sics.hop.metadata.hdfs.dal.QuotaUpdateDataAccess;
 import se.sics.hop.metadata.hdfs.dal.StorageIdMapDataAccess;
 import se.sics.hop.metadata.hdfs.tabledef.BlockInfoTableDef;
 import se.sics.hop.metadata.hdfs.tabledef.BlockLookUpTableDef;
@@ -41,6 +42,7 @@ import se.sics.hop.metadata.hdfs.tabledef.LeaderTableDef;
 import se.sics.hop.metadata.hdfs.tabledef.LeasePathTableDef;
 import se.sics.hop.metadata.hdfs.tabledef.LeaseTableDef;
 import se.sics.hop.metadata.hdfs.tabledef.PendingBlockTableDef;
+import se.sics.hop.metadata.hdfs.tabledef.QuotaUpdateTableDef;
 import se.sics.hop.metadata.hdfs.tabledef.ReplicaTableDef;
 import se.sics.hop.metadata.hdfs.tabledef.ReplicaUnderConstructionTableDef;
 import se.sics.hop.metadata.hdfs.tabledef.StorageIdMapTableDef;
@@ -152,17 +154,6 @@ public class ClusterjConnector implements StorageConnector<Session> {
   static ThreadLocal<Session> sessionPool = new ThreadLocal<Session>();
   static final Logger LOG = Logger.getLogger(ClusterjConnector.class);
 
-  /*@Override
-   public void clearSession() {
-   Session session = obtainSession();
-   if (session != null && !session.currentTransaction().isActive()) {
-   LOG.info("Session object being closed.-" + session);
-
-   session.flush();
-   session.close();
-   sessionPool.remove();
-   }
-   }*/
   private ClusterjConnector() {
   }
 
@@ -190,7 +181,7 @@ public class ClusterjConnector implements StorageConnector<Session> {
     }
   }
 
-  /*
+   /*
    * Return a session from a random session factory in our pool.
    *
    * NOTE: Do not close the session returned by this call or you will die.
@@ -198,14 +189,12 @@ public class ClusterjConnector implements StorageConnector<Session> {
   @Override
   public Session obtainSession() throws StorageException {
     try {
-      Session session = sessionPool.get();
-      System.out.println("obtainSession for thread " + Thread.currentThread().getId());
-      if (session == null) {
-        session = sessionFactory.getSession();
-        LOG.info("New session object being obtained.-" + session);
-        sessionPool.set(session);
-      }
-      return session;
+    Session session = sessionPool.get();
+    if (session == null) {
+      session = sessionFactory.getSession();
+      sessionPool.set(session);
+    }
+    return session;
     } catch (Exception e) {
       throw new StorageException(e);
     }
@@ -215,15 +204,19 @@ public class ClusterjConnector implements StorageConnector<Session> {
    * begin a transaction.
    */
   @Override
-  public void beginTransaction(String name) throws StorageException {
+  public void beginTransaction() throws StorageException {
     try {
-      Session session = obtainSession();
-      LOG.debug(name + " begin transaction for thread " + Thread.currentThread().getId());
-      if (session.currentTransaction().isActive()) {
-        LOG.error("Can not start Tx inside another Tx");
-        System.exit(0);
+    Session session = obtainSession();
+    if (session.currentTransaction().isActive()) {
+      StringBuilder msg = new StringBuilder();
+      msg.append("Can not start Tx inside another Tx:\n");
+      for (StackTraceElement element : Thread.currentThread().getStackTrace()) {
+        msg.append("\t"  + element + "\n");
       }
-      session.currentTransaction().begin();
+      LOG.fatal(msg);
+      System.exit(-1);
+    }
+    session.currentTransaction().begin();
     } catch (Exception e) {
       throw new StorageException(e);
     }
@@ -235,20 +228,17 @@ public class ClusterjConnector implements StorageConnector<Session> {
   @Override
   public void commit() throws StorageException {
     try {
-      Session session = obtainSession();
-      Transaction tx = session.currentTransaction();
-      if (!tx.isActive()) {
-        throw new StorageException("The transaction is not began!");
-      }
+    Session session = obtainSession();
+    Transaction tx = session.currentTransaction();
+    if (!tx.isActive()) {
+      throw new StorageException("The transaction is not began!");
+    }
 
-      tx.commit();
-      session.flush();
-      System.out.println("end transaction for thread " + Thread.currentThread().getId());
-//    sessionPool.remove();
-//    session.close();
-    } catch (StorageException e){
-      System.out.println("commit did not work");
-      e.printStackTrace();
+    tx.commit();
+    session.flush();
+    sessionPool.remove();
+    session.close();
+    } catch (Exception e) {
       throw new StorageException(e);
     }
   }
@@ -259,13 +249,13 @@ public class ClusterjConnector implements StorageConnector<Session> {
   @Override
   public void rollback() throws StorageException {
     try {
-      Session session = obtainSession();
-      Transaction tx = session.currentTransaction();
-      if (tx.isActive()) {
-        tx.rollback();
-      }
-    //sessionPool.remove();
-      //session.close();
+    Session session = obtainSession();
+    Transaction tx = session.currentTransaction();
+    if (tx.isActive()) {
+      tx.rollback();
+    }
+    sessionPool.remove();
+    session.close();
     } catch (Exception e) {
       throw new StorageException(e);
     }
@@ -277,13 +267,13 @@ public class ClusterjConnector implements StorageConnector<Session> {
   @Override
   public boolean formatStorage() throws StorageException {
 
-    return formatStorage(/*INodeDataAccess.class, BlockInfoDataAccess.class,
-             LeaseDataAccess.class, LeasePathDataAccess.class, ReplicaDataAccess.class,
-             ReplicaUnderConstructionDataAccess.class, InvalidateBlockDataAccess.class,
-             ExcessReplicaDataAccess.class, PendingBlockDataAccess.class, CorruptReplicaDataAccess.class,
-             UnderReplicatedBlockDataAccess.class, LeaderDataAccess.class,
-             INodeAttributesDataAccess.class, VariableDataAccess.class, StorageIdMapDataAccess.class, 
-             BlockLookUpDataAccess.class*/VariableDataAccess.class, AppMasterRPCDataAccess.class,
+    return formatStorage(INodeDataAccess.class, BlockInfoDataAccess.class,
+            LeaseDataAccess.class, LeasePathDataAccess.class, ReplicaDataAccess.class,
+            ReplicaUnderConstructionDataAccess.class, InvalidateBlockDataAccess.class,
+            ExcessReplicaDataAccess.class, PendingBlockDataAccess.class, CorruptReplicaDataAccess.class,
+            UnderReplicatedBlockDataAccess.class, LeaderDataAccess.class, 
+            INodeAttributesDataAccess.class, VariableDataAccess.class, StorageIdMapDataAccess.class, 
+            BlockLookUpDataAccess.class, QuotaUpdateDataAccess.class, AppMasterRPCDataAccess.class,
             ApplicationStateDataAccess.class, ApplicationAttemptStateDataAccess.class, DelegationKeyDataAccess.class,
             DelegationTokenDataAccess.class, ApplicationIdDataAccess.class, SequenceNumberDataAccess.class,
             RMStateVersionDataAccess.class, YarnVariablesDataAccess.class, ApplicationAttemptIdDataAccess.class,
@@ -364,6 +354,8 @@ public class ClusterjConnector implements StorageConnector<Session> {
             MysqlServerConnector.truncateTable(StorageIdMapTableDef.TABLE_NAME);
           } else if (e == BlockLookUpDataAccess.class) {
             MysqlServerConnector.truncateTable(BlockLookUpTableDef.TABLE_NAME);
+          } else if (e == QuotaUpdateDataAccess.class) {
+            MysqlServerConnector.truncateTable(QuotaUpdateTableDef.TABLE_NAME);
           } else if (e == AppMasterRPCDataAccess.class) {
             MysqlServerConnector.truncateTable(AppMasterRPCTableDef.TABLE_NAME);
           } else if (e == ApplicationStateDataAccess.class) {
@@ -458,13 +450,8 @@ public class ClusterjConnector implements StorageConnector<Session> {
             }
 
           }
-//          else if(e == StorageIdMapDataAccess.class){
-//            MysqlServerConnector.truncateTable(StorageIdMapTableDef.TABLE_NAME);
-//          }else if(e == BlockLookUpDataAccess.class){
-//            MysqlServerConnector.truncateTable(BlockLookUpTableDef.TABLE_NAME);
-//          }
         }
-//        MysqlServerConnector.truncateTable("path_memcached");
+        MysqlServerConnector.truncateTable("path_memcached");
         tx.commit();
         session.flush();
         return true;
@@ -558,8 +545,8 @@ public class ClusterjConnector implements StorageConnector<Session> {
     }
 
     try {
-      Session session = obtainSession();
-      session.setPartitionKey(cls, key);
+    Session session = obtainSession();
+    session.setPartitionKey(cls, key);
     } catch (Exception e) {
       throw new StorageException(e);
     }

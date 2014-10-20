@@ -337,10 +337,4 @@ public class INodeClusterj implements INodeTableDef, INodeDataAccess<HopINode> {
 //      System.out.println("values "+ Arrays.toString(map.values().toArray()));
   }
 
-  private void explain(Query<InodeDTO> query){
-//      Map<String,Object> map = query.explain();
-//      System.out.println("Explain");
-//      System.out.println("keys " +Arrays.toString(map.keySet().toArray()));
-//      System.out.println("values "+ Arrays.toString(map.values().toArray()));
-  }
 }

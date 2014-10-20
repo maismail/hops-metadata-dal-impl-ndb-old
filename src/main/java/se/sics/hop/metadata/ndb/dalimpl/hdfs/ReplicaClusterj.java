@@ -12,8 +12,7 @@ import com.mysql.clusterj.query.QueryDomainType;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.log4j.*;
 import se.sics.hop.metadata.hdfs.entity.hop.HopIndexedReplica;
 import se.sics.hop.metadata.hdfs.dal.ReplicaDataAccess;
 import se.sics.hop.exception.StorageException;
@@ -26,8 +25,8 @@ import se.sics.hop.metadata.ndb.mysqlserver.CountHelper;
  * @author Hooman <hooman@sics.se>
  */
 public class ReplicaClusterj implements ReplicaTableDef, ReplicaDataAccess<HopIndexedReplica> {
-  static final Log LOG = LogFactory.getLog(ReplicaClusterj.class);
-
+//  static final Log LOG = LogFactory.getLog(ReplicaClusterj.class);
+  static final Logger LOG = Logger.getLogger(ReplicaClusterj.class);
   @PersistenceCapable(table = TABLE_NAME)
   public interface ReplicaDTO {
 
