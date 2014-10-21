@@ -37,9 +37,9 @@ public class QueueMetricsClusterJ implements QueueMetricsTableDef, QueueMetricsD
 
     @PrimaryKey
     @Column(name = ID)
-    int getid();
+    String getid();
 
-    void setid(int id);
+    void setid(String id);
 
     @Column(name = APPS_SUBMITTED)
     int getappssubmitted();
