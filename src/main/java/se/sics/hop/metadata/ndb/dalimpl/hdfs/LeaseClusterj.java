@@ -1,7 +1,6 @@
 package se.sics.hop.metadata.ndb.dalimpl.hdfs;
 
 import com.mysql.clusterj.Query;
-import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.Index;
 import com.mysql.clusterj.annotation.PartitionKey;
@@ -22,6 +21,7 @@ import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
 import se.sics.hop.metadata.ndb.mysqlserver.CountHelper;
 import se.sics.hop.metadata.hdfs.tabledef.LeaseTableDef;
+import se.sics.hop.metadata.ndb.DBSession;
 
 /**
  *
@@ -66,11 +66,11 @@ public class LeaseClusterj implements LeaseTableDef, LeaseDataAccess<HopLease> {
   @Override
   public HopLease findByPKey(String holder) throws StorageException {
     try {
-      Session session = connector.obtainSession();
+      DBSession dbSession = connector.obtainSession();
       Object[] key = new Object[2];
       key[0] = holder;
       key[1] = PART_KEY_VAL;
-      LeaseDTO lTable = session.find(LeaseDTO.class, key);
+      LeaseDTO lTable = dbSession.getSession().find(LeaseDTO.class, key);
       if (lTable != null) {
         HopLease lease = createLease(lTable);
         return lease;
@@ -84,8 +84,8 @@ public class LeaseClusterj implements LeaseTableDef, LeaseDataAccess<HopLease> {
   @Override
   public HopLease findByHolderId(int holderId) throws StorageException {
     try {
-      Session session = connector.obtainSession();
-      QueryBuilder qb = session.getQueryBuilder();
+      DBSession dbSession = connector.obtainSession();
+      QueryBuilder qb = dbSession.getSession().getQueryBuilder();
       QueryDomainType<LeaseDTO> dobj = qb.createQueryDefinition(LeaseDTO.class);
 
       Predicate pred1 = dobj.get("holderId").equal(dobj.param("param1"));
@@ -93,7 +93,7 @@ public class LeaseClusterj implements LeaseTableDef, LeaseDataAccess<HopLease> {
       
       dobj.where(pred1/*.and(pred2)*/);
 
-      Query<LeaseDTO> query = session.createQuery(dobj);
+      Query<LeaseDTO> query = dbSession.getSession().createQuery(dobj);
       query.setParameter("param1", holderId); //the WHERE clause of SQL
       query.setParameter("param2", PART_KEY_VAL);
       List<LeaseDTO> leaseTables = query.getResultList();
@@ -116,12 +116,12 @@ public class LeaseClusterj implements LeaseTableDef, LeaseDataAccess<HopLease> {
   @Override
   public Collection<HopLease> findAll() throws StorageException {
     try {
-      Session session = connector.obtainSession();
-      QueryBuilder qb = session.getQueryBuilder();
+      DBSession dbSession = connector.obtainSession();
+      QueryBuilder qb = dbSession.getSession().getQueryBuilder();
       QueryDomainType<LeaseDTO> dobj = qb.createQueryDefinition(LeaseDTO.class);
       Predicate pred = dobj.get("partKey").equal(dobj.param("param"));
       dobj.where(pred);
-      Query<LeaseDTO> query = session.createQuery(dobj);
+      Query<LeaseDTO> query = dbSession.getSession().createQuery(dobj);
       query.setParameter("param", PART_KEY_VAL);
       return createList(query.getResultList());
     } catch (Exception e) {
@@ -132,15 +132,15 @@ public class LeaseClusterj implements LeaseTableDef, LeaseDataAccess<HopLease> {
   @Override
   public Collection<HopLease> findByTimeLimit(long timeLimit) throws StorageException {
     try {
-      Session session = connector.obtainSession();
-      QueryBuilder qb = session.getQueryBuilder();
+      DBSession dbSession = connector.obtainSession();
+      QueryBuilder qb = dbSession.getSession().getQueryBuilder();
       QueryDomainType dobj = qb.createQueryDefinition(LeaseDTO.class);
       PredicateOperand propertyPredicate = dobj.get("lastUpdate");
       String param = "timelimit";
       PredicateOperand propertyLimit = dobj.param(param);
       Predicate lessThan = propertyPredicate.lessThan(propertyLimit);
       dobj.where(lessThan.and(dobj.get("partKey").equal(dobj.param("partKeyParam"))));
-      Query query = session.createQuery(dobj);
+      Query query = dbSession.getSession().createQuery(dobj);
       query.setParameter(param, new Long(timeLimit));
       query.setParameter("partKeyParam", PART_KEY_VAL);
       return createList(query.getResultList());
@@ -152,17 +152,17 @@ public class LeaseClusterj implements LeaseTableDef, LeaseDataAccess<HopLease> {
   @Override
   public void prepare(Collection<HopLease> removed, Collection<HopLease> newed, Collection<HopLease> modified) throws StorageException {
     try {
-      Session session = connector.obtainSession();
+      DBSession dbSession = connector.obtainSession();
       List<LeaseDTO> changes = new ArrayList<LeaseDTO>();
       List<LeaseDTO> deletions = new ArrayList<LeaseDTO>();
       for (HopLease l : newed) {
-        LeaseDTO lTable = session.newInstance(LeaseDTO.class);
+        LeaseDTO lTable = dbSession.getSession().newInstance(LeaseDTO.class);
         createPersistableLeaseInstance(l, lTable);
         changes.add(lTable);
       }
 
       for (HopLease l : modified) {
-        LeaseDTO lTable = session.newInstance(LeaseDTO.class);
+        LeaseDTO lTable = dbSession.getSession().newInstance(LeaseDTO.class);
         createPersistableLeaseInstance(l, lTable);
         changes.add(lTable);
       }
@@ -171,11 +171,11 @@ public class LeaseClusterj implements LeaseTableDef, LeaseDataAccess<HopLease> {
         Object[] key = new Object[2];
         key[0] = l.getHolder();
         key[1] = PART_KEY_VAL;
-        LeaseDTO lTable = session.newInstance(LeaseDTO.class, key);
+        LeaseDTO lTable = dbSession.getSession().newInstance(LeaseDTO.class, key);
         deletions.add(lTable);
       }
-      session.deletePersistentAll(deletions);
-      session.savePersistentAll(changes);
+      dbSession.getSession().deletePersistentAll(deletions);
+      dbSession.getSession().savePersistentAll(changes);
     } catch (Exception e) {
       throw new StorageException(e);
     }
@@ -193,8 +193,8 @@ public class LeaseClusterj implements LeaseTableDef, LeaseDataAccess<HopLease> {
   @Override
   public void removeAll() throws StorageException {
     try {
-      Session session = connector.obtainSession();
-      session.deletePersistentAll(LeaseDTO.class);
+      DBSession dbSession = connector.obtainSession();
+      dbSession.getSession().deletePersistentAll(LeaseDTO.class);
     } catch (Exception e) {
       throw new StorageException(e);
     }

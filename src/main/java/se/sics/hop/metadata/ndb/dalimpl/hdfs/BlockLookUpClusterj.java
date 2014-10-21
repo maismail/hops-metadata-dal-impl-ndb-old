@@ -1,6 +1,6 @@
 package se.sics.hop.metadata.ndb.dalimpl.hdfs;
 
-import com.mysql.clusterj.Session;
+
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
@@ -13,6 +13,7 @@ import se.sics.hop.metadata.hdfs.dal.BlockLookUpDataAccess;
 import se.sics.hop.metadata.hdfs.entity.hop.HopBlockLookUp;
 import se.sics.hop.metadata.hdfs.tabledef.BlockLookUpTableDef;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
+import se.sics.hop.metadata.ndb.DBSession;
 
 /**
  *
@@ -41,16 +42,16 @@ public class BlockLookUpClusterj implements BlockLookUpTableDef, BlockLookUpData
   @Override
   public void prepare(Collection<HopBlockLookUp> modified, Collection<HopBlockLookUp> removed) throws StorageException {
     try {
-      Session session = connector.obtainSession();
+      DBSession dbSession = connector.obtainSession();
       for (HopBlockLookUp block_lookup : removed) {
-        BlockLookUpClusterj.BlockLookUpDTO bTable = session.newInstance(BlockLookUpClusterj.BlockLookUpDTO.class, block_lookup.getBlockId());
-        session.deletePersistent(bTable);
+        BlockLookUpClusterj.BlockLookUpDTO bTable = dbSession.getSession().newInstance(BlockLookUpClusterj.BlockLookUpDTO.class, block_lookup.getBlockId());
+        dbSession.getSession().deletePersistent(bTable);
       }
 
       for (HopBlockLookUp block_lookup : modified) {
-        BlockLookUpClusterj.BlockLookUpDTO bTable = session.newInstance(BlockLookUpClusterj.BlockLookUpDTO.class);
+        BlockLookUpClusterj.BlockLookUpDTO bTable = dbSession.getSession().newInstance(BlockLookUpClusterj.BlockLookUpDTO.class);
         createPersistable(block_lookup, bTable);
-        session.savePersistent(bTable);
+        dbSession.getSession().savePersistent(bTable);
       }
     } catch (Exception e) {
       throw new StorageException(e);
@@ -60,8 +61,8 @@ public class BlockLookUpClusterj implements BlockLookUpTableDef, BlockLookUpData
   @Override
   public HopBlockLookUp findByBlockId(long blockId) throws StorageException {
     try {
-      Session session = connector.obtainSession();
-      BlockLookUpClusterj.BlockLookUpDTO lookup = session.find(BlockLookUpClusterj.BlockLookUpDTO.class, blockId);
+      DBSession dbSession = connector.obtainSession();
+      BlockLookUpClusterj.BlockLookUpDTO lookup = dbSession.getSession().find(BlockLookUpClusterj.BlockLookUpDTO.class, blockId);
       if (lookup == null) {
         return null;
       }
@@ -80,16 +81,16 @@ public class BlockLookUpClusterj implements BlockLookUpTableDef, BlockLookUpData
   @Override
   public int[] findINodeIdsByBlockIds(long[] blockIds) throws StorageException {
     try {
-      Session session = connector.obtainSession();
+      DBSession dbSession = connector.obtainSession();
       List<BlockLookUpDTO> bldtos = new ArrayList<BlockLookUpDTO>();
       int[] inodeIds = new int[blockIds.length];
       for (long blockId : blockIds) {
-        BlockLookUpDTO bldto = session.newInstance(BlockLookUpDTO.class, blockId);
+        BlockLookUpDTO bldto = dbSession.getSession().newInstance(BlockLookUpDTO.class, blockId);
         bldto.setINodeId(NOT_FOUND_ROW);
-        bldto = session.load(bldto);
+        bldto = dbSession.getSession().load(bldto);
         bldtos.add(bldto);
       }
-      session.flush();
+      dbSession.getSession().flush();
       for (int i = 0; i < bldtos.size(); i++) {
         BlockLookUpClusterj.BlockLookUpDTO bld = bldtos.get(i);
         inodeIds[i] = bld.getINodeId();

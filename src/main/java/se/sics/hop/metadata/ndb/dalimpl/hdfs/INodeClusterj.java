@@ -1,7 +1,6 @@
 package se.sics.hop.metadata.ndb.dalimpl.hdfs;
 
 import com.mysql.clusterj.Query;
-import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.Index;
 import com.mysql.clusterj.annotation.PartitionKey;
@@ -22,6 +21,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import se.sics.hop.metadata.ndb.DBSession;
 
 /**
  *
@@ -39,7 +39,6 @@ public class INodeClusterj implements INodeTableDef, INodeDataAccess<HopINode> {
   @PartitionKey(column=PARENT_ID)
   @Index(name = "inode_idx")
   public interface InodeDTO {
-
     @Column(name = ID)
     int getId();     // id of the inode
     void setId(int id);
@@ -52,7 +51,6 @@ public class INodeClusterj implements INodeTableDef, INodeDataAccess<HopINode> {
     //id of the parent inode 
     @PrimaryKey
     @Column(name = PARENT_ID)
-    @Index(name = "parent_idx")
     int getParentId();     // id of the inode
     void setParentId(int parentid);
 
@@ -139,7 +137,7 @@ public class INodeClusterj implements INodeTableDef, INodeDataAccess<HopINode> {
   
   @Override
   public void prepare(Collection<HopINode> removed, Collection<HopINode> newEntries, Collection<HopINode> modified) throws StorageException {
-    Session session = connector.obtainSession();
+    DBSession dbSession = connector.obtainSession();
     try {
       List<InodeDTO> changes = new ArrayList<InodeDTO>();
       List<InodeDTO> deletions = new ArrayList<InodeDTO>();
@@ -147,23 +145,23 @@ public class INodeClusterj implements INodeTableDef, INodeDataAccess<HopINode> {
         Object[] pk = new Object[2];
         pk[0] = inode.getParentId();
         pk[1] = inode.getName();
-        InodeDTO persistable = session.newInstance(InodeDTO.class, pk);
+        InodeDTO persistable = dbSession.getSession().newInstance(InodeDTO.class, pk);
         deletions.add(persistable);
       }
       
       for (HopINode inode : newEntries) {
-        InodeDTO persistable = session.newInstance(InodeDTO.class);
+        InodeDTO persistable = dbSession.getSession().newInstance(InodeDTO.class);
         createPersistable(inode, persistable);
         changes.add(persistable);
       }
 
       for (HopINode inode : modified) {
-        InodeDTO persistable = session.newInstance(InodeDTO.class);
+        InodeDTO persistable = dbSession.getSession().newInstance(InodeDTO.class);
         createPersistable(inode, persistable);
         changes.add(persistable);
       }
-      session.deletePersistentAll(deletions);
-      session.savePersistentAll(changes);
+      dbSession.getSession().deletePersistentAll(deletions);
+      dbSession.getSession().savePersistentAll(changes);
     } catch (Exception e) {
       throw new StorageException(e);
     }
@@ -173,14 +171,14 @@ public class INodeClusterj implements INodeTableDef, INodeDataAccess<HopINode> {
   public HopINode indexScanfindInodeById(int inodeId) throws StorageException {
     try {
       //System.out.println("*** pruneScanfindInodeById, Id "+inodeId);
-      Session session = connector.obtainSession();
+      DBSession dbSession = connector.obtainSession();
       
-      QueryBuilder qb = session.getQueryBuilder();
+      QueryBuilder qb = dbSession.getSession().getQueryBuilder();
       QueryDomainType<InodeDTO> dobj = qb.createQueryDefinition(InodeDTO.class);
       Predicate pred1 = dobj.get("id").equal(dobj.param("idParam"));
       dobj.where(pred1);
 
-      Query<InodeDTO> query = session.createQuery(dobj);
+      Query<InodeDTO> query = dbSession.getSession().createQuery(dobj);
       query.setParameter("idParam", inodeId);
      
       List<InodeDTO> results = query.getResultList();
@@ -202,13 +200,13 @@ public class INodeClusterj implements INodeTableDef, INodeDataAccess<HopINode> {
   public List<HopINode> indexScanFindInodesByParentId(int parentId) throws StorageException {
     try {
       //System.out.println("*** indexScanFindInodesByParentId ");
-      Session session = connector.obtainSession();
+      DBSession dbSession = connector.obtainSession();
             
-      QueryBuilder qb = session.getQueryBuilder();
+      QueryBuilder qb = dbSession.getSession().getQueryBuilder();
       QueryDomainType<InodeDTO> dobj = qb.createQueryDefinition(InodeDTO.class);
       Predicate pred1 = dobj.get("parentId").equal(dobj.param("parentIDParam"));
       dobj.where(pred1);
-      Query<InodeDTO> query = session.createQuery(dobj);
+      Query<InodeDTO> query = dbSession.getSession().createQuery(dobj);
       query.setParameter("parentIDParam", parentId);
       
       List<InodeDTO> results = query.getResultList();
@@ -224,13 +222,13 @@ public class INodeClusterj implements INodeTableDef, INodeDataAccess<HopINode> {
     try {
      // System.out.println("*** pkLookUpFindInodeByNameAndParentId, name "+name+" parentId "+parentId);
       
-      Session session = connector.obtainSession();
+      DBSession dbSession = connector.obtainSession();
 
       Object[] pk = new Object[2];
       pk[0] = parentId;
       pk[1] = name;
       
-      InodeDTO result = session.find(InodeDTO.class, pk);
+      InodeDTO result = dbSession.getSession().find(InodeDTO.class, pk);
       if(result != null){
         return createInode(result);
       }else{
@@ -245,15 +243,15 @@ public class INodeClusterj implements INodeTableDef, INodeDataAccess<HopINode> {
   @Override
   public List<HopINode> getINodesPkBatched(String[] names, int[] parentIds) throws StorageException {
     try {
-      Session session = connector.obtainSession();
+      DBSession dbSession = connector.obtainSession();
       List<InodeDTO> dtos = new ArrayList<InodeDTO>();
       for (int i = 0; i < names.length; i++) {
-        InodeDTO dto = session.newInstance(InodeDTO.class, new Object[]{parentIds[i], names[i]});
+        InodeDTO dto = dbSession.getSession().newInstance(InodeDTO.class, new Object[]{parentIds[i], names[i]});
         dto.setId(NOT_FOUND_ROW);
-        dto = session.load(dto);
+        dto = dbSession.getSession().load(dto);
         dtos.add(dto);
       }
-      session.flush();
+      dbSession.getSession().flush();
       return createInodeList(dtos);
     } catch (Exception e) {
       throw new StorageException(e);
@@ -263,12 +261,12 @@ public class INodeClusterj implements INodeTableDef, INodeDataAccess<HopINode> {
   @Override
   public List<INodeIdentifier> getAllINodeFiles() throws StorageException {
     try {
-      Session session = connector.obtainSession();
-      QueryBuilder qb = session.getQueryBuilder();
+      DBSession dbSession = connector.obtainSession();
+      QueryBuilder qb = dbSession.getSession().getQueryBuilder();
       QueryDomainType<InodeDTO> dobj = qb.createQueryDefinition(InodeDTO.class);
       Predicate pred = dobj.get("dir").equal(dobj.param("isDirParam"));
       dobj.where(pred);
-      Query<InodeDTO> query = session.createQuery(dobj);
+      Query<InodeDTO> query = dbSession.getSession().createQuery(dobj);
       query.setParameter("isDirParam", false);
       List<InodeDTO> dtos = query.getResultList();
       List<INodeIdentifier> res = new ArrayList<INodeIdentifier>();
