@@ -27,6 +27,7 @@ import se.sics.hop.metadata.hdfs.dal.VariableDataAccess;
 import se.sics.hop.metadata.hdfs.entity.hop.var.HopVariable;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.dal.BlockLookUpDataAccess;
+import se.sics.hop.metadata.hdfs.dal.QuotaUpdateDataAccess;
 import se.sics.hop.metadata.hdfs.dal.StorageIdMapDataAccess;
 import se.sics.hop.metadata.hdfs.tabledef.BlockInfoTableDef;
 import se.sics.hop.metadata.hdfs.tabledef.BlockLookUpTableDef;
@@ -39,6 +40,7 @@ import se.sics.hop.metadata.hdfs.tabledef.LeaderTableDef;
 import se.sics.hop.metadata.hdfs.tabledef.LeasePathTableDef;
 import se.sics.hop.metadata.hdfs.tabledef.LeaseTableDef;
 import se.sics.hop.metadata.hdfs.tabledef.PendingBlockTableDef;
+import se.sics.hop.metadata.hdfs.tabledef.QuotaUpdateTableDef;
 import se.sics.hop.metadata.hdfs.tabledef.ReplicaTableDef;
 import se.sics.hop.metadata.hdfs.tabledef.ReplicaUnderConstructionTableDef;
 import se.sics.hop.metadata.hdfs.tabledef.StorageIdMapTableDef;
@@ -198,7 +200,7 @@ public class ClusterjConnector implements StorageConnector<DBSession> {
                 ExcessReplicaDataAccess.class, PendingBlockDataAccess.class, CorruptReplicaDataAccess.class,
                 UnderReplicatedBlockDataAccess.class, LeaderDataAccess.class,
                 INodeAttributesDataAccess.class, VariableDataAccess.class, StorageIdMapDataAccess.class,
-                BlockLookUpDataAccess.class);
+                BlockLookUpDataAccess.class, QuotaUpdateDataAccess.class);
     }
 
     @Override
@@ -262,7 +264,9 @@ public class ClusterjConnector implements StorageConnector<DBSession> {
                         MysqlServerConnector.truncateTable(StorageIdMapTableDef.TABLE_NAME);
                     } else if (e == BlockLookUpDataAccess.class) {
                         MysqlServerConnector.truncateTable(BlockLookUpTableDef.TABLE_NAME);
-                    }
+                    }else if (e == QuotaUpdateDataAccess.class) {
+            MysqlServerConnector.truncateTable(QuotaUpdateTableDef.TABLE_NAME);
+          }
                 }
                 MysqlServerConnector.truncateTable("path_memcached");
                 tx.commit();
