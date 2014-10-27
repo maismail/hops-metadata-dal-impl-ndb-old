@@ -29,12 +29,15 @@ import se.sics.hop.metadata.hdfs.dal.VariableDataAccess;
 import se.sics.hop.metadata.hdfs.entity.hop.var.HopVariable;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.dal.BlockLookUpDataAccess;
+import se.sics.hop.metadata.hdfs.dal.HdfsLeaderDataAccess;
 import se.sics.hop.metadata.hdfs.dal.QuotaUpdateDataAccess;
 import se.sics.hop.metadata.hdfs.dal.StorageIdMapDataAccess;
+import se.sics.hop.metadata.hdfs.dal.YarnLeaderDataAccess;
 import se.sics.hop.metadata.hdfs.tabledef.BlockInfoTableDef;
 import se.sics.hop.metadata.hdfs.tabledef.BlockLookUpTableDef;
 import se.sics.hop.metadata.hdfs.tabledef.CorruptReplicaTableDef;
 import se.sics.hop.metadata.hdfs.tabledef.ExcessReplicaTableDef;
+import se.sics.hop.metadata.hdfs.tabledef.HdfsLeaderTableDef;
 import se.sics.hop.metadata.hdfs.tabledef.INodeAttributesTableDef;
 import se.sics.hop.metadata.hdfs.tabledef.INodeTableDef;
 import se.sics.hop.metadata.hdfs.tabledef.InvalidatedBlockTableDef;
@@ -47,9 +50,11 @@ import se.sics.hop.metadata.hdfs.tabledef.ReplicaTableDef;
 import se.sics.hop.metadata.hdfs.tabledef.ReplicaUnderConstructionTableDef;
 import se.sics.hop.metadata.hdfs.tabledef.StorageIdMapTableDef;
 import se.sics.hop.metadata.hdfs.tabledef.UnderReplicatedBlockTableDef;
+import se.sics.hop.metadata.hdfs.tabledef.YarnLeaderTableDef;
 import se.sics.hop.metadata.ndb.dalimpl.hdfs.BlockInfoClusterj;
 import se.sics.hop.metadata.ndb.dalimpl.hdfs.CorruptReplicaClusterj;
 import se.sics.hop.metadata.ndb.dalimpl.hdfs.ExcessReplicaClusterj;
+import se.sics.hop.metadata.ndb.dalimpl.hdfs.HdfsLeaderClusterj;
 import se.sics.hop.metadata.ndb.dalimpl.hdfs.INodeAttributesClusterj;
 import se.sics.hop.metadata.ndb.dalimpl.hdfs.INodeClusterj;
 import se.sics.hop.metadata.ndb.dalimpl.hdfs.InvalidatedBlockClusterj;
@@ -61,6 +66,7 @@ import se.sics.hop.metadata.ndb.dalimpl.hdfs.ReplicaClusterj;
 import se.sics.hop.metadata.ndb.dalimpl.hdfs.ReplicaUnderConstructionClusterj;
 import se.sics.hop.metadata.ndb.dalimpl.hdfs.UnderReplicatedBlockClusterj;
 import se.sics.hop.metadata.ndb.dalimpl.hdfs.VariableClusterj;
+import se.sics.hop.metadata.ndb.dalimpl.hdfs.YarnLeaderClusterj;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.YarnVariablesClusterJ;
 import se.sics.hop.metadata.yarn.dal.AppSchedulingInfoBlacklistDataAccess;
 import se.sics.hop.metadata.yarn.dal.AppSchedulingInfoDataAccess;
@@ -255,7 +261,7 @@ public class ClusterjConnector implements StorageConnector<Session> {
             LeaseDataAccess.class, LeasePathDataAccess.class, ReplicaDataAccess.class,
             ReplicaUnderConstructionDataAccess.class, InvalidateBlockDataAccess.class,
             ExcessReplicaDataAccess.class, PendingBlockDataAccess.class, CorruptReplicaDataAccess.class,
-            UnderReplicatedBlockDataAccess.class, LeaderDataAccess.class, 
+            UnderReplicatedBlockDataAccess.class, HdfsLeaderDataAccess.class, 
             INodeAttributesDataAccess.class, VariableDataAccess.class, StorageIdMapDataAccess.class, 
             BlockLookUpDataAccess.class, QuotaUpdateDataAccess.class, AppMasterRPCDataAccess.class,
             ApplicationStateDataAccess.class, ApplicationAttemptStateDataAccess.class, DelegationKeyDataAccess.class,
@@ -273,7 +279,7 @@ public class ClusterjConnector implements StorageConnector<Session> {
             RMNodeDataAccess.class, SchedulerApplicationDataAccess.class, SequenceNumberDataAccess.class,
              FinishedApplicationsDataAccess.class,
             TokenDataAccess.class, RMContextInactiveNodesDataAccess.class, RMContextActiveNodesDataAccess.class,
-            UpdatedContainerInfoDataAccess.class);
+            UpdatedContainerInfoDataAccess.class, YarnLeaderDataAccess.class);
   }
 
   @Override
@@ -319,9 +325,10 @@ public class ClusterjConnector implements StorageConnector<Session> {
           } else if (e == UnderReplicatedBlockDataAccess.class) {
             MysqlServerConnector.truncateTable(UnderReplicatedBlockTableDef.TABLE_NAME);
 
-          } else if (e == LeaderDataAccess.class) {
-            MysqlServerConnector.truncateTable(LeaderTableDef.TABLE_NAME);
-
+          } else if (e == HdfsLeaderDataAccess.class) {
+            MysqlServerConnector.truncateTable(HdfsLeaderTableDef.TABLE_NAME);
+          } else if (e == YarnLeaderDataAccess.class) {
+            MysqlServerConnector.truncateTable(YarnLeaderTableDef.TABLE_NAME);
           } else if (e == INodeAttributesDataAccess.class) {
             MysqlServerConnector.truncateTable(INodeAttributesTableDef.TABLE_NAME);
 
@@ -495,8 +502,10 @@ public class ClusterjConnector implements StorageConnector<Session> {
       cls = LeaseClusterj.LeaseDTO.class;
     } else if (className == LeasePathDataAccess.class) {
       cls = LeasePathClusterj.LeasePathsDTO.class;
-    } else if (className == LeaderDataAccess.class) {
-      cls = LeaderClusterj.LeaderDTO.class;
+    } else if (className == HdfsLeaderDataAccess.class) {
+      cls = HdfsLeaderClusterj.LeaderDTO.class;
+    } else if (className == YarnLeaderDataAccess.class) {
+      cls = YarnLeaderClusterj.LeaderDTO.class;
     } else if (className == ReplicaDataAccess.class) {
       cls = ReplicaClusterj.ReplicaDTO.class;
     } else if (className == CorruptReplicaDataAccess.class) {

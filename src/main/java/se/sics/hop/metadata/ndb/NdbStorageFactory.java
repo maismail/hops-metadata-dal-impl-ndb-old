@@ -182,7 +182,8 @@ public class NdbStorageFactory implements DALStorageFactory {
     dataAccessMap.put(INodeAttributesDataAccess.class, new INodeAttributesClusterj());
     dataAccessMap.put(LeaseDataAccess.class, new LeaseClusterj());
     dataAccessMap.put(LeasePathDataAccess.class, new LeasePathClusterj());
-    dataAccessMap.put(LeaderDataAccess.class, new LeaderClusterj());
+    dataAccessMap.put(HdfsLeaderDataAccess.class, new HdfsLeaderClusterj());
+    dataAccessMap.put(YarnLeaderDataAccess.class, new YarnLeaderClusterj());
     dataAccessMap.put(ReplicaDataAccess.class, new ReplicaClusterj());
     dataAccessMap.put(CorruptReplicaDataAccess.class, new CorruptReplicaClusterj());
     dataAccessMap.put(ExcessReplicaDataAccess.class, new ExcessReplicaClusterj());
