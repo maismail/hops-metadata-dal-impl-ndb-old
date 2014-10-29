@@ -7,6 +7,9 @@ import java.util.Map;
 import java.util.Properties;
 import se.sics.hop.DALStorageFactory;
 import se.sics.hop.StorageConnector;
+import se.sics.hop.metadata.hdfs.dal.*;
+import se.sics.hop.exception.StorageInitializtionException;
+import se.sics.hop.metadata.ndb.dalimpl.hdfs.*;
 import se.sics.hop.exception.StorageInitializtionException;
 import se.sics.hop.metadata.hdfs.dal.BlockInfoDataAccess;
 import se.sics.hop.metadata.hdfs.dal.BlockLookUpDataAccess;
@@ -179,7 +182,8 @@ public class NdbStorageFactory implements DALStorageFactory {
     dataAccessMap.put(INodeAttributesDataAccess.class, new INodeAttributesClusterj());
     dataAccessMap.put(LeaseDataAccess.class, new LeaseClusterj());
     dataAccessMap.put(LeasePathDataAccess.class, new LeasePathClusterj());
-    dataAccessMap.put(LeaderDataAccess.class, new LeaderClusterj());
+    dataAccessMap.put(HdfsLeaderDataAccess.class, new HdfsLeaderClusterj());
+    dataAccessMap.put(YarnLeaderDataAccess.class, new YarnLeaderClusterj());
     dataAccessMap.put(ReplicaDataAccess.class, new ReplicaClusterj());
     dataAccessMap.put(CorruptReplicaDataAccess.class, new CorruptReplicaClusterj());
     dataAccessMap.put(ExcessReplicaDataAccess.class, new ExcessReplicaClusterj());
@@ -190,6 +194,7 @@ public class NdbStorageFactory implements DALStorageFactory {
     dataAccessMap.put(BlockLookUpDataAccess.class, new BlockLookUpClusterj());
     
     dataAccessMap.put(FSSchedulerNodeDataAccess.class, new FSSchedulerNodeClusterJ());
+    dataAccessMap.put(QuotaUpdateDataAccess.class, new QuotaUpdateClusterj());
   }
 
   @Override

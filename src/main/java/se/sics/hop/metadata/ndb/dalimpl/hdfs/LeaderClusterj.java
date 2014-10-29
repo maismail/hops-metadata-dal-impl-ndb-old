@@ -24,43 +24,41 @@ import se.sics.hop.metadata.hdfs.tabledef.LeaderTableDef;
  *
  * @author Salman <salman@sics.se>
  */
-public class LeaderClusterj implements LeaderTableDef, LeaderDataAccess<HopLeader> {
+public abstract class LeaderClusterj implements LeaderTableDef, LeaderDataAccess<HopLeader> {
 
-  @PersistenceCapable(table = TABLE_NAME)
-  public interface LeaderDTO {
+    Class dto;
 
-    @PrimaryKey
-    @Column(name = ID)
-    long getId();
+    public interface LeaderDTO {
 
-    void setId(long id);
+        long getId();
 
-    @PrimaryKey
-    @Column(name = PARTITION_VAL)
-    int getPartitionVal();
+        void setId(long id);
 
-    void setPartitionVal(int partitionVal);
+       int getPartitionVal();
 
-    @Column(name = COUNTER)
-    long getCounter();
+        void setPartitionVal(int partitionVal);
 
-    void setCounter(long counter);
+        long getCounter();
 
-    @Column(name = TIMESTAMP)
-    long getTimestamp();
+        void setCounter(long counter);
 
-    void setTimestamp(long timestamp);
+        long getTimestamp();
 
-    @Column(name = HOSTNAME)
-    String getHostname();
+        void setTimestamp(long timestamp);
 
-    void setHostname(String hostname);
+        String getHostname();
 
-    @Column(name = AVG_REQUEST_PROCESSING_LATENCY)
-    int getAvgRequestProcessingLatency();
+        void setHostname(String hostname);
 
-    void setAvgRequestProcessingLatency(int avgRequestProcessingLatency);
-  }
+        int getAvgRequestProcessingLatency();
+
+        void setAvgRequestProcessingLatency(int avgRequestProcessingLatency);
+    }
+    
+    public LeaderClusterj(Class dto){
+        this.dto = dto;
+    }
+          
   private ClusterjConnector connector = ClusterjConnector.getInstance();
 
   @Override
@@ -74,7 +72,7 @@ public class LeaderClusterj implements LeaderTableDef, LeaderDataAccess<HopLeade
       // TODO[Hooman]: code repetition. Use query for fetching "ids less than".
       Session session = connector.obtainSession();
       QueryBuilder qb = session.getQueryBuilder();
-      QueryDomainType dobj = qb.createQueryDefinition(LeaderDTO.class);
+      QueryDomainType dobj = qb.createQueryDefinition(dto);
       PredicateOperand propertyPredicate = dobj.get("id");
       String param = "id";
       PredicateOperand propertyLimit = dobj.param(param);
@@ -93,7 +91,7 @@ public class LeaderClusterj implements LeaderTableDef, LeaderDataAccess<HopLeade
     try {
       Session session = connector.obtainSession();
       QueryBuilder qb = session.getQueryBuilder();
-      QueryDomainType dobj = qb.createQueryDefinition(LeaderDTO.class);
+      QueryDomainType dobj = qb.createQueryDefinition(dto);
       PredicateOperand propertyPredicate = dobj.get("id");
       String param = "id";
       PredicateOperand propertyLimit = dobj.param(param);
@@ -113,7 +111,7 @@ public class LeaderClusterj implements LeaderTableDef, LeaderDataAccess<HopLeade
 //        try
 //        {
 //            Session session = connector.obtainSession();
-//            LeaderDTO lTable = session.find(LeaderDTO.class, id);
+//            LeaderDTO lTable = session.find(dto, id);
 //            if (lTable != null)
 //            {
 //                Leader leader = createLeader(lTable);
@@ -131,7 +129,7 @@ public class LeaderClusterj implements LeaderTableDef, LeaderDataAccess<HopLeade
     try {
       Session session = connector.obtainSession();
       Object[] keys = new Object[]{id, partitionKey};
-      LeaderDTO lTable = session.find(LeaderDTO.class, keys);
+      LeaderDTO lTable = (LeaderDTO) session.find(dto, keys);
       if (lTable != null) {
         HopLeader leader = createLeader(lTable);
         return leader;
@@ -147,7 +145,7 @@ public class LeaderClusterj implements LeaderTableDef, LeaderDataAccess<HopLeade
     try {
       Session session = connector.obtainSession();
       QueryBuilder qb = session.getQueryBuilder();
-      QueryDomainType dobj = qb.createQueryDefinition(LeaderDTO.class);
+      QueryDomainType dobj = qb.createQueryDefinition(dto);
       PredicateOperand propertyPredicate = dobj.get("counter");
       String param = "counter";
       PredicateOperand propertyLimit = dobj.param(param);
@@ -166,7 +164,7 @@ public class LeaderClusterj implements LeaderTableDef, LeaderDataAccess<HopLeade
     try {
       Session session = connector.obtainSession();
       QueryBuilder qb = session.getQueryBuilder();
-      QueryDomainType dobj = qb.createQueryDefinition(LeaderDTO.class);
+      QueryDomainType dobj = qb.createQueryDefinition(dto);
       PredicateOperand propertyPredicate = dobj.get("id");
       String param = "id";
       PredicateOperand propertyLimit = dobj.param(param);
@@ -185,7 +183,7 @@ public class LeaderClusterj implements LeaderTableDef, LeaderDataAccess<HopLeade
     try {
       Session session = connector.obtainSession();
       QueryBuilder qb = session.getQueryBuilder();
-      QueryDomainType<LeaderDTO> dobj = qb.createQueryDefinition(LeaderDTO.class);
+      QueryDomainType<LeaderDTO> dobj = qb.createQueryDefinition(dto);
       Query<LeaderDTO> query = session.createQuery(dobj);
       return createList(query.getResultList());
     } catch (Exception e) {
@@ -200,19 +198,19 @@ public class LeaderClusterj implements LeaderTableDef, LeaderDataAccess<HopLeade
       List<LeaderDTO> changes = new ArrayList<LeaderDTO>();
       List<LeaderDTO> deletions = new ArrayList<LeaderDTO>();
       for (HopLeader l : newed) {
-        LeaderDTO lTable = session.newInstance(LeaderDTO.class);
+        LeaderDTO lTable = (LeaderDTO) session.newInstance(dto);
         createPersistableLeaderInstance(l, lTable);
         changes.add(lTable);
       }
 
       for (HopLeader l : modified) {
-        LeaderDTO lTable = session.newInstance(LeaderDTO.class);
+        LeaderDTO lTable = (LeaderDTO)session.newInstance(dto);
         createPersistableLeaderInstance(l, lTable);
         changes.add(lTable);
       }
 
       for (HopLeader l : removed) {
-        LeaderDTO lTable = session.newInstance(LeaderDTO.class);
+        LeaderDTO lTable = (LeaderDTO)session.newInstance(dto);
         createPersistableLeaderInstance(l, lTable);
         deletions.add(lTable);
       }
