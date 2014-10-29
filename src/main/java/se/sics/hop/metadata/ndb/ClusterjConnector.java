@@ -194,9 +194,10 @@ public class ClusterjConnector implements StorageConnector<Session> {
    * begin a transaction.
    */
   @Override
-  public void beginTransaction() throws StorageException {
+  public void beginTransaction(String name) throws StorageException {
     try {
     Session session = obtainSession();
+      LOG.debug(name + " begin transaction for thread " + Thread.currentThread().getId());
     if (session.currentTransaction().isActive()) {
       StringBuilder msg = new StringBuilder();
       msg.append("Can not start Tx inside another Tx:\n");
@@ -257,13 +258,13 @@ public class ClusterjConnector implements StorageConnector<Session> {
   @Override
   public boolean formatStorage() throws StorageException {
 
-    return formatStorage(INodeDataAccess.class, BlockInfoDataAccess.class,
+    return formatStorage(/*INodeDataAccess.class, BlockInfoDataAccess.class,
             LeaseDataAccess.class, LeasePathDataAccess.class, ReplicaDataAccess.class,
             ReplicaUnderConstructionDataAccess.class, InvalidateBlockDataAccess.class,
             ExcessReplicaDataAccess.class, PendingBlockDataAccess.class, CorruptReplicaDataAccess.class,
             UnderReplicatedBlockDataAccess.class, HdfsLeaderDataAccess.class, 
-            INodeAttributesDataAccess.class, VariableDataAccess.class, StorageIdMapDataAccess.class, 
-            BlockLookUpDataAccess.class, QuotaUpdateDataAccess.class, AppMasterRPCDataAccess.class,
+            INodeAttributesDataAccess.class,  StorageIdMapDataAccess.class, 
+            BlockLookUpDataAccess.class, QuotaUpdateDataAccess.class,*/VariableDataAccess.class, AppMasterRPCDataAccess.class,
             ApplicationStateDataAccess.class, ApplicationAttemptStateDataAccess.class, DelegationKeyDataAccess.class,
             DelegationTokenDataAccess.class, SequenceNumberDataAccess.class,
             RMStateVersionDataAccess.class, YarnVariablesDataAccess.class,

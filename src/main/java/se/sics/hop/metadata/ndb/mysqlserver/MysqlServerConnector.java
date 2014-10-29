@@ -103,7 +103,7 @@ public class MysqlServerConnector implements StorageConnector<Connection> {
 
 
   @Override
-  public void beginTransaction() throws StorageException {
+  public void beginTransaction(String name) throws StorageException {
     throw new UnsupportedOperationException("Not supported yet.");
   }
 
