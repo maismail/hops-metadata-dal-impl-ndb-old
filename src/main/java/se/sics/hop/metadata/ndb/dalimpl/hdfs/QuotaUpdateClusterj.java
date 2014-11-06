@@ -12,6 +12,7 @@ import se.sics.hop.metadata.hdfs.dal.QuotaUpdateDataAccess;
 import se.sics.hop.metadata.hdfs.entity.hop.QuotaUpdate;
 import se.sics.hop.metadata.hdfs.tabledef.QuotaUpdateTableDef;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
+import se.sics.hop.metadata.ndb.DBSession;
 import se.sics.hop.metadata.ndb.mysqlserver.MysqlServerConnector;
 
 import java.sql.Connection;
@@ -21,7 +22,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import se.sics.hop.metadata.ndb.DBSession;
 
 public class QuotaUpdateClusterj implements QuotaUpdateTableDef, QuotaUpdateDataAccess<QuotaUpdate> {
 
@@ -99,6 +99,8 @@ public class QuotaUpdateClusterj implements QuotaUpdateTableDef, QuotaUpdateData
       }
     } catch (SQLException ex) {
       throw new StorageException(ex);
+    } finally {
+      mysqlConnector.closeSession();
     }
     return resultList;
   }
@@ -138,6 +140,8 @@ public class QuotaUpdateClusterj implements QuotaUpdateTableDef, QuotaUpdateData
       return createResultList(results);
     } catch (Exception e) {
       throw new StorageException(e);
+    } finally {
+      mysqlConnector.closeSession();
     }
   }
 }

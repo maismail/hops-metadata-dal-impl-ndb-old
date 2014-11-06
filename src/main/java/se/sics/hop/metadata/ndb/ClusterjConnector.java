@@ -1,51 +1,20 @@
 package se.sics.hop.metadata.ndb;
 
-import se.sics.hop.metadata.hdfs.dal.*;
-import se.sics.hop.metadata.hdfs.tabledef.*;
-import se.sics.hop.metadata.ndb.dalimpl.hdfs.LeaseClusterj;
 import com.mysql.clusterj.ClusterJException;
 import com.mysql.clusterj.Constants;
 import com.mysql.clusterj.LockMode;
 import com.mysql.clusterj.Transaction;
-import java.util.Properties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import se.sics.hop.StorageConnector;
-import se.sics.hop.metadata.hdfs.entity.hop.var.HopVariable;
 import se.sics.hop.exception.StorageException;
-import se.sics.hop.metadata.hdfs.dal.BlockLookUpDataAccess;
-import se.sics.hop.metadata.hdfs.dal.QuotaUpdateDataAccess;
-import se.sics.hop.metadata.hdfs.dal.StorageIdMapDataAccess;
-import se.sics.hop.metadata.hdfs.tabledef.BlockInfoTableDef;
-import se.sics.hop.metadata.hdfs.tabledef.BlockLookUpTableDef;
-import se.sics.hop.metadata.hdfs.tabledef.CorruptReplicaTableDef;
-import se.sics.hop.metadata.hdfs.tabledef.ExcessReplicaTableDef;
-import se.sics.hop.metadata.hdfs.tabledef.INodeAttributesTableDef;
-import se.sics.hop.metadata.hdfs.tabledef.INodeTableDef;
-import se.sics.hop.metadata.hdfs.tabledef.InvalidatedBlockTableDef;
-import se.sics.hop.metadata.hdfs.tabledef.LeaderTableDef;
-import se.sics.hop.metadata.hdfs.tabledef.LeasePathTableDef;
-import se.sics.hop.metadata.hdfs.tabledef.LeaseTableDef;
-import se.sics.hop.metadata.hdfs.tabledef.PendingBlockTableDef;
-import se.sics.hop.metadata.hdfs.tabledef.QuotaUpdateTableDef;
-import se.sics.hop.metadata.hdfs.tabledef.ReplicaTableDef;
-import se.sics.hop.metadata.hdfs.tabledef.ReplicaUnderConstructionTableDef;
-import se.sics.hop.metadata.hdfs.tabledef.StorageIdMapTableDef;
-import se.sics.hop.metadata.hdfs.tabledef.UnderReplicatedBlockTableDef;
-import se.sics.hop.metadata.ndb.dalimpl.hdfs.BlockInfoClusterj;
-import se.sics.hop.metadata.ndb.dalimpl.hdfs.CorruptReplicaClusterj;
-import se.sics.hop.metadata.ndb.dalimpl.hdfs.ExcessReplicaClusterj;
-import se.sics.hop.metadata.ndb.dalimpl.hdfs.INodeAttributesClusterj;
-import se.sics.hop.metadata.ndb.dalimpl.hdfs.INodeClusterj;
-import se.sics.hop.metadata.ndb.dalimpl.hdfs.InvalidatedBlockClusterj;
-import se.sics.hop.metadata.ndb.dalimpl.hdfs.LeaderClusterj;
-import se.sics.hop.metadata.ndb.dalimpl.hdfs.LeasePathClusterj;
-import se.sics.hop.metadata.ndb.dalimpl.hdfs.PendingBlockClusterj;
-import se.sics.hop.metadata.ndb.dalimpl.hdfs.ReplicaClusterj;
-import se.sics.hop.metadata.ndb.dalimpl.hdfs.ReplicaUnderConstructionClusterj;
-import se.sics.hop.metadata.ndb.dalimpl.hdfs.UnderReplicatedBlockClusterj;
-import se.sics.hop.metadata.ndb.dalimpl.hdfs.VariableClusterj;
+import se.sics.hop.metadata.hdfs.dal.*;
+import se.sics.hop.metadata.hdfs.entity.hop.var.HopVariable;
+import se.sics.hop.metadata.hdfs.tabledef.*;
+import se.sics.hop.metadata.ndb.dalimpl.hdfs.*;
 import se.sics.hop.metadata.ndb.mysqlserver.MysqlServerConnector;
+
+import java.util.Properties;
 
 public class ClusterjConnector implements StorageConnector<DBSession> {
 
@@ -220,7 +189,6 @@ public class ClusterjConnector implements StorageConnector<DBSession> {
 
                     } else if (e == InvalidateBlockDataAccess.class) {
                         MysqlServerConnector.truncateTable(InvalidatedBlockTableDef.TABLE_NAME);
-
                     } else if (e == ExcessReplicaDataAccess.class) {
                         MysqlServerConnector.truncateTable(ExcessReplicaTableDef.TABLE_NAME);
 
@@ -251,9 +219,9 @@ public class ClusterjConnector implements StorageConnector<DBSession> {
                         MysqlServerConnector.truncateTable(StorageIdMapTableDef.TABLE_NAME);
                     } else if (e == BlockLookUpDataAccess.class) {
                         MysqlServerConnector.truncateTable(BlockLookUpTableDef.TABLE_NAME);
-                    }else if (e == QuotaUpdateDataAccess.class) {
-            MysqlServerConnector.truncateTable(QuotaUpdateTableDef.TABLE_NAME);
-          }
+                    } else if (e == QuotaUpdateDataAccess.class) {
+                      MysqlServerConnector.truncateTable(QuotaUpdateTableDef.TABLE_NAME);
+                    }
                 }
                 MysqlServerConnector.truncateTable("path_memcached");
                 tx.commit();

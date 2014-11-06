@@ -13,11 +13,17 @@ import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.INodeIdentifier;
 import se.sics.hop.metadata.hdfs.dal.INodeDataAccess;
 import se.sics.hop.metadata.hdfs.entity.hdfs.HopINode;
+import se.sics.hop.metadata.hdfs.entity.hdfs.ProjectedINode;
 import se.sics.hop.metadata.hdfs.tabledef.INodeTableDef;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
 import se.sics.hop.metadata.ndb.mysqlserver.CountHelper;
+import se.sics.hop.metadata.ndb.mysqlserver.MysqlServerConnector;
 
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -132,7 +138,9 @@ public class INodeClusterj implements INodeTableDef, INodeDataAccess<HopINode> {
 
     void setSubtreeLockOwner(long leaderId);
   }
+
   private ClusterjConnector connector = ClusterjConnector.getInstance();
+  private MysqlServerConnector mysqlConnector = MysqlServerConnector.getInstance();
   private final static int NOT_FOUND_ROW = -1000;
   
   @Override
@@ -215,6 +223,40 @@ public class INodeClusterj implements INodeTableDef, INodeDataAccess<HopINode> {
     } catch (Exception e) {
       throw new StorageException(e);
     }
+  }
+
+  @Override
+  public List<ProjectedINode> findInodesForSubtreeOperationsWithReadLock(int parentId) throws StorageException {
+    final String query = String.format("SELECT %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s FROM %s WHERE %s=%d LOCK IN SHARE MODE",
+        ID, NAME, PARENT_ID, PERMISSION, HEADER, DIR, SYMLINK, QUOTA_ENABLED, UNDER_CONSTRUCTION,
+        SUBTREE_LOCKED, SUBTREE_LOCK_OWNER, TABLE_NAME, PARENT_ID, parentId);
+    ArrayList<ProjectedINode> resultList;
+    try {
+      Connection conn = mysqlConnector.obtainSession();
+      PreparedStatement s = conn.prepareStatement(query);
+      ResultSet result = s.executeQuery();
+      resultList = new ArrayList<ProjectedINode>();
+
+      while (result.next()) {
+        resultList.add(new ProjectedINode(
+            result.getInt(ID),
+            result.getInt(PARENT_ID),
+            result.getString(NAME),
+            result.getBytes(PERMISSION),
+            result.getLong(HEADER),
+            result.getString(SYMLINK) == null ? false : true,
+            result.getBoolean(DIR),
+            result.getBoolean(QUOTA_ENABLED),
+            result.getBoolean(UNDER_CONSTRUCTION),
+            result.getBoolean(SUBTREE_LOCKED),
+            result.getLong(SUBTREE_LOCK_OWNER)));
+      }
+    } catch (SQLException ex) {
+      throw new StorageException(ex);
+    } finally {
+      mysqlConnector.closeSession();
+    }
+    return resultList;
   }
 
   @Override
