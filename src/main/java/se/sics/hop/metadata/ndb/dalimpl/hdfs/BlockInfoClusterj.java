@@ -11,7 +11,9 @@ import com.mysql.clusterj.query.QueryBuilder;
 import com.mysql.clusterj.query.QueryDomainType;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import se.sics.hop.metadata.hdfs.dal.BlockInfoDataAccess;
 import se.sics.hop.metadata.hdfs.entity.hdfs.HopBlockInfo;
 import se.sics.hop.exception.StorageException;
@@ -233,7 +235,22 @@ public class BlockInfoClusterj implements BlockInfoTableDef, BlockInfoDataAccess
       throw new StorageException(e);
     }
   }
-
+  
+  @Override
+  public Set<Long> findByStorageIdOnlyIds(int storageId) throws StorageException {
+    try {
+      Session session = connector.obtainSession();
+      List<ReplicaClusterj.ReplicaDTO> replicas = ReplicaClusterj.getReplicas(session, storageId);
+      Set<Long> blks = new HashSet<Long>();
+      for (ReplicaClusterj.ReplicaDTO replica : replicas) {
+       blks.add(replica.getBlockId());
+      }
+      return blks;
+    } catch (Exception e) {
+      throw new StorageException(e);
+    }
+  }
+    
   @Override
   public List<HopBlockInfo> findByIds(long[] blockIds, int[] inodeIds) throws StorageException {
     try {
