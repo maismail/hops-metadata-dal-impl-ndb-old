@@ -103,7 +103,7 @@ public class EncodingStatusClusterj implements EncodingStatusTableDef, EncodingS
   @Override
   public void add(HopEncodingStatus status) throws StorageException {
     LOG.info("ADD " + status.toString());
-    Session session = clusterjConnector.obtainSession();
+    Session session = clusterjConnector.obtainSession().getSession();
     EncodingStatusDto dto = session.newInstance(EncodingStatusDto.class);
     copyState(status, dto);
     session.savePersistent(dto);
@@ -112,7 +112,7 @@ public class EncodingStatusClusterj implements EncodingStatusTableDef, EncodingS
   @Override
   public void update(HopEncodingStatus status) throws StorageException {
     LOG.info("UPDATE " + status.toString());
-    Session session = clusterjConnector.obtainSession();
+    Session session = clusterjConnector.obtainSession().getSession();
     EncodingStatusDto dto = session.newInstance(EncodingStatusDto.class);
     copyState(status, dto);
     session.updatePersistent(dto);
@@ -120,7 +120,7 @@ public class EncodingStatusClusterj implements EncodingStatusTableDef, EncodingS
 
   @Override
   public void delete(HopEncodingStatus status) throws StorageException {
-    Session session = clusterjConnector.obtainSession();
+    Session session = clusterjConnector.obtainSession().getSession();
     EncodingStatusDto dto = session.newInstance(EncodingStatusDto.class);
     copyState(status, dto);
     LOG.info("Delte " + status);
@@ -181,7 +181,7 @@ public class EncodingStatusClusterj implements EncodingStatusTableDef, EncodingS
   @Override
   public HopEncodingStatus findByInodeId(int inodeId) throws StorageException {
     try {
-      Session session = clusterjConnector.obtainSession();
+      Session session = clusterjConnector.obtainSession().getSession();
       EncodingStatusDto dto = session.find(EncodingStatusDto.class, inodeId);
       if (dto == null) {
         return null;
@@ -195,7 +195,7 @@ public class EncodingStatusClusterj implements EncodingStatusTableDef, EncodingS
   @Override
   public HopEncodingStatus findByParityInodeId(int inodeId) throws StorageException {
     try {
-      Session session = clusterjConnector.obtainSession();
+      Session session = clusterjConnector.obtainSession().getSession();
       QueryBuilder builder = session.getQueryBuilder();
       QueryDomainType<EncodingStatusDto> domain = builder.createQueryDefinition(EncodingStatusDto.class);
       domain.where(domain.get("parityInodeId").equal(domain.param(PARITY_INODE_ID)));
@@ -335,7 +335,7 @@ public class EncodingStatusClusterj implements EncodingStatusTableDef, EncodingS
   @Override
   public Collection<HopEncodingStatus> findRevoked() throws StorageException {
     try {
-      Session session = clusterjConnector.obtainSession();
+      Session session = clusterjConnector.obtainSession().getSession();
       QueryBuilder builder = session.getQueryBuilder();
       QueryDomainType<EncodingStatusDto> domain = builder.createQueryDefinition(EncodingStatusDto.class);
       domain.where(domain.get("revoked").equal(domain.param(REVOKED)));
