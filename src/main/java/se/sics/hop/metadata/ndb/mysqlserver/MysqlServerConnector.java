@@ -91,11 +91,19 @@ public class MysqlServerConnector implements StorageConnector<Connection> {
     }
   }
   
-  public static void truncateTable(boolean transactional, String tableName) throws StorageException, SQLException{
+  public static void truncateTable(boolean transactional, String tableName) throws StorageException, SQLException {
+    truncateTable(transactional, tableName, -1);
+  }
+
+  public static void truncateTable(String tableName, int limit) throws StorageException, SQLException {
+    truncateTable(true, tableName, -1);
+  }
+
+  public static void truncateTable(boolean transactional, String tableName, int limit) throws StorageException, SQLException{
     MysqlServerConnector connector = MysqlServerConnector.getInstance();
     try {
       Connection conn = connector.obtainSession();
-      PreparedStatement s = transactional ? conn.prepareStatement("delete from "+tableName) : conn.prepareStatement("truncate table "+tableName);
+      PreparedStatement s = transactional ? conn.prepareStatement("delete from "+tableName + (limit > 0 ? " limit " + limit : "") ) : conn.prepareStatement("truncate table "+tableName);
       s.executeUpdate();
     } finally {
       connector.closeSession();

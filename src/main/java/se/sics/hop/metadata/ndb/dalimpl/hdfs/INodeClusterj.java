@@ -15,7 +15,7 @@ import se.sics.hop.metadata.hdfs.dal.INodeDataAccess;
 import se.sics.hop.metadata.hdfs.entity.hdfs.HopINode;
 import se.sics.hop.metadata.hdfs.tabledef.INodeTableDef;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
-import se.sics.hop.metadata.ndb.mysqlserver.CountHelper;
+import se.sics.hop.metadata.ndb.mysqlserver.MySQLQueryHelper;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -31,7 +31,7 @@ public class INodeClusterj implements INodeTableDef, INodeDataAccess<HopINode> {
 
   @Override
   public int countAll() throws StorageException {
-    return CountHelper.countAll(TABLE_NAME);
+    return MySQLQueryHelper.countAll(TABLE_NAME);
   }
 
   @PersistenceCapable(table = TABLE_NAME)
@@ -249,15 +249,20 @@ public class INodeClusterj implements INodeTableDef, INodeDataAccess<HopINode> {
   }
   
   @Override
-  public List<INodeIdentifier> getAllINodeFiles() throws StorageException {
+  public List<INodeIdentifier> getAllINodeFiles(long startId, long endId) throws StorageException {
     try {
       Session session = connector.obtainSession();
       QueryBuilder qb = session.getQueryBuilder();
       QueryDomainType<InodeDTO> dobj = qb.createQueryDefinition(InodeDTO.class);
       Predicate pred = dobj.get("dir").equal(dobj.param("isDirParam"));
-      dobj.where(pred);
+      Predicate pred2 = dobj.get("id").between(dobj.param("startId"), dobj.param("endId"));
+      dobj.where(pred.and(pred2));
       Query<InodeDTO> query = session.createQuery(dobj);
       query.setParameter("isDirParam", false);
+      //FIXME: InodeId is integer
+      //startId is inclusive and endId exclusive
+      query.setParameter("startId", (int)startId);
+      query.setParameter("endId", (int)(endId-1));
       List<InodeDTO> dtos = query.getResultList();
       List<INodeIdentifier> res = new ArrayList<INodeIdentifier>();
       for(InodeDTO dto : dtos){
@@ -268,7 +273,33 @@ public class INodeClusterj implements INodeTableDef, INodeDataAccess<HopINode> {
       throw new StorageException(e);
     }
   }
-    
+  
+  
+  @Override
+  public boolean haveFilesWithIdsBetween(long startId, long endId) throws StorageException {
+    return MySQLQueryHelper.exists(TABLE_NAME, String.format("%s=0 and %s between %d and %d", DIR, ID, startId, (endId - 1)));
+  }
+  
+  @Override
+  public boolean haveFilesWithIdsGreaterThan(long id) throws StorageException {
+     return MySQLQueryHelper.exists(TABLE_NAME, String.format("%s=0 and %s>%d", DIR, ID, id));
+  }
+  
+  @Override
+  public long getMinFileId() throws StorageException {
+    return MySQLQueryHelper.minInt(TABLE_NAME, ID, String.format("%s=0", DIR));
+  }
+
+  @Override
+  public long getMaxFileId() throws StorageException {
+    return MySQLQueryHelper.maxInt(TABLE_NAME, ID, String.format("%s=0", DIR));
+  }
+
+  @Override
+  public int countAllFiles() throws StorageException {
+    return MySQLQueryHelper.countWithCriterion(TABLE_NAME, String.format("%s=0", DIR));
+  }
+  
   private List<HopINode> createInodeList(List<InodeDTO> list) throws IOException {
     List<HopINode> inodes = new ArrayList<HopINode>();
     for (InodeDTO persistable : list) {

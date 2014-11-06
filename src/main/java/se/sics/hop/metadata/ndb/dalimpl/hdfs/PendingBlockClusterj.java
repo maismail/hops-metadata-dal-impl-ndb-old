@@ -9,7 +9,6 @@ import com.mysql.clusterj.annotation.PrimaryKey;
 import com.mysql.clusterj.query.Predicate;
 import com.mysql.clusterj.query.PredicateOperand;
 import com.mysql.clusterj.query.QueryBuilder;
-import com.mysql.clusterj.query.QueryDefinition;
 import com.mysql.clusterj.query.QueryDomainType;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -18,7 +17,7 @@ import se.sics.hop.metadata.hdfs.dal.PendingBlockDataAccess;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.entity.hdfs.HopPendingBlockInfo;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
-import se.sics.hop.metadata.ndb.mysqlserver.CountHelper;
+import se.sics.hop.metadata.ndb.mysqlserver.MySQLQueryHelper;
 import se.sics.hop.metadata.hdfs.tabledef.PendingBlockTableDef;
 import static se.sics.hop.metadata.hdfs.tabledef.PendingBlockTableDef.INODE_ID;
 
@@ -30,7 +29,7 @@ public class PendingBlockClusterj implements PendingBlockTableDef, PendingBlockD
 
   @Override
   public int countValidPendingBlocks(long timeLimit) throws StorageException {
-    return CountHelper.countWithCriterion(TABLE_NAME, String.format("%s>%d", TIME_STAMP, timeLimit));
+    return MySQLQueryHelper.countWithCriterion(TABLE_NAME, String.format("%s>%d", TIME_STAMP, timeLimit));
   }
 
   @Override

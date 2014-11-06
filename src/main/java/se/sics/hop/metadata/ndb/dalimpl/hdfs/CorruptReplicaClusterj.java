@@ -16,7 +16,7 @@ import se.sics.hop.metadata.hdfs.entity.hop.HopCorruptReplica;
 import se.sics.hop.metadata.hdfs.dal.CorruptReplicaDataAccess;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
-import se.sics.hop.metadata.ndb.mysqlserver.CountHelper;
+import se.sics.hop.metadata.ndb.mysqlserver.MySQLQueryHelper;
 import se.sics.hop.metadata.hdfs.tabledef.CorruptReplicaTableDef;
 
 /**
@@ -51,12 +51,12 @@ public class CorruptReplicaClusterj implements CorruptReplicaTableDef, CorruptRe
 
   @Override
   public int countAll() throws StorageException {
-    return CountHelper.countAll(TABLE_NAME);
+    return MySQLQueryHelper.countAll(TABLE_NAME);
   }
 
   @Override
   public int countAllUniqueBlk() throws StorageException {
-    return CountHelper.countAllUnique(TABLE_NAME, BLOCK_ID);
+    return MySQLQueryHelper.countAllUnique(TABLE_NAME, BLOCK_ID);
   }
 
   @Override

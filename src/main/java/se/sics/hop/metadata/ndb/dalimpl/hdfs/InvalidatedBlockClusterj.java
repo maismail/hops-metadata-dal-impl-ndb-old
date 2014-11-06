@@ -17,9 +17,8 @@ import se.sics.hop.metadata.hdfs.entity.hop.HopInvalidatedBlock;
 import se.sics.hop.metadata.hdfs.dal.InvalidateBlockDataAccess;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
-import se.sics.hop.metadata.ndb.mysqlserver.CountHelper;
+import se.sics.hop.metadata.ndb.mysqlserver.MySQLQueryHelper;
 import se.sics.hop.metadata.hdfs.tabledef.InvalidatedBlockTableDef;
-import se.sics.hop.util.Slicer;
 
 /**
  *
@@ -59,7 +58,7 @@ public class InvalidatedBlockClusterj implements InvalidatedBlockTableDef, Inval
   
   @Override
   public int countAll() throws StorageException {
-    return CountHelper.countAll(TABLE_NAME);
+    return MySQLQueryHelper.countAll(TABLE_NAME);
   }
 
   @Override
@@ -161,24 +160,21 @@ public class InvalidatedBlockClusterj implements InvalidatedBlockTableDef, Inval
   @Override
   public List<HopInvalidatedBlock> findInvalidatedBlocksbyPKS(final long[] blockIds, final int[] inodesIds, final int[] storageIds) throws StorageException {
     try {
+      int currentTableSize = countAll();
+      if(currentTableSize == 0){
+        return new ArrayList<HopInvalidatedBlock>();
+      }else if(currentTableSize < inodesIds.length){
+        return findAllInvalidatedBlocks();
+      }
       final List<InvalidateBlocksDTO> invBlocks = new ArrayList<InvalidateBlocksDTO>();
-
-      Slicer.slice(blockIds.length, connector.getBatchSize(), new Slicer.OperationHandler() {
-        @Override
-        public void handle(int startIndex, int endIndex) throws Exception {
-          Session session = connector.obtainSession();
-          for (int i = startIndex; i < endIndex; i++) {
-            InvalidateBlocksDTO invTable = session.newInstance(InvalidateBlocksDTO.class, new Object[]{inodesIds[i], blockIds[i], storageIds[i]});
-            invTable.setGenerationStamp(NOT_FOUND_ROW);
-            invTable = session.load(invTable);
-            invBlocks.add(invTable);
-          }
-          session.flush();
-
-          session.currentTransaction().commit();
-          session.currentTransaction().begin();
-        }
-      });
+      Session session = connector.obtainSession();
+      for (int i = 0; i < blockIds.length; i++) {
+        InvalidateBlocksDTO invTable = session.newInstance(InvalidateBlocksDTO.class, new Object[]{inodesIds[i], blockIds[i], storageIds[i]});
+        invTable.setGenerationStamp(NOT_FOUND_ROW);
+        invTable = session.load(invTable);
+        invBlocks.add(invTable);
+      }
+      session.flush();
 
       return createList(invBlocks);
     } catch (Exception e) {

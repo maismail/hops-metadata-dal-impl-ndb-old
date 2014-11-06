@@ -1,7 +1,6 @@
 package se.sics.hop.metadata.ndb;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -24,6 +23,8 @@ import se.sics.hop.metadata.hdfs.dal.UnderReplicatedBlockDataAccess;
 import se.sics.hop.metadata.hdfs.dal.VariableDataAccess;
 import se.sics.hop.exception.StorageInitializtionException;
 import se.sics.hop.metadata.hdfs.dal.BlockLookUpDataAccess;
+import se.sics.hop.metadata.hdfs.dal.MisReplicatedRangeQueueDataAccess;
+import se.sics.hop.metadata.hdfs.dal.SafeBlocksDataAccess;
 import se.sics.hop.metadata.hdfs.dal.StorageIdMapDataAccess;
 import se.sics.hop.metadata.ndb.dalimpl.hdfs.BlockInfoClusterj;
 import se.sics.hop.metadata.ndb.dalimpl.hdfs.BlockLookUpClusterj;
@@ -35,9 +36,11 @@ import se.sics.hop.metadata.ndb.dalimpl.hdfs.InvalidatedBlockClusterj;
 import se.sics.hop.metadata.ndb.dalimpl.hdfs.LeaderClusterj;
 import se.sics.hop.metadata.ndb.dalimpl.hdfs.LeaseClusterj;
 import se.sics.hop.metadata.ndb.dalimpl.hdfs.LeasePathClusterj;
+import se.sics.hop.metadata.ndb.dalimpl.hdfs.MisReplicatedRangeQueueClusterj;
 import se.sics.hop.metadata.ndb.dalimpl.hdfs.PendingBlockClusterj;
 import se.sics.hop.metadata.ndb.dalimpl.hdfs.ReplicaClusterj;
 import se.sics.hop.metadata.ndb.dalimpl.hdfs.ReplicaUnderConstructionClusterj;
+import se.sics.hop.metadata.ndb.dalimpl.hdfs.SafeBlocksClusterj;
 import se.sics.hop.metadata.ndb.dalimpl.hdfs.StorageIdMapClusterj;
 import se.sics.hop.metadata.ndb.dalimpl.hdfs.UnderReplicatedBlockClusterj;
 import se.sics.hop.metadata.ndb.dalimpl.hdfs.VariableClusterj;
@@ -52,11 +55,8 @@ public class NdbStorageFactory implements DALStorageFactory {
   private Map<Class, EntityDataAccess> dataAccessMap = new HashMap<Class, EntityDataAccess>();
 
   @Override
-  public void setConfiguration(String configFile) throws StorageInitializtionException{
+  public void setConfiguration(Properties conf) throws StorageInitializtionException{
     try {
-      Properties conf = new Properties();
-      InputStream inStream = this.getClass().getClassLoader().getResourceAsStream(configFile);
-      conf.load(inStream);
       ClusterjConnector.getInstance().setConfiguration(conf);
       MysqlServerConnector.getInstance().setConfiguration(conf);
       initDataAccessMap();
@@ -82,6 +82,8 @@ public class NdbStorageFactory implements DALStorageFactory {
     dataAccessMap.put(VariableDataAccess.class, new VariableClusterj());
     dataAccessMap.put(StorageIdMapDataAccess.class, new StorageIdMapClusterj());
     dataAccessMap.put(BlockLookUpDataAccess.class, new BlockLookUpClusterj());
+    dataAccessMap.put(SafeBlocksDataAccess.class, new SafeBlocksClusterj());
+    dataAccessMap.put(MisReplicatedRangeQueueDataAccess.class, new MisReplicatedRangeQueueClusterj());
   }
 
   @Override

@@ -14,7 +14,6 @@ import se.sics.hop.metadata.hdfs.dal.BlockLookUpDataAccess;
 import se.sics.hop.metadata.hdfs.entity.hop.HopBlockLookUp;
 import se.sics.hop.metadata.hdfs.tabledef.BlockLookUpTableDef;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
-import se.sics.hop.util.Slicer;
 
 /**
  *
@@ -92,39 +91,31 @@ public class BlockLookUpClusterj implements BlockLookUpTableDef, BlockLookUpData
   protected static int[] readINodeIdsByBlockIds(final Session session, final long[] blockIds) throws Exception {
     final List<BlockLookUpDTO> bldtos = new ArrayList<BlockLookUpDTO>();
     final List<Integer> inodeIds = new ArrayList<Integer>();
+    for (int blk = 0; blk < blockIds.length; blk++) {
 
-    Slicer.slice(blockIds.length, ClusterjConnector.getInstance().getBatchSize(), new Slicer.OperationHandler() {
-      @Override
-      public void handle(int startIndex, int endIndex) throws Exception {
+      BlockLookUpDTO bldto = session.newInstance(BlockLookUpDTO.class, blockIds[blk]);
+      bldto.setINodeId(NOT_FOUND_ROW);
+      bldto = session.load(bldto);
+      bldtos.add(bldto);
+    }
+    session.flush();
 
-        for (int blk = startIndex; blk < endIndex; blk++) {
-
-          BlockLookUpDTO bldto = session.newInstance(BlockLookUpDTO.class, blockIds[blk]);
-          bldto.setINodeId(NOT_FOUND_ROW);
-          bldto = session.load(bldto);
-          bldtos.add(bldto);
+    for (int i = 0; i < bldtos.size(); i++) {
+      BlockLookUpClusterj.BlockLookUpDTO bld = bldtos.get(i);
+      if (bld.getINodeId() != NOT_FOUND_ROW) {
+        inodeIds.add(bld.getINodeId());
+      } else {
+        bld = session.find(BlockLookUpDTO.class, bld.getBlockId());
+        if (bld != null) {
+          //[M] BUG:
+          //ClusterjConnector.LOG.error("xxx: Inode doesn't exists retries for " + bld.getBlockId() + " inodeId " + bld.getINodeId() + " at index " + i);
+          inodeIds.add(bld.getINodeId());
+        } else {
+          inodeIds.add(NOT_FOUND_ROW);
         }
-        session.flush();
-
-        session.currentTransaction().commit();
-        session.currentTransaction().begin();
-
-        for (int i = 0; i < bldtos.size(); i++) {
-          BlockLookUpClusterj.BlockLookUpDTO bld = bldtos.get(i);
-          if (bld.getINodeId() != NOT_FOUND_ROW) {
-            inodeIds.add(bld.getINodeId());
-          } else {
-            bld = session.find(BlockLookUpDTO.class, bld.getBlockId());
-            if (bld != null) {
-              //[M] BUG:
-              inodeIds.add(bld.getINodeId());
-            }
-
-          }
-        }
-        bldtos.clear();
       }
-    });
+    }
+    bldtos.clear();
     return Ints.toArray(inodeIds);
   }
   

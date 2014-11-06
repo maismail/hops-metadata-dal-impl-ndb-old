@@ -20,8 +20,7 @@ import se.sics.hop.metadata.hdfs.dal.ReplicaDataAccess;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
 import se.sics.hop.metadata.hdfs.tabledef.ReplicaTableDef;
-import se.sics.hop.metadata.ndb.mysqlserver.CountHelper;
-import se.sics.hop.util.Slicer;
+import se.sics.hop.metadata.ndb.mysqlserver.MySQLQueryHelper;
 
 /**
  *
@@ -109,25 +108,30 @@ public class ReplicaClusterj implements ReplicaTableDef, ReplicaDataAccess<HopIn
   }
   
   @Override
+  public List<HopIndexedReplica> findReplicasByStorageId(int storageId) throws StorageException {
+   try {
+      Session session = connector.obtainSession();
+      long t = System.currentTimeMillis();
+      List<ReplicaDTO> res = getReplicas(session, storageId);
+      //ClusterjConnector.LOG.error("xxxa: got replicas " + res.size() + " in " + (System.currentTimeMillis() - t));
+      return createReplicaList(res);
+    } catch (Exception e) {
+      throw new StorageException(e);
+    }
+  }
+    
+  @Override
   public List<HopIndexedReplica> findReplicasByPKS(final long[] blockIds, final int[] inodeIds, final int[] sids) throws StorageException {
     try {
       final List<ReplicaDTO> dtos = new ArrayList<ReplicaDTO>();
-      Slicer.slice(blockIds.length, connector.getBatchSize(), new Slicer.OperationHandler() {
-        @Override
-        public void handle(int startIndex, int endIndex) throws Exception {
-          Session session = connector.obtainSession();
-          for (int i = startIndex; i < endIndex; i++) {
-            ReplicaDTO newInstance = session.newInstance(ReplicaDTO.class, new Object[]{inodeIds[i], blockIds[i], sids[i]});
-            newInstance.setIndex(NOT_FOUND_ROW);
-            newInstance = session.load(newInstance);
-            dtos.add(newInstance);
-          }
-          session.flush();
-          
-          session.currentTransaction().commit();
-          session.currentTransaction().begin();
-        }
-      });
+      Session session = connector.obtainSession();
+      for (int i = 0; i < blockIds.length; i++) {
+        ReplicaDTO newInstance = session.newInstance(ReplicaDTO.class, new Object[]{inodeIds[i], blockIds[i], sids[i]});
+        newInstance.setIndex(NOT_FOUND_ROW);
+        newInstance = session.load(newInstance);
+        dtos.add(newInstance);
+      }
+      session.flush();
 
       return createReplicaList(dtos);
     } catch (Exception e) {
@@ -168,9 +172,20 @@ public class ReplicaClusterj implements ReplicaTableDef, ReplicaDataAccess<HopIn
 
   @Override
   public int countAllReplicasForStorageId(int sid) throws StorageException {
-    return CountHelper.countWithCriterion(TABLE_NAME, String.format("%s=%d", STORAGE_ID, sid));
+    return MySQLQueryHelper.countWithCriterion(TABLE_NAME, String.format("%s=%d", STORAGE_ID, sid));
   }
 
+  
+  protected static List<ReplicaClusterj.ReplicaDTO> getReplicas(Session session, int storageId) {
+    QueryBuilder qb = session.getQueryBuilder();
+    QueryDomainType<ReplicaClusterj.ReplicaDTO> dobj = qb.createQueryDefinition(ReplicaClusterj.ReplicaDTO.class);
+    dobj.where(dobj.get("storageId").equal(dobj.param("param")));
+    Query<ReplicaClusterj.ReplicaDTO> query = session.createQuery(dobj);
+    query.setParameter("param", storageId);
+    return query.getResultList();
+  }
+
+    
   private List<HopIndexedReplica> createReplicaList(List<ReplicaDTO> triplets) {
     List<HopIndexedReplica> replicas = new ArrayList<HopIndexedReplica>(triplets.size());
     for (ReplicaDTO t : triplets) {
