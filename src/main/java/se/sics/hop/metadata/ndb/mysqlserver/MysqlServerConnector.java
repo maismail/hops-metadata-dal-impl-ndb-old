@@ -1,17 +1,16 @@
 package se.sics.hop.metadata.ndb.mysqlserver;
 
 import com.mysql.clusterj.Constants;
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
+import se.sics.hop.StorageConnector;
+import se.sics.hop.exception.StorageException;
+import se.sics.hop.metadata.hdfs.dal.EntityDataAccess;
+
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Properties;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import se.sics.hop.StorageConnector;
-import se.sics.hop.metadata.hdfs.dal.EntityDataAccess;
-import se.sics.hop.exception.StorageException;
 
 /**
  * This class presents a singleton connector to Mysql Server.
@@ -22,16 +21,8 @@ import se.sics.hop.exception.StorageException;
 public class MysqlServerConnector implements StorageConnector<Connection> {
 
   private static MysqlServerConnector instance;
-  private Log log;
-  private String protocol;
-  private String user;
-  private String password;
-  private ThreadLocal<Connection> connectionPool = new ThreadLocal<Connection>();
-  public static final String DRIVER = "com.mysql.jdbc.Driver";
-
-  private MysqlServerConnector() {
-    log = LogFactory.getLog(MysqlServerConnector.class);
-  }
+  private static HikariDataSource connectionPool;
+  private ThreadLocal<Connection> connection = new ThreadLocal<Connection>();
 
   public static MysqlServerConnector getInstance(){
     if(instance == null){
@@ -42,49 +33,50 @@ public class MysqlServerConnector implements StorageConnector<Connection> {
   
   @Override
   public void setConfiguration(Properties conf) throws StorageException {
-    this.protocol = conf.getProperty(Constants.PROPERTY_JDBC_URL);
-    this.user = conf.getProperty(Constants.PROPERTY_JDBC_USERNAME);
-    this.password = conf.getProperty(Constants.PROPERTY_JDBC_PASSWORD);
-    loadDriver();
+    initializeConnectionPool(conf);
   }
 
-  private void loadDriver() throws StorageException {
-    try {
-      Class.forName(DRIVER).newInstance();
-      log.info("Loaded Mysql driver.");
-    } catch (ClassNotFoundException cnfe) {
-      log.error("\nUnable to load the JDBC driver " + DRIVER, cnfe);
-      throw new StorageException(cnfe);
-    } catch (InstantiationException ie) {
-      log.error("\nUnable to instantiate the JDBC driver " + DRIVER, ie);
-      throw new StorageException(ie);
-    } catch (IllegalAccessException iae) {
-      log.error("\nNot allowed to access the JDBC driver " + DRIVER, iae);
-      throw new StorageException(iae);
-    }
+  private void initializeConnectionPool(Properties conf) {
+    HikariConfig config = new HikariConfig();
+    config.setMaximumPoolSize(Integer.valueOf(
+        conf.getProperty(se.sics.hop.metadata.ndb.mysqlserver.Constants.PROPERTY_MYSQL_CONNECTION_POOL_SIZE)));
+    config.setDataSourceClassName(
+        conf.getProperty(se.sics.hop.metadata.ndb.mysqlserver.Constants.PROPERTY_MYSQL_DATA_SOURCE_CLASS_NAME));
+    config.addDataSourceProperty("serverName",
+        conf.getProperty(se.sics.hop.metadata.ndb.mysqlserver.Constants.PROPERTY_MYSQL_HOST));
+    config.addDataSourceProperty("port",
+        conf.getProperty(se.sics.hop.metadata.ndb.mysqlserver.Constants.PROPERTY_MYSQL_PORT));
+    config.addDataSourceProperty("databaseName",
+        conf.getProperty(Constants.PROPERTY_CLUSTER_DATABASE));
+    config.addDataSourceProperty("user",
+        conf.getProperty(se.sics.hop.metadata.ndb.mysqlserver.Constants.PROPERTY_MYSQL_USERNAME));
+    config.addDataSourceProperty("password",
+        conf.getProperty(se.sics.hop.metadata.ndb.mysqlserver.Constants.PROPERTY_MYSQL_PASSWORD));
+
+    connectionPool = new HikariDataSource(config);
   }
 
   @Override
   public Connection obtainSession() throws StorageException {
-    Connection conn = connectionPool.get();
+    Connection conn = connection.get();
     if (conn == null) {
       try {
-        conn = DriverManager.getConnection(protocol, user, password);
-        connectionPool.set(conn);
+        conn = connectionPool.getConnection();
+        connection.set(conn);
       } catch (SQLException ex) {
         throw new StorageException(ex);
       }
     }
     return conn;
   }
-  
+
   public void closeSession() throws StorageException
   {
-    Connection conn = connectionPool.get();
+    Connection conn = connection.get();
     if (conn != null) {
       try {
         conn.close();
-        connectionPool.remove();
+        connection.remove();
       } catch (SQLException ex) {
         throw new StorageException(ex);
       }

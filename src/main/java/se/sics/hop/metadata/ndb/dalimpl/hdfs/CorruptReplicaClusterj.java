@@ -1,8 +1,9 @@
 package se.sics.hop.metadata.ndb.dalimpl.hdfs;
 
 import com.mysql.clusterj.Query;
-import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
+import com.mysql.clusterj.annotation.Index;
+import com.mysql.clusterj.annotation.PartitionKey;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
 import com.mysql.clusterj.query.Predicate;
@@ -17,6 +18,7 @@ import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
 import se.sics.hop.metadata.ndb.mysqlserver.CountHelper;
 import se.sics.hop.metadata.hdfs.tabledef.CorruptReplicaTableDef;
+import se.sics.hop.metadata.ndb.DBSession;
 
 /**
  *
@@ -26,6 +28,8 @@ public class CorruptReplicaClusterj implements CorruptReplicaTableDef, CorruptRe
 
 
   @PersistenceCapable(table = TABLE_NAME)
+  @PartitionKey(column=INODE_ID)
+  @Index(name="timestamp")
   public interface CorruptReplicaDTO {
     @PrimaryKey
     @Column(name = INODE_ID)
@@ -60,34 +64,34 @@ public class CorruptReplicaClusterj implements CorruptReplicaTableDef, CorruptRe
 
   @Override
   public void prepare(Collection<HopCorruptReplica> removed, Collection<HopCorruptReplica> newed, Collection<HopCorruptReplica> modified) throws StorageException {
-    Session session = connector.obtainSession();
+    DBSession dbSession = connector.obtainSession();
     List<CorruptReplicaDTO> changes = new ArrayList<CorruptReplicaDTO>();
     List<CorruptReplicaDTO> deletions = new ArrayList<CorruptReplicaDTO>();
     for (HopCorruptReplica corruptReplica : removed) {
-      CorruptReplicaDTO newInstance = session.newInstance(CorruptReplicaDTO.class);
+      CorruptReplicaDTO newInstance = dbSession.getSession().newInstance(CorruptReplicaDTO.class);
       createPersistable(corruptReplica, newInstance);
       deletions.add(newInstance);
     }
 
     for (HopCorruptReplica corruptReplica : newed) {
-      CorruptReplicaDTO newInstance = session.newInstance(CorruptReplicaDTO.class);
+      CorruptReplicaDTO newInstance = dbSession.getSession().newInstance(CorruptReplicaDTO.class);
       createPersistable(corruptReplica, newInstance);
       changes.add(newInstance);
     }
-    session.deletePersistentAll(deletions);
-    session.savePersistentAll(changes);
+    dbSession.getSession().deletePersistentAll(deletions);
+    dbSession.getSession().savePersistentAll(changes);
   }
 
   @Override
   public HopCorruptReplica findByPk(long blockId, int storageId, int inodeId) throws StorageException {
     try {
-      Session session = connector.obtainSession();
+      DBSession dbSession = connector.obtainSession();
       Object[] keys = new Object[2];
       keys[0] = inodeId;
       keys[1] = blockId;
       keys[2] = storageId;
       
-      CorruptReplicaDTO corruptReplicaTable = session.find(CorruptReplicaDTO.class, keys);
+      CorruptReplicaDTO corruptReplicaTable = dbSession.getSession().find(CorruptReplicaDTO.class, keys);
       if (corruptReplicaTable != null) {
         return createReplica(corruptReplicaTable);
       } else {
@@ -101,10 +105,10 @@ public class CorruptReplicaClusterj implements CorruptReplicaTableDef, CorruptRe
   @Override
   public List<HopCorruptReplica> findAll() throws StorageException {
     try {
-      Session session = connector.obtainSession();
-      QueryBuilder qb = session.getQueryBuilder();
+      DBSession dbSession= connector.obtainSession();
+      QueryBuilder qb = dbSession.getSession().getQueryBuilder();
       QueryDomainType<CorruptReplicaDTO> dobj = qb.createQueryDefinition(CorruptReplicaDTO.class);
-      Query<CorruptReplicaDTO> query = session.createQuery(dobj);
+      Query<CorruptReplicaDTO> query = dbSession.getSession().createQuery(dobj);
       query.setOrdering(Query.Ordering.ASCENDING, "timestamp");
       List<CorruptReplicaDTO> ibts = query.getResultList();
       return createCorruptReplicaList(ibts);
@@ -116,13 +120,13 @@ public class CorruptReplicaClusterj implements CorruptReplicaTableDef, CorruptRe
   @Override
   public List<HopCorruptReplica> findByBlockId(long blockId, int inodeId) throws StorageException {
     try {
-      Session session = connector.obtainSession();
-      QueryBuilder qb = session.getQueryBuilder();
+      DBSession dbSession = connector.obtainSession();
+      QueryBuilder qb = dbSession.getSession().getQueryBuilder();
       QueryDomainType<CorruptReplicaDTO> dobj = qb.createQueryDefinition(CorruptReplicaDTO.class);
       Predicate pred1 = dobj.get("blockId").equal(dobj.param("blockId"));
       Predicate pred2 = dobj.get("iNodeId").equal(dobj.param("iNodeIdParam"));
       dobj.where(pred1.and(pred2));
-      Query<CorruptReplicaDTO> query = session.createQuery(dobj);
+      Query<CorruptReplicaDTO> query = dbSession.getSession().createQuery(dobj);
       query.setParameter("blockId", blockId);
       query.setParameter("iNodeIdParam", inodeId);
       List<CorruptReplicaDTO> creplicas = query.getResultList();
@@ -135,12 +139,12 @@ public class CorruptReplicaClusterj implements CorruptReplicaTableDef, CorruptRe
     @Override
   public List<HopCorruptReplica> findByINodeId(int inodeId) throws StorageException {
     try {
-      Session session = connector.obtainSession();
-      QueryBuilder qb = session.getQueryBuilder();
+      DBSession dbSession = connector.obtainSession();
+      QueryBuilder qb = dbSession.getSession().getQueryBuilder();
       QueryDomainType<CorruptReplicaDTO> dobj = qb.createQueryDefinition(CorruptReplicaDTO.class);
       Predicate pred1 = dobj.get("iNodeId").equal(dobj.param("iNodeIdParam"));
       dobj.where(pred1);
-      Query<CorruptReplicaDTO> query = session.createQuery(dobj);
+      Query<CorruptReplicaDTO> query = dbSession.getSession().createQuery(dobj);
       query.setParameter("iNodeIdParam", inodeId);
       return createCorruptReplicaList(query.getResultList());
     } catch (Exception e) {
