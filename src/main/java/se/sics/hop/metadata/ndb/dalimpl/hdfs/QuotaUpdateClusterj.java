@@ -1,7 +1,6 @@
 package se.sics.hop.metadata.ndb.dalimpl.hdfs;
 
 import com.mysql.clusterj.Query;
-import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
@@ -22,6 +21,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import se.sics.hop.metadata.ndb.DBSession;
 
 public class QuotaUpdateClusterj implements QuotaUpdateTableDef, QuotaUpdateDataAccess<QuotaUpdate> {
 
@@ -56,24 +56,24 @@ public class QuotaUpdateClusterj implements QuotaUpdateTableDef, QuotaUpdateData
 
   @Override
   public void prepare(Collection<QuotaUpdate> added, Collection<QuotaUpdate> removed) throws StorageException {
-    Session session = connector.obtainSession();
+    DBSession dbSession = connector.obtainSession();
     try {
       List<QuotaUpdateDTO> changes = new ArrayList<QuotaUpdateDTO>();
       List<QuotaUpdateDTO> deletions = new ArrayList<QuotaUpdateDTO>();
       if (removed != null) {
         for (QuotaUpdate update : removed) {
-          QuotaUpdateDTO persistable = createPersistable(update, session);
+          QuotaUpdateDTO persistable = createPersistable(update, dbSession);
           deletions.add(persistable);
         }
       }
       if (added != null) {
         for (QuotaUpdate update : added) {
-          QuotaUpdateDTO persistable = createPersistable(update, session);
+          QuotaUpdateDTO persistable = createPersistable(update, dbSession);
           changes.add(persistable);
         }
       }
-      session.deletePersistentAll(deletions);
-      session.savePersistentAll(changes);
+      dbSession.getSession().deletePersistentAll(deletions);
+      dbSession.getSession().savePersistentAll(changes);
     } catch (Exception e) {
       throw new StorageException(e);
     }
@@ -103,8 +103,8 @@ public class QuotaUpdateClusterj implements QuotaUpdateTableDef, QuotaUpdateData
     return resultList;
   }
 
-  private QuotaUpdateDTO createPersistable(QuotaUpdate update, Session session) {
-    QuotaUpdateDTO dto = session.newInstance(QuotaUpdateDTO.class);
+  private QuotaUpdateDTO createPersistable(QuotaUpdate update, DBSession dbSession) {
+    QuotaUpdateDTO dto = dbSession.getSession().newInstance(QuotaUpdateDTO.class);
     dto.setId(update.getId());
     dto.setInodeId(update.getInodeId());
     dto.setNamespaceDelta(update.getNamespaceDelta());
@@ -125,13 +125,13 @@ public class QuotaUpdateClusterj implements QuotaUpdateTableDef, QuotaUpdateData
   public List<QuotaUpdate> findByInodeId(int inodeId) throws StorageException {
 
     try {
-      Session session = connector.obtainSession();
+      DBSession dbSession = connector.obtainSession();
 
-      QueryBuilder qb = session.getQueryBuilder();
+      QueryBuilder qb = dbSession.getSession().getQueryBuilder();
       QueryDomainType<QuotaUpdateDTO> dobj = qb.createQueryDefinition(QuotaUpdateDTO.class);
       Predicate pred1 = dobj.get("inodeId").equal(dobj.param(INODE_ID_PARAM));
       dobj.where(pred1);
-      Query<QuotaUpdateDTO> query = session.createQuery(dobj);
+      Query<QuotaUpdateDTO> query = dbSession.getSession().createQuery(dobj);
       query.setParameter(INODE_ID_PARAM, inodeId);
 
       List<QuotaUpdateDTO> results = query.getResultList();
