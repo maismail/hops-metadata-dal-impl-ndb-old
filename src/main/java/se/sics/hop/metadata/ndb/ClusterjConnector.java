@@ -18,7 +18,6 @@ import se.sics.hop.metadata.hdfs.dal.ExcessReplicaDataAccess;
 import se.sics.hop.metadata.hdfs.dal.INodeAttributesDataAccess;
 import se.sics.hop.metadata.hdfs.dal.INodeDataAccess;
 import se.sics.hop.metadata.hdfs.dal.InvalidateBlockDataAccess;
-import se.sics.hop.metadata.hdfs.dal.LeaderDataAccess;
 import se.sics.hop.metadata.hdfs.dal.LeaseDataAccess;
 import se.sics.hop.metadata.hdfs.dal.LeasePathDataAccess;
 import se.sics.hop.metadata.hdfs.dal.PendingBlockDataAccess;
@@ -41,7 +40,6 @@ import se.sics.hop.metadata.hdfs.tabledef.HdfsLeaderTableDef;
 import se.sics.hop.metadata.hdfs.tabledef.INodeAttributesTableDef;
 import se.sics.hop.metadata.hdfs.tabledef.INodeTableDef;
 import se.sics.hop.metadata.hdfs.tabledef.InvalidatedBlockTableDef;
-import se.sics.hop.metadata.hdfs.tabledef.LeaderTableDef;
 import se.sics.hop.metadata.hdfs.tabledef.LeasePathTableDef;
 import se.sics.hop.metadata.hdfs.tabledef.LeaseTableDef;
 import se.sics.hop.metadata.hdfs.tabledef.PendingBlockTableDef;
@@ -58,7 +56,6 @@ import se.sics.hop.metadata.ndb.dalimpl.hdfs.HdfsLeaderClusterj;
 import se.sics.hop.metadata.ndb.dalimpl.hdfs.INodeAttributesClusterj;
 import se.sics.hop.metadata.ndb.dalimpl.hdfs.INodeClusterj;
 import se.sics.hop.metadata.ndb.dalimpl.hdfs.InvalidatedBlockClusterj;
-import se.sics.hop.metadata.ndb.dalimpl.hdfs.LeaderClusterj;
 import se.sics.hop.metadata.ndb.dalimpl.hdfs.LeaseClusterj;
 import se.sics.hop.metadata.ndb.dalimpl.hdfs.LeasePathClusterj;
 import se.sics.hop.metadata.ndb.dalimpl.hdfs.PendingBlockClusterj;
@@ -426,7 +423,7 @@ public class ClusterjConnector implements StorageConnector<Session> {
 
           }
         }
-        MysqlServerConnector.truncateTable("path_memcached");
+//        MysqlServerConnector.truncateTable("path_memcached");
         tx.commit();
         session.flush();
         return true;
@@ -504,9 +501,9 @@ public class ClusterjConnector implements StorageConnector<Session> {
     } else if (className == LeasePathDataAccess.class) {
       cls = LeasePathClusterj.LeasePathsDTO.class;
     } else if (className == HdfsLeaderDataAccess.class) {
-      cls = HdfsLeaderClusterj.LeaderDTO.class;
+      cls = HdfsLeaderClusterj.HdfsLeaderDTO.class;
     } else if (className == YarnLeaderDataAccess.class) {
-      cls = YarnLeaderClusterj.LeaderDTO.class;
+      cls = YarnLeaderClusterj.YarnLeaderDTO.class;
     } else if (className == ReplicaDataAccess.class) {
       cls = ReplicaClusterj.ReplicaDTO.class;
     } else if (className == CorruptReplicaDataAccess.class) {
