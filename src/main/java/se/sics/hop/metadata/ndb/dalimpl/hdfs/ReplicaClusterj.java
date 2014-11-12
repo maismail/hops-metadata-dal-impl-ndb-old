@@ -96,12 +96,12 @@ public class ReplicaClusterj implements ReplicaTableDef, ReplicaDataAccess<HopIn
   @Override
   public List<HopIndexedReplica> findReplicasByINodeIds(int[] inodeIds) throws StorageException {
      try {
-      Session session = connector.obtainSession();
-      QueryBuilder qb = session.getQueryBuilder();
+      DBSession dbSession = connector.obtainSession();
+      QueryBuilder qb = dbSession.getSession().getQueryBuilder();
       QueryDomainType<ReplicaDTO> dobj = qb.createQueryDefinition(ReplicaDTO.class);
       Predicate pred1 = dobj.get("iNodeId").in(dobj.param("iNodeIdParam"));
       dobj.where(pred1);
-      Query<ReplicaDTO> query = session.createQuery(dobj);
+      Query<ReplicaDTO> query = dbSession.getSession().createQuery(dobj);
       query.setParameter("iNodeIdParam", Ints.asList(inodeIds));
       return createReplicaList(query.getResultList());
     } catch (Exception e) {
@@ -112,9 +112,8 @@ public class ReplicaClusterj implements ReplicaTableDef, ReplicaDataAccess<HopIn
   @Override
   public List<HopIndexedReplica> findReplicasByStorageId(int storageId) throws StorageException {
    try {
-      Session session = connector.obtainSession();
-      long t = System.currentTimeMillis();
-      List<ReplicaDTO> res = getReplicas(session, storageId);
+      DBSession dbSession = connector.obtainSession();
+      List<ReplicaDTO> res = getReplicas(dbSession, storageId);
       //ClusterjConnector.LOG.error("xxxa: got replicas " + res.size() + " in " + (System.currentTimeMillis() - t));
       return createReplicaList(res);
     } catch (Exception e) {
@@ -178,11 +177,10 @@ public class ReplicaClusterj implements ReplicaTableDef, ReplicaDataAccess<HopIn
 
   
   protected static List<ReplicaClusterj.ReplicaDTO> getReplicas(DBSession dbSession, int storageId) {
-    Session session = dbSession.getSession();
-    QueryBuilder qb = session.getQueryBuilder();
+    QueryBuilder qb = dbSession.getSession().getQueryBuilder();
     QueryDomainType<ReplicaClusterj.ReplicaDTO> dobj = qb.createQueryDefinition(ReplicaClusterj.ReplicaDTO.class);
     dobj.where(dobj.get("storageId").equal(dobj.param("param")));
-    Query<ReplicaClusterj.ReplicaDTO> query = session.createQuery(dobj);
+    Query<ReplicaClusterj.ReplicaDTO> query = dbSession.getSession().createQuery(dobj);
     query.setParameter("param", storageId);
     return query.getResultList();
   }

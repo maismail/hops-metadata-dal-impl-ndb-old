@@ -178,12 +178,12 @@ public class BlockInfoClusterj implements BlockInfoTableDef, BlockInfoDataAccess
   @Override
   public List<HopBlockInfo> findByInodeIds(int[] inodeIds) throws StorageException {
      try {
-      Session session = connector.obtainSession();
-      QueryBuilder qb = session.getQueryBuilder();
+      DBSession dbSession = connector.obtainSession();
+      QueryBuilder qb = dbSession.getSession().getQueryBuilder();
       QueryDomainType<BlockInfoClusterj.BlockInfoDTO> dobj = qb.createQueryDefinition(BlockInfoClusterj.BlockInfoDTO.class);
       Predicate pred1 = dobj.get("iNodeId").in(dobj.param("iNodeParam"));
       dobj.where(pred1);
-      Query<BlockInfoClusterj.BlockInfoDTO> query = session.createQuery(dobj);
+      Query<BlockInfoClusterj.BlockInfoDTO> query = dbSession.getSession().createQuery(dobj);
       query.setParameter("iNodeParam", Ints.asList(inodeIds));
       return createBlockInfoList(query.getResultList());
     } catch (Exception e) {
@@ -268,16 +268,15 @@ public class BlockInfoClusterj implements BlockInfoTableDef, BlockInfoDataAccess
   }
   
   private List<HopBlockInfo> readBlockInfoBatch(final DBSession dbSession, final int[] inodeIds, final long[] blockIds) throws Exception {
-    Session session = dbSession.getSession();
     final List<BlockInfoClusterj.BlockInfoDTO> bdtos = new ArrayList<BlockInfoDTO>();
         for (int i = 0; i < blockIds.length; i++) {
           Object[] pk = new Object[]{inodeIds[i], blockIds[i]};
-          BlockInfoClusterj.BlockInfoDTO bdto = session.newInstance(BlockInfoClusterj.BlockInfoDTO.class, pk);
+          BlockInfoClusterj.BlockInfoDTO bdto = dbSession.getSession().newInstance(BlockInfoClusterj.BlockInfoDTO.class, pk);
           bdto.setBlockIndex(NOT_FOUND_ROW);
-          bdto = session.load(bdto);
+          bdto = dbSession.getSession().load(bdto);
           bdtos.add(bdto);
         }
-        session.flush();
+        dbSession.getSession().flush();
     return createBlockInfoList(bdtos);
   }
   

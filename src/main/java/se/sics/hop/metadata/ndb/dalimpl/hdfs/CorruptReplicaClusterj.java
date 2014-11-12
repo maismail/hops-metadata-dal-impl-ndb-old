@@ -137,7 +137,7 @@ public class CorruptReplicaClusterj implements CorruptReplicaTableDef, CorruptRe
     }
   }
   
-    @Override
+  @Override
   public List<HopCorruptReplica> findByINodeId(int inodeId) throws StorageException {
     try {
       DBSession dbSession = connector.obtainSession();
@@ -156,12 +156,12 @@ public class CorruptReplicaClusterj implements CorruptReplicaTableDef, CorruptRe
   @Override
   public List<HopCorruptReplica> findByINodeIds(int[] inodeIds) throws StorageException {
     try {
-      Session session = connector.obtainSession();
-      QueryBuilder qb = session.getQueryBuilder();
+      DBSession dbSession = connector.obtainSession();
+      QueryBuilder qb = dbSession.getSession().getQueryBuilder();
       QueryDomainType<CorruptReplicaDTO> dobj = qb.createQueryDefinition(CorruptReplicaDTO.class);
       Predicate pred1 = dobj.get("iNodeId").in(dobj.param("iNodeIdParam"));
       dobj.where(pred1);
-      Query<CorruptReplicaDTO> query = session.createQuery(dobj);
+      Query<CorruptReplicaDTO> query = dbSession.getSession().createQuery(dobj);
       query.setParameter("iNodeIdParam", Ints.asList(inodeIds));
       return createCorruptReplicaList(query.getResultList());
     } catch (Exception e) {

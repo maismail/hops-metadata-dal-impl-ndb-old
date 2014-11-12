@@ -46,9 +46,7 @@ public class PendingBlockClusterj implements PendingBlockTableDef, PendingBlockD
 
       Query<PendingBlockDTO> query = session.getSession().createQuery(qdt);
       query.setParameter("idParam", inodeId);
-     
-      List<PendingBlockDTO> results = query.getResultList();
- 
+      
       return createList(query.getResultList());
     } catch (Exception e) {
       throw new StorageException(e);
@@ -58,15 +56,15 @@ public class PendingBlockClusterj implements PendingBlockTableDef, PendingBlockD
   @Override
   public List<HopPendingBlockInfo> findByINodeIds(int[] inodeIds) throws StorageException {
     try {
-      Session session = connector.obtainSession();
+      DBSession session = connector.obtainSession();
 
-      QueryBuilder qb = session.getQueryBuilder();
+      QueryBuilder qb = session.getSession().getQueryBuilder();
       QueryDomainType<PendingBlockDTO> qdt = qb.createQueryDefinition(PendingBlockDTO.class);
 
       Predicate pred1 = qdt.get("iNodeId").in(qdt.param("idParam"));
       qdt.where(pred1);
 
-      Query<PendingBlockDTO> query = session.createQuery(qdt);
+      Query<PendingBlockDTO> query = session.getSession().createQuery(qdt);
       query.setParameter("idParam", Ints.asList(inodeIds));
 
       return createList(query.getResultList());

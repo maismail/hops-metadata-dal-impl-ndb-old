@@ -132,12 +132,12 @@ public class ExcessReplicaClusterj implements ExcessReplicaTableDef, ExcessRepli
   @Override
   public List<HopExcessReplica> findExcessReplicaByINodeIds(int[] inodeIds) throws StorageException {
     try {
-      Session session = connector.obtainSession();
-      QueryBuilder qb = session.getQueryBuilder();
+      DBSession dbSession = connector.obtainSession();
+      QueryBuilder qb = dbSession.getSession().getQueryBuilder();
       QueryDomainType<ExcessReplicaDTO> qdt = qb.createQueryDefinition(ExcessReplicaDTO.class);
       Predicate pred1 = qdt.get("iNodeId").in(qdt.param("iNodeIdParam"));
       qdt.where(pred1);
-      Query<ExcessReplicaDTO> query = session.createQuery(qdt);
+      Query<ExcessReplicaDTO> query = dbSession.getSession().createQuery(qdt);
       query.setParameter("iNodeIdParam", Ints.asList(inodeIds));
       return createList(query.getResultList());
     } catch (Exception e) {

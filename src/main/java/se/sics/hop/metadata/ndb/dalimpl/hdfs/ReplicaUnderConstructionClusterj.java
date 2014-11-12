@@ -2,6 +2,7 @@ package se.sics.hop.metadata.ndb.dalimpl.hdfs;
 
 import com.google.common.primitives.Ints;
 import com.mysql.clusterj.Query;
+import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PartitionKey;
 import com.mysql.clusterj.annotation.PersistenceCapable;
@@ -112,12 +113,12 @@ public class ReplicaUnderConstructionClusterj implements ReplicaUnderConstructio
   @Override
   public List<HopReplicaUnderConstruction> findReplicaUnderConstructionByINodeIds(int[] inodeIds) throws StorageException {
     try {
-      Session session = connector.obtainSession();
-      QueryBuilder qb = session.getQueryBuilder();
+      DBSession dbSession = connector.obtainSession();
+      QueryBuilder qb = dbSession.getSession().getQueryBuilder();
       QueryDomainType<ReplicaUcDTO> dobj = qb.createQueryDefinition(ReplicaUcDTO.class);
       Predicate pred1 = dobj.get("iNodeId").in(dobj.param("iNodeIdParam"));
       dobj.where(pred1);
-      Query<ReplicaUcDTO> query = session.createQuery(dobj);
+      Query<ReplicaUcDTO> query = dbSession.getSession().createQuery(dobj);
       query.setParameter("iNodeIdParam", Ints.asList(inodeIds));
       return createReplicaList(query.getResultList());
     } catch (Exception e) {

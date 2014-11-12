@@ -16,9 +16,9 @@ import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.dal.SafeBlocksDataAccess;
 import se.sics.hop.metadata.hdfs.tabledef.SafeBlocksTableDef;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
+import se.sics.hop.metadata.ndb.DBSession;
 import se.sics.hop.metadata.ndb.mysqlserver.MySQLQueryHelper;
 import se.sics.hop.metadata.ndb.mysqlserver.MysqlServerConnector;
-import se.sics.hop.util.Slicer;
 
 /**
  *
@@ -41,12 +41,12 @@ public class SafeBlocksClusterj implements SafeBlocksTableDef, SafeBlocksDataAcc
   public void insert(Collection<Long> safeBlocks) throws StorageException {
     try {
       final List<SafeBlockDTO> dtos = new ArrayList<SafeBlockDTO>(safeBlocks.size());
-      final Session session = connector.obtainSession();
+      final DBSession dbSession = connector.obtainSession();
       for (Long blk : safeBlocks) {
-        SafeBlockDTO dto = create(session, blk);
+        SafeBlockDTO dto = create(dbSession.getSession(), blk);
         dtos.add(dto);
       }
-      session.savePersistentAll(dtos);
+      dbSession.getSession().savePersistentAll(dtos);
     } catch (Exception e) {
       throw new StorageException(e);
     }
@@ -55,9 +55,9 @@ public class SafeBlocksClusterj implements SafeBlocksTableDef, SafeBlocksDataAcc
   @Override
   public void remove(Long safeBlock) throws StorageException {
     try {
-      Session session = connector.obtainSession();
-      SafeBlockDTO dto = create(session, safeBlock);
-      session.deletePersistent(dto);
+      DBSession dbSession = connector.obtainSession();
+      SafeBlockDTO dto = create(dbSession.getSession(), safeBlock);
+      dbSession.getSession().deletePersistent(dto);
     } catch (Exception e) {
       throw new StorageException(e);
     }

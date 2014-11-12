@@ -12,6 +12,7 @@ import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.dal.MisReplicatedRangeQueueDataAccess;
 import se.sics.hop.metadata.hdfs.tabledef.MisReplicatedRangeQueueTableDef;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
+import se.sics.hop.metadata.ndb.DBSession;
 import se.sics.hop.metadata.ndb.mysqlserver.MySQLQueryHelper;
 
 /**
@@ -35,9 +36,9 @@ public class MisReplicatedRangeQueueClusterj implements MisReplicatedRangeQueueT
   @Override
   public void insert(long start, long end) throws StorageException {
     try {
-      Session session = connector.obtainSession();
-      MisReplicatedRangeQueueDTO dto = session.newInstance(MisReplicatedRangeQueueDTO.class, getRange(start, end));
-      session.savePersistent(dto);
+      DBSession dbSession = connector.obtainSession();
+      MisReplicatedRangeQueueDTO dto = dbSession.getSession().newInstance(MisReplicatedRangeQueueDTO.class, getRange(start, end));
+      dbSession.getSession().savePersistent(dto);
     } catch (Exception e) {
       throw new StorageException(e);
     }
@@ -47,9 +48,9 @@ public class MisReplicatedRangeQueueClusterj implements MisReplicatedRangeQueueT
   @Override
   public void remove(long start, long end) throws StorageException {
     try {
-      Session session = connector.obtainSession();
-      MisReplicatedRangeQueueDTO oldR = session.newInstance(MisReplicatedRangeQueueDTO.class, getRange(start, end));
-      session.deletePersistent(oldR);
+      DBSession dbSession = connector.obtainSession();
+      MisReplicatedRangeQueueDTO oldR = dbSession.getSession().newInstance(MisReplicatedRangeQueueDTO.class, getRange(start, end));
+      dbSession.getSession().deletePersistent(oldR);
     } catch (Exception e) {
       throw new StorageException(e);
     }
