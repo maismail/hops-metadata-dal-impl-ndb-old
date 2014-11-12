@@ -2,9 +2,9 @@ package se.sics.hop.metadata.ndb.dalimpl.hdfs;
 
 import com.google.common.primitives.Ints;
 import com.mysql.clusterj.Query;
-import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.Index;
+import com.mysql.clusterj.annotation.PartitionKey;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
 import com.mysql.clusterj.query.Predicate;
@@ -21,6 +21,7 @@ import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
 import se.sics.hop.metadata.hdfs.tabledef.ReplicaTableDef;
 import se.sics.hop.metadata.ndb.mysqlserver.MySQLQueryHelper;
+import se.sics.hop.metadata.ndb.DBSession;
 
 /**
  *
@@ -30,6 +31,8 @@ public class ReplicaClusterj implements ReplicaTableDef, ReplicaDataAccess<HopIn
   static final Log LOG = LogFactory.getLog(ReplicaClusterj.class);
 
   @PersistenceCapable(table = TABLE_NAME)
+  @PartitionKey(column=INODE_ID)
+  @Index(name = "storage_idx")
   public interface ReplicaDTO {
 
     @PrimaryKey
@@ -43,8 +46,7 @@ public class ReplicaClusterj implements ReplicaTableDef, ReplicaDataAccess<HopIn
     void setBlockId(long bid);
 
     @PrimaryKey
-    @Column(name = STORAGE_ID)
-    @Index(name = "storage_idx")
+    @Column(name = STORAGE_ID)    
     int getStorageId();
     void setStorageId(int id);
 
@@ -58,13 +60,13 @@ public class ReplicaClusterj implements ReplicaTableDef, ReplicaDataAccess<HopIn
   @Override
   public List<HopIndexedReplica> findReplicasById(long blockId, int inodeId) throws StorageException {
     try {
-      Session session = connector.obtainSession();
-      QueryBuilder qb = session.getQueryBuilder();
+      DBSession dbSession = connector.obtainSession();
+      QueryBuilder qb = dbSession.getSession().getQueryBuilder();
       QueryDomainType<ReplicaDTO> dobj = qb.createQueryDefinition(ReplicaDTO.class);
       Predicate pred1 = dobj.get("blockId").equal(dobj.param("blockIdParam"));
       Predicate pred2 = dobj.get("iNodeId").equal(dobj.param("iNodeIdParam"));
       dobj.where(pred1.and(pred2));
-      Query<ReplicaDTO> query = session.createQuery(dobj);
+      Query<ReplicaDTO> query = dbSession.getSession().createQuery(dobj);
       query.setParameter("blockIdParam", blockId);
       query.setParameter("iNodeIdParam", inodeId);
       return createReplicaList(query.getResultList());
@@ -77,12 +79,12 @@ public class ReplicaClusterj implements ReplicaTableDef, ReplicaDataAccess<HopIn
   @Override
   public List<HopIndexedReplica> findReplicasByINodeId(int inodeId) throws StorageException {
     try {
-      Session session = connector.obtainSession();
-      QueryBuilder qb = session.getQueryBuilder();
+      DBSession dbSession = connector.obtainSession();
+      QueryBuilder qb = dbSession.getSession().getQueryBuilder();
       QueryDomainType<ReplicaDTO> dobj = qb.createQueryDefinition(ReplicaDTO.class);
       Predicate pred1 = dobj.get("iNodeId").equal(dobj.param("iNodeIdParam"));
       dobj.where(pred1);
-      Query<ReplicaDTO> query = session.createQuery(dobj);
+      Query<ReplicaDTO> query = dbSession.getSession().createQuery(dobj);
       query.setParameter("iNodeIdParam", inodeId);
       return createReplicaList(query.getResultList());
     } catch (Exception e) {
@@ -123,16 +125,15 @@ public class ReplicaClusterj implements ReplicaTableDef, ReplicaDataAccess<HopIn
   @Override
   public List<HopIndexedReplica> findReplicasByPKS(final long[] blockIds, final int[] inodeIds, final int[] sids) throws StorageException {
     try {
-      final List<ReplicaDTO> dtos = new ArrayList<ReplicaDTO>();
-      Session session = connector.obtainSession();
+      DBSession dbSession = connector.obtainSession();
+      List<ReplicaDTO> dtos = new ArrayList<ReplicaDTO>();
       for (int i = 0; i < blockIds.length; i++) {
-        ReplicaDTO newInstance = session.newInstance(ReplicaDTO.class, new Object[]{inodeIds[i], blockIds[i], sids[i]});
+        ReplicaDTO newInstance = dbSession.getSession().newInstance(ReplicaDTO.class, new Object[]{inodeIds[i], blockIds[i], sids[i]});
         newInstance.setIndex(NOT_FOUND_ROW);
-        newInstance = session.load(newInstance);
+        newInstance = dbSession.getSession().load(newInstance);
         dtos.add(newInstance);
       }
-      session.flush();
-
+      dbSession.getSession().flush();
       return createReplicaList(dtos);
     } catch (Exception e) {
       throw new StorageException(e);
@@ -145,26 +146,26 @@ public class ReplicaClusterj implements ReplicaTableDef, ReplicaDataAccess<HopIn
     try {
       List<ReplicaDTO> changes = new ArrayList<ReplicaDTO>();
       List<ReplicaDTO> deletions = new ArrayList<ReplicaDTO>();
-      Session session = connector.obtainSession();
+      DBSession dbSession = connector.obtainSession();
       for (HopIndexedReplica replica : removed) {
-        ReplicaDTO newInstance = session.newInstance(ReplicaDTO.class);
+        ReplicaDTO newInstance = dbSession.getSession().newInstance(ReplicaDTO.class);
         createPersistable(replica, newInstance);
         deletions.add(newInstance);
       }
 
       for (HopIndexedReplica replica : newed) {
-        ReplicaDTO newInstance = session.newInstance(ReplicaDTO.class);
+        ReplicaDTO newInstance = dbSession.getSession().newInstance(ReplicaDTO.class);
         createPersistable(replica, newInstance);
         changes.add(newInstance);
       }
 
       for (HopIndexedReplica replica : modified) {
-        ReplicaDTO newInstance = session.newInstance(ReplicaDTO.class);
+        ReplicaDTO newInstance = dbSession.getSession().newInstance(ReplicaDTO.class);
         createPersistable(replica, newInstance);
         changes.add(newInstance);
       }
-      session.deletePersistentAll(deletions);
-      session.savePersistentAll(changes);
+      dbSession.getSession().deletePersistentAll(deletions);
+      dbSession.getSession().savePersistentAll(changes);
     } catch (Exception e) {
       throw new StorageException(e);
     }
@@ -176,7 +177,8 @@ public class ReplicaClusterj implements ReplicaTableDef, ReplicaDataAccess<HopIn
   }
 
   
-  protected static List<ReplicaClusterj.ReplicaDTO> getReplicas(Session session, int storageId) {
+  protected static List<ReplicaClusterj.ReplicaDTO> getReplicas(DBSession dbSession, int storageId) {
+    Session session = dbSession.getSession();
     QueryBuilder qb = session.getQueryBuilder();
     QueryDomainType<ReplicaClusterj.ReplicaDTO> dobj = qb.createQueryDefinition(ReplicaClusterj.ReplicaDTO.class);
     dobj.where(dobj.get("storageId").equal(dobj.param("param")));

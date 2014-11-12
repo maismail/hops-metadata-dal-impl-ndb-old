@@ -2,8 +2,8 @@ package se.sics.hop.metadata.ndb.dalimpl.hdfs;
 
 import com.google.common.primitives.Ints;
 import com.mysql.clusterj.Query;
-import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
+import com.mysql.clusterj.annotation.PartitionKey;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
 import com.mysql.clusterj.query.Predicate;
@@ -20,6 +20,7 @@ import se.sics.hop.metadata.ndb.ClusterjConnector;
 import se.sics.hop.metadata.ndb.mysqlserver.MySQLQueryHelper;
 import se.sics.hop.metadata.hdfs.tabledef.PendingBlockTableDef;
 import static se.sics.hop.metadata.hdfs.tabledef.PendingBlockTableDef.INODE_ID;
+import se.sics.hop.metadata.ndb.DBSession;
 
 /**
  *
@@ -35,15 +36,15 @@ public class PendingBlockClusterj implements PendingBlockTableDef, PendingBlockD
   @Override
   public List<HopPendingBlockInfo> findByINodeId(int inodeId) throws StorageException {
     try {
-      Session session = connector.obtainSession();
+      DBSession session = connector.obtainSession();
       
-      QueryBuilder qb = session.getQueryBuilder();
+      QueryBuilder qb = session.getSession().getQueryBuilder();
       QueryDomainType<PendingBlockDTO> qdt = qb.createQueryDefinition(PendingBlockDTO.class);
       
       Predicate pred1 = qdt.get("iNodeId").equal(qdt.param("idParam"));
       qdt.where(pred1);
 
-      Query<PendingBlockDTO> query = session.createQuery(qdt);
+      Query<PendingBlockDTO> query = session.getSession().createQuery(qdt);
       query.setParameter("idParam", inodeId);
      
       List<PendingBlockDTO> results = query.getResultList();
@@ -75,6 +76,7 @@ public class PendingBlockClusterj implements PendingBlockTableDef, PendingBlockD
   }
 
   @PersistenceCapable(table = TABLE_NAME)
+  @PartitionKey(column=INODE_ID)
   public interface PendingBlockDTO {
 
     @PrimaryKey
@@ -99,38 +101,38 @@ public class PendingBlockClusterj implements PendingBlockTableDef, PendingBlockD
 
   @Override
   public void prepare(Collection<HopPendingBlockInfo> removed, Collection<HopPendingBlockInfo> newed, Collection<HopPendingBlockInfo> modified) throws StorageException {
-    Session session = connector.obtainSession();
+    DBSession session = connector.obtainSession();
     List<PendingBlockDTO> changes = new ArrayList<PendingBlockDTO>();
     List<PendingBlockDTO> deletions = new ArrayList<PendingBlockDTO>();
     for (HopPendingBlockInfo p : newed) {
-      PendingBlockDTO pTable = session.newInstance(PendingBlockDTO.class);
+      PendingBlockDTO pTable = session.getSession().newInstance(PendingBlockDTO.class);
       createPersistableHopPendingBlockInfo(p, pTable);
       changes.add(pTable);
     }
     for (HopPendingBlockInfo p : modified) {
-      PendingBlockDTO pTable = session.newInstance(PendingBlockDTO.class);
+      PendingBlockDTO pTable = session.getSession().newInstance(PendingBlockDTO.class);
       createPersistableHopPendingBlockInfo(p, pTable);
       changes.add(pTable);
     }
 
     for (HopPendingBlockInfo p : removed) {
-      PendingBlockDTO pTable = session.newInstance(PendingBlockDTO.class);
+      PendingBlockDTO pTable = session.getSession().newInstance(PendingBlockDTO.class);
       createPersistableHopPendingBlockInfo(p, pTable);
       deletions.add(pTable);
     }
-    session.deletePersistentAll(deletions);
-    session.savePersistentAll(changes);
+    session.getSession().deletePersistentAll(deletions);
+    session.getSession().savePersistentAll(changes);
   }
 
   @Override
   public HopPendingBlockInfo findByPKey(long blockId, int inodeId) throws StorageException {
     try {
-      Session session = connector.obtainSession();
+      DBSession session = connector.obtainSession();
       Object[] pk = new Object[2];
       pk[0] = inodeId;
       pk[1] = blockId;
 
-      PendingBlockDTO pendingTable = session.find(PendingBlockDTO.class, pk);
+      PendingBlockDTO pendingTable = session.getSession().find(PendingBlockDTO.class, pk);
       HopPendingBlockInfo pendingBlock = null;
       if (pendingTable != null) {
         pendingBlock = createHopPendingBlockInfo(pendingTable);
@@ -145,10 +147,10 @@ public class PendingBlockClusterj implements PendingBlockTableDef, PendingBlockD
   @Override
   public List<HopPendingBlockInfo> findAll() throws StorageException {
     try {
-      Session session = connector.obtainSession();
-      QueryBuilder qb = session.getQueryBuilder();
+      DBSession session = connector.obtainSession();
+      QueryBuilder qb = session.getSession().getQueryBuilder();
       Query<PendingBlockDTO> query =
-              session.createQuery(qb.createQueryDefinition(PendingBlockDTO.class));
+              session.getSession().createQuery(qb.createQueryDefinition(PendingBlockDTO.class));
       return createList(query.getResultList());
     } catch (Exception e) {
       throw new StorageException(e);
@@ -158,15 +160,15 @@ public class PendingBlockClusterj implements PendingBlockTableDef, PendingBlockD
   @Override
   public List<HopPendingBlockInfo> findByTimeLimitLessThan(long timeLimit) throws StorageException {
     try {
-      Session session = connector.obtainSession();
-      QueryBuilder qb = session.getQueryBuilder();
+      DBSession session = connector.obtainSession();
+      QueryBuilder qb = session.getSession().getQueryBuilder();
       QueryDomainType<PendingBlockDTO> qdt = qb.createQueryDefinition(PendingBlockDTO.class);
       PredicateOperand predicateOp = qdt.get("timestamp");
       String paramName = "timelimit";
       PredicateOperand param = qdt.param(paramName);
       Predicate lessThan = predicateOp.lessThan(param);
       qdt.where(lessThan);
-      Query query = session.createQuery(qdt);
+      Query query = session.getSession().createQuery(qdt);
       query.setParameter(paramName, timeLimit);
       return createList(query.getResultList());
     } catch (Exception e) {
@@ -177,8 +179,8 @@ public class PendingBlockClusterj implements PendingBlockTableDef, PendingBlockD
   @Override
   public void removeAll() throws StorageException {
     try {
-      Session session = connector.obtainSession();
-      session.deletePersistentAll(PendingBlockDTO.class);
+      DBSession session = connector.obtainSession();
+      session.getSession().deletePersistentAll(PendingBlockDTO.class);
     } catch (Exception e) {
       throw new StorageException(e);
     }

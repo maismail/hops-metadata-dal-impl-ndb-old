@@ -1,6 +1,5 @@
 package se.sics.hop.metadata.ndb.dalimpl.hdfs;
 
-import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
@@ -14,6 +13,7 @@ import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.entity.hdfs.HopINodeCandidatePK;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
 import se.sics.hop.metadata.hdfs.tabledef.INodeAttributesTableDef;
+import se.sics.hop.metadata.ndb.DBSession;
 
 /**
  *
@@ -53,9 +53,9 @@ public class INodeAttributesClusterj implements INodeAttributesTableDef, INodeAt
 
   @Override
   public HopINodeAttributes findAttributesByPk(Integer inodeId) throws StorageException {
-    Session session = connector.obtainSession();
+    DBSession dbSession = connector.obtainSession();
     try {
-      INodeAttributesDTO dto = session.find(INodeAttributesDTO.class, inodeId);
+      INodeAttributesDTO dto = dbSession.getSession().find(INodeAttributesDTO.class, inodeId);
       HopINodeAttributes iNodeAttributes = makeINodeAttributes(dto);
       return iNodeAttributes;
     } catch (Exception e) {
@@ -65,18 +65,18 @@ public class INodeAttributesClusterj implements INodeAttributesTableDef, INodeAt
   
   @Override
   public Collection<HopINodeAttributes> findAttributesByPkList(List<HopINodeCandidatePK> inodePks) throws StorageException {
-    Session session = connector.obtainSession();
+    DBSession dbSession = connector.obtainSession();
     try {
         List<HopINodeAttributes> inodeAttributesBatchResponse = new ArrayList<HopINodeAttributes>();
         List<INodeAttributesDTO> inodeAttributesBatchRequest = new ArrayList<INodeAttributesDTO>();
         for(HopINodeCandidatePK pk : inodePks){
-          INodeAttributesDTO dto = session.newInstance(INodeAttributesDTO.class);
+          INodeAttributesDTO dto = dbSession.getSession().newInstance(INodeAttributesDTO.class);
           dto.setId(pk.getInodeId());
           inodeAttributesBatchRequest.add(dto);
-          session.load(dto);
+          dbSession.getSession().load(dto);
         }
         
-        session.flush();
+        dbSession.getSession().flush();
         
         for(int i = 0; i < inodeAttributesBatchRequest.size();i++){
           inodeAttributesBatchResponse.add(makeINodeAttributes(inodeAttributesBatchRequest.get(i)));
@@ -89,31 +89,31 @@ public class INodeAttributesClusterj implements INodeAttributesTableDef, INodeAt
 
   @Override
   public void prepare(Collection<HopINodeAttributes> modified, Collection<HopINodeAttributes> removed) throws StorageException {
-    Session session = connector.obtainSession();
+    DBSession dbSession = connector.obtainSession();
     try {
       List<INodeAttributesDTO> changes = new ArrayList<INodeAttributesDTO>();
       List<INodeAttributesDTO> deletions = new ArrayList<INodeAttributesDTO>();
       if (removed != null) {
         for (HopINodeAttributes attr : removed) {
-          INodeAttributesDTO persistable = session.newInstance(INodeAttributesDTO.class, attr.getInodeId());
+          INodeAttributesDTO persistable = dbSession.getSession().newInstance(INodeAttributesDTO.class, attr.getInodeId());
           deletions.add(persistable);
         }
       }
       if (modified != null) {
         for (HopINodeAttributes attr : modified) {
-          INodeAttributesDTO persistable = createPersistable(attr, session);
+          INodeAttributesDTO persistable = createPersistable(attr, dbSession);
           changes.add(persistable);
         }
       }
-      session.deletePersistentAll(deletions);
-      session.savePersistentAll(changes);
+      dbSession.getSession().deletePersistentAll(deletions);
+      dbSession.getSession().savePersistentAll(changes);
     } catch (Exception e) {
       throw new StorageException(e);
     }
   }
 
-  private INodeAttributesDTO createPersistable(HopINodeAttributes attribute, Session session) {
-    INodeAttributesDTO dto = session.newInstance(INodeAttributesDTO.class);
+  private INodeAttributesDTO createPersistable(HopINodeAttributes attribute, DBSession dbSession) {
+    INodeAttributesDTO dto = dbSession.getSession().newInstance(INodeAttributesDTO.class);
     dto.setId(attribute.getInodeId());
     dto.setNSQuota(attribute.getNsQuota());
     dto.setNSCount(attribute.getNsCount());
