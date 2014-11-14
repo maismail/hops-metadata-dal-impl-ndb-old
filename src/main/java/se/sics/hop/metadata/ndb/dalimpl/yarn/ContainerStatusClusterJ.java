@@ -59,7 +59,7 @@ public class ContainerStatusClusterJ implements ContainerStatusTableDef, Contain
             uciDTO = session.find(ContainerStatusDTO.class, id);
         }
         if (uciDTO == null) {
-            throw new StorageException("HOP :: Error while retrieving row");
+            throw new StorageException("HOP :: Error while retrieving " + id);
         }
 
         return createHopContainerStatus(uciDTO);

@@ -65,9 +65,6 @@ public class ResourceClusterJ implements ResourceTableDef, ResourceDataAccess<Ho
             pk[2] = parent;
             resourceDTO = session.find(ResourceDTO.class, pk);
         }
-        if (resourceDTO == null) {
-            throw new StorageException("HOP :: Error while retrieving row:" + id);
-        }
 
         return createHopResource(resourceDTO);
     }
@@ -123,6 +120,9 @@ public class ResourceClusterJ implements ResourceTableDef, ResourceDataAccess<Ho
     }
 
     private HopResource createHopResource(ResourceDTO resourceDTO) {
+        if(resourceDTO==null){
+            return null;
+        }
         return new HopResource(resourceDTO.getId(), resourceDTO.getType(), resourceDTO.getParent(), resourceDTO.getMemory(), resourceDTO.getVirtualcores());
     }
 
@@ -132,7 +132,7 @@ public class ResourceClusterJ implements ResourceTableDef, ResourceDataAccess<Ho
         resourceDTO.setType(resource.getType());
         resourceDTO.setParent(resource.getParent());
         resourceDTO.setMemory(resource.getMemory());
-        resourceDTO.setVirtualcores(resource.getVirtualcores());
+        resourceDTO.setVirtualcores(resource.getVirtualCores());
         return resourceDTO;
     }
 }
