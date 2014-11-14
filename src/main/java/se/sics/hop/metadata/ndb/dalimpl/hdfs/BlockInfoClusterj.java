@@ -223,7 +223,6 @@ public class BlockInfoClusterj implements BlockInfoTableDef, BlockInfoDataAccess
   public List<HopBlockInfo> findByStorageId(int storageId) throws StorageException {
     try {
       DBSession dbSession = connector.obtainSession();
-      dbSession.getSession().currentTransaction().begin();
       List<ReplicaClusterj.ReplicaDTO> replicas = ReplicaClusterj.getReplicas(dbSession, storageId);
       long[] blockIds = new long[replicas.size()];
       for (int i = 0; i < blockIds.length; i++) {
