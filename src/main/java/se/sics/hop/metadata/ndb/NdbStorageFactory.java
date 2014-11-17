@@ -192,6 +192,7 @@ public class NdbStorageFactory implements DALStorageFactory {
     
     dataAccessMap.put(FSSchedulerNodeDataAccess.class, new FSSchedulerNodeClusterJ());
     dataAccessMap.put(QuotaUpdateDataAccess.class, new QuotaUpdateClusterj());
+    dataAccessMap.put(SecretMamagerKeysDataAccess.class, SecretMamagerKeysClusterj());
   }
 
   @Override
