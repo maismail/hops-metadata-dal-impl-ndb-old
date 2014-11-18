@@ -55,6 +55,7 @@ public class NdbStorageFactory implements DALStorageFactory {
     dataAccessMap.put(EncodingStatusDataAccess.class, new EncodingStatusClusterj() {});
     dataAccessMap.put(BlockLookUpDataAccess.class, new BlockLookUpClusterj());
     dataAccessMap.put(QuotaUpdateDataAccess.class, new QuotaUpdateClusterj());
+    dataAccessMap.put(BlockChecksumDataAccess.class, new BlockChecksumClusterj());
   }
 
   @Override

@@ -156,7 +156,8 @@ public class ClusterjConnector implements StorageConnector<DBSession> {
                 ExcessReplicaDataAccess.class, PendingBlockDataAccess.class, CorruptReplicaDataAccess.class,
                 UnderReplicatedBlockDataAccess.class, LeaderDataAccess.class,
                 INodeAttributesDataAccess.class, VariableDataAccess.class, StorageIdMapDataAccess.class,
-                BlockLookUpDataAccess.class, QuotaUpdateDataAccess.class);
+                BlockLookUpDataAccess.class, EncodingStatusDataAccess.class, QuotaUpdateDataAccess.class,
+                BlockChecksumDataAccess.class);
     }
 
     @Override
@@ -221,6 +222,10 @@ public class ClusterjConnector implements StorageConnector<DBSession> {
                         MysqlServerConnector.truncateTable(BlockLookUpTableDef.TABLE_NAME);
                     } else if (e == QuotaUpdateDataAccess.class) {
                       MysqlServerConnector.truncateTable(QuotaUpdateTableDef.TABLE_NAME);
+                    } else if (e == EncodingStatusDataAccess.class) {
+                      MysqlServerConnector.truncateTable(EncodingStatusTableDef.TABLE_NAME);
+                    } else if (e == BlockChecksumDataAccess.class) {
+                      MysqlServerConnector.truncateTable(BlockChecksumTableDef.TABLE_NAME);
                     }
                 }
                 MysqlServerConnector.truncateTable("path_memcached");

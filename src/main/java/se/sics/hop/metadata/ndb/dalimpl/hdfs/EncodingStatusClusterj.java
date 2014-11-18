@@ -53,9 +53,9 @@ public class EncodingStatusClusterj implements EncodingStatusTableDef, EncodingS
     void setCodec(String codec);
 
     @Column(name = TARGET_REPLICATION)
-    Integer getTargetReplication();
+    Short getTargetReplication();
 
-    void setTargetReplication(Integer targetReplication);
+    void setTargetReplication(Short targetReplication);
 
     @Column(name = STATUS_MODIFICATION_TIME)
     Long getStatusModificationTime();
@@ -140,7 +140,7 @@ public class EncodingStatusClusterj implements EncodingStatusTableDef, EncodingS
     if (codec != null) {
       dto.setCodec(codec);
     }
-    Integer targetReplication = status.getTargetReplication();
+    Short targetReplication = status.getTargetReplication();
     if (targetReplication != null) {
       dto.setTargetReplication(targetReplication);
     }
@@ -410,7 +410,7 @@ public class EncodingStatusClusterj implements EncodingStatusTableDef, EncodingS
         Integer parityInodeId = result.getInt(PARITY_INODE_ID);
         Integer status = result.getInt(STATUS);
         String codec = result.getString(CODEC);
-        Integer targetReplication = result.getInt(TARGET_REPLICATION);
+        Short targetReplication = result.getShort(TARGET_REPLICATION);
         Long statusModificationTime = result.getLong(STATUS_MODIFICATION_TIME);
         Integer parityStatus = result.getInt(PARITY_STATUS);
         Long parityStatusModificationTime = result.getLong(PARITY_STATUS_MODIFICATION_TIME);
@@ -426,6 +426,8 @@ public class EncodingStatusClusterj implements EncodingStatusTableDef, EncodingS
       }
     } catch (SQLException ex) {
       throw new StorageException(ex);
+    } finally {
+      mysqlConnector.closeSession();
     }
 
     return resultList;
