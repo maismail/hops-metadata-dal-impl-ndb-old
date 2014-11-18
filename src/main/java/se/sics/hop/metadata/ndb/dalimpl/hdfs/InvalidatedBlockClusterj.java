@@ -1,5 +1,6 @@
 package se.sics.hop.metadata.ndb.dalimpl.hdfs;
 
+import com.google.common.primitives.Ints;
 import com.mysql.clusterj.Query;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.Index;
@@ -16,7 +17,7 @@ import se.sics.hop.metadata.hdfs.entity.hop.HopInvalidatedBlock;
 import se.sics.hop.metadata.hdfs.dal.InvalidateBlockDataAccess;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
-import se.sics.hop.metadata.ndb.mysqlserver.CountHelper;
+import se.sics.hop.metadata.ndb.mysqlserver.MySQLQueryHelper;
 import se.sics.hop.metadata.hdfs.tabledef.InvalidatedBlockTableDef;
 import se.sics.hop.metadata.ndb.DBSession;
 
@@ -59,7 +60,7 @@ public class InvalidatedBlockClusterj implements InvalidatedBlockTableDef, Inval
   
   @Override
   public int countAll() throws StorageException {
-    return CountHelper.countAll(TABLE_NAME);
+    return MySQLQueryHelper.countAll(TABLE_NAME);
   }
 
   @Override
@@ -124,6 +125,22 @@ public class InvalidatedBlockClusterj implements InvalidatedBlockTableDef, Inval
   }
 
   @Override
+  public List<HopInvalidatedBlock> findInvalidatedBlocksByINodeIds(int[] inodeIds) throws StorageException {
+       try {
+      DBSession dbSession = connector.obtainSession();
+      QueryBuilder qb = dbSession.getSession().getQueryBuilder();
+      QueryDomainType<InvalidateBlocksDTO> qdt = qb.createQueryDefinition(InvalidateBlocksDTO.class);
+      Predicate pred1 = qdt.get("iNodeId").in(qdt.param("iNodeIdParam"));
+      qdt.where(pred1);
+      Query<InvalidateBlocksDTO> query = dbSession.getSession().createQuery(qdt);
+      query.setParameter("iNodeIdParam", Ints.asList(inodeIds));
+      return createList(query.getResultList());
+    } catch (Exception e) {
+      throw new StorageException(e);
+    }
+  }
+  
+  @Override
   public HopInvalidatedBlock findInvBlockByPkey(long blockId, int storageId, int inodeId) throws StorageException {
     try {
       DBSession dbSession = connector.obtainSession();
@@ -143,10 +160,16 @@ public class InvalidatedBlockClusterj implements InvalidatedBlockTableDef, Inval
   }
 
   @Override
-  public List<HopInvalidatedBlock> findInvalidatedBlocksbyPKS(long[] blockIds, int[] inodesIds, int[] storageIds) throws StorageException {
+  public List<HopInvalidatedBlock> findInvalidatedBlocksbyPKS(final long[] blockIds, final int[] inodesIds, final int[] storageIds) throws StorageException {
     try {
+      int currentTableSize = countAll();
+      if(currentTableSize == 0){
+        return new ArrayList<HopInvalidatedBlock>();
+      }else if(currentTableSize < inodesIds.length){
+        return findAllInvalidatedBlocks();
+      }
+      final List<InvalidateBlocksDTO> invBlocks = new ArrayList<InvalidateBlocksDTO>();
       DBSession dbSession = connector.obtainSession();
-      List<InvalidateBlocksDTO> invBlocks = new ArrayList<InvalidateBlocksDTO>();
       for (int i = 0; i < blockIds.length; i++) {
         InvalidateBlocksDTO invTable = dbSession.getSession().newInstance(InvalidateBlocksDTO.class, new Object[]{inodesIds[i], blockIds[i], storageIds[i]});
         invTable.setGenerationStamp(NOT_FOUND_ROW);

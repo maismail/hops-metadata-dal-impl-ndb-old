@@ -1,5 +1,6 @@
 package se.sics.hop.metadata.ndb.dalimpl.hdfs;
 
+import com.google.common.primitives.Ints;
 import com.mysql.clusterj.Query;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PartitionKey;
@@ -8,7 +9,6 @@ import com.mysql.clusterj.annotation.PrimaryKey;
 import com.mysql.clusterj.query.Predicate;
 import com.mysql.clusterj.query.PredicateOperand;
 import com.mysql.clusterj.query.QueryBuilder;
-import com.mysql.clusterj.query.QueryDefinition;
 import com.mysql.clusterj.query.QueryDomainType;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -17,7 +17,7 @@ import se.sics.hop.metadata.hdfs.dal.PendingBlockDataAccess;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.entity.hdfs.HopPendingBlockInfo;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
-import se.sics.hop.metadata.ndb.mysqlserver.CountHelper;
+import se.sics.hop.metadata.ndb.mysqlserver.MySQLQueryHelper;
 import se.sics.hop.metadata.hdfs.tabledef.PendingBlockTableDef;
 import static se.sics.hop.metadata.hdfs.tabledef.PendingBlockTableDef.INODE_ID;
 import se.sics.hop.metadata.ndb.DBSession;
@@ -30,7 +30,7 @@ public class PendingBlockClusterj implements PendingBlockTableDef, PendingBlockD
 
   @Override
   public int countValidPendingBlocks(long timeLimit) throws StorageException {
-    return CountHelper.countWithCriterion(TABLE_NAME, String.format("%s>%d", TIME_STAMP, timeLimit));
+    return MySQLQueryHelper.countWithCriterion(TABLE_NAME, String.format("%s>%d", TIME_STAMP, timeLimit));
   }
 
   @Override
@@ -46,9 +46,27 @@ public class PendingBlockClusterj implements PendingBlockTableDef, PendingBlockD
 
       Query<PendingBlockDTO> query = session.getSession().createQuery(qdt);
       query.setParameter("idParam", inodeId);
-     
-      List<PendingBlockDTO> results = query.getResultList();
- 
+      
+      return createList(query.getResultList());
+    } catch (Exception e) {
+      throw new StorageException(e);
+    }
+  }
+
+  @Override
+  public List<HopPendingBlockInfo> findByINodeIds(int[] inodeIds) throws StorageException {
+    try {
+      DBSession session = connector.obtainSession();
+
+      QueryBuilder qb = session.getSession().getQueryBuilder();
+      QueryDomainType<PendingBlockDTO> qdt = qb.createQueryDefinition(PendingBlockDTO.class);
+
+      Predicate pred1 = qdt.get("iNodeId").in(qdt.param("idParam"));
+      qdt.where(pred1);
+
+      Query<PendingBlockDTO> query = session.getSession().createQuery(qdt);
+      query.setParameter("idParam", Ints.asList(inodeIds));
+
       return createList(query.getResultList());
     } catch (Exception e) {
       throw new StorageException(e);

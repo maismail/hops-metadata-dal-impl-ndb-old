@@ -1,6 +1,7 @@
 package se.sics.hop.metadata.ndb.dalimpl.hdfs;
 
-
+import com.google.common.primitives.Ints;
+import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
@@ -79,28 +80,47 @@ public class BlockLookUpClusterj implements BlockLookUpTableDef, BlockLookUpData
   }
 
   @Override
-  public int[] findINodeIdsByBlockIds(long[] blockIds) throws StorageException {
+  public int[] findINodeIdsByBlockIds(final long[] blockIds) throws StorageException {
     try {
-      DBSession dbSession = connector.obtainSession();
-      List<BlockLookUpDTO> bldtos = new ArrayList<BlockLookUpDTO>();
-      int[] inodeIds = new int[blockIds.length];
-      for (long blockId : blockIds) {
-        BlockLookUpDTO bldto = dbSession.getSession().newInstance(BlockLookUpDTO.class, blockId);
-        bldto.setINodeId(NOT_FOUND_ROW);
-        bldto = dbSession.getSession().load(bldto);
-        bldtos.add(bldto);
-      }
-      dbSession.getSession().flush();
-      for (int i = 0; i < bldtos.size(); i++) {
-        BlockLookUpClusterj.BlockLookUpDTO bld = bldtos.get(i);
-        inodeIds[i] = bld.getINodeId();
-      }
-      return inodeIds;
+      final DBSession dbSession = connector.obtainSession();
+      return readINodeIdsByBlockIds(dbSession, blockIds);
     } catch (Exception e) {
       throw new StorageException(e);
     }
   }
 
+  protected static int[] readINodeIdsByBlockIds(final DBSession dbSession, final long[] blockIds) throws Exception {
+    Session session = dbSession.getSession();
+    final List<BlockLookUpDTO> bldtos = new ArrayList<BlockLookUpDTO>();
+    final List<Integer> inodeIds = new ArrayList<Integer>();
+    for (int blk = 0; blk < blockIds.length; blk++) {
+
+      BlockLookUpDTO bldto = session.newInstance(BlockLookUpDTO.class, blockIds[blk]);
+      bldto.setINodeId(NOT_FOUND_ROW);
+      bldto = session.load(bldto);
+      bldtos.add(bldto);
+    }
+    session.flush();
+
+    for (int i = 0; i < bldtos.size(); i++) {
+      BlockLookUpClusterj.BlockLookUpDTO bld = bldtos.get(i);
+      if (bld.getINodeId() != NOT_FOUND_ROW) {
+        inodeIds.add(bld.getINodeId());
+      } else {
+        bld = session.find(BlockLookUpDTO.class, bld.getBlockId());
+        if (bld != null) {
+          //[M] BUG:
+          //ClusterjConnector.LOG.error("xxx: Inode doesn't exists retries for " + bld.getBlockId() + " inodeId " + bld.getINodeId() + " at index " + i);
+          inodeIds.add(bld.getINodeId());
+        } else {
+          inodeIds.add(NOT_FOUND_ROW);
+        }
+      }
+    }
+    bldtos.clear();
+    return Ints.toArray(inodeIds);
+  }
+  
   protected static HopBlockLookUp createBlockInfo(BlockLookUpClusterj.BlockLookUpDTO dto) {
     HopBlockLookUp lookup = new HopBlockLookUp(dto.getBlockId(), dto.getINodeId());
     return lookup;

@@ -1,5 +1,6 @@
 package se.sics.hop.metadata.ndb.dalimpl.hdfs;
 
+import com.google.common.primitives.Ints;
 import com.mysql.clusterj.Query;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.Index;
@@ -19,8 +20,8 @@ import se.sics.hop.metadata.hdfs.dal.ReplicaDataAccess;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
 import se.sics.hop.metadata.hdfs.tabledef.ReplicaTableDef;
+import se.sics.hop.metadata.ndb.mysqlserver.MySQLQueryHelper;
 import se.sics.hop.metadata.ndb.DBSession;
-import se.sics.hop.metadata.ndb.mysqlserver.CountHelper;
 
 /**
  *
@@ -93,7 +94,35 @@ public class ReplicaClusterj implements ReplicaTableDef, ReplicaDataAccess<HopIn
   
 
   @Override
-  public List<HopIndexedReplica> findReplicasByPKS(long[] blockIds, int[] inodeIds, int[] sids) throws StorageException {
+  public List<HopIndexedReplica> findReplicasByINodeIds(int[] inodeIds) throws StorageException {
+     try {
+      DBSession dbSession = connector.obtainSession();
+      QueryBuilder qb = dbSession.getSession().getQueryBuilder();
+      QueryDomainType<ReplicaDTO> dobj = qb.createQueryDefinition(ReplicaDTO.class);
+      Predicate pred1 = dobj.get("iNodeId").in(dobj.param("iNodeIdParam"));
+      dobj.where(pred1);
+      Query<ReplicaDTO> query = dbSession.getSession().createQuery(dobj);
+      query.setParameter("iNodeIdParam", Ints.asList(inodeIds));
+      return createReplicaList(query.getResultList());
+    } catch (Exception e) {
+      throw new StorageException(e);
+    }
+  }
+  
+  @Override
+  public List<HopIndexedReplica> findReplicasByStorageId(int storageId) throws StorageException {
+   try {
+      DBSession dbSession = connector.obtainSession();
+      List<ReplicaDTO> res = getReplicas(dbSession, storageId);
+      //ClusterjConnector.LOG.error("xxxa: got replicas " + res.size() + " in " + (System.currentTimeMillis() - t));
+      return createReplicaList(res);
+    } catch (Exception e) {
+      throw new StorageException(e);
+    }
+  }
+    
+  @Override
+  public List<HopIndexedReplica> findReplicasByPKS(final long[] blockIds, final int[] inodeIds, final int[] sids) throws StorageException {
     try {
       DBSession dbSession = connector.obtainSession();
       List<ReplicaDTO> dtos = new ArrayList<ReplicaDTO>();
@@ -109,7 +138,7 @@ public class ReplicaClusterj implements ReplicaTableDef, ReplicaDataAccess<HopIn
       throw new StorageException(e);
     }
   }
-   
+
   
   @Override
   public void prepare(Collection<HopIndexedReplica> removed, Collection<HopIndexedReplica> newed, Collection<HopIndexedReplica> modified) throws StorageException {
@@ -143,9 +172,20 @@ public class ReplicaClusterj implements ReplicaTableDef, ReplicaDataAccess<HopIn
 
   @Override
   public int countAllReplicasForStorageId(int sid) throws StorageException {
-    return CountHelper.countWithCriterion(TABLE_NAME, String.format("%s=%d", STORAGE_ID, sid));
+    return MySQLQueryHelper.countWithCriterion(TABLE_NAME, String.format("%s=%d", STORAGE_ID, sid));
   }
 
+  
+  protected static List<ReplicaClusterj.ReplicaDTO> getReplicas(DBSession dbSession, int storageId) {
+    QueryBuilder qb = dbSession.getSession().getQueryBuilder();
+    QueryDomainType<ReplicaClusterj.ReplicaDTO> dobj = qb.createQueryDefinition(ReplicaClusterj.ReplicaDTO.class);
+    dobj.where(dobj.get("storageId").equal(dobj.param("param")));
+    Query<ReplicaClusterj.ReplicaDTO> query = dbSession.getSession().createQuery(dobj);
+    query.setParameter("param", storageId);
+    return query.getResultList();
+  }
+
+    
   private List<HopIndexedReplica> createReplicaList(List<ReplicaDTO> triplets) {
     List<HopIndexedReplica> replicas = new ArrayList<HopIndexedReplica>(triplets.size());
     for (ReplicaDTO t : triplets) {

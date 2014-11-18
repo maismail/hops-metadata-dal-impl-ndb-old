@@ -1,5 +1,6 @@
 package se.sics.hop.metadata.ndb.dalimpl.hdfs;
 
+import com.google.common.primitives.Ints;
 import com.mysql.clusterj.Query;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.Index;
@@ -16,7 +17,7 @@ import se.sics.hop.metadata.hdfs.entity.hop.HopUnderReplicatedBlock;
 import se.sics.hop.metadata.hdfs.dal.UnderReplicatedBlockDataAccess;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
-import se.sics.hop.metadata.ndb.mysqlserver.CountHelper;
+import se.sics.hop.metadata.ndb.mysqlserver.MySQLQueryHelper;
 import se.sics.hop.metadata.hdfs.tabledef.UnderReplicatedBlockTableDef;
 import se.sics.hop.metadata.ndb.DBSession;
 
@@ -28,14 +29,14 @@ public class UnderReplicatedBlockClusterj implements UnderReplicatedBlockTableDe
 
   @Override
   public int countByLevel(int level) throws StorageException {
-    return CountHelper.countWithCriterion(
+    return MySQLQueryHelper.countWithCriterion(
             TABLE_NAME,
             String.format("%s=%d", LEVEL, level));
   }
 
   @Override
   public int countLessThanALevel(int level) throws StorageException {
-    return CountHelper.countWithCriterion(
+    return MySQLQueryHelper.countWithCriterion(
             TABLE_NAME,
             String.format("%s<%d", LEVEL, level));
   }
@@ -132,7 +133,7 @@ public class UnderReplicatedBlockClusterj implements UnderReplicatedBlockTableDe
 
   @Override
   public int countAll() throws StorageException {
-    return CountHelper.countAll(TABLE_NAME);
+    return MySQLQueryHelper.countAll(TABLE_NAME);
   }
 
   @Override
@@ -168,6 +169,24 @@ public class UnderReplicatedBlockClusterj implements UnderReplicatedBlockTableDe
   }
 
   @Override
+  public List<HopUnderReplicatedBlock> findByLevel(int level, int offset, int count) throws StorageException {
+    try {
+      DBSession dbSession = connector.obtainSession();
+      QueryBuilder qb = dbSession.getSession().getQueryBuilder();
+      QueryDomainType<UnderReplicatedBlocksDTO> dobj = qb.createQueryDefinition(UnderReplicatedBlocksDTO.class);
+      Predicate pred = dobj.get("level").equal(dobj.param("level"));
+      dobj.where(pred);
+      Query<UnderReplicatedBlocksDTO> query = dbSession.getSession().createQuery(dobj);
+      query.setParameter("level", level);
+      query.setOrdering(Query.Ordering.ASCENDING, "level", "timestamp");
+      query.setLimits(offset, count);
+      return createUrBlockList(query.getResultList());
+    } catch (Exception e) {
+      throw new StorageException(e);
+    }
+  }
+    
+  @Override
   public List<HopUnderReplicatedBlock> findByINodeId(int inodeId) throws StorageException {
     try {
       DBSession dbSession = connector.obtainSession();
@@ -186,6 +205,22 @@ public class UnderReplicatedBlockClusterj implements UnderReplicatedBlockTableDe
     }
   }
 
+  @Override
+  public List<HopUnderReplicatedBlock> findByINodeIds(int[] inodeIds) throws StorageException {
+    try {
+      DBSession dbSession = connector.obtainSession();
+      QueryBuilder qb = dbSession.getSession().getQueryBuilder();
+      QueryDomainType<UnderReplicatedBlocksDTO> qdt = qb.createQueryDefinition(UnderReplicatedBlocksDTO.class);
+      Predicate pred1 = qdt.get("iNodeId").in(qdt.param("idParam"));
+      qdt.where(pred1);
+      Query<UnderReplicatedBlocksDTO> query = dbSession.getSession().createQuery(qdt);
+      query.setParameter("idParam", Ints.asList(inodeIds));
+      return createUrBlockList(query.getResultList());
+    } catch (Exception e) {
+      throw new StorageException(e);
+    }
+  }
+  
   @Override
   public void removeAll() throws StorageException {
     DBSession dbSession = connector.obtainSession();

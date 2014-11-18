@@ -1,5 +1,6 @@
 package se.sics.hop.metadata.ndb.dalimpl.hdfs;
 
+import com.google.common.primitives.Ints;
 import com.mysql.clusterj.Query;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.Index;
@@ -16,7 +17,7 @@ import se.sics.hop.metadata.hdfs.entity.hop.HopCorruptReplica;
 import se.sics.hop.metadata.hdfs.dal.CorruptReplicaDataAccess;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
-import se.sics.hop.metadata.ndb.mysqlserver.CountHelper;
+import se.sics.hop.metadata.ndb.mysqlserver.MySQLQueryHelper;
 import se.sics.hop.metadata.hdfs.tabledef.CorruptReplicaTableDef;
 import se.sics.hop.metadata.ndb.DBSession;
 
@@ -54,12 +55,12 @@ public class CorruptReplicaClusterj implements CorruptReplicaTableDef, CorruptRe
 
   @Override
   public int countAll() throws StorageException {
-    return CountHelper.countAll(TABLE_NAME);
+    return MySQLQueryHelper.countAll(TABLE_NAME);
   }
 
   @Override
   public int countAllUniqueBlk() throws StorageException {
-    return CountHelper.countAllUnique(TABLE_NAME, BLOCK_ID);
+    return MySQLQueryHelper.countAllUnique(TABLE_NAME, BLOCK_ID);
   }
 
   @Override
@@ -136,7 +137,7 @@ public class CorruptReplicaClusterj implements CorruptReplicaTableDef, CorruptRe
     }
   }
   
-    @Override
+  @Override
   public List<HopCorruptReplica> findByINodeId(int inodeId) throws StorageException {
     try {
       DBSession dbSession = connector.obtainSession();
@@ -152,6 +153,21 @@ public class CorruptReplicaClusterj implements CorruptReplicaTableDef, CorruptRe
     }
   }
 
+  @Override
+  public List<HopCorruptReplica> findByINodeIds(int[] inodeIds) throws StorageException {
+    try {
+      DBSession dbSession = connector.obtainSession();
+      QueryBuilder qb = dbSession.getSession().getQueryBuilder();
+      QueryDomainType<CorruptReplicaDTO> dobj = qb.createQueryDefinition(CorruptReplicaDTO.class);
+      Predicate pred1 = dobj.get("iNodeId").in(dobj.param("iNodeIdParam"));
+      dobj.where(pred1);
+      Query<CorruptReplicaDTO> query = dbSession.getSession().createQuery(dobj);
+      query.setParameter("iNodeIdParam", Ints.asList(inodeIds));
+      return createCorruptReplicaList(query.getResultList());
+    } catch (Exception e) {
+      throw new StorageException(e);
+    }
+  }
 
   private HopCorruptReplica createReplica(CorruptReplicaDTO corruptReplicaTable) {
     return new HopCorruptReplica(corruptReplicaTable.getBlockId(), corruptReplicaTable.getStorageId(), corruptReplicaTable.getINodeId());

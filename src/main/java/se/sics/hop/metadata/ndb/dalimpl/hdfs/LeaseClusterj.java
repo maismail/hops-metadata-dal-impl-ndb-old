@@ -19,7 +19,7 @@ import se.sics.hop.metadata.hdfs.dal.LeaseDataAccess;
 import se.sics.hop.metadata.hdfs.entity.hdfs.HopLease;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
-import se.sics.hop.metadata.ndb.mysqlserver.CountHelper;
+import se.sics.hop.metadata.ndb.mysqlserver.MySQLQueryHelper;
 import se.sics.hop.metadata.hdfs.tabledef.LeaseTableDef;
 import se.sics.hop.metadata.ndb.DBSession;
 
@@ -60,7 +60,7 @@ public class LeaseClusterj implements LeaseTableDef, LeaseDataAccess<HopLease> {
 
   @Override
   public int countAll() throws StorageException {
-    return CountHelper.countAll(TABLE_NAME);
+    return MySQLQueryHelper.countAll(TABLE_NAME);
   }
 
   @Override

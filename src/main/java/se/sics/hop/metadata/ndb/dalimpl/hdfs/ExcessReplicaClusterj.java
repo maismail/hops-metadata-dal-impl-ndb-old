@@ -1,5 +1,6 @@
 package se.sics.hop.metadata.ndb.dalimpl.hdfs;
 
+import com.google.common.primitives.Ints;
 import com.mysql.clusterj.Query;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.Index;
@@ -16,7 +17,7 @@ import se.sics.hop.metadata.hdfs.entity.hop.HopExcessReplica;
 import se.sics.hop.metadata.hdfs.dal.ExcessReplicaDataAccess;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
-import se.sics.hop.metadata.ndb.mysqlserver.CountHelper;
+import se.sics.hop.metadata.ndb.mysqlserver.MySQLQueryHelper;
 import se.sics.hop.metadata.hdfs.tabledef.ExcessReplicaTableDef;
 import se.sics.hop.metadata.ndb.DBSession;
 
@@ -52,7 +53,7 @@ public class ExcessReplicaClusterj implements ExcessReplicaTableDef, ExcessRepli
 
   @Override
   public int countAll() throws StorageException {
-    return CountHelper.countAll(TABLE_NAME);
+    return MySQLQueryHelper.countAll(TABLE_NAME);
   }
 
   @Override
@@ -128,6 +129,22 @@ public class ExcessReplicaClusterj implements ExcessReplicaTableDef, ExcessRepli
     }
   }
 
+  @Override
+  public List<HopExcessReplica> findExcessReplicaByINodeIds(int[] inodeIds) throws StorageException {
+    try {
+      DBSession dbSession = connector.obtainSession();
+      QueryBuilder qb = dbSession.getSession().getQueryBuilder();
+      QueryDomainType<ExcessReplicaDTO> qdt = qb.createQueryDefinition(ExcessReplicaDTO.class);
+      Predicate pred1 = qdt.get("iNodeId").in(qdt.param("iNodeIdParam"));
+      qdt.where(pred1);
+      Query<ExcessReplicaDTO> query = dbSession.getSession().createQuery(qdt);
+      query.setParameter("iNodeIdParam", Ints.asList(inodeIds));
+      return createList(query.getResultList());
+    } catch (Exception e) {
+      throw new StorageException(e);
+    }
+  }
+      
   @Override
   public HopExcessReplica findByPK(long bId, int sId, int inodeId) throws StorageException {
     try {

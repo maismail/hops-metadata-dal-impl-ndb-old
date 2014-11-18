@@ -1,7 +1,6 @@
 package se.sics.hop.metadata.ndb;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -23,11 +22,8 @@ public class NdbStorageFactory implements DALStorageFactory {
   private Map<Class, EntityDataAccess> dataAccessMap = new HashMap<Class, EntityDataAccess>();
 
   @Override
-  public void setConfiguration(String configFile) throws StorageInitializtionException{
+  public void setConfiguration(Properties conf) throws StorageInitializtionException{
     try {
-      Properties conf = new Properties();
-      InputStream inStream = this.getClass().getClassLoader().getResourceAsStream(configFile);
-      conf.load(inStream);
       ClusterjConnector.getInstance().setConfiguration(conf);
       MysqlServerConnector.getInstance().setConfiguration(conf);
       initDataAccessMap();
@@ -54,6 +50,8 @@ public class NdbStorageFactory implements DALStorageFactory {
     dataAccessMap.put(StorageIdMapDataAccess.class, new StorageIdMapClusterj());
     dataAccessMap.put(EncodingStatusDataAccess.class, new EncodingStatusClusterj() {});
     dataAccessMap.put(BlockLookUpDataAccess.class, new BlockLookUpClusterj());
+    dataAccessMap.put(SafeBlocksDataAccess.class, new SafeBlocksClusterj());
+    dataAccessMap.put(MisReplicatedRangeQueueDataAccess.class, new MisReplicatedRangeQueueClusterj());
     dataAccessMap.put(QuotaUpdateDataAccess.class, new QuotaUpdateClusterj());
     dataAccessMap.put(BlockChecksumDataAccess.class, new BlockChecksumClusterj());
   }
