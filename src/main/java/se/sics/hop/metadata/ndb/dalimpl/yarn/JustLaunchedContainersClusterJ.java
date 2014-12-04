@@ -118,11 +118,6 @@ public class JustLaunchedContainersClusterJ implements JustLaunchedContainersTab
         }
     }
 
-    @Override
-    public void createJustLaunchedContainerEntry(HopJustLaunchedContainers entry) throws StorageException {
-        Session session = connector.obtainSession();
-        createPersistable(entry, session);
-    }
 
     private HopJustLaunchedContainers createJustLaunchedContainers(JustLaunchedContainersDTO dto) {
         HopJustLaunchedContainers hop = new HopJustLaunchedContainers(dto.getrmnodeid(), dto.getcontainerid());

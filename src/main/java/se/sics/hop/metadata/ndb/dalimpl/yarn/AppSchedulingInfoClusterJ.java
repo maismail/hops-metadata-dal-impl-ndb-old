@@ -38,9 +38,9 @@ public class AppSchedulingInfoClusterJ implements AppSchedulingInfoTableDef, App
     
     @PrimaryKey
     @Column(name = APPID)
-    int getappid();
+    String getappid();
 
-    void setappid(int appid);
+    void setappid(String appid);
     
     @Column(name = QUEUENAME)
     String getqueuename();

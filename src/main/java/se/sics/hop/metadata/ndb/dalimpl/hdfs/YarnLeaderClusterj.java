@@ -17,7 +17,7 @@ import se.sics.hop.metadata.hdfs.tabledef.YarnLeaderTableDef;
 public class YarnLeaderClusterj extends LeaderClusterj implements YarnLeaderTableDef {
 
     @PersistenceCapable(table = TABLE_NAME)
-    public interface YearnLeaderDTO extends LeaderDTO{
+    public interface YarnLeaderDTO extends LeaderDTO{
 
         @PrimaryKey
         @Column(name = ID)
@@ -53,6 +53,6 @@ public class YarnLeaderClusterj extends LeaderClusterj implements YarnLeaderTabl
     }
    
     public YarnLeaderClusterj(){
-        super(YearnLeaderDTO.class);
+        super(YarnLeaderDTO.class);
     }
 }
