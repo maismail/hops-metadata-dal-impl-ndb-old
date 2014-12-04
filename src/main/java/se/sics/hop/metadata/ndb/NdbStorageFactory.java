@@ -69,6 +69,7 @@ import se.sics.hop.metadata.ndb.dalimpl.yarn.SchedulerApplicationClusterJ;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.UpdatedContainerInfoClusterJ;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.YarnVariablesClusterJ;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.fair.FSSchedulerNodeClusterJ;
+import se.sics.hop.metadata.ndb.dalimpl.yarn.rmstatestore.AllocateResponseClusterJ;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.rmstatestore.AppMasterRPCClusterJ;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.rmstatestore.ApplicationAttemptStateClusterJ;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.rmstatestore.ApplicationStateClusterJ;
@@ -76,6 +77,7 @@ import se.sics.hop.metadata.ndb.dalimpl.yarn.rmstatestore.DelegationKeyClusterJ;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.rmstatestore.DelegationTokenClusterJ;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.rmstatestore.RMStateVersionClusterJ;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.rmstatestore.SequenceNumberClusterJ;
+import se.sics.hop.metadata.ndb.dalimpl.yarn.rmstatestore.SecretMamagerKeysClusterJ;
 import se.sics.hop.metadata.ndb.mysqlserver.MysqlServerConnector;
 import se.sics.hop.metadata.yarn.dal.AppSchedulingInfoBlacklistDataAccess;
 import se.sics.hop.metadata.yarn.dal.AppSchedulingInfoDataAccess;
@@ -105,12 +107,14 @@ import se.sics.hop.metadata.yarn.dal.SchedulerApplicationDataAccess;
 import se.sics.hop.metadata.yarn.dal.UpdatedContainerInfoDataAccess;
 import se.sics.hop.metadata.yarn.dal.YarnVariablesDataAccess;
 import se.sics.hop.metadata.yarn.dal.fair.FSSchedulerNodeDataAccess;
+import se.sics.hop.metadata.yarn.dal.rmstatestore.AllocateResponseDataAccess;
 import se.sics.hop.metadata.yarn.dal.rmstatestore.AppMasterRPCDataAccess;
 import se.sics.hop.metadata.yarn.dal.rmstatestore.ApplicationAttemptStateDataAccess;
 import se.sics.hop.metadata.yarn.dal.rmstatestore.ApplicationStateDataAccess;
 import se.sics.hop.metadata.yarn.dal.rmstatestore.DelegationKeyDataAccess;
 import se.sics.hop.metadata.yarn.dal.rmstatestore.DelegationTokenDataAccess;
 import se.sics.hop.metadata.yarn.dal.rmstatestore.RMStateVersionDataAccess;
+import se.sics.hop.metadata.yarn.dal.rmstatestore.SecretMamagerKeysDataAccess;
 import se.sics.hop.metadata.yarn.dal.rmstatestore.SequenceNumberDataAccess;
 
 /**
@@ -192,7 +196,8 @@ public class NdbStorageFactory implements DALStorageFactory {
     
     dataAccessMap.put(FSSchedulerNodeDataAccess.class, new FSSchedulerNodeClusterJ());
     dataAccessMap.put(QuotaUpdateDataAccess.class, new QuotaUpdateClusterj());
-    dataAccessMap.put(SecretMamagerKeysDataAccess.class, SecretMamagerKeysClusterj());
+    dataAccessMap.put(SecretMamagerKeysDataAccess.class, new SecretMamagerKeysClusterJ());
+    dataAccessMap.put(AllocateResponseDataAccess.class, new AllocateResponseClusterJ());
   }
 
   @Override

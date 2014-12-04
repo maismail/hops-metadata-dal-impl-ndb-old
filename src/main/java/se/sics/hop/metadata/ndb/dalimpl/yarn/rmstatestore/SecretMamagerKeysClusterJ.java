@@ -74,7 +74,7 @@ public class SecretMamagerKeysClusterJ implements SecretMamagerKeysTableDef, Sec
       if (removed != null) {
         List<SecretMamagerKeysDTO> toRemove = new ArrayList<SecretMamagerKeysDTO>();
         for (HopSecretMamagerKey hop : removed) {
-          toRemove.add(session.newInstance(SecretMamagerKeysDTO.class, hop.getKeyId()));
+          toRemove.add(session.newInstance(SecretMamagerKeysDTO.class, hop.getKeyType()));
         }
         session.deletePersistentAll(toRemove);
       }
@@ -92,7 +92,7 @@ public class SecretMamagerKeysClusterJ implements SecretMamagerKeysTableDef, Sec
 
   private SecretMamagerKeysDTO createPersistable(HopSecretMamagerKey hop, Session session) {
     SecretMamagerKeysDTO keyDTO = session.newInstance(SecretMamagerKeysDTO.class);
-    keyDTO.setkeyid(hop.getKeyId());
+    keyDTO.setkeyid(hop.getKeyType());
     keyDTO.setkey(hop.getKey());
 
     return keyDTO;
