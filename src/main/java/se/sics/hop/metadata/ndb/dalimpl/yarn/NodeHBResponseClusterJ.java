@@ -1,12 +1,17 @@
 package se.sics.hop.metadata.ndb.dalimpl.yarn;
 
+import com.mysql.clusterj.Query;
 import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
+import com.mysql.clusterj.query.QueryBuilder;
+import com.mysql.clusterj.query.QueryDomainType;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.entity.yarn.HopNodeHBResponse;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
@@ -49,6 +54,20 @@ public class NodeHBResponseClusterJ implements NodeHBResponseTableDef, NodeHBRes
         return createHopNodeHBResponse(nodeHBresponseDTO);
     }
 
+   @Override
+  public Map<String, HopNodeHBResponse> getAll() throws StorageException {
+    Session session = connector.obtainSession();
+    QueryBuilder qb = session.getQueryBuilder();
+    QueryDomainType<NodeHBResponseDTO> dobj
+            = qb.createQueryDefinition(
+                    NodeHBResponseDTO.class);
+    Query<NodeHBResponseDTO> query = session.
+            createQuery(dobj);
+    List<NodeHBResponseDTO> results = query.
+            getResultList();
+    return createMap(results);
+  }
+    
     @Override
     public void prepare(Collection<HopNodeHBResponse> modified, Collection<HopNodeHBResponse> removed) throws StorageException {
         Session session = connector.obtainSession();
@@ -89,4 +108,15 @@ public class NodeHBResponseClusterJ implements NodeHBResponseTableDef, NodeHBRes
         nodeHBResponseDT0.setresponse(nodehbresponse.getResponseid());
         return nodeHBResponseDT0;
     }
+    
+  private Map<String, HopNodeHBResponse> createMap(
+          List<NodeHBResponseDTO> results) {
+    Map<String, HopNodeHBResponse> map
+            = new HashMap<String, HopNodeHBResponse>();
+    for (NodeHBResponseDTO dto : results) {
+      HopNodeHBResponse hop = createHopNodeHBResponse(dto);
+      map.put(hop.getRMNodeId(), hop);
+    }
+    return map;
+  }
 }

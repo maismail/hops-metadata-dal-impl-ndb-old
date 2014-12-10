@@ -10,7 +10,9 @@ import com.mysql.clusterj.query.QueryBuilder;
 import com.mysql.clusterj.query.QueryDomainType;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.entity.yarn.HopNode;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
@@ -93,6 +95,18 @@ public class NodeClusterJ implements NodeTableDef, NodeDataAccess<HopNode> {
         }
     }
 
+   @Override
+  public Map<String, HopNode> getAll() throws StorageException {
+    Session session = connector.obtainSession();
+    QueryBuilder qb = session.getQueryBuilder();
+
+    QueryDomainType<NodeDTO> dobj = qb.createQueryDefinition(NodeDTO.class);
+    Query<NodeDTO> query = session.createQuery(dobj);
+
+    List<NodeDTO> results = query.getResultList();
+    return createMap(results);
+  }
+    
     @Override
     public void prepare(Collection<HopNode> modified, Collection<HopNode> removed) throws StorageException {
         Session session = connector.obtainSession();
@@ -144,4 +158,13 @@ public class NodeClusterJ implements NodeTableDef, NodeDataAccess<HopNode> {
     private HopNode createHopNode(NodeDTO nodeDTO) {
         return new HopNode(nodeDTO.getnodeid(), nodeDTO.getName(), nodeDTO.getLocation(), nodeDTO.getLevel(), nodeDTO.getParent());
     }
+    
+  private Map<String, HopNode> createMap(List<NodeDTO> results) {
+    Map<String, HopNode> map = new HashMap<String, HopNode>();
+    for (NodeDTO persistable : results) {
+      HopNode hop = createHopNode(persistable);
+      map.put(hop.getId(), hop);
+    }
+    return map;
+  }
 }

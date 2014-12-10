@@ -284,6 +284,7 @@ public class ClusterjConnector implements StorageConnector<Session> {
 
   @Override
   public boolean formatStorage(Class<? extends EntityDataAccess>... das) throws StorageException {
+    LOG.info("Formating storage");
     Session session = obtainSession();
     Transaction tx = session.currentTransaction();
     session.setLockMode(LockMode.READ_COMMITTED);

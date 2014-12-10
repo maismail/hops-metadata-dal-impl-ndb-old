@@ -16,7 +16,9 @@ import com.mysql.clusterj.query.QueryBuilder;
 import com.mysql.clusterj.query.QueryDomainType;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.entity.yarn.HopAppSchedulingInfoBlacklist;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
@@ -64,6 +66,20 @@ public class AppSchedulingInfoBlacklistClusterJ implements AppSchedulingInfoBlac
         }
     }
 
+  public Map<String, List<HopAppSchedulingInfoBlacklist>> getAll() throws
+          StorageException {
+    Session session = connector.obtainSession();
+    QueryBuilder qb = session.getQueryBuilder();
+    QueryDomainType<AppSchedulingInfoBlacklistDTO> dobj
+            = qb.createQueryDefinition(
+                    AppSchedulingInfoBlacklistDTO.class);
+    Query<AppSchedulingInfoBlacklistDTO> query = session.
+            createQuery(dobj);
+    List<AppSchedulingInfoBlacklistDTO> results = query.
+            getResultList();
+    return createMap(results);
+  }
+    
     @Override
     public void prepare(Collection<HopAppSchedulingInfoBlacklist> modified, Collection<HopAppSchedulingInfoBlacklist> removed) throws StorageException {
         Session session = connector.obtainSession();
@@ -110,5 +126,20 @@ public class AppSchedulingInfoBlacklistClusterJ implements AppSchedulingInfoBlac
         }
         return blackList;
     }
-    
+ 
+   private Map<String, List<HopAppSchedulingInfoBlacklist>> createMap(
+          List<AppSchedulingInfoBlacklistDTO> results) {
+    Map<String, List<HopAppSchedulingInfoBlacklist>> map
+            = new HashMap<String, List<HopAppSchedulingInfoBlacklist>>();
+    for (AppSchedulingInfoBlacklistDTO dto : results) {
+      HopAppSchedulingInfoBlacklist hop = createHopAppSchedulingInfoBlacklist(
+              dto);
+      if (map.get(hop.getAppschedulinginfo_id()) == null) {
+        map.put(hop.getAppschedulinginfo_id(),
+                new ArrayList<HopAppSchedulingInfoBlacklist>());
+      }
+      map.get(hop.getAppschedulinginfo_id()).add(hop);
+    }
+    return map;
+  }
 }

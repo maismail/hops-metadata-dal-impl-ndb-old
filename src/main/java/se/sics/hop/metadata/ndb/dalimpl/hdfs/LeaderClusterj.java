@@ -2,9 +2,6 @@ package se.sics.hop.metadata.ndb.dalimpl.hdfs;
 
 import com.mysql.clusterj.Query;
 import com.mysql.clusterj.Session;
-import com.mysql.clusterj.annotation.Column;
-import com.mysql.clusterj.annotation.PersistenceCapable;
-import com.mysql.clusterj.annotation.PrimaryKey;
 import com.mysql.clusterj.query.Predicate;
 import com.mysql.clusterj.query.PredicateOperand;
 import com.mysql.clusterj.query.QueryBuilder;
@@ -14,6 +11,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import org.apache.log4j.Logger;
 import se.sics.hop.metadata.hdfs.entity.hop.HopLeader;
 import se.sics.hop.metadata.hdfs.dal.LeaderDataAccess;
 import se.sics.hop.exception.StorageException;
@@ -26,6 +24,8 @@ import se.sics.hop.metadata.hdfs.tabledef.LeaderTableDef;
  */
 public abstract class LeaderClusterj implements LeaderTableDef, LeaderDataAccess<HopLeader> {
 
+    static final Logger LOG = Logger.getLogger(LeaderClusterj.class);
+    
     Class dto;
 
     public interface LeaderDTO {
@@ -198,18 +198,21 @@ public abstract class LeaderClusterj implements LeaderTableDef, LeaderDataAccess
       List<LeaderDTO> changes = new ArrayList<LeaderDTO>();
       List<LeaderDTO> deletions = new ArrayList<LeaderDTO>();
       for (HopLeader l : newed) {
+        LOG.debug("adding " + l.getHostName() + " from leader table");
         LeaderDTO lTable = (LeaderDTO) session.newInstance(dto);
         createPersistableLeaderInstance(l, lTable);
         changes.add(lTable);
       }
 
       for (HopLeader l : modified) {
+        LOG.debug("updating " + l.getHostName() + " from leader table");
         LeaderDTO lTable = (LeaderDTO)session.newInstance(dto);
         createPersistableLeaderInstance(l, lTable);
         changes.add(lTable);
       }
 
       for (HopLeader l : removed) {
+        LOG.debug("removing " + l.getHostName() + " from leader table");
         LeaderDTO lTable = (LeaderDTO)session.newInstance(dto);
         createPersistableLeaderInstance(l, lTable);
         deletions.add(lTable);

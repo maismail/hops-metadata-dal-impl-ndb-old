@@ -16,7 +16,9 @@ import com.mysql.clusterj.query.QueryBuilder;
 import com.mysql.clusterj.query.QueryDomainType;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.entity.yarn.HopResourceRequest;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
@@ -71,6 +73,20 @@ public class ResourceRequestClusterJ implements ResourceRequestTableDef, Resourc
     }
 
     @Override
+    public Map<String, List<HopResourceRequest>>  getAll() throws StorageException{
+      Session session = connector.obtainSession();
+    QueryBuilder qb = session.getQueryBuilder();
+    QueryDomainType<ResourceRequestDTO> dobj
+            = qb.createQueryDefinition(
+                    ResourceRequestDTO.class);
+    Query<ResourceRequestDTO> query = session.
+            createQuery(dobj);
+    List<ResourceRequestDTO> results = query.
+            getResultList();
+    return createMap(results);
+    }
+    
+    @Override
     public void prepare(Collection<HopResourceRequest> modified, Collection<HopResourceRequest> removed) throws StorageException {
         Session session = connector.obtainSession();
         try {
@@ -121,5 +137,17 @@ public class ResourceRequestClusterJ implements ResourceRequestTableDef, Resourc
             resourceRequests.add(createHopResourceRequest(persistable));
         }
         return resourceRequests;
+    }
+    
+    private Map<String, List<HopResourceRequest>> createMap(List<ResourceRequestDTO> results){
+      Map<String, List<HopResourceRequest>> map = new HashMap<String, List<HopResourceRequest>>();
+      for(ResourceRequestDTO dto: results){
+        HopResourceRequest hop = createHopResourceRequest(dto);
+        if(map.get(hop.getId())==null){
+          map.put(hop.getId(), new ArrayList<HopResourceRequest>());
+        }
+        map.get(hop.getId()).add(hop);
+      }
+      return map;
     }
 }

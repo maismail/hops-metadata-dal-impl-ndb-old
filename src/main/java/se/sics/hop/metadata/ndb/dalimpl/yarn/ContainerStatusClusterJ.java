@@ -1,14 +1,20 @@
 package se.sics.hop.metadata.ndb.dalimpl.yarn;
 
+import com.mysql.clusterj.Query;
 import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
+import com.mysql.clusterj.query.QueryBuilder;
+import com.mysql.clusterj.query.QueryDomainType;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.entity.yarn.HopContainerStatus;
+import se.sics.hop.metadata.hdfs.entity.yarn.HopRMNode;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
 import se.sics.hop.metadata.yarn.dal.ContainerStatusDataAccess;
 import se.sics.hop.metadata.yarn.tabledef.ContainerStatusTableDef;
@@ -65,6 +71,19 @@ public class ContainerStatusClusterJ implements ContainerStatusTableDef, Contain
         return createHopContainerStatus(uciDTO);
     }
 
+   @Override
+  public Map<String, HopContainerStatus> getAll() throws StorageException {
+    Session session = connector.obtainSession();
+    QueryBuilder qb = session.getQueryBuilder();
+
+    QueryDomainType<ContainerStatusDTO> dobj = qb.createQueryDefinition(
+            ContainerStatusDTO.class);
+    Query<ContainerStatusDTO> query = session.createQuery(dobj);
+
+    List<ContainerStatusDTO> results = query.getResultList();
+    return createMap(results);
+  }
+  
     @Override
     public void prepare(Collection<HopContainerStatus> modified, Collection<HopContainerStatus> removed) throws StorageException {
         Session session = connector.obtainSession();
@@ -118,4 +137,13 @@ public class ContainerStatusClusterJ implements ContainerStatusTableDef, Contain
         }
         return hopList;
     }
+    
+     private Map<String, HopContainerStatus> createMap(List<ContainerStatusDTO> results) {
+    Map<String, HopContainerStatus> map = new HashMap<String, HopContainerStatus>();
+    for (ContainerStatusDTO persistable : results) {
+      HopContainerStatus hop = createHopContainerStatus(persistable);
+      map.put(hop.getContainerid(), hop);
+    }
+    return map;
+  }
 }

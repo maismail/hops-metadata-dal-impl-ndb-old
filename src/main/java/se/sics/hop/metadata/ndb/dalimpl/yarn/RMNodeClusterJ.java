@@ -10,7 +10,9 @@ import com.mysql.clusterj.query.QueryBuilder;
 import com.mysql.clusterj.query.QueryDomainType;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.entity.yarn.HopRMNode;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
@@ -130,11 +132,19 @@ public class RMNodeClusterJ implements RMNodeTableDef, RMNodeDataAccess<HopRMNod
         return createHopRMNode(rmnodeDTO);
     }
 
-    @Override
-    public List<HopRMNode> findByNodeAddress(String nodeAddress) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
+  @Override
+  public Map<String, HopRMNode> getAll() throws StorageException {
+    Session session = connector.obtainSession();
+    QueryBuilder qb = session.getQueryBuilder();
 
+    QueryDomainType<RMNodeDTO> dobj = qb.createQueryDefinition(RMNodeDTO.class);
+    Query<RMNodeDTO> query = session.createQuery(dobj);
+
+    List<RMNodeDTO> results = query.getResultList();
+    return createMap(results);
+  }
+    
+    
     @Override
     public void deleteAll(int startId, int endId) throws StorageException {
         Session session = connector.obtainSession();
@@ -205,4 +215,13 @@ public class RMNodeClusterJ implements RMNodeTableDef, RMNodeDataAccess<HopRMNod
                 /*rmDTO.getRMContextid(),*/ rmDTO.getLasthealthreporttime(), rmDTO.getcurrentstate(), 
                 rmDTO.getnodemanagerversion(), rmDTO.getovercommittimeout());
     }
+    
+  private Map<String, HopRMNode> createMap(List<RMNodeDTO> results) {
+    Map<String, HopRMNode> map = new HashMap<String, HopRMNode>();
+    for (RMNodeDTO persistable : results) {
+      HopRMNode hop = createHopRMNode(persistable);
+      map.put(hop.getNodeId(), hop);
+    }
+    return map;
+  }
 }
