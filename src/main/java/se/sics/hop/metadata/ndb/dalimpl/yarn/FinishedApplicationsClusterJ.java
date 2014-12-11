@@ -11,7 +11,9 @@ import com.mysql.clusterj.query.QueryDomainType;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.entity.yarn.HopFinishedApplications;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
@@ -60,6 +62,21 @@ public class FinishedApplicationsClusterJ implements FinishedApplicationsTableDe
         }
     }
 
+  @Override
+  public Map<String, List<HopFinishedApplications>> getAll() throws
+          StorageException {
+    Session session = connector.obtainSession();
+    QueryBuilder qb = session.getQueryBuilder();
+    QueryDomainType<FinishedApplicationsDTO> dobj
+            = qb.createQueryDefinition(
+                    FinishedApplicationsDTO.class);
+    Query<FinishedApplicationsDTO> query = session.
+            createQuery(dobj);
+    List<FinishedApplicationsDTO> results = query.
+            getResultList();
+    return createMap(results);
+  }
+    
     @Override
     public HopFinishedApplications findEntry(String rmnodeId, int applicationId) throws StorageException {
         Session session = connector.obtainSession();
@@ -114,4 +131,20 @@ public class FinishedApplicationsClusterJ implements FinishedApplicationsTableDe
         }
         return finishedApps;
     }
+    
+  private Map<String, List<HopFinishedApplications>> createMap(
+          List<FinishedApplicationsDTO> results) {
+    Map<String, List<HopFinishedApplications>> map
+            = new HashMap<String, List<HopFinishedApplications>>();
+    for (FinishedApplicationsDTO dto : results) {
+      HopFinishedApplications hop
+              = createHopFinishedApplications(dto);
+      if (map.get(hop.getRMNodeID()) == null) {
+        map.put(hop.getRMNodeID(),
+                new ArrayList<HopFinishedApplications>());
+      }
+      map.get(hop.getRMNodeID()).add(hop);
+    }
+    return map;
+  }
 }

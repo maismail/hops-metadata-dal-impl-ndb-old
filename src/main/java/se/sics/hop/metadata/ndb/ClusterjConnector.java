@@ -133,7 +133,9 @@ import se.sics.hop.metadata.yarn.tabledef.rmstatestore.DelegationTokenTableDef;
 import se.sics.hop.metadata.yarn.tabledef.rmstatestore.SequenceNumberTableDef;
 import se.sics.hop.metadata.yarn.tabledef.rmstatestore.VersionTableDef;
 import se.sics.hop.metadata.ndb.mysqlserver.MysqlServerConnector;
+import se.sics.hop.metadata.yarn.dal.rmstatestore.AllocateResponseDataAccess;
 import se.sics.hop.metadata.yarn.dal.rmstatestore.SecretMamagerKeysDataAccess;
+import se.sics.hop.metadata.yarn.tabledef.rmstatestore.AllocateResponseTableDef;
 import se.sics.hop.metadata.yarn.tabledef.rmstatestore.SecretMamagerKeysTableDef;
 
 public class ClusterjConnector implements StorageConnector<Session> {
@@ -279,11 +281,13 @@ public class ClusterjConnector implements StorageConnector<Session> {
             RMNodeDataAccess.class, SchedulerApplicationDataAccess.class, SequenceNumberDataAccess.class,
              FinishedApplicationsDataAccess.class,
             TokenDataAccess.class, RMContextInactiveNodesDataAccess.class, RMContextActiveNodesDataAccess.class,
-            UpdatedContainerInfoDataAccess.class, YarnLeaderDataAccess.class, SecretMamagerKeysDataAccess.class);
+            UpdatedContainerInfoDataAccess.class, YarnLeaderDataAccess.class, SecretMamagerKeysDataAccess.class,
+            AllocateResponseDataAccess.class);
   }
 
   @Override
   public boolean formatStorage(Class<? extends EntityDataAccess>... das) throws StorageException {
+    LOG.info("Formating storage");
     Session session = obtainSession();
     Transaction tx = session.currentTransaction();
     session.setLockMode(LockMode.READ_COMMITTED);
@@ -416,6 +420,8 @@ public class ClusterjConnector implements StorageConnector<Session> {
             truncate(UpdatedContainerInfoTableDef.TABLE_NAME);
           } else if (e == SecretMamagerKeysDataAccess.class){
             truncate(SecretMamagerKeysTableDef.TABLE_NAME);
+          } else if (e == AllocateResponseDataAccess.class){
+            truncate(AllocateResponseTableDef.TABLE_NAME);
           } else if (e == YarnVariablesDataAccess.class) {
             session.deletePersistentAll(YarnVariablesClusterJ.YarnVariablesDTO.class);
             for (int j = 0; j <= 18; j++) {

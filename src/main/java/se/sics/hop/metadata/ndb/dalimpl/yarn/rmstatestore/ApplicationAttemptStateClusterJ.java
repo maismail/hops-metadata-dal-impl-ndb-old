@@ -8,6 +8,7 @@ import com.mysql.clusterj.annotation.PrimaryKey;
 import com.mysql.clusterj.query.Predicate;
 import com.mysql.clusterj.query.QueryBuilder;
 import com.mysql.clusterj.query.QueryDomainType;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -17,6 +18,7 @@ import se.sics.hop.metadata.ndb.ClusterjConnector;
 import se.sics.hop.metadata.yarn.dal.rmstatestore.ApplicationAttemptStateDataAccess;
 import se.sics.hop.metadata.yarn.tabledef.rmstatestore.ApplicationAttemptStateTableDef;
 import static se.sics.hop.metadata.yarn.tabledef.rmstatestore.ApplicationAttemptStateTableDef.APPLICATIONATTEMPTID;
+import static se.sics.hop.metadata.yarn.tabledef.rmstatestore.ApplicationAttemptStateTableDef.APPLICATIONATTEMPTSTATE;
 
 /**
  *
@@ -25,24 +27,44 @@ import static se.sics.hop.metadata.yarn.tabledef.rmstatestore.ApplicationAttempt
 public class ApplicationAttemptStateClusterJ implements ApplicationAttemptStateTableDef, ApplicationAttemptStateDataAccess<HopApplicationAttemptState> {
 
     @PersistenceCapable(table = TABLE_NAME)
-    public interface ApplicationAttemptStateDTO {
+  public interface ApplicationAttemptStateDTO {
 
-        @PrimaryKey
-        @Column(name = APPLICATIONID)
-        String getapplicationid();
+    @PrimaryKey
+    @Column(name = APPLICATIONID)
+    String getapplicationid();
 
-        void setapplicationid(String applicationid);
+    void setapplicationid(String applicationid);
 
-        @Column(name = APPLICATIONATTEMPTID)
-        String getapplicationattemptid();
+    @Column(name = APPLICATIONATTEMPTID)
+    String getapplicationattemptid();
 
-        void setapplicationattemptid(String applicationattemptid);
+    void setapplicationattemptid(String applicationattemptid);
 
-        @Column(name = APPLICATIONATTEMPTSTATE)
-        byte[] getapplicationattemptstate();
+    @Column(name = APPLICATIONATTEMPTSTATE)
+    byte[] getapplicationattemptstate();
 
-        void setapplicationattemptstate(byte[] applicationattemptstate);
-    }
+    void setapplicationattemptstate(byte[] applicationattemptstate);
+
+    @Column(name = HOST)
+    String getapplicationattempthost();
+
+    void setapplicationattempthost(String host);
+
+    @Column(name = RPCPORT)
+    int getapplicationattemptrpcport();
+
+    void setapplicationattemptrpcport(int port);
+
+    @Column(name = TOKENS)
+    byte[] getapplicationattempttokens();
+
+    void setapplicationattempttokens(byte[] tokens);
+
+    @Column(name = TRAKINGURL)
+    String getapplicationattempttrakingurl();
+
+    void setapplicationattempttrakingurl(String trakingUrl);
+  }
     private final ClusterjConnector connector = ClusterjConnector.getInstance();
 
     @Override
@@ -64,7 +86,6 @@ public class ApplicationAttemptStateClusterJ implements ApplicationAttemptStateT
 
     @Override
     public List<HopApplicationAttemptState> findApplicationAttemptIdByApplicationId(String applicationid) throws StorageException {
-        try {
             Session session = connector.obtainSession();
             QueryBuilder qb = session.getQueryBuilder();
             QueryDomainType<ApplicationAttemptStateDTO> dobj = qb.createQueryDefinition(ApplicationAttemptStateDTO.class);
@@ -81,11 +102,8 @@ public class ApplicationAttemptStateClusterJ implements ApplicationAttemptStateT
                 }
                 return appAttemptIds;
             } else {
-                throw new StorageException("HOP :: findApplicationAttemptIdByApplicationId - attempt with appId:" + applicationid + " was not found");
+                return null;
             }
-        } catch (Exception e) {
-            throw new StorageException(e);
-        }
     }
 
     @Override
@@ -120,11 +138,22 @@ public class ApplicationAttemptStateClusterJ implements ApplicationAttemptStateT
         }
     }
 
-    private HopApplicationAttemptState createHopApplicationAttemptState(ApplicationAttemptStateDTO entry) {
-        return new HopApplicationAttemptState(entry.getapplicationid(),
-                entry.getapplicationattemptid(),
-                entry.getapplicationattemptstate());
+  private HopApplicationAttemptState createHopApplicationAttemptState(
+          ApplicationAttemptStateDTO entry) {
+    ByteBuffer buffer;
+    if (entry.getapplicationattempttokens() != null) {
+      buffer = ByteBuffer.wrap(entry.getapplicationattempttokens());
+    } else {
+      buffer = null;
     }
+    return new HopApplicationAttemptState(entry.getapplicationid(),
+            entry.getapplicationattemptid(),
+            entry.getapplicationattemptstate(),
+            entry.getapplicationattempthost(),
+            entry.getapplicationattemptrpcport(),
+            buffer,
+            entry.getapplicationattempttrakingurl());
+  }
 
     private List<HopApplicationAttemptState> createHopApplicationAttemptStateList(List<ApplicationAttemptStateDTO> list) {
         List<HopApplicationAttemptState> hopList = new ArrayList<HopApplicationAttemptState>();
@@ -135,13 +164,24 @@ public class ApplicationAttemptStateClusterJ implements ApplicationAttemptStateT
 
     }
 
-    private ApplicationAttemptStateDTO createPersistable(HopApplicationAttemptState hop, Session session) {
-        ApplicationAttemptStateClusterJ.ApplicationAttemptStateDTO applicationAttemptStateDTO = session.newInstance(ApplicationAttemptStateClusterJ.ApplicationAttemptStateDTO.class);
+  private ApplicationAttemptStateDTO createPersistable(
+          HopApplicationAttemptState hop, Session session) {
+    ApplicationAttemptStateClusterJ.ApplicationAttemptStateDTO applicationAttemptStateDTO
+            = session.newInstance(
+                    ApplicationAttemptStateClusterJ.ApplicationAttemptStateDTO.class);
 
-        applicationAttemptStateDTO.setapplicationid(hop.getApplicationid());
-        applicationAttemptStateDTO.setapplicationattemptid(hop.getApplicationattemptid());
-        applicationAttemptStateDTO.setapplicationattemptstate(hop.getApplicationattemptstate());
-
-        return applicationAttemptStateDTO;
+    applicationAttemptStateDTO.setapplicationid(hop.getApplicationid());
+    applicationAttemptStateDTO.setapplicationattemptid(hop.
+            getApplicationattemptid());
+    applicationAttemptStateDTO.setapplicationattemptstate(hop.
+            getApplicationattemptstate());
+    applicationAttemptStateDTO.setapplicationattempthost(hop.getHost());
+    applicationAttemptStateDTO.setapplicationattemptrpcport(hop.getRpcPort());
+    if (hop.getAppAttemptTokens() != null) {
+      applicationAttemptStateDTO.setapplicationattempttokens(hop.
+              getAppAttemptTokens().array());
     }
+    applicationAttemptStateDTO.setapplicationattempttrakingurl(hop.getUrl());
+    return applicationAttemptStateDTO;
+  }
 }

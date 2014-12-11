@@ -1,10 +1,16 @@
 package se.sics.hop.metadata.ndb.dalimpl.yarn;
 
+import com.mysql.clusterj.Query;
 import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
+import com.mysql.clusterj.query.QueryBuilder;
+import com.mysql.clusterj.query.QueryDomainType;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.entity.yarn.HopContainer;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
@@ -46,6 +52,20 @@ public class ContainerClusterJ implements ContainerTableDef, ContainerDataAccess
         return createHopContainer(containerDTO);
     }
 
+  @Override
+  public Map<String, HopContainer> getAll() throws StorageException {
+    Session session = connector.obtainSession();
+    QueryBuilder qb = session.getQueryBuilder();
+    QueryDomainType<ContainerDTO> dobj
+            = qb.createQueryDefinition(
+                    ContainerDTO.class);
+    Query<ContainerDTO> query = session.
+            createQuery(dobj);
+    List<ContainerDTO> results = query.
+            getResultList();
+    return createMap(results);
+  }
+    
     @Override
     public void prepare(Collection<HopContainer> modified, Collection<HopContainer> removed) throws StorageException {
         Session session = connector.obtainSession();
@@ -87,4 +107,16 @@ public class ContainerClusterJ implements ContainerTableDef, ContainerDataAccess
         
         return containerDTO;
     }
+    
+  private Map<String,HopContainer> createMap(
+          List<ContainerDTO> results) {
+    Map<String, HopContainer> map
+            = new HashMap<String, HopContainer>();
+    for (ContainerDTO dto : results) {
+      HopContainer hop
+              = createHopContainer(dto);
+      map.put(hop.getContainerIdID(), hop);
+    }
+    return map;
+  }
 }

@@ -14,9 +14,12 @@ import com.mysql.clusterj.annotation.PrimaryKey;
 import com.mysql.clusterj.query.Predicate;
 import com.mysql.clusterj.query.QueryBuilder;
 import com.mysql.clusterj.query.QueryDomainType;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.entity.yarn.HopFiCaSchedulerAppNewlyAllocatedContainers;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
@@ -46,7 +49,7 @@ public class FiCaSchedulerAppNewlyAllocatedContainersClusterJ implements FiCaSch
     
     @Override
     public List<HopFiCaSchedulerAppNewlyAllocatedContainers> findById(String ficaId) throws StorageException {
-        try {
+        
             Session session = connector.obtainSession();
             QueryBuilder qb = session.getQueryBuilder();
 
@@ -58,10 +61,23 @@ public class FiCaSchedulerAppNewlyAllocatedContainersClusterJ implements FiCaSch
 
             List<FiCaSchedulerAppNewlyAllocatedContainersClusterJ.FiCaSchedulerAppNewlyAllocatedContainersDTO> results = query.getResultList();
             return createFiCaSchedulerAppNewlyAllocatedContainersList(results);
-        } catch (Exception e) {
-            throw new StorageException(e);
-        }
+        
     }
+    
+    @Override
+  public Map<String, List<HopFiCaSchedulerAppNewlyAllocatedContainers>> getAll()
+          throws IOException {
+    Session session = connector.obtainSession();
+    QueryBuilder qb = session.getQueryBuilder();
+    QueryDomainType<FiCaSchedulerAppNewlyAllocatedContainersDTO> dobj
+            = qb.createQueryDefinition(
+                    FiCaSchedulerAppNewlyAllocatedContainersDTO.class);
+    Query<FiCaSchedulerAppNewlyAllocatedContainersDTO> query = session.
+            createQuery(dobj);
+    List<FiCaSchedulerAppNewlyAllocatedContainersDTO> results = query.
+            getResultList();
+    return createMap(results);
+  }
 
     @Override
     public void prepare(Collection<HopFiCaSchedulerAppNewlyAllocatedContainers> modified, Collection<HopFiCaSchedulerAppNewlyAllocatedContainers> removed) throws StorageException {
@@ -109,4 +125,20 @@ public class FiCaSchedulerAppNewlyAllocatedContainersClusterJ implements FiCaSch
         }
         return ficaSchedulerAppNewlyAllocatedContainers;
     }
+    
+    private Map<String, List<HopFiCaSchedulerAppNewlyAllocatedContainers>>
+          createMap(List<FiCaSchedulerAppNewlyAllocatedContainersDTO> results) {
+    Map<String, List<HopFiCaSchedulerAppNewlyAllocatedContainers>> map
+            = new HashMap<String, List<HopFiCaSchedulerAppNewlyAllocatedContainers>>();
+    for (FiCaSchedulerAppNewlyAllocatedContainersDTO persistable : results) {
+      HopFiCaSchedulerAppNewlyAllocatedContainers hop
+              = createHopFiCaSchedulerAppNewlyAllocatedContainers(persistable);
+      if (map.get(hop.getSchedulerapp_id()) == null) {
+        map.put(hop.getSchedulerapp_id(),
+                new ArrayList<HopFiCaSchedulerAppNewlyAllocatedContainers>());
+      }
+      map.get(hop.getSchedulerapp_id()).add(hop);
+    }
+    return map;
+  }
 }

@@ -16,7 +16,10 @@ import com.mysql.clusterj.query.QueryBuilder;
 import com.mysql.clusterj.query.QueryDomainType;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.entity.yarn.HopFiCaSchedulerAppLiveContainers;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
@@ -66,6 +69,21 @@ public class FiCaSchedulerAppLiveContainersClusterJ implements FiCaSchedulerAppL
         }
     }
 
+   @Override
+  public Map<String, List<HopFiCaSchedulerAppLiveContainers>> getAll() throws
+          StorageException {
+    Session session = connector.obtainSession();
+    QueryBuilder qb = session.getQueryBuilder();
+    QueryDomainType<FiCaSchedulerAppLiveContainersDTO> dobj
+            = qb.createQueryDefinition(
+                    FiCaSchedulerAppLiveContainersDTO.class);
+    Query<FiCaSchedulerAppLiveContainersDTO> query = session.
+            createQuery(dobj);
+    List<FiCaSchedulerAppLiveContainersDTO> results = query.
+            getResultList();
+    return createMap(results);
+  }
+    
     @Override
     public void prepare(Collection<HopFiCaSchedulerAppLiveContainers> modified, Collection<HopFiCaSchedulerAppLiveContainers> removed) throws StorageException {
         Session session = connector.obtainSession();
@@ -114,4 +132,20 @@ public class FiCaSchedulerAppLiveContainersClusterJ implements FiCaSchedulerAppL
         }
         return ficaSchedulerAppLiveContainers;
     }  
+    
+    private Map<String, List<HopFiCaSchedulerAppLiveContainers>> createMap(
+          List<FiCaSchedulerAppLiveContainersDTO> results) {
+    Map<String, List<HopFiCaSchedulerAppLiveContainers>> map
+            = new HashMap<String, List<HopFiCaSchedulerAppLiveContainers>>();
+    for (FiCaSchedulerAppLiveContainersDTO dto : results) {
+      HopFiCaSchedulerAppLiveContainers hop
+              = createHopFiCaSchedulerAppLiveContainers(dto);
+      if (map.get(hop.getSchedulerapp_id()) == null) {
+        map.put(hop.getSchedulerapp_id(),
+                new ArrayList<HopFiCaSchedulerAppLiveContainers>());
+      }
+      map.get(hop.getSchedulerapp_id()).add(hop);
+    }
+    return map;
+  }
 }

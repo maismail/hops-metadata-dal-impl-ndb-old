@@ -11,7 +11,9 @@ import com.mysql.clusterj.query.QueryDomainType;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.entity.yarn.HopUpdatedContainerInfo;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
@@ -85,7 +87,21 @@ public class UpdatedContainerInfoClusterJ implements UpdatedContainerInfoTableDe
             throw new StorageException(e);
         }
     }
+    
+  @Override
+  public Map<String, List<HopUpdatedContainerInfo>> getAll() throws
+          StorageException {
+    Session session = connector.obtainSession();
+    QueryBuilder qb = session.getQueryBuilder();
 
+    QueryDomainType<UpdatedContainerInfoDTO> dobj = qb.createQueryDefinition(
+            UpdatedContainerInfoDTO.class);
+    Query<UpdatedContainerInfoDTO> query = session.createQuery(dobj);
+
+    List<UpdatedContainerInfoDTO> results = query.getResultList();
+    return createMap(results);
+  }
+    
     @Override
     public void prepare(Collection<HopUpdatedContainerInfo> modified, Collection<HopUpdatedContainerInfo> removed) throws StorageException {
         Session session = connector.obtainSession();
@@ -133,4 +149,18 @@ public class UpdatedContainerInfoClusterJ implements UpdatedContainerInfoTableDe
         }
         return updatedContainerInfos;
     }
+    
+  private Map<String, List<HopUpdatedContainerInfo>> createMap(
+          List<UpdatedContainerInfoDTO> results) {
+    Map<String, List<HopUpdatedContainerInfo>> map
+            = new HashMap<String, List<HopUpdatedContainerInfo>>();
+    for (UpdatedContainerInfoDTO persistable : results) {
+      HopUpdatedContainerInfo hop = createHopUpdatedContainerInfo(persistable);
+      if (map.get(hop.getRmnodeid()) == null) {
+        map.put(hop.getRmnodeid(), new ArrayList<HopUpdatedContainerInfo>());
+      }
+      map.get(hop.getRmnodeid()).add(hop);
+    }
+    return map;
+  }
 }

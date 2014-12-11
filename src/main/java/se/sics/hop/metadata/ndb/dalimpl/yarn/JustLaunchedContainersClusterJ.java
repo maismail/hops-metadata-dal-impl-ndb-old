@@ -10,7 +10,9 @@ import com.mysql.clusterj.query.QueryBuilder;
 import com.mysql.clusterj.query.QueryDomainType;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.entity.yarn.HopJustLaunchedContainers;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
@@ -118,6 +120,18 @@ public class JustLaunchedContainersClusterJ implements JustLaunchedContainersTab
         }
     }
 
+  @Override
+  public Map<String, List<HopJustLaunchedContainers>> getAll() throws StorageException {
+    Session session = connector.obtainSession();
+    QueryBuilder qb = session.getQueryBuilder();
+
+    QueryDomainType<JustLaunchedContainersDTO> dobj = qb.createQueryDefinition(
+            JustLaunchedContainersDTO.class);
+    Query<JustLaunchedContainersDTO> query = session.createQuery(dobj);
+
+    List<JustLaunchedContainersDTO> results = query.getResultList();
+    return createMap(results);
+  }
 
     private HopJustLaunchedContainers createJustLaunchedContainers(JustLaunchedContainersDTO dto) {
         HopJustLaunchedContainers hop = new HopJustLaunchedContainers(dto.getrmnodeid(), dto.getcontainerid());
@@ -145,4 +159,18 @@ public class JustLaunchedContainersClusterJ implements JustLaunchedContainersTab
         }
         return justLaunchedContainers;
     }
+    
+  private Map<String, List<HopJustLaunchedContainers>> createMap(
+          List<JustLaunchedContainersDTO> results) {
+    Map<String, List<HopJustLaunchedContainers>> map
+            = new HashMap<String, List<HopJustLaunchedContainers>>();
+    for (JustLaunchedContainersDTO persistable : results) {
+      HopJustLaunchedContainers hop = createJustLaunchedContainers(persistable);
+      if (map.get(hop.getRmnodeid()) == null) {
+        map.put(hop.getRmnodeid(), new ArrayList<HopJustLaunchedContainers>());
+      }
+      map.get(hop.getRmnodeid()).add(hop);
+    }
+    return map;
+  }
 }

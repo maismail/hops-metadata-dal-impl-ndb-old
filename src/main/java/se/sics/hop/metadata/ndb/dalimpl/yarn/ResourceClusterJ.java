@@ -10,7 +10,9 @@ import com.mysql.clusterj.query.QueryBuilder;
 import com.mysql.clusterj.query.QueryDomainType;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.entity.yarn.HopResource;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
@@ -69,6 +71,21 @@ public class ResourceClusterJ implements ResourceTableDef, ResourceDataAccess<Ho
         return createHopResource(resourceDTO);
     }
 
+  @Override
+  public Map<String, Map<Integer, Map<Integer, HopResource>>> getAll() throws
+          StorageException {
+    Session session = connector.obtainSession();
+    QueryBuilder qb = session.getQueryBuilder();
+    QueryDomainType<ResourceDTO> dobj
+            = qb.createQueryDefinition(
+                    ResourceDTO.class);
+    Query<ResourceDTO> query = session.
+            createQuery(dobj);
+    List<ResourceDTO> results = query.
+            getResultList();
+    return createMap(results);
+  }
+    
     @Override
     public HopResource findById(String id) throws StorageException {
         Session session = connector.obtainSession();
@@ -135,4 +152,24 @@ public class ResourceClusterJ implements ResourceTableDef, ResourceDataAccess<Ho
         resourceDTO.setVirtualcores(resource.getVirtualCores());
         return resourceDTO;
     }
+    
+  private Map<String, Map<Integer, Map<Integer, HopResource>>> createMap(
+          List<ResourceDTO> results) {
+    Map<String, Map<Integer, Map<Integer, HopResource>>> map
+            = new HashMap<String, Map<Integer, Map<Integer, HopResource>>>();
+    for (ResourceDTO dto : results) {
+      HopResource hop
+              = createHopResource(dto);
+      if (map.get(hop.getId()) == null) {
+        map.put(hop.getId(),
+                new HashMap<Integer, Map<Integer, HopResource>>());
+      }
+      Map<Integer, Map<Integer, HopResource>> inerMap = map.get(hop.getId());
+      if(inerMap.get(hop.getType())==null){
+        inerMap.put(hop.getType(), new HashMap<Integer, HopResource>());
+      }
+      inerMap.get(hop.getType()).put(hop.getParent(), hop);
+    }
+    return map;
+  }
 }

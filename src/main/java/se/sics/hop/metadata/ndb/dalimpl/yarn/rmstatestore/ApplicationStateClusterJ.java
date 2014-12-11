@@ -35,6 +35,21 @@ public class ApplicationStateClusterJ implements ApplicationStateTableDef, Appli
         byte[] getappstate();
 
         void setappstate(byte[] appstate);
+        
+        @Column(name = USER)
+        String getappuser();
+
+        void setappuser(String user);
+        
+        @Column(name = NAME)
+        String getappname();
+
+        void setappname(String name);
+        
+        @Column(name = SMSTATE)
+        String getappsmstate();
+
+        void setappsmstate(String appstate);
     }
     private final ClusterjConnector connector = ClusterjConnector.getInstance();
 
@@ -91,14 +106,16 @@ public class ApplicationStateClusterJ implements ApplicationStateTableDef, Appli
         }
     }
 
-    private HopApplicationState createHopApplicationState(ApplicationStateDTO appStateDTO) {
-      if(appStateDTO!=null){
-        return new HopApplicationState(appStateDTO.getapplicationid(),
-                appStateDTO.getappstate());
-      }else{
-        return null;
-      }
+  private HopApplicationState createHopApplicationState(
+          ApplicationStateDTO appStateDTO) {
+    if (appStateDTO != null) {
+      return new HopApplicationState(appStateDTO.getapplicationid(),
+              appStateDTO.getappstate(), appStateDTO.getappuser(),
+              appStateDTO.getappname(), appStateDTO.getappsmstate());
+    } else {
+      return null;
     }
+  }
 
     private List<HopApplicationState> createHopApplicationStateList(List<ApplicationStateDTO> list) {
         List<HopApplicationState> hopList = new ArrayList<HopApplicationState>();
@@ -109,11 +126,16 @@ public class ApplicationStateClusterJ implements ApplicationStateTableDef, Appli
 
     }
 
-    private ApplicationStateDTO createPersistable(HopApplicationState hop, Session session) {
-        ApplicationStateDTO appStateDTO = session.newInstance(ApplicationStateClusterJ.ApplicationStateDTO.class);
-        appStateDTO.setapplicationid(hop.getApplicationid());
-        appStateDTO.setappstate(hop.getAppstate());
+  private ApplicationStateDTO createPersistable(HopApplicationState hop,
+          Session session) {
+    ApplicationStateDTO appStateDTO = session.newInstance(
+            ApplicationStateClusterJ.ApplicationStateDTO.class);
+    appStateDTO.setapplicationid(hop.getApplicationid());
+    appStateDTO.setappstate(hop.getAppstate());
+    appStateDTO.setappuser(hop.getUser());
+    appStateDTO.setappname(hop.getName());
+    appStateDTO.setappsmstate(hop.getState());
 
-        return appStateDTO;
-    }
+    return appStateDTO;
+  }
 }

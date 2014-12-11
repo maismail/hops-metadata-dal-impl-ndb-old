@@ -10,7 +10,9 @@ import com.mysql.clusterj.query.QueryBuilder;
 import com.mysql.clusterj.query.QueryDomainType;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.entity.yarn.HopLaunchedContainers;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
@@ -62,6 +64,22 @@ public class LaunchedContainersClusterJ implements LaunchedContainersTableDef, L
         return createLaunchedContainersEntry(dto);
     }
 
+  @Override
+  public Map<String, List<HopLaunchedContainers>> getAll() throws
+          StorageException {
+    Session session = connector.obtainSession();
+    QueryBuilder qb = session.getQueryBuilder();
+    QueryDomainType<LaunchedContainersDTO> dobj
+            = qb.createQueryDefinition(
+                    LaunchedContainersDTO.class);
+    Query<LaunchedContainersDTO> query = session.
+            createQuery(dobj);
+    List<LaunchedContainersDTO> results = query.
+            getResultList();
+    return createMap(results);
+  }
+    
+    
     @Override
     public List<HopLaunchedContainers> findByFiCaSchedulerNode(String schedulernode_id) throws StorageException {
         try {
@@ -113,6 +131,18 @@ public class LaunchedContainersClusterJ implements LaunchedContainersTableDef, L
         createPersistable(ficaschedulernode, session);
     }
 
+    private Map<String, List<HopLaunchedContainers>> createMap( List<LaunchedContainersDTO> dtos){
+      Map<String, List<HopLaunchedContainers>> map = new HashMap<String, List<HopLaunchedContainers>>();
+      for (LaunchedContainersDTO dto : dtos) {
+        HopLaunchedContainers hop = createLaunchedContainersEntry(dto);
+        if(map.get(hop.getSchedulerNodeID())==null){
+          map.put(hop.getSchedulerNodeID(), new ArrayList<HopLaunchedContainers>());
+        }
+        map.get(hop.getSchedulerNodeID()).add(hop);
+      }
+      return map;
+    }
+    
     private HopLaunchedContainers createLaunchedContainersEntry(LaunchedContainersDTO dto) {
         HopLaunchedContainers hop = new HopLaunchedContainers(
                 dto.getschedulernode_id(),

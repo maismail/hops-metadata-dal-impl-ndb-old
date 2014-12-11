@@ -1,12 +1,17 @@
 package se.sics.hop.metadata.ndb.dalimpl.yarn;
 
+import com.mysql.clusterj.Query;
 import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
+import com.mysql.clusterj.query.QueryBuilder;
+import com.mysql.clusterj.query.QueryDomainType;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.entity.yarn.HopRMContainer;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
@@ -94,6 +99,20 @@ public class RMContainerClusterJ implements RMContainerTableDef, RMContainerData
   }
 
   @Override
+  public Map<String, HopRMContainer> getAll() throws StorageException {
+    Session session = connector.obtainSession();
+    QueryBuilder qb = session.getQueryBuilder();
+    QueryDomainType<RMContainerDTO> dobj
+            = qb.createQueryDefinition(
+                    RMContainerDTO.class);
+    Query<RMContainerDTO> query = session.
+            createQuery(dobj);
+    List<RMContainerDTO> results = query.
+            getResultList();
+    return createMap(results);
+  }
+  
+  @Override
   public void prepare(Collection<HopRMContainer> modified, Collection<HopRMContainer> removed) throws StorageException {
     Session session = connector.obtainSession();
     try {
@@ -155,5 +174,17 @@ public class RMContainerClusterJ implements RMContainerTableDef, RMContainerData
     rMContainerDTO.setexitstatus(hop.getExitStatus());
 
     return rMContainerDTO;
+  }
+  
+  private Map<String, HopRMContainer> createMap(
+          List<RMContainerDTO> results) {
+    Map<String, HopRMContainer> map
+            = new HashMap<String, HopRMContainer>();
+    for (RMContainerDTO dto : results) {
+      HopRMContainer hop
+              = createHopRMContainer(dto);
+      map.put(hop.getContainerIdID(), hop);
+    }
+    return map;
   }
 }
