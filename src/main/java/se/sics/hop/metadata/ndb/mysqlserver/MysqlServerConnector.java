@@ -20,14 +20,11 @@ import java.util.Properties;
  */
 public class MysqlServerConnector implements StorageConnector<Connection> {
 
-  private static MysqlServerConnector instance;
+  private final static MysqlServerConnector instance = new MysqlServerConnector();
   private static HikariDataSource connectionPool;
   private ThreadLocal<Connection> connection = new ThreadLocal<Connection>();
 
-  public static MysqlServerConnector getInstance(){
-    if(instance == null){
-      instance = new MysqlServerConnector();
-    }
+  public static MysqlServerConnector getInstance() {
     return instance;
   }
   
@@ -64,21 +61,20 @@ public class MysqlServerConnector implements StorageConnector<Connection> {
         conn = connectionPool.getConnection();
         connection.set(conn);
       } catch (SQLException ex) {
-        throw new StorageException(ex);
+        throw HopsSQLExceptionHelper.wrap(ex);
       }
     }
     return conn;
   }
 
-  public void closeSession() throws StorageException
-  {
+  public void closeSession() throws StorageException {
     Connection conn = connection.get();
     if (conn != null) {
       try {
         conn.close();
         connection.remove();
       } catch (SQLException ex) {
-        throw new StorageException(ex);
+        throw HopsSQLExceptionHelper.wrap(ex);
       }
     }
   }
@@ -123,7 +119,7 @@ public class MysqlServerConnector implements StorageConnector<Connection> {
   }
 
   public boolean formatStorage(Class<? extends EntityDataAccess>... das) throws StorageException {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    throw new UnsupportedOperationException("Not supported yet.");
   }
   
   @Override
@@ -158,6 +154,6 @@ public class MysqlServerConnector implements StorageConnector<Connection> {
 
   @Override
   public boolean formatStorageNonTransactional() throws StorageException {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    throw new UnsupportedOperationException("Not supported yet.");
   }
 }

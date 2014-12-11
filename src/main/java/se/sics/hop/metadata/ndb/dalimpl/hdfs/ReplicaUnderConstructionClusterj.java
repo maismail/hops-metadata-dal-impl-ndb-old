@@ -1,15 +1,11 @@
 package se.sics.hop.metadata.ndb.dalimpl.hdfs;
 
 import com.google.common.primitives.Ints;
-import com.mysql.clusterj.Query;
 import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PartitionKey;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
-import com.mysql.clusterj.query.Predicate;
-import com.mysql.clusterj.query.QueryBuilder;
-import com.mysql.clusterj.query.QueryDomainType;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -18,7 +14,11 @@ import se.sics.hop.metadata.hdfs.entity.hdfs.HopReplicaUnderConstruction;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
 import se.sics.hop.metadata.hdfs.tabledef.ReplicaUnderConstructionTableDef;
-import se.sics.hop.metadata.ndb.DBSession;
+import se.sics.hop.metadata.ndb.wrapper.HopsPredicate;
+import se.sics.hop.metadata.ndb.wrapper.HopsQuery;
+import se.sics.hop.metadata.ndb.wrapper.HopsQueryBuilder;
+import se.sics.hop.metadata.ndb.wrapper.HopsQueryDomainType;
+import se.sics.hop.metadata.ndb.wrapper.HopsSession;
 
 /**
  *
@@ -57,75 +57,63 @@ public class ReplicaUnderConstructionClusterj implements ReplicaUnderConstructio
 
   @Override
   public void prepare(Collection<HopReplicaUnderConstruction> removed, Collection<HopReplicaUnderConstruction> newed, Collection<HopReplicaUnderConstruction> modified) throws StorageException {
-    DBSession dbSession = connector.obtainSession();
+    HopsSession session = connector.obtainSession();
     List<ReplicaUcDTO> changes = new ArrayList<ReplicaUcDTO>();
     List<ReplicaUcDTO> deletions = new ArrayList<ReplicaUcDTO>();
     for (HopReplicaUnderConstruction replica : removed) {
-      ReplicaUcDTO newInstance = dbSession.getSession().newInstance(ReplicaUcDTO.class);
+      ReplicaUcDTO newInstance = session.newInstance(ReplicaUcDTO.class);
       createPersistable(replica, newInstance);
       deletions.add(newInstance);
     }
 
     for (HopReplicaUnderConstruction replica : newed) {
-      ReplicaUcDTO newInstance = dbSession.getSession().newInstance(ReplicaUcDTO.class);
+      ReplicaUcDTO newInstance = session.newInstance(ReplicaUcDTO.class);
       createPersistable(replica, newInstance);
       changes.add(newInstance);
     }
-    dbSession.getSession().deletePersistentAll(deletions);
-    dbSession.getSession().savePersistentAll(changes);
+    session.deletePersistentAll(deletions);
+    session.savePersistentAll(changes);
   }
 
   @Override
   public List<HopReplicaUnderConstruction> findReplicaUnderConstructionByBlockId(long blockId, int inodeId) throws StorageException {
-    try {
-      DBSession dbSession = connector.obtainSession();
-      QueryBuilder qb = dbSession.getSession().getQueryBuilder();
-      QueryDomainType<ReplicaUcDTO> dobj = qb.createQueryDefinition(ReplicaUcDTO.class);
-      Predicate pred1 = dobj.get("blockId").equal(dobj.param("blockIdParam"));
-      Predicate pred2 = dobj.get("iNodeId").equal(dobj.param("iNodeIdParam"));
-      dobj.where(pred1.and(pred2));
-      Query<ReplicaUcDTO> query = dbSession.getSession().createQuery(dobj);
-      query.setParameter("blockIdParam", blockId);
-      query.setParameter("iNodeIdParam", inodeId);
-      return createReplicaList(query.getResultList());
-    } catch (Exception e) {
-      throw new StorageException(e);
-    }
+    HopsSession session = connector.obtainSession();
+    HopsQueryBuilder qb = session.getQueryBuilder();
+    HopsQueryDomainType<ReplicaUcDTO> dobj = qb.createQueryDefinition(ReplicaUcDTO.class);
+    HopsPredicate pred1 = dobj.get("blockId").equal(dobj.param("blockIdParam"));
+    HopsPredicate pred2 = dobj.get("iNodeId").equal(dobj.param("iNodeIdParam"));
+    dobj.where(pred1.and(pred2));
+    HopsQuery<ReplicaUcDTO> query = session.createQuery(dobj);
+    query.setParameter("blockIdParam", blockId);
+    query.setParameter("iNodeIdParam", inodeId);
+    return createReplicaList(query.getResultList());
   }
   
   @Override
   public List<HopReplicaUnderConstruction> findReplicaUnderConstructionByINodeId(int inodeId) throws StorageException {
-    try {
-      DBSession dbSession = connector.obtainSession();
-      QueryBuilder qb = dbSession.getSession().getQueryBuilder();
-      QueryDomainType<ReplicaUcDTO> dobj = qb.createQueryDefinition(ReplicaUcDTO.class);
-      Predicate pred1 = dobj.get("iNodeId").equal(dobj.param("iNodeIdParam"));
-      dobj.where(pred1);
-      Query<ReplicaUcDTO> query = dbSession.getSession().createQuery(dobj);
-      query.setParameter("iNodeIdParam", inodeId);
-      return createReplicaList(query.getResultList());
-    } catch (Exception e) {
-      throw new StorageException(e);
-    }
+    HopsSession session = connector.obtainSession();
+    HopsQueryBuilder qb = session.getQueryBuilder();
+    HopsQueryDomainType<ReplicaUcDTO> dobj = qb.createQueryDefinition(ReplicaUcDTO.class);
+    HopsPredicate pred1 = dobj.get("iNodeId").equal(dobj.param("iNodeIdParam"));
+    dobj.where(pred1);
+    HopsQuery<ReplicaUcDTO> query = session.createQuery(dobj);
+    query.setParameter("iNodeIdParam", inodeId);
+    return createReplicaList(query.getResultList());
   }
   
 
   @Override
   public List<HopReplicaUnderConstruction> findReplicaUnderConstructionByINodeIds(int[] inodeIds) throws StorageException {
-    try {
-      DBSession dbSession = connector.obtainSession();
-      QueryBuilder qb = dbSession.getSession().getQueryBuilder();
-      QueryDomainType<ReplicaUcDTO> dobj = qb.createQueryDefinition(ReplicaUcDTO.class);
-      Predicate pred1 = dobj.get("iNodeId").in(dobj.param("iNodeIdParam"));
-      dobj.where(pred1);
-      Query<ReplicaUcDTO> query = dbSession.getSession().createQuery(dobj);
-      query.setParameter("iNodeIdParam", Ints.asList(inodeIds));
-      return createReplicaList(query.getResultList());
-    } catch (Exception e) {
-      throw new StorageException(e);
-    }
+    HopsSession session = connector.obtainSession();
+    HopsQueryBuilder qb = session.getQueryBuilder();
+    HopsQueryDomainType<ReplicaUcDTO> dobj = qb.createQueryDefinition(ReplicaUcDTO.class);
+    HopsPredicate pred1 = dobj.get("iNodeId").in(dobj.param("iNodeIdParam"));
+    dobj.where(pred1);
+    HopsQuery<ReplicaUcDTO> query = session.createQuery(dobj);
+    query.setParameter("iNodeIdParam", Ints.asList(inodeIds));
+    return createReplicaList(query.getResultList());
   }
-   
+
   private List<HopReplicaUnderConstruction> createReplicaList(List<ReplicaUcDTO> replicaUc) throws StorageException {
     List<HopReplicaUnderConstruction> replicas = new ArrayList<HopReplicaUnderConstruction>(replicaUc.size());
     for (ReplicaUcDTO t : replicaUc) {

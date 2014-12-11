@@ -6,21 +6,19 @@ package se.sics.hop.metadata.ndb;
 
 import com.mysql.clusterj.ClusterJException;
 import com.mysql.clusterj.ClusterJHelper;
-import java.util.Properties;
+import com.mysql.clusterj.Constants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import se.sics.hop.exception.StorageException;
-import com.mysql.clusterj.Constants;
-import com.mysql.clusterj.Session;
-import com.mysql.clusterj.SessionFactory;
-import java.util.Iterator;
+import se.sics.hop.metadata.ndb.wrapper.HopsExceptionHelper;
+import se.sics.hop.metadata.ndb.wrapper.HopsSession;
+import se.sics.hop.metadata.ndb.wrapper.HopsSessionFactory;
+
 import java.util.NoSuchElementException;
-import java.util.Queue;
+import java.util.Properties;
 import java.util.Random;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -29,7 +27,7 @@ import java.util.logging.Logger;
 public class DBSessionProvider implements Runnable {
 
     static final Log LOG = LogFactory.getLog(DBSessionProvider.class);
-    static SessionFactory sessionFactory;
+    static HopsSessionFactory sessionFactory;
     private ConcurrentLinkedQueue<DBSession> sessionPool = new ConcurrentLinkedQueue<DBSession>();
     private ConcurrentLinkedQueue<DBSession> toGC = new ConcurrentLinkedQueue<DBSession>();
     private final int MAX_REUSE_COUNT;
@@ -58,24 +56,24 @@ public class DBSessionProvider implements Runnable {
         System.out.println("Database name: " + conf.get(Constants.PROPERTY_CLUSTER_DATABASE));
         System.out.println("Max Transactions: " + conf.get(Constants.PROPERTY_CLUSTER_MAX_TRANSACTIONS));
         try {
-            sessionFactory = ClusterJHelper.getSessionFactory(conf);
+            sessionFactory = new HopsSessionFactory(ClusterJHelper.getSessionFactory(conf));
         } catch (ClusterJException ex) {
-            throw new StorageException(ex);
+            throw HopsExceptionHelper.wrap(ex);
         }
 
         for (int i = 0; i < initialPoolSize; i++) {
             sessionPool.add(initSession());
         }
 
-        thread = new Thread(this, "Session Pool Refresh Deamon");
+        thread = new Thread(this, "Session Pool Refresh Daemon");
         thread.setDaemon(true);
         automaticRefresh = true;
         thread.start();
     }
 
-    private DBSession initSession() {
+    private DBSession initSession() throws StorageException {
         Long startTime = System.currentTimeMillis();
-        Session session = sessionFactory.getSession();
+        HopsSession session = sessionFactory.getSession();
         Long sessionCreationTime = (System.currentTimeMillis() - startTime);
         rollingAvg[rollingAvgIndex.incrementAndGet() % rollingAvg.length] = sessionCreationTime;
 
@@ -85,14 +83,14 @@ public class DBSessionProvider implements Runnable {
         return dbSession;
     }
     
-    private void closeSession(DBSession dbSession){
+    private void closeSession(DBSession dbSession) throws StorageException {
         Long startTime = System.currentTimeMillis();
         dbSession.getSession().close();
         Long sessionCreationTime = (System.currentTimeMillis() - startTime);
         rollingAvg[rollingAvgIndex.incrementAndGet() % rollingAvg.length] = sessionCreationTime;
     }
 
-    public void stop() {
+    public void stop() throws StorageException {
         automaticRefresh = false;
         while (!sessionPool.isEmpty()) {
             DBSession dbsession = sessionPool.remove();
@@ -100,7 +98,7 @@ public class DBSessionProvider implements Runnable {
         }
     }
 
-    public DBSession getSession() {
+    public DBSession getSession() throws StorageException {
         try {
             DBSession session = sessionPool.remove();
             return session;
@@ -175,10 +173,16 @@ public class DBSessionProvider implements Runnable {
             } catch (NoSuchElementException e) {
                 //System.out.print(".");
                 for (int i = 0; i < 100; i++) {
-                    sessionPool.add(initSession());
+                    try {
+                        sessionPool.add(initSession());
+                    } catch (StorageException e1) {
+                        LOG.error(e1);
+                    }
                 }
             } catch (InterruptedException ex) {
-                System.out.println(ex);
+                LOG.warn(ex);
+            } catch (StorageException e) {
+                LOG.error(e);
             }
         }
     }

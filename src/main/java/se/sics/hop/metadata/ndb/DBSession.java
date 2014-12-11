@@ -4,7 +4,7 @@
  */
 package se.sics.hop.metadata.ndb;
 
-import com.mysql.clusterj.Session;
+import se.sics.hop.metadata.ndb.wrapper.HopsSession;
 
 /**
  *
@@ -12,17 +12,17 @@ import com.mysql.clusterj.Session;
  */
 public class DBSession {
     
-    private Session session;
+    private HopsSession session;
     private final int MAX_REUSE_COUNT;
     private int sessionUseCount;
 
-    public DBSession(Session session, int maxReuseCount) {
+    public DBSession(HopsSession session, int maxReuseCount) {
         this.session = session;
         this.MAX_REUSE_COUNT = maxReuseCount;
         this.sessionUseCount = 0;
     }
 
-    public Session getSession() {
+    public HopsSession getSession() {
         return session;
     }
 

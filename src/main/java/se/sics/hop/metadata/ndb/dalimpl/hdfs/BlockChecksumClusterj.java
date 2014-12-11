@@ -1,27 +1,25 @@
 package se.sics.hop.metadata.ndb.dalimpl.hdfs;
 
-import com.mysql.clusterj.Query;
-import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
-import com.mysql.clusterj.query.Predicate;
-import com.mysql.clusterj.query.QueryBuilder;
-import com.mysql.clusterj.query.QueryDomainType;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.dal.BlockChecksumDataAccess;
 import se.sics.hop.metadata.hdfs.entity.hop.BlockChecksum;
-import se.sics.hop.metadata.hdfs.entity.hop.HopEncodingStatus;
 import se.sics.hop.metadata.hdfs.tabledef.BlockChecksumTableDef;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
-import se.sics.hop.metadata.ndb.DBSession;
+import se.sics.hop.metadata.ndb.mysqlserver.HopsSQLExceptionHelper;
 import se.sics.hop.metadata.ndb.mysqlserver.MysqlServerConnector;
+import se.sics.hop.metadata.ndb.wrapper.HopsPredicate;
+import se.sics.hop.metadata.ndb.wrapper.HopsQuery;
+import se.sics.hop.metadata.ndb.wrapper.HopsQueryBuilder;
+import se.sics.hop.metadata.ndb.wrapper.HopsQueryDomainType;
+import se.sics.hop.metadata.ndb.wrapper.HopsSession;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -58,7 +56,7 @@ public class BlockChecksumClusterj implements BlockChecksumTableDef, BlockChecks
   @Override
   public void add(BlockChecksum blockChecksum) throws StorageException {
     LOG.info("ADD " + blockChecksum.toString());
-    Session session = clusterjConnector.obtainSession().getSession();
+    HopsSession session = clusterjConnector.obtainSession();
     BlockChecksumDto dto = session.newInstance(BlockChecksumDto.class);
     copyState(blockChecksum, dto);
     session.savePersistent(dto);
@@ -67,7 +65,7 @@ public class BlockChecksumClusterj implements BlockChecksumTableDef, BlockChecks
   @Override
   public void update(BlockChecksum blockChecksum) throws StorageException {
     LOG.info("UPDATE " + blockChecksum.toString());
-    Session session = clusterjConnector.obtainSession().getSession();
+    HopsSession session = clusterjConnector.obtainSession();
     BlockChecksumDto dto = session.newInstance(BlockChecksumDto.class);
     copyState(blockChecksum, dto);
     session.updatePersistent(dto);
@@ -76,7 +74,7 @@ public class BlockChecksumClusterj implements BlockChecksumTableDef, BlockChecks
   @Override
   public void delete(BlockChecksum blockChecksum) throws StorageException {
     LOG.info("DELETE " + blockChecksum.toString());
-    Session session = clusterjConnector.obtainSession().getSession();
+    HopsSession session = clusterjConnector.obtainSession();
     BlockChecksumDto dto = session.newInstance(BlockChecksumDto.class);
     copyState(blockChecksum, dto);
     session.deletePersistent(dto);
@@ -84,32 +82,26 @@ public class BlockChecksumClusterj implements BlockChecksumTableDef, BlockChecks
 
   @Override
   public BlockChecksum find(int inodeId, int blockIndex) throws StorageException {
-    try {
-      Session session = clusterjConnector.obtainSession().getSession();
-      BlockChecksumDto dto = session.find(BlockChecksumDto.class, new Object[]{inodeId, blockIndex});
-      if (dto == null) {
-        return null;
-      }
-      return createBlockChecksum(dto);
-    } catch (Exception e) {
-      throw new StorageException(e);
+    HopsSession session = clusterjConnector.obtainSession();
+    BlockChecksumDto dto =
+        session.find(BlockChecksumDto.class, new Object[]{inodeId, blockIndex});
+    if (dto == null) {
+      return null;
     }
+    return createBlockChecksum(dto);
   }
 
   @Override
   public Collection<BlockChecksum> findAll(int inodeId) throws StorageException {
-    try {
-      DBSession dbSession = clusterjConnector.obtainSession();
-      QueryBuilder qb = dbSession.getSession().getQueryBuilder();
-      QueryDomainType<BlockChecksumDto> dobj = qb.createQueryDefinition(BlockChecksumDto.class);
-      Predicate pred1 = dobj.get("inodeId").equal(dobj.param("iNodeParam"));
-      dobj.where(pred1);
-      Query<BlockChecksumDto> query = dbSession.getSession().createQuery(dobj);
-      query.setParameter("iNodeParam", inodeId);
-      return createBlockChecksumList(query.getResultList());
-    } catch (Exception e) {
-      throw new StorageException(e);
-    }
+    HopsSession session = clusterjConnector.obtainSession();
+    HopsQueryBuilder qb = session.getQueryBuilder();
+    HopsQueryDomainType<BlockChecksumDto> dobj =
+        qb.createQueryDefinition(BlockChecksumDto.class);
+    HopsPredicate pred1 = dobj.get("inodeId").equal(dobj.param("iNodeParam"));
+    dobj.where(pred1);
+    HopsQuery<BlockChecksumDto> query = session.createQuery(dobj);
+    query.setParameter("iNodeParam", inodeId);
+    return createBlockChecksumList(query.getResultList());
   }
 
   @Override
@@ -120,7 +112,7 @@ public class BlockChecksumClusterj implements BlockChecksumTableDef, BlockChecks
       PreparedStatement s = conn.prepareStatement(query);
       s.executeQuery();
     } catch (SQLException ex) {
-      throw new StorageException(ex);
+      throw HopsSQLExceptionHelper.wrap(ex);
     } finally {
       mysqlConnector.closeSession();
     }

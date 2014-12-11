@@ -4,7 +4,6 @@
  */
 package se.sics.hop.metadata.ndb.dalimpl.hdfs;
 
-import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
@@ -16,9 +15,10 @@ import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.dal.SafeBlocksDataAccess;
 import se.sics.hop.metadata.hdfs.tabledef.SafeBlocksTableDef;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
-import se.sics.hop.metadata.ndb.DBSession;
+import se.sics.hop.metadata.ndb.mysqlserver.HopsSQLExceptionHelper;
 import se.sics.hop.metadata.ndb.mysqlserver.MySQLQueryHelper;
 import se.sics.hop.metadata.ndb.mysqlserver.MysqlServerConnector;
+import se.sics.hop.metadata.ndb.wrapper.HopsSession;
 
 /**
  *
@@ -39,31 +39,23 @@ public class SafeBlocksClusterj implements SafeBlocksTableDef, SafeBlocksDataAcc
   
   @Override
   public void insert(Collection<Long> safeBlocks) throws StorageException {
-    try {
-      final List<SafeBlockDTO> dtos = new ArrayList<SafeBlockDTO>(safeBlocks.size());
-      final DBSession dbSession = connector.obtainSession();
-      for (Long blk : safeBlocks) {
-        SafeBlockDTO dto = create(dbSession.getSession(), blk);
-        dtos.add(dto);
-      }
-      dbSession.getSession().savePersistentAll(dtos);
-    } catch (Exception e) {
-      throw new StorageException(e);
+    final List<SafeBlockDTO> dtos = new ArrayList<SafeBlockDTO>(safeBlocks.size());
+    final HopsSession session = connector.obtainSession();
+    for (Long blk : safeBlocks) {
+      SafeBlockDTO dto = create(session, blk);
+      dtos.add(dto);
     }
+    session.savePersistentAll(dtos);
   }
   
   @Override
   public void remove(Long safeBlock) throws StorageException {
-    try {
-      DBSession dbSession = connector.obtainSession();
-      SafeBlockDTO dto = create(dbSession.getSession(), safeBlock);
-      dbSession.getSession().deletePersistent(dto);
-    } catch (Exception e) {
-      throw new StorageException(e);
-    }
+    HopsSession session = connector.obtainSession();
+    SafeBlockDTO dto = create(session, safeBlock);
+    session.deletePersistent(dto);
   }
 
-    
+
   @Override
   public int countAll() throws StorageException {
     return MySQLQueryHelper.countAll(TABLE_NAME);
@@ -76,14 +68,14 @@ public class SafeBlocksClusterj implements SafeBlocksTableDef, SafeBlocksDataAcc
         MysqlServerConnector.truncateTable(TABLE_NAME, 10000);
       }
     } catch (SQLException ex) {
-      throw new StorageException(ex);
+      throw HopsSQLExceptionHelper.wrap(ex);
     }
   }
-    
-  private SafeBlockDTO create(Session session, Long blk) {
+
+  private SafeBlockDTO create(HopsSession session, Long blk)
+      throws StorageException {
     SafeBlockDTO dto = session.newInstance(SafeBlockDTO.class);
     dto.setId(blk);
     return dto;
   }
-  
 }
