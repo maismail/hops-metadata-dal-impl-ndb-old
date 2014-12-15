@@ -60,21 +60,16 @@ public class DelegationTokenClusterJ implements DelegationTokenTableDef, Delegat
     }
 
     @Override
-    public List<HopDelegationToken> getAll() throws StorageException {
-        try {
-            Session session = connector.obtainSession();
-            QueryBuilder qb = session.getQueryBuilder();
-            QueryDomainType<DelegationTokenDTO> dobj = qb.createQueryDefinition(DelegationTokenDTO.class);
-            Query<DelegationTokenDTO> query = session.createQuery(dobj);
-            List<DelegationTokenDTO> results = query.getResultList();
+  public List<HopDelegationToken> getAll() throws StorageException {
+      Session session = connector.obtainSession();
+      QueryBuilder qb = session.getQueryBuilder();
+      QueryDomainType<DelegationTokenDTO> dobj = qb.createQueryDefinition(
+              DelegationTokenDTO.class);
+      Query<DelegationTokenDTO> query = session.createQuery(dobj);
+      List<DelegationTokenDTO> results = query.getResultList();
+      return createHopDelegationTokenList(results);
 
-            return createHopDelegationTokenList(results);
-
-        } catch (Exception e) {
-            throw new StorageException(e);
-        }
-
-    }
+  }
 
     @Override
     public void prepare(Collection<HopDelegationToken> modified, Collection<HopDelegationToken> removed) throws StorageException {

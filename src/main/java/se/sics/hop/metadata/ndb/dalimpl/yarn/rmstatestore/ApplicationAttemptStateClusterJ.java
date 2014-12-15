@@ -11,7 +11,9 @@ import com.mysql.clusterj.query.QueryDomainType;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.entity.yarn.rmstatestore.HopApplicationAttemptState;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
@@ -105,6 +107,19 @@ public class ApplicationAttemptStateClusterJ implements ApplicationAttemptStateT
                 return null;
             }
     }
+    
+  @Override
+  public Map<String, List<HopApplicationAttemptState>> getAll() throws
+          StorageException {
+    Session session = connector.obtainSession();
+    QueryBuilder qb = session.getQueryBuilder();
+    QueryDomainType<ApplicationAttemptStateDTO> dobj = qb.createQueryDefinition(
+            ApplicationAttemptStateDTO.class);
+    Query<ApplicationAttemptStateDTO> query = session.createQuery(dobj);
+    List<ApplicationAttemptStateDTO> results = query.getResultList();
+
+    return createMap(results);
+  }
 
     @Override
     public void createApplicationAttemptStateEntry(HopApplicationAttemptState entry) throws StorageException {
@@ -120,7 +135,7 @@ public class ApplicationAttemptStateClusterJ implements ApplicationAttemptStateT
                 List<ApplicationAttemptStateDTO> toRemove = new ArrayList<ApplicationAttemptStateDTO>();
                 for (HopApplicationAttemptState hop : removed) {
                     Object[] objarr = new Object[2];
-                    objarr[0] = hop.getApplicationid();
+                    objarr[0] = hop.getApplicationId();
                     objarr[1] = hop.getApplicationattemptid();
                     toRemove.add(session.newInstance(ApplicationAttemptStateClusterJ.ApplicationAttemptStateDTO.class, objarr));
                 }
@@ -170,7 +185,7 @@ public class ApplicationAttemptStateClusterJ implements ApplicationAttemptStateT
             = session.newInstance(
                     ApplicationAttemptStateClusterJ.ApplicationAttemptStateDTO.class);
 
-    applicationAttemptStateDTO.setapplicationid(hop.getApplicationid());
+    applicationAttemptStateDTO.setapplicationid(hop.getApplicationId());
     applicationAttemptStateDTO.setapplicationattemptid(hop.
             getApplicationattemptid());
     applicationAttemptStateDTO.setapplicationattemptstate(hop.
@@ -183,5 +198,21 @@ public class ApplicationAttemptStateClusterJ implements ApplicationAttemptStateT
     }
     applicationAttemptStateDTO.setapplicationattempttrakingurl(hop.getUrl());
     return applicationAttemptStateDTO;
+  }
+  
+  private Map<String, List<HopApplicationAttemptState>>
+          createMap(List<ApplicationAttemptStateDTO> results) {
+    Map<String, List<HopApplicationAttemptState>> map
+            = new HashMap<String, List<HopApplicationAttemptState>>();
+    for (ApplicationAttemptStateDTO persistable : results) {
+      HopApplicationAttemptState hop
+              = createHopApplicationAttemptState(persistable);
+      if (map.get(hop.getApplicationId()) == null) {
+        map.put(hop.getApplicationId(),
+                new ArrayList<HopApplicationAttemptState>());
+      }
+      map.get(hop.getApplicationId()).add(hop);
+    }
+    return map;
   }
 }
