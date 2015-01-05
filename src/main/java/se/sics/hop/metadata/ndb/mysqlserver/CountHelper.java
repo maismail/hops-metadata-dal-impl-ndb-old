@@ -15,8 +15,14 @@ public class CountHelper {
 
   public static final String COUNT_QUERY = "select count(*) from %s";
   public static final String COUNT_QUERY_UNIQUE = "select count(distinct %s) from %s";
+  public static final String COUNT_WHERE = "select count(*) from %s where %s";
   
   private static MysqlServerConnector connector = MysqlServerConnector.getInstance();
+
+  public static int countWhere(String tableName, String condition) throws StorageException {
+    String query = String.format(COUNT_WHERE, tableName, condition);
+    return count(query);
+  }
 
   /**
    * Counts the number of rows in a given table.

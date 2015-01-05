@@ -1,13 +1,15 @@
 package se.sics.hop.metadata.ndb;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import se.sics.hop.DALStorageFactory;
 import se.sics.hop.StorageConnector;
 import se.sics.hop.metadata.hdfs.dal.*;
+import se.sics.hop.exception.StorageInitializtionException;
+import se.sics.hop.metadata.hdfs.dal.BlockLookUpDataAccess;
+import se.sics.hop.metadata.hdfs.dal.StorageIdMapDataAccess;
 import se.sics.hop.metadata.ndb.dalimpl.hdfs.*;
 import se.sics.hop.exception.StorageInitializtionException;
 import se.sics.hop.metadata.hdfs.dal.BlockInfoDataAccess;
@@ -126,11 +128,8 @@ public class NdbStorageFactory implements DALStorageFactory {
   private Map<Class, EntityDataAccess> dataAccessMap = new HashMap<Class, EntityDataAccess>();
 
   @Override
-  public void setConfiguration(String configFile) throws StorageInitializtionException {
+  public void setConfiguration(Properties conf) throws StorageInitializtionException{
     try {
-      Properties conf = new Properties();
-      InputStream inStream = this.getClass().getClassLoader().getResourceAsStream(configFile);
-      conf.load(inStream);
       ClusterjConnector.getInstance().setConfiguration(conf);
       MysqlServerConnector.getInstance().setConfiguration(conf);
       initDataAccessMap();
@@ -192,12 +191,15 @@ public class NdbStorageFactory implements DALStorageFactory {
     dataAccessMap.put(UnderReplicatedBlockDataAccess.class, new UnderReplicatedBlockClusterj());
     dataAccessMap.put(VariableDataAccess.class, new VariableClusterj());
     dataAccessMap.put(StorageIdMapDataAccess.class, new StorageIdMapClusterj());
+    dataAccessMap.put(EncodingStatusDataAccess.class, new EncodingStatusClusterj() {});
     dataAccessMap.put(BlockLookUpDataAccess.class, new BlockLookUpClusterj());
-    
     dataAccessMap.put(FSSchedulerNodeDataAccess.class, new FSSchedulerNodeClusterJ());
+    dataAccessMap.put(SafeBlocksDataAccess.class, new SafeBlocksClusterj());
+    dataAccessMap.put(MisReplicatedRangeQueueDataAccess.class, new MisReplicatedRangeQueueClusterj());
     dataAccessMap.put(QuotaUpdateDataAccess.class, new QuotaUpdateClusterj());
     dataAccessMap.put(SecretMamagerKeysDataAccess.class, new SecretMamagerKeysClusterJ());
     dataAccessMap.put(AllocateResponseDataAccess.class, new AllocateResponseClusterJ());
+    dataAccessMap.put(BlockChecksumDataAccess.class, new BlockChecksumClusterj());
   }
 
   @Override
