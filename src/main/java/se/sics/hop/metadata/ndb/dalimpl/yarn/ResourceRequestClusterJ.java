@@ -22,6 +22,11 @@ import java.util.Map;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.entity.yarn.HopResourceRequest;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
+import se.sics.hop.metadata.ndb.wrapper.HopsPredicate;
+import se.sics.hop.metadata.ndb.wrapper.HopsQuery;
+import se.sics.hop.metadata.ndb.wrapper.HopsQueryBuilder;
+import se.sics.hop.metadata.ndb.wrapper.HopsQueryDomainType;
+import se.sics.hop.metadata.ndb.wrapper.HopsSession;
 import se.sics.hop.metadata.yarn.dal.ResourceRequestDataAccess;
 import se.sics.hop.metadata.yarn.tabledef.ResourceRequestTableDef;
 
@@ -56,13 +61,13 @@ public class ResourceRequestClusterJ implements ResourceRequestTableDef, Resourc
     @Override
     public List<HopResourceRequest> findById(String id) throws StorageException {
         try {
-            Session session = connector.obtainSession();
-            QueryBuilder qb = session.getQueryBuilder();
+            HopsSession session = connector.obtainSession();
+            HopsQueryBuilder qb = session.getQueryBuilder();
 
-            QueryDomainType<ResourceRequestClusterJ.ResourceRequestDTO> dobj = qb.createQueryDefinition(ResourceRequestClusterJ.ResourceRequestDTO.class);
-            Predicate pred1 = dobj.get("appschedulinginfo_id").equal(dobj.param("appschedulinginfo_id"));
+            HopsQueryDomainType<ResourceRequestClusterJ.ResourceRequestDTO> dobj = qb.createQueryDefinition(ResourceRequestClusterJ.ResourceRequestDTO.class);
+            HopsPredicate pred1 = dobj.get("appschedulinginfo_id").equal(dobj.param("appschedulinginfo_id"));
             dobj.where(pred1);
-            Query<ResourceRequestClusterJ.ResourceRequestDTO> query = session.createQuery(dobj);
+            HopsQuery<ResourceRequestClusterJ.ResourceRequestDTO> query = session.createQuery(dobj);
             query.setParameter("appschedulinginfo_id", id);
 
             List<ResourceRequestClusterJ.ResourceRequestDTO> results = query.getResultList();
@@ -74,12 +79,12 @@ public class ResourceRequestClusterJ implements ResourceRequestTableDef, Resourc
 
     @Override
     public Map<String, List<HopResourceRequest>>  getAll() throws StorageException{
-      Session session = connector.obtainSession();
-    QueryBuilder qb = session.getQueryBuilder();
-    QueryDomainType<ResourceRequestDTO> dobj
+      HopsSession session = connector.obtainSession();
+    HopsQueryBuilder qb = session.getQueryBuilder();
+    HopsQueryDomainType<ResourceRequestDTO> dobj
             = qb.createQueryDefinition(
                     ResourceRequestDTO.class);
-    Query<ResourceRequestDTO> query = session.
+    HopsQuery<ResourceRequestDTO> query = session.
             createQuery(dobj);
     List<ResourceRequestDTO> results = query.
             getResultList();
@@ -88,7 +93,7 @@ public class ResourceRequestClusterJ implements ResourceRequestTableDef, Resourc
     
     @Override
     public void prepare(Collection<HopResourceRequest> modified, Collection<HopResourceRequest> removed) throws StorageException {
-        Session session = connector.obtainSession();
+        HopsSession session = connector.obtainSession();
         try {
             if (removed != null) {
                 List<ResourceRequestClusterJ.ResourceRequestDTO> toRemove = new ArrayList<ResourceRequestClusterJ.ResourceRequestDTO>();
@@ -120,7 +125,7 @@ public class ResourceRequestClusterJ implements ResourceRequestTableDef, Resourc
                                         resourceRequestDTO.getresourcerequeststate());
     }
 
-    private ResourceRequestDTO createPersistable(HopResourceRequest hop, Session session) {
+    private ResourceRequestDTO createPersistable(HopResourceRequest hop, HopsSession session) throws StorageException {
         ResourceRequestClusterJ.ResourceRequestDTO resourceRequestDTO = session.newInstance(ResourceRequestClusterJ.ResourceRequestDTO.class);
         
         resourceRequestDTO.setappschedulinginfo_id(hop.getId());

@@ -1,13 +1,8 @@
 package se.sics.hop.metadata.ndb.dalimpl.yarn;
 
-import com.mysql.clusterj.Query;
-import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
-import com.mysql.clusterj.query.Predicate;
-import com.mysql.clusterj.query.QueryBuilder;
-import com.mysql.clusterj.query.QueryDomainType;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -16,6 +11,11 @@ import java.util.Map;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.entity.yarn.HopResource;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
+import se.sics.hop.metadata.ndb.wrapper.HopsPredicate;
+import se.sics.hop.metadata.ndb.wrapper.HopsQuery;
+import se.sics.hop.metadata.ndb.wrapper.HopsQueryBuilder;
+import se.sics.hop.metadata.ndb.wrapper.HopsQueryDomainType;
+import se.sics.hop.metadata.ndb.wrapper.HopsSession;
 import se.sics.hop.metadata.yarn.dal.ResourceDataAccess;
 import se.sics.hop.metadata.yarn.tabledef.ResourceTableDef;
 
@@ -58,7 +58,7 @@ public class ResourceClusterJ implements ResourceTableDef, ResourceDataAccess<Ho
 
     @Override
     public HopResource findEntry(String id, int type, int parent) throws StorageException {
-        Session session = connector.obtainSession();
+        HopsSession session = connector.obtainSession();
         ResourceDTO resourceDTO = null;
         if (session != null) {
             Object[] pk = new Object[3];
@@ -74,12 +74,12 @@ public class ResourceClusterJ implements ResourceTableDef, ResourceDataAccess<Ho
   @Override
   public Map<String, Map<Integer, Map<Integer, HopResource>>> getAll() throws
           StorageException {
-    Session session = connector.obtainSession();
-    QueryBuilder qb = session.getQueryBuilder();
-    QueryDomainType<ResourceDTO> dobj
+    HopsSession session = connector.obtainSession();
+    HopsQueryBuilder qb = session.getQueryBuilder();
+    HopsQueryDomainType<ResourceDTO> dobj
             = qb.createQueryDefinition(
                     ResourceDTO.class);
-    Query<ResourceDTO> query = session.
+    HopsQuery<ResourceDTO> query = session.
             createQuery(dobj);
     List<ResourceDTO> results = query.
             getResultList();
@@ -88,12 +88,12 @@ public class ResourceClusterJ implements ResourceTableDef, ResourceDataAccess<Ho
     
     @Override
     public HopResource findById(String id) throws StorageException {
-        Session session = connector.obtainSession();
-        QueryBuilder qb = session.getQueryBuilder();
-        QueryDomainType<ResourceDTO> dobj = qb.createQueryDefinition(ResourceDTO.class);
-        Predicate pred1 = dobj.get("id").equal(dobj.param("id"));
+        HopsSession session = connector.obtainSession();
+        HopsQueryBuilder qb = session.getQueryBuilder();
+        HopsQueryDomainType<ResourceDTO> dobj = qb.createQueryDefinition(ResourceDTO.class);
+        HopsPredicate pred1 = dobj.get("id").equal(dobj.param("id"));
         dobj.where(pred1);
-        Query<ResourceDTO> query = session.createQuery(dobj);
+        HopsQuery<ResourceDTO> query = session.createQuery(dobj);
         query.setParameter("id", id);
         List<ResourceDTO> results = query.getResultList();
         if (results != null && !results.isEmpty()) {
@@ -105,7 +105,7 @@ public class ResourceClusterJ implements ResourceTableDef, ResourceDataAccess<Ho
 
     @Override
     public void prepare(Collection<HopResource> modified, Collection<HopResource> removed) throws StorageException {
-        Session session = connector.obtainSession();
+        HopsSession session = connector.obtainSession();
         try {
             if (removed != null) {
                 List<ResourceDTO> toRemove = new ArrayList<ResourceDTO>();
@@ -132,7 +132,7 @@ public class ResourceClusterJ implements ResourceTableDef, ResourceDataAccess<Ho
 
     @Override
     public void createResource(HopResource resourceNode) throws StorageException {
-        Session session = connector.obtainSession();
+        HopsSession session = connector.obtainSession();
         session.savePersistent(createPersistable(resourceNode, session));
     }
 
@@ -143,7 +143,7 @@ public class ResourceClusterJ implements ResourceTableDef, ResourceDataAccess<Ho
         return new HopResource(resourceDTO.getId(), resourceDTO.getType(), resourceDTO.getParent(), resourceDTO.getMemory(), resourceDTO.getVirtualcores());
     }
 
-    private ResourceDTO createPersistable(HopResource resource, Session session) {
+    private ResourceDTO createPersistable(HopResource resource, HopsSession session) throws StorageException {
         ResourceDTO resourceDTO = session.newInstance(ResourceDTO.class);
         resourceDTO.setId(resource.getId());
         resourceDTO.setType(resource.getType());

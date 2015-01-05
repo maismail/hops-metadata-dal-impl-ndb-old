@@ -1,13 +1,8 @@
 package se.sics.hop.metadata.ndb.dalimpl.yarn.rmstatestore;
 
-import com.mysql.clusterj.Query;
-import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
-import com.mysql.clusterj.query.Predicate;
-import com.mysql.clusterj.query.QueryBuilder;
-import com.mysql.clusterj.query.QueryDomainType;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -17,6 +12,11 @@ import java.util.Map;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.entity.yarn.rmstatestore.HopApplicationAttemptState;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
+import se.sics.hop.metadata.ndb.wrapper.HopsPredicate;
+import se.sics.hop.metadata.ndb.wrapper.HopsQuery;
+import se.sics.hop.metadata.ndb.wrapper.HopsQueryBuilder;
+import se.sics.hop.metadata.ndb.wrapper.HopsQueryDomainType;
+import se.sics.hop.metadata.ndb.wrapper.HopsSession;
 import se.sics.hop.metadata.yarn.dal.rmstatestore.ApplicationAttemptStateDataAccess;
 import se.sics.hop.metadata.yarn.tabledef.rmstatestore.ApplicationAttemptStateTableDef;
 import static se.sics.hop.metadata.yarn.tabledef.rmstatestore.ApplicationAttemptStateTableDef.APPLICATIONATTEMPTID;
@@ -71,7 +71,7 @@ public class ApplicationAttemptStateClusterJ implements ApplicationAttemptStateT
 
     @Override
     public HopApplicationAttemptState findEntry(int applicationid, int applicationattemptid) throws StorageException {
-        Session session = connector.obtainSession();
+        HopsSession session = connector.obtainSession();
         Object[] objarr = new Object[2];
         objarr[0] = applicationid;
         objarr[1] = applicationattemptid;
@@ -88,12 +88,12 @@ public class ApplicationAttemptStateClusterJ implements ApplicationAttemptStateT
 
     @Override
     public List<HopApplicationAttemptState> findApplicationAttemptIdByApplicationId(String applicationid) throws StorageException {
-            Session session = connector.obtainSession();
-            QueryBuilder qb = session.getQueryBuilder();
-            QueryDomainType<ApplicationAttemptStateDTO> dobj = qb.createQueryDefinition(ApplicationAttemptStateDTO.class);
-            Predicate pred1 = dobj.get("applicationid").equal(dobj.param("applicationid"));
+            HopsSession session = connector.obtainSession();
+            HopsQueryBuilder qb = session.getQueryBuilder();
+            HopsQueryDomainType<ApplicationAttemptStateDTO> dobj = qb.createQueryDefinition(ApplicationAttemptStateDTO.class);
+            HopsPredicate pred1 = dobj.get("applicationid").equal(dobj.param("applicationid"));
             dobj.where(pred1);
-            Query<ApplicationAttemptStateDTO> query = session.createQuery(dobj);
+            HopsQuery<ApplicationAttemptStateDTO> query = session.createQuery(dobj);
             query.setParameter("applicationid", applicationid);
             List<ApplicationAttemptStateDTO> results = query.getResultList();
             List<HopApplicationAttemptState> appAttemptIds;
@@ -111,11 +111,11 @@ public class ApplicationAttemptStateClusterJ implements ApplicationAttemptStateT
   @Override
   public Map<String, List<HopApplicationAttemptState>> getAll() throws
           StorageException {
-    Session session = connector.obtainSession();
-    QueryBuilder qb = session.getQueryBuilder();
-    QueryDomainType<ApplicationAttemptStateDTO> dobj = qb.createQueryDefinition(
+    HopsSession session = connector.obtainSession();
+    HopsQueryBuilder qb = session.getQueryBuilder();
+    HopsQueryDomainType<ApplicationAttemptStateDTO> dobj = qb.createQueryDefinition(
             ApplicationAttemptStateDTO.class);
-    Query<ApplicationAttemptStateDTO> query = session.createQuery(dobj);
+    HopsQuery<ApplicationAttemptStateDTO> query = session.createQuery(dobj);
     List<ApplicationAttemptStateDTO> results = query.getResultList();
 
     return createMap(results);
@@ -123,13 +123,13 @@ public class ApplicationAttemptStateClusterJ implements ApplicationAttemptStateT
 
     @Override
     public void createApplicationAttemptStateEntry(HopApplicationAttemptState entry) throws StorageException {
-        Session session = connector.obtainSession();
+        HopsSession session = connector.obtainSession();
         session.savePersistent(createPersistable(entry, session));
     }
 
     @Override
     public void prepare(Collection<HopApplicationAttemptState> modified, Collection<HopApplicationAttemptState> removed) throws StorageException {
-        Session session = connector.obtainSession();
+        HopsSession session = connector.obtainSession();
         try {
             if (removed != null) {
                 List<ApplicationAttemptStateDTO> toRemove = new ArrayList<ApplicationAttemptStateDTO>();
@@ -180,7 +180,7 @@ public class ApplicationAttemptStateClusterJ implements ApplicationAttemptStateT
     }
 
   private ApplicationAttemptStateDTO createPersistable(
-          HopApplicationAttemptState hop, Session session) {
+          HopApplicationAttemptState hop, HopsSession session) throws StorageException {
     ApplicationAttemptStateClusterJ.ApplicationAttemptStateDTO applicationAttemptStateDTO
             = session.newInstance(
                     ApplicationAttemptStateClusterJ.ApplicationAttemptStateDTO.class);

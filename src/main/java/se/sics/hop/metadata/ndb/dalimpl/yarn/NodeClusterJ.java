@@ -1,13 +1,8 @@
 package se.sics.hop.metadata.ndb.dalimpl.yarn;
 
-import com.mysql.clusterj.Query;
-import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
-import com.mysql.clusterj.query.Predicate;
-import com.mysql.clusterj.query.QueryBuilder;
-import com.mysql.clusterj.query.QueryDomainType;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -16,6 +11,11 @@ import java.util.Map;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.entity.yarn.HopNode;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
+import se.sics.hop.metadata.ndb.wrapper.HopsPredicate;
+import se.sics.hop.metadata.ndb.wrapper.HopsQuery;
+import se.sics.hop.metadata.ndb.wrapper.HopsQueryBuilder;
+import se.sics.hop.metadata.ndb.wrapper.HopsQueryDomainType;
+import se.sics.hop.metadata.ndb.wrapper.HopsSession;
 import se.sics.hop.metadata.yarn.dal.NodeDataAccess;
 import se.sics.hop.metadata.yarn.tabledef.NodeTableDef;
 
@@ -58,7 +58,7 @@ public class NodeClusterJ implements NodeTableDef, NodeDataAccess<HopNode> {
 
     @Override
     public HopNode findById(String id) throws StorageException {
-        Session session = connector.obtainSession();
+        HopsSession session = connector.obtainSession();
 
         NodeDTO nodeDTO = null;
         if (session != null) {
@@ -74,14 +74,14 @@ public class NodeClusterJ implements NodeTableDef, NodeDataAccess<HopNode> {
     @Override
     public HopNode findByNameLocation(String name, String location) throws StorageException {
         try {
-            Session session = connector.obtainSession();
-            QueryBuilder qb = session.getQueryBuilder();
-            QueryDomainType<NodeDTO> dobj = qb.createQueryDefinition(NodeDTO.class);
-            Predicate pred1 = dobj.get("name").equal(dobj.param("name"));
-            Predicate pred2 = dobj.get("location").equal(dobj.param("location"));
+            HopsSession session = connector.obtainSession();
+            HopsQueryBuilder qb = session.getQueryBuilder();
+            HopsQueryDomainType<NodeDTO> dobj = qb.createQueryDefinition(NodeDTO.class);
+            HopsPredicate pred1 = dobj.get("name").equal(dobj.param("name"));
+            HopsPredicate pred2 = dobj.get("location").equal(dobj.param("location"));
             pred1 = pred1.and(pred2);
             dobj.where(pred1);
-            Query<NodeDTO> query = session.createQuery(dobj);
+            HopsQuery<NodeDTO> query = session.createQuery(dobj);
             query.setParameter("name", name);
             query.setParameter("location", location);
             List<NodeDTO> results = query.getResultList();
@@ -97,11 +97,11 @@ public class NodeClusterJ implements NodeTableDef, NodeDataAccess<HopNode> {
 
    @Override
   public Map<String, HopNode> getAll() throws StorageException {
-    Session session = connector.obtainSession();
-    QueryBuilder qb = session.getQueryBuilder();
+    HopsSession session = connector.obtainSession();
+    HopsQueryBuilder qb = session.getQueryBuilder();
 
-    QueryDomainType<NodeDTO> dobj = qb.createQueryDefinition(NodeDTO.class);
-    Query<NodeDTO> query = session.createQuery(dobj);
+    HopsQueryDomainType<NodeDTO> dobj = qb.createQueryDefinition(NodeDTO.class);
+    HopsQuery<NodeDTO> query = session.createQuery(dobj);
 
     List<NodeDTO> results = query.getResultList();
     return createMap(results);
@@ -109,7 +109,7 @@ public class NodeClusterJ implements NodeTableDef, NodeDataAccess<HopNode> {
     
     @Override
     public void prepare(Collection<HopNode> modified, Collection<HopNode> removed) throws StorageException {
-        Session session = connector.obtainSession();
+        HopsSession session = connector.obtainSession();
         try {
             if (removed != null) {
                 List<NodeDTO> toRemove = new ArrayList<NodeDTO>();
@@ -132,13 +132,13 @@ public class NodeClusterJ implements NodeTableDef, NodeDataAccess<HopNode> {
 
     @Override
     public void createNode(HopNode node) throws StorageException {
-        Session session = connector.obtainSession();
+        HopsSession session = connector.obtainSession();
 
         session.savePersistent(createPersistable(node, session));
 
     }
 
-    private NodeDTO createPersistable(HopNode hopNode, Session session) {
+    private NodeDTO createPersistable(HopNode hopNode, HopsSession session) throws StorageException {
         NodeDTO nodeDTO = session.newInstance(NodeDTO.class);
         //Set values to persist new rmnode
         nodeDTO.setnodeid(hopNode.getId());

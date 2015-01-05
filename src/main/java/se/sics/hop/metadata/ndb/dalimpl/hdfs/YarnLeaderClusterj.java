@@ -8,6 +8,7 @@ package se.sics.hop.metadata.ndb.dalimpl.hdfs;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
+import static se.sics.hop.metadata.hdfs.tabledef.LeaderTableDef.HTTP_ADDRESS;
 import se.sics.hop.metadata.hdfs.tabledef.YarnLeaderTableDef;
 
 /**
@@ -46,10 +47,10 @@ public class YarnLeaderClusterj extends LeaderClusterj implements YarnLeaderTabl
 
         void setHostname(String hostname);
 
-        @Column(name = AVG_REQUEST_PROCESSING_LATENCY)
-        int getAvgRequestProcessingLatency();
+        @Column(name = HTTP_ADDRESS)
+        String getHttpAddress();
 
-        void setAvgRequestProcessingLatency(int avgRequestProcessingLatency);
+        void setHttpAddress(String httpAddress);
     }
    
     public YarnLeaderClusterj(){

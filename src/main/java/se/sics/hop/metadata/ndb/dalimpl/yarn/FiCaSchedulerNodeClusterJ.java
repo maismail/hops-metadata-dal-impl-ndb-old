@@ -1,19 +1,18 @@
 package se.sics.hop.metadata.ndb.dalimpl.yarn;
 
-import com.mysql.clusterj.Query;
-import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
-import com.mysql.clusterj.query.QueryBuilder;
-import com.mysql.clusterj.query.QueryDomainType;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.entity.yarn.HopFiCaSchedulerNode;
-import se.sics.hop.metadata.hdfs.entity.yarn.HopFiCaSchedulerNode;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
+import se.sics.hop.metadata.ndb.wrapper.HopsQuery;
+import se.sics.hop.metadata.ndb.wrapper.HopsQueryBuilder;
+import se.sics.hop.metadata.ndb.wrapper.HopsQueryDomainType;
+import se.sics.hop.metadata.ndb.wrapper.HopsSession;
 import se.sics.hop.metadata.yarn.dal.FiCaSchedulerNodeDataAccess;
 import se.sics.hop.metadata.yarn.tabledef.FiCaSchedulerNodeTableDef;
 
@@ -47,7 +46,7 @@ public class FiCaSchedulerNodeClusterJ implements FiCaSchedulerNodeTableDef, FiC
 
     @Override
     public HopFiCaSchedulerNode findById(String id) throws StorageException {
-        Session session = connector.obtainSession();
+        HopsSession session = connector.obtainSession();
 
         FiCaSchedulerNodeDTO ficaschedulernodeDTO = null;
         if (session != null) {
@@ -62,7 +61,7 @@ public class FiCaSchedulerNodeClusterJ implements FiCaSchedulerNodeTableDef, FiC
 
     @Override
     public void prepare(Collection<HopFiCaSchedulerNode> modified, Collection<HopFiCaSchedulerNode> removed) throws StorageException {
-        Session session = connector.obtainSession();
+        HopsSession session = connector.obtainSession();
         try {
             if (removed != null) {
                 List<FiCaSchedulerNodeDTO> toRemove = new ArrayList<FiCaSchedulerNodeDTO>();
@@ -87,7 +86,7 @@ public class FiCaSchedulerNodeClusterJ implements FiCaSchedulerNodeTableDef, FiC
 
     @Override
     public void createFiCaSchedulerNode(HopFiCaSchedulerNode node) throws StorageException {
-        Session session = connector.obtainSession();
+        HopsSession session = connector.obtainSession();
         session.savePersistent(createPersistable(node, session));
     }
 
@@ -98,7 +97,7 @@ public class FiCaSchedulerNodeClusterJ implements FiCaSchedulerNodeTableDef, FiC
         return hop;
     }
 
-    private FiCaSchedulerNodeDTO createPersistable(HopFiCaSchedulerNode hop, Session session) {
+    private FiCaSchedulerNodeDTO createPersistable(HopFiCaSchedulerNode hop, HopsSession session) throws StorageException {
         FiCaSchedulerNodeDTO ficaDTO = session.newInstance(FiCaSchedulerNodeDTO.class);
         ficaDTO.setrmnodeid(hop.getRmnodeId());
         ficaDTO.setnodename(hop.getNodeName());
@@ -109,11 +108,11 @@ public class FiCaSchedulerNodeClusterJ implements FiCaSchedulerNodeTableDef, FiC
     @Override
     public List<HopFiCaSchedulerNode> getAll() throws StorageException {
         try {
-            Session session = connector.obtainSession();
-            QueryBuilder qb = session.getQueryBuilder();
+            HopsSession session = connector.obtainSession();
+            HopsQueryBuilder qb = session.getQueryBuilder();
 
-            QueryDomainType<FiCaSchedulerNodeClusterJ.FiCaSchedulerNodeDTO> dobj = qb.createQueryDefinition(FiCaSchedulerNodeClusterJ.FiCaSchedulerNodeDTO.class);
-            Query<FiCaSchedulerNodeClusterJ.FiCaSchedulerNodeDTO> query = session.createQuery(dobj);
+            HopsQueryDomainType<FiCaSchedulerNodeClusterJ.FiCaSchedulerNodeDTO> dobj = qb.createQueryDefinition(FiCaSchedulerNodeClusterJ.FiCaSchedulerNodeDTO.class);
+            HopsQuery<FiCaSchedulerNodeClusterJ.FiCaSchedulerNodeDTO> query = session.createQuery(dobj);
 
             List<FiCaSchedulerNodeClusterJ.FiCaSchedulerNodeDTO> results = query.getResultList();
             return createFiCaSchedulerNodeList(results);

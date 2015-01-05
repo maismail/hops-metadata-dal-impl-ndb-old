@@ -1,6 +1,5 @@
 package se.sics.hop.metadata.ndb.dalimpl.yarn.rmstatestore;
 
-import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
@@ -10,6 +9,7 @@ import java.util.List;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.entity.yarn.rmstatestore.HopRMStateVersion;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
+import se.sics.hop.metadata.ndb.wrapper.HopsSession;
 import se.sics.hop.metadata.yarn.dal.rmstatestore.RMStateVersionDataAccess;
 import se.sics.hop.metadata.yarn.tabledef.rmstatestore.VersionTableDef;
 
@@ -37,7 +37,7 @@ public class RMStateVersionClusterJ implements VersionTableDef, RMStateVersionDa
 
     @Override
     public HopRMStateVersion findById(int id) throws StorageException {
-        Session session = connector.obtainSession();
+        HopsSession session = connector.obtainSession();
 
         RMStateVersionClusterJ.VersionDTO versionDTO = null;
         if (session != null) {
@@ -49,7 +49,7 @@ public class RMStateVersionClusterJ implements VersionTableDef, RMStateVersionDa
 
     @Override
     public void prepare(Collection<HopRMStateVersion> modified, Collection<HopRMStateVersion> removed) throws StorageException {
-        Session session = connector.obtainSession();
+        HopsSession session = connector.obtainSession();
         try {
             if (removed != null) {
                 List<VersionDTO> toRemove = new ArrayList<VersionDTO>();
@@ -78,7 +78,7 @@ public class RMStateVersionClusterJ implements VersionTableDef, RMStateVersionDa
       }
     }
 
-    private VersionDTO createPersistable(HopRMStateVersion hop, Session session) {
+    private VersionDTO createPersistable(HopRMStateVersion hop, HopsSession session) throws StorageException {
         RMStateVersionClusterJ.VersionDTO versionDTO = session.newInstance(RMStateVersionClusterJ.VersionDTO.class);
         versionDTO.setid(hop.getId());
         versionDTO.setversion(hop.getVersion());

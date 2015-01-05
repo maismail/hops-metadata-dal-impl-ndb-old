@@ -6,7 +6,6 @@
 
 package se.sics.hop.metadata.ndb.dalimpl.yarn.capacity;
 
-import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
@@ -14,6 +13,7 @@ import java.util.Collection;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.entity.yarn.capacity.HopFiCaSchedulerAppReservations;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
+import se.sics.hop.metadata.ndb.wrapper.HopsSession;
 import se.sics.hop.metadata.yarn.dal.capacity.FiCaSchedulerAppReservationsDataAccess;
 import se.sics.hop.metadata.yarn.tabledef.capacity.FiCaSchedulerAppReservationsTableDef;
 
@@ -39,7 +39,7 @@ public class FiCaSchedulerAppReservationsClusterJ implements FiCaSchedulerAppRes
     
     @Override
     public HopFiCaSchedulerAppReservations findById(int id) throws StorageException {
-        Session session = connector.obtainSession();
+        HopsSession session = connector.obtainSession();
 
         FiCaSchedulerAppReservationsClusterJ.FiCaSchedulerAppReservationsDTO fiCaSchedulerAppReservationsDTO = null;
         if (session != null) {
@@ -54,7 +54,7 @@ public class FiCaSchedulerAppReservationsClusterJ implements FiCaSchedulerAppRes
 
     @Override
     public void prepare(Collection<HopFiCaSchedulerAppReservations> modified, Collection<HopFiCaSchedulerAppReservations> removed) throws StorageException {
-        Session session = connector.obtainSession();
+        HopsSession session = connector.obtainSession();
         try {
             if (removed != null) {
                 for (HopFiCaSchedulerAppReservations hop : removed) {
@@ -79,7 +79,7 @@ public class FiCaSchedulerAppReservationsClusterJ implements FiCaSchedulerAppRes
                                                     fiCaSchedulerAppReservationsDTO.getpriorityid());
     }
 
-    private FiCaSchedulerAppReservationsDTO createPersistable(HopFiCaSchedulerAppReservations hop, Session session) {
+    private FiCaSchedulerAppReservationsDTO createPersistable(HopFiCaSchedulerAppReservations hop, HopsSession session) throws StorageException {
         FiCaSchedulerAppReservationsClusterJ.FiCaSchedulerAppReservationsDTO fiCaSchedulerAppReservationsDTO = session.newInstance(FiCaSchedulerAppReservationsClusterJ.FiCaSchedulerAppReservationsDTO.class);
         
         fiCaSchedulerAppReservationsDTO.setschedulerappid(hop.getSchedulerapp_id());

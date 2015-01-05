@@ -1,13 +1,8 @@
 package se.sics.hop.metadata.ndb.dalimpl.yarn;
 
-import com.mysql.clusterj.Query;
-import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
-import com.mysql.clusterj.query.Predicate;
-import com.mysql.clusterj.query.QueryBuilder;
-import com.mysql.clusterj.query.QueryDomainType;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -16,6 +11,11 @@ import java.util.Map;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.entity.yarn.HopLaunchedContainers;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
+import se.sics.hop.metadata.ndb.wrapper.HopsPredicate;
+import se.sics.hop.metadata.ndb.wrapper.HopsQuery;
+import se.sics.hop.metadata.ndb.wrapper.HopsQueryBuilder;
+import se.sics.hop.metadata.ndb.wrapper.HopsQueryDomainType;
+import se.sics.hop.metadata.ndb.wrapper.HopsSession;
 import se.sics.hop.metadata.yarn.dal.LaunchedContainersDataAccess;
 import se.sics.hop.metadata.yarn.tabledef.LaunchedContainersTableDef;
 
@@ -49,7 +49,7 @@ public class LaunchedContainersClusterJ implements LaunchedContainersTableDef, L
 
     @Override
     public HopLaunchedContainers findEntry(String schedulernodeId, String containeridId) throws StorageException {
-        Session session = connector.obtainSession();
+        HopsSession session = connector.obtainSession();
         Object[] objarr = new Object[2];
         objarr[0] = schedulernodeId;
         objarr[1] = containeridId;
@@ -67,12 +67,12 @@ public class LaunchedContainersClusterJ implements LaunchedContainersTableDef, L
   @Override
   public Map<String, List<HopLaunchedContainers>> getAll() throws
           StorageException {
-    Session session = connector.obtainSession();
-    QueryBuilder qb = session.getQueryBuilder();
-    QueryDomainType<LaunchedContainersDTO> dobj
+    HopsSession session = connector.obtainSession();
+    HopsQueryBuilder qb = session.getQueryBuilder();
+    HopsQueryDomainType<LaunchedContainersDTO> dobj
             = qb.createQueryDefinition(
                     LaunchedContainersDTO.class);
-    Query<LaunchedContainersDTO> query = session.
+    HopsQuery<LaunchedContainersDTO> query = session.
             createQuery(dobj);
     List<LaunchedContainersDTO> results = query.
             getResultList();
@@ -83,13 +83,13 @@ public class LaunchedContainersClusterJ implements LaunchedContainersTableDef, L
     @Override
     public List<HopLaunchedContainers> findByFiCaSchedulerNode(String schedulernode_id) throws StorageException {
         try {
-            Session session = connector.obtainSession();
-            QueryBuilder qb = session.getQueryBuilder();
+            HopsSession session = connector.obtainSession();
+            HopsQueryBuilder qb = session.getQueryBuilder();
 
-            QueryDomainType<LaunchedContainersDTO> dobj = qb.createQueryDefinition(LaunchedContainersDTO.class);
-            Predicate pred1 = dobj.get("schedulernode_id").equal(dobj.param("schedulernode_id"));
+            HopsQueryDomainType<LaunchedContainersDTO> dobj = qb.createQueryDefinition(LaunchedContainersDTO.class);
+            HopsPredicate pred1 = dobj.get("schedulernode_id").equal(dobj.param("schedulernode_id"));
             dobj.where(pred1);
-            Query<LaunchedContainersDTO> query = session.createQuery(dobj);
+            HopsQuery<LaunchedContainersDTO> query = session.createQuery(dobj);
             query.setParameter("schedulernode_id", schedulernode_id);
 
             List<LaunchedContainersDTO> results = query.getResultList();
@@ -101,7 +101,7 @@ public class LaunchedContainersClusterJ implements LaunchedContainersTableDef, L
 
     @Override
     public void prepare(Collection<HopLaunchedContainers> modified, Collection<HopLaunchedContainers> removed) throws StorageException {
-        Session session = connector.obtainSession();
+        HopsSession session = connector.obtainSession();
         try {
             if (removed != null) {
                 List<LaunchedContainersDTO> toRemove = new ArrayList<LaunchedContainersDTO>(removed.size());
@@ -127,7 +127,7 @@ public class LaunchedContainersClusterJ implements LaunchedContainersTableDef, L
 
     @Override
     public void createLaunchedContainersEntry(HopLaunchedContainers ficaschedulernode, HopLaunchedContainers containerId) throws StorageException {
-        Session session = connector.obtainSession();
+        HopsSession session = connector.obtainSession();
         createPersistable(ficaschedulernode, session);
     }
 
@@ -151,7 +151,7 @@ public class LaunchedContainersClusterJ implements LaunchedContainersTableDef, L
         return hop;
     }
 
-    private LaunchedContainersDTO createPersistable(HopLaunchedContainers entry, Session session) {
+    private LaunchedContainersDTO createPersistable(HopLaunchedContainers entry, HopsSession session) throws StorageException {
         Object[] objarr = new Object[2];
         objarr[0] = entry.getSchedulerNodeID();
         objarr[1] = entry.getContainerIdID();

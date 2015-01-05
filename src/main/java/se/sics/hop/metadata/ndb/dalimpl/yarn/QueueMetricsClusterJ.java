@@ -5,22 +5,20 @@
  */
 package se.sics.hop.metadata.ndb.dalimpl.yarn;
 
-import com.mysql.clusterj.Query;
-import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
-import com.mysql.clusterj.query.QueryBuilder;
-import com.mysql.clusterj.query.QueryDomainType;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.entity.yarn.HopQueueMetrics;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
+import se.sics.hop.metadata.ndb.wrapper.HopsQuery;
+import se.sics.hop.metadata.ndb.wrapper.HopsQueryBuilder;
+import se.sics.hop.metadata.ndb.wrapper.HopsQueryDomainType;
+import se.sics.hop.metadata.ndb.wrapper.HopsSession;
 import se.sics.hop.metadata.yarn.dal.QueueMetricsDataAccess;
 import se.sics.hop.metadata.yarn.tabledef.QueueMetricsTableDef;
 import static se.sics.hop.metadata.yarn.tabledef.QueueMetricsTableDef.PENDING_VCORES;
@@ -161,7 +159,7 @@ public class QueueMetricsClusterJ implements QueueMetricsTableDef, QueueMetricsD
 
   @Override
   public HopQueueMetrics findById(int id) throws StorageException {
-    Session session = connector.obtainSession();
+    HopsSession session = connector.obtainSession();
 
     QueueMetricsClusterJ.QueueMetricsDTO queueMetricsDTO = null;
     if (session != null) {
@@ -176,10 +174,10 @@ public class QueueMetricsClusterJ implements QueueMetricsTableDef, QueueMetricsD
 
   @Override
   public List<HopQueueMetrics> findAll() throws StorageException, IOException {
-    Session session = connector.obtainSession();
-    QueryBuilder qb = session.getQueryBuilder();
-    QueryDomainType<QueueMetricsClusterJ.QueueMetricsDTO> dobj = qb.createQueryDefinition(QueueMetricsClusterJ.QueueMetricsDTO.class);
-    Query<QueueMetricsClusterJ.QueueMetricsDTO> query = session.createQuery(dobj);
+    HopsSession session = connector.obtainSession();
+    HopsQueryBuilder qb = session.getQueryBuilder();
+    HopsQueryDomainType<QueueMetricsClusterJ.QueueMetricsDTO> dobj = qb.createQueryDefinition(QueueMetricsClusterJ.QueueMetricsDTO.class);
+    HopsQuery<QueueMetricsClusterJ.QueueMetricsDTO> query = session.createQuery(dobj);
     List<QueueMetricsClusterJ.QueueMetricsDTO> results = query.getResultList();
     session.flush();
     return createHopQueueMetricsList(results);
@@ -196,7 +194,7 @@ public class QueueMetricsClusterJ implements QueueMetricsTableDef, QueueMetricsD
   
   @Override
   public void prepare(Collection<HopQueueMetrics> modified, Collection<HopQueueMetrics> removed) throws StorageException {
-    Session session = connector.obtainSession();
+    HopsSession session = connector.obtainSession();
     try {
       if (removed != null) {
         for (HopQueueMetrics hop : removed) {
@@ -242,7 +240,7 @@ public class QueueMetricsClusterJ implements QueueMetricsTableDef, QueueMetricsD
             queueMetricsDTO.getqueuename());
   }
 
-  private QueueMetricsDTO createPersistable(HopQueueMetrics hop, Session session) {
+  private QueueMetricsDTO createPersistable(HopQueueMetrics hop, HopsSession session) throws StorageException {
     QueueMetricsClusterJ.QueueMetricsDTO queueMetricsDTO = session.newInstance(QueueMetricsClusterJ.QueueMetricsDTO.class);
 
     queueMetricsDTO.setactiveapplications(hop.getActiveapplications());

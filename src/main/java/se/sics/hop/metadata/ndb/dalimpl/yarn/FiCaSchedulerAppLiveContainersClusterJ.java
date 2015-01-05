@@ -6,23 +6,22 @@
 
 package se.sics.hop.metadata.ndb.dalimpl.yarn;
 
-import com.mysql.clusterj.Query;
-import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
-import com.mysql.clusterj.query.Predicate;
-import com.mysql.clusterj.query.QueryBuilder;
-import com.mysql.clusterj.query.QueryDomainType;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.entity.yarn.HopFiCaSchedulerAppLiveContainers;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
+import se.sics.hop.metadata.ndb.wrapper.HopsPredicate;
+import se.sics.hop.metadata.ndb.wrapper.HopsQuery;
+import se.sics.hop.metadata.ndb.wrapper.HopsQueryBuilder;
+import se.sics.hop.metadata.ndb.wrapper.HopsQueryDomainType;
+import se.sics.hop.metadata.ndb.wrapper.HopsSession;
 import se.sics.hop.metadata.yarn.dal.FiCaSchedulerAppLiveContainersDataAccess;
 import se.sics.hop.metadata.yarn.tabledef.FiCaSchedulerAppLiveContainersTableDef;
 
@@ -53,13 +52,13 @@ public class FiCaSchedulerAppLiveContainersClusterJ implements FiCaSchedulerAppL
     @Override
     public List<HopFiCaSchedulerAppLiveContainers> findById(String ficaId) throws StorageException {
         try {
-            Session session = connector.obtainSession();
-            QueryBuilder qb = session.getQueryBuilder();
+            HopsSession session = connector.obtainSession();
+            HopsQueryBuilder qb = session.getQueryBuilder();
 
-            QueryDomainType<FiCaSchedulerAppLiveContainersClusterJ.FiCaSchedulerAppLiveContainersDTO> dobj = qb.createQueryDefinition(FiCaSchedulerAppLiveContainersClusterJ.FiCaSchedulerAppLiveContainersDTO.class);
-            Predicate pred1 = dobj.get("schedulerapp_id").equal(dobj.param("schedulerapp_id"));
+            HopsQueryDomainType<FiCaSchedulerAppLiveContainersClusterJ.FiCaSchedulerAppLiveContainersDTO> dobj = qb.createQueryDefinition(FiCaSchedulerAppLiveContainersClusterJ.FiCaSchedulerAppLiveContainersDTO.class);
+            HopsPredicate pred1 = dobj.get("schedulerapp_id").equal(dobj.param("schedulerapp_id"));
             dobj.where(pred1);
-            Query<FiCaSchedulerAppLiveContainersClusterJ.FiCaSchedulerAppLiveContainersDTO> query = session.createQuery(dobj);
+            HopsQuery<FiCaSchedulerAppLiveContainersClusterJ.FiCaSchedulerAppLiveContainersDTO> query = session.createQuery(dobj);
             query.setParameter("schedulerapp_id", ficaId);
 
             List<FiCaSchedulerAppLiveContainersClusterJ.FiCaSchedulerAppLiveContainersDTO> results = query.getResultList();
@@ -72,12 +71,12 @@ public class FiCaSchedulerAppLiveContainersClusterJ implements FiCaSchedulerAppL
    @Override
   public Map<String, List<HopFiCaSchedulerAppLiveContainers>> getAll() throws
           StorageException {
-    Session session = connector.obtainSession();
-    QueryBuilder qb = session.getQueryBuilder();
-    QueryDomainType<FiCaSchedulerAppLiveContainersDTO> dobj
+    HopsSession session = connector.obtainSession();
+    HopsQueryBuilder qb = session.getQueryBuilder();
+    HopsQueryDomainType<FiCaSchedulerAppLiveContainersDTO> dobj
             = qb.createQueryDefinition(
                     FiCaSchedulerAppLiveContainersDTO.class);
-    Query<FiCaSchedulerAppLiveContainersDTO> query = session.
+     HopsQuery<FiCaSchedulerAppLiveContainersDTO> query = session.
             createQuery(dobj);
     List<FiCaSchedulerAppLiveContainersDTO> results = query.
             getResultList();
@@ -86,7 +85,7 @@ public class FiCaSchedulerAppLiveContainersClusterJ implements FiCaSchedulerAppL
     
     @Override
     public void prepare(Collection<HopFiCaSchedulerAppLiveContainers> modified, Collection<HopFiCaSchedulerAppLiveContainers> removed) throws StorageException {
-        Session session = connector.obtainSession();
+        HopsSession session = connector.obtainSession();
         try {
             if (removed != null) {
                 List<FiCaSchedulerAppLiveContainersClusterJ.FiCaSchedulerAppLiveContainersDTO> toRemove = new ArrayList<FiCaSchedulerAppLiveContainersClusterJ.FiCaSchedulerAppLiveContainersDTO>();
@@ -115,7 +114,7 @@ public class FiCaSchedulerAppLiveContainersClusterJ implements FiCaSchedulerAppL
                                                     fiCaSchedulerAppLiveContainersDTO.getrmcontainerid());
     }
 
-    private FiCaSchedulerAppLiveContainersDTO createPersistable(HopFiCaSchedulerAppLiveContainers hop, Session session) {
+    private FiCaSchedulerAppLiveContainersDTO createPersistable(HopFiCaSchedulerAppLiveContainers hop, HopsSession session) throws StorageException {
         FiCaSchedulerAppLiveContainersClusterJ.FiCaSchedulerAppLiveContainersDTO fiCaSchedulerAppLiveContainersDTO = session.newInstance(FiCaSchedulerAppLiveContainersClusterJ.FiCaSchedulerAppLiveContainersDTO.class);
         
         fiCaSchedulerAppLiveContainersDTO.setschedulerapp_id(hop.getSchedulerapp_id());

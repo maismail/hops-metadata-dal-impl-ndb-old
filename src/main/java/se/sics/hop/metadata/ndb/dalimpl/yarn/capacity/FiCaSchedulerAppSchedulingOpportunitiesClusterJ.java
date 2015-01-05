@@ -14,6 +14,7 @@ import java.util.Collection;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.entity.yarn.capacity.HopFiCaSchedulerAppSchedulingOpportunities;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
+import se.sics.hop.metadata.ndb.wrapper.HopsSession;
 import se.sics.hop.metadata.yarn.dal.capacity.FiCaSchedulerAppSchedulingOpportunitiesDataAccess;
 import se.sics.hop.metadata.yarn.tabledef.capacity.FiCaSchedulerAppSchedulingOpportunitiesTableDef;
 
@@ -40,7 +41,7 @@ public class FiCaSchedulerAppSchedulingOpportunitiesClusterJ implements FiCaSche
     
     @Override
     public HopFiCaSchedulerAppSchedulingOpportunities findById(int id) throws StorageException {
-        Session session = connector.obtainSession();
+        HopsSession session = connector.obtainSession();
 
         FiCaSchedulerAppSchedulingOpportunitiesClusterJ.FiCaSchedulerAppSchedulingOpportunitiesDTO fiCaSchedulerAppSchedulingOpportunitiesDTO = null;
         if (session != null) {
@@ -55,7 +56,7 @@ public class FiCaSchedulerAppSchedulingOpportunitiesClusterJ implements FiCaSche
 
     @Override
     public void prepare(Collection<HopFiCaSchedulerAppSchedulingOpportunities> modified, Collection<HopFiCaSchedulerAppSchedulingOpportunities> removed) throws StorageException {
-        Session session = connector.obtainSession();
+        HopsSession session = connector.obtainSession();
         try {
             if (removed != null) {
                 for (HopFiCaSchedulerAppSchedulingOpportunities hop : removed) {
@@ -79,7 +80,7 @@ public class FiCaSchedulerAppSchedulingOpportunitiesClusterJ implements FiCaSche
                                                             fiCaSchedulerAppSchedulingOpportunitiesDTO.getpriorityid());
    }
 
-    private FiCaSchedulerAppSchedulingOpportunitiesDTO createPersistable(HopFiCaSchedulerAppSchedulingOpportunities hop, Session session) {
+    private FiCaSchedulerAppSchedulingOpportunitiesDTO createPersistable(HopFiCaSchedulerAppSchedulingOpportunities hop, HopsSession session) throws StorageException {
         FiCaSchedulerAppSchedulingOpportunitiesClusterJ.FiCaSchedulerAppSchedulingOpportunitiesDTO fiCaSchedulerAppSchedulingOpportunitiesDTO = session.newInstance(FiCaSchedulerAppSchedulingOpportunitiesClusterJ.FiCaSchedulerAppSchedulingOpportunitiesDTO.class);
         
         fiCaSchedulerAppSchedulingOpportunitiesDTO.setschedulerappid(hop.getSchedulerapp_id());

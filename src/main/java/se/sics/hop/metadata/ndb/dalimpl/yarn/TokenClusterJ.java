@@ -1,6 +1,5 @@
 package se.sics.hop.metadata.ndb.dalimpl.yarn;
 
-import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
@@ -8,6 +7,7 @@ import java.util.Collection;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.entity.yarn.HopToken;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
+import se.sics.hop.metadata.ndb.wrapper.HopsSession;
 import se.sics.hop.metadata.yarn.dal.TokenDataAccess;
 import se.sics.hop.metadata.yarn.tabledef.TokenTableDef;
 
@@ -50,7 +50,7 @@ public class TokenClusterJ implements TokenTableDef, TokenDataAccess<HopToken> {
 
     @Override
     public HopToken findById(int id) throws StorageException {
-        Session session = connector.obtainSession();
+        HopsSession session = connector.obtainSession();
 
         TokenDTO tokenDTO = null;
         if (session != null) {
@@ -65,7 +65,7 @@ public class TokenClusterJ implements TokenTableDef, TokenDataAccess<HopToken> {
 
     @Override
     public void prepare(Collection<HopToken> modified, Collection<HopToken> removed) throws StorageException {
-        Session session = connector.obtainSession();
+        HopsSession session = connector.obtainSession();
         try {
             if (removed != null) {
                 for (HopToken token : removed) {
@@ -87,7 +87,7 @@ public class TokenClusterJ implements TokenTableDef, TokenDataAccess<HopToken> {
 
     @Override
     public void createToken(HopToken token) throws StorageException {
-        Session session = connector.obtainSession();
+        HopsSession session = connector.obtainSession();
         createPersistable(token, session);
     }
 
@@ -100,7 +100,7 @@ public class TokenClusterJ implements TokenTableDef, TokenDataAccess<HopToken> {
                 tokenDTO.getservice());
     }
 
-    private TokenDTO createPersistable(HopToken token, Session session) {
+    private TokenDTO createPersistable(HopToken token, HopsSession session) throws StorageException {
         TokenDTO tokenDTO = session.newInstance(TokenDTO.class);
         //Set values to persist new rmnode
         tokenDTO.setid(token.getId());

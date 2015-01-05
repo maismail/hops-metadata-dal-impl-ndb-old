@@ -1,18 +1,18 @@
 package se.sics.hop.metadata.ndb.dalimpl.yarn;
 
-import com.mysql.clusterj.Query;
-import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
-import com.mysql.clusterj.query.QueryBuilder;
-import com.mysql.clusterj.query.QueryDomainType;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.entity.yarn.HopRMContextActiveNodes;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
+import se.sics.hop.metadata.ndb.wrapper.HopsQuery;
+import se.sics.hop.metadata.ndb.wrapper.HopsQueryBuilder;
+import se.sics.hop.metadata.ndb.wrapper.HopsQueryDomainType;
+import se.sics.hop.metadata.ndb.wrapper.HopsSession;
 import se.sics.hop.metadata.yarn.dal.RMContextActiveNodesDataAccess;
 
 import se.sics.hop.metadata.yarn.tabledef.RMContextActiveNodesTableDef;
@@ -37,7 +37,7 @@ public class RMContextActiveNodesClusterJ implements RMContextActiveNodesTableDe
 
     @Override
     public HopRMContextActiveNodes findEntry(int rmcontextId, int nodeidId) throws StorageException {
-        Session session = connector.obtainSession();
+        HopsSession session = connector.obtainSession();
         RMContextNodesDTO entry = null;
         if (session != null) {
             entry = session.find(RMContextNodesDTO.class, nodeidId);
@@ -51,11 +51,11 @@ public class RMContextActiveNodesClusterJ implements RMContextActiveNodesTableDe
     @Override
     public List<HopRMContextActiveNodes> findAll() throws StorageException {
         try {
-            Session session = connector.obtainSession();
-            QueryBuilder qb = session.getQueryBuilder();
+            HopsSession session = connector.obtainSession();
+            HopsQueryBuilder qb = session.getQueryBuilder();
 
-            QueryDomainType<RMContextNodesDTO> dobj = qb.createQueryDefinition(RMContextNodesDTO.class);
-            Query<RMContextNodesDTO> query = session.createQuery(dobj);
+            HopsQueryDomainType<RMContextNodesDTO> dobj = qb.createQueryDefinition(RMContextNodesDTO.class);
+            HopsQuery<RMContextNodesDTO> query = session.createQuery(dobj);
 
             List<RMContextNodesDTO> results = query.getResultList();
             return createRMContextNodesList(results);
@@ -66,7 +66,7 @@ public class RMContextActiveNodesClusterJ implements RMContextActiveNodesTableDe
 
     @Override
     public void prepare(Collection<HopRMContextActiveNodes> modified, Collection<HopRMContextActiveNodes> removed) throws StorageException {
-        Session session = connector.obtainSession();
+        HopsSession session = connector.obtainSession();
         try {
             if (removed != null) {
                 List<RMContextNodesDTO> toRemove = new ArrayList<RMContextNodesDTO>();
@@ -89,7 +89,7 @@ public class RMContextActiveNodesClusterJ implements RMContextActiveNodesTableDe
 
     @Override
     public void createRMContextNodesEntry(HopRMContextActiveNodes entry) throws StorageException {
-        Session session = connector.obtainSession();
+        HopsSession session = connector.obtainSession();
         session.savePersistent(createPersistable(entry, session));
     }
 
@@ -97,7 +97,7 @@ public class RMContextActiveNodesClusterJ implements RMContextActiveNodesTableDe
         return new HopRMContextActiveNodes(entry.getnodeidid());
     }
 
-    private RMContextNodesDTO createPersistable(HopRMContextActiveNodes entry, Session session) {
+    private RMContextNodesDTO createPersistable(HopRMContextActiveNodes entry, HopsSession session) throws StorageException {
         RMContextNodesDTO persistable = session.newInstance(RMContextNodesDTO.class, entry.getNodeidId());
         persistable.setnodeidid(entry.getNodeidId());
         //session.savePersistent(persistable);

@@ -1,13 +1,8 @@
 package se.sics.hop.metadata.ndb.dalimpl.yarn;
 
-import com.mysql.clusterj.Query;
-import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
-import com.mysql.clusterj.query.Predicate;
-import com.mysql.clusterj.query.QueryBuilder;
-import com.mysql.clusterj.query.QueryDomainType;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -16,6 +11,11 @@ import java.util.Map;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.entity.yarn.HopRMNode;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
+import se.sics.hop.metadata.ndb.wrapper.HopsPredicate;
+import se.sics.hop.metadata.ndb.wrapper.HopsQuery;
+import se.sics.hop.metadata.ndb.wrapper.HopsQueryBuilder;
+import se.sics.hop.metadata.ndb.wrapper.HopsQueryDomainType;
+import se.sics.hop.metadata.ndb.wrapper.HopsSession;
 import se.sics.hop.metadata.yarn.dal.RMNodeDataAccess;
 import se.sics.hop.metadata.yarn.tabledef.RMNodeTableDef;
 
@@ -94,7 +94,7 @@ public class RMNodeClusterJ implements RMNodeTableDef, RMNodeDataAccess<HopRMNod
 
     @Override
     public HopRMNode findByNodeId(String nodeid) throws StorageException {
-        Session session = connector.obtainSession();
+        HopsSession session = connector.obtainSession();
         RMNodeDTO rmnodeDTO = session.find(RMNodeDTO.class, nodeid);
         if (rmnodeDTO == null) {
             throw new StorageException("Error while retrieving row:" + nodeid);
@@ -104,14 +104,14 @@ public class RMNodeClusterJ implements RMNodeTableDef, RMNodeDataAccess<HopRMNod
 
     @Override
     public HopRMNode findByHostNameCommandPort(String hostName, int commandPort) throws StorageException {
-        Session session = connector.obtainSession();
-        QueryBuilder qb = session.getQueryBuilder();
-        QueryDomainType<RMNodeDTO> dobj = qb.createQueryDefinition(RMNodeDTO.class);
-        Predicate pred1 = dobj.get("hostname").equal(dobj.param("hostname"));
-        Predicate pred2 = dobj.get("commandport").equal(dobj.param("commandport"));
+        HopsSession session = connector.obtainSession();
+        HopsQueryBuilder qb = session.getQueryBuilder();
+        HopsQueryDomainType<RMNodeDTO> dobj = qb.createQueryDefinition(RMNodeDTO.class);
+        HopsPredicate pred1 = dobj.get("hostname").equal(dobj.param("hostname"));
+        HopsPredicate pred2 = dobj.get("commandport").equal(dobj.param("commandport"));
         pred1 = pred1.and(pred2);
         dobj.where(pred1);
-        Query<RMNodeDTO> query = session.createQuery(dobj);
+        HopsQuery<RMNodeDTO> query = session.createQuery(dobj);
         query.setParameter("hostname", hostName);
         query.setParameter("commandport", commandPort);
         List<RMNodeDTO> results = query.getResultList();
@@ -124,7 +124,7 @@ public class RMNodeClusterJ implements RMNodeTableDef, RMNodeDataAccess<HopRMNod
 
     @Override
     public HopRMNode findByHostName(String hostName) throws StorageException {
-        Session session = connector.obtainSession();
+        HopsSession session = connector.obtainSession();
         RMNodeDTO rmnodeDTO = session.find(RMNodeDTO.class, hostName);
         if (rmnodeDTO == null) {
             throw new StorageException("Error while retrieving row:" + hostName);
@@ -134,11 +134,11 @@ public class RMNodeClusterJ implements RMNodeTableDef, RMNodeDataAccess<HopRMNod
 
   @Override
   public Map<String, HopRMNode> getAll() throws StorageException {
-    Session session = connector.obtainSession();
-    QueryBuilder qb = session.getQueryBuilder();
+    HopsSession session = connector.obtainSession();
+    HopsQueryBuilder qb = session.getQueryBuilder();
 
-    QueryDomainType<RMNodeDTO> dobj = qb.createQueryDefinition(RMNodeDTO.class);
-    Query<RMNodeDTO> query = session.createQuery(dobj);
+    HopsQueryDomainType<RMNodeDTO> dobj = qb.createQueryDefinition(RMNodeDTO.class);
+    HopsQuery<RMNodeDTO> query = session.createQuery(dobj);
 
     List<RMNodeDTO> results = query.getResultList();
     return createMap(results);
@@ -147,7 +147,7 @@ public class RMNodeClusterJ implements RMNodeTableDef, RMNodeDataAccess<HopRMNod
     
     @Override
     public void deleteAll(int startId, int endId) throws StorageException {
-        Session session = connector.obtainSession();
+        HopsSession session = connector.obtainSession();
         for (int i = startId; i < endId; i++) {
             RMNodeDTO rmnodeDTO = session.find(RMNodeDTO.class, i);
             session.deletePersistent(rmnodeDTO);
@@ -157,7 +157,7 @@ public class RMNodeClusterJ implements RMNodeTableDef, RMNodeDataAccess<HopRMNod
 
     @Override
     public void prepare(Collection<HopRMNode> modified, Collection<HopRMNode> removed) throws StorageException {
-        Session session = connector.obtainSession();
+        HopsSession session = connector.obtainSession();
         try {
             if (removed != null) {
                 List<RMNodeDTO> toRemove = new ArrayList<RMNodeDTO>();
@@ -180,11 +180,11 @@ public class RMNodeClusterJ implements RMNodeTableDef, RMNodeDataAccess<HopRMNod
 
     @Override
     public void createRMNode(HopRMNode rmNode) throws StorageException {
-        Session session = connector.obtainSession();
+        HopsSession session = connector.obtainSession();
         session.savePersistent(createPersistable(rmNode, session));
     }
 
-    private RMNodeDTO createPersistable(HopRMNode hopRMNode, Session session) {
+    private RMNodeDTO createPersistable(HopRMNode hopRMNode, HopsSession session) throws StorageException {
         RMNodeDTO rmDTO = session.newInstance(RMNodeDTO.class);
         //Set values to persist new rmnode
         rmDTO.setNodeid(hopRMNode.getNodeId());

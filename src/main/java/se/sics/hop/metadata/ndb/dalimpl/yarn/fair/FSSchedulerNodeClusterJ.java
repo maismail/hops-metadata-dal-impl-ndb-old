@@ -6,7 +6,6 @@
 
 package se.sics.hop.metadata.ndb.dalimpl.yarn.fair;
 
-import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
@@ -16,6 +15,7 @@ import java.util.List;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.entity.yarn.fair.HopFSSchedulerNode;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
+import se.sics.hop.metadata.ndb.wrapper.HopsSession;
 import se.sics.hop.metadata.yarn.dal.fair.FSSchedulerNodeDataAccess;
 import se.sics.hop.metadata.yarn.tabledef.fair.FSSchedulerNodeTableDef;
 import static se.sics.hop.metadata.yarn.tabledef.fair.FSSchedulerNodeTableDef.RMNODEID;
@@ -51,7 +51,7 @@ public class FSSchedulerNodeClusterJ implements FSSchedulerNodeTableDef, FSSched
     
     @Override
     public HopFSSchedulerNode findById(String id) throws StorageException {
-        Session session = connector.obtainSession();
+        HopsSession session = connector.obtainSession();
 
         FSSchedulerNodeClusterJ.FSSchedulerNodeDTO fsschedulernodeDTO = null;
         if (session != null) {
@@ -66,7 +66,7 @@ public class FSSchedulerNodeClusterJ implements FSSchedulerNodeTableDef, FSSched
 
     @Override
     public void prepare(Collection<HopFSSchedulerNode> modified, Collection<HopFSSchedulerNode> removed) throws StorageException {
-        Session session = connector.obtainSession();
+        HopsSession session = connector.obtainSession();
         try {
             if (removed != null) {
                 List<FSSchedulerNodeClusterJ.FSSchedulerNodeDTO> toRemove = new ArrayList<FSSchedulerNodeClusterJ.FSSchedulerNodeDTO>();
@@ -91,7 +91,7 @@ public class FSSchedulerNodeClusterJ implements FSSchedulerNodeTableDef, FSSched
 
     @Override
     public void createFSSchedulerNode(HopFSSchedulerNode node) throws StorageException {
-        Session session = connector.obtainSession();
+        HopsSession session = connector.obtainSession();
         session.savePersistent(createPersistable(node, session));
     }
     
@@ -102,7 +102,7 @@ public class FSSchedulerNodeClusterJ implements FSSchedulerNodeTableDef, FSSched
         return hop;
     }
     
-    private FSSchedulerNodeDTO createPersistable(HopFSSchedulerNode hop, Session session) {
+    private FSSchedulerNodeDTO createPersistable(HopFSSchedulerNode hop, HopsSession session) throws StorageException {
         FSSchedulerNodeDTO fssDTO = session.newInstance(FSSchedulerNodeDTO.class);
         fssDTO.setrmnodeid(hop.getRmnodeid());
         fssDTO.setnumcontainers(hop.getNumcontainers());

@@ -5,19 +5,19 @@
  */
 package se.sics.hop.metadata.ndb.dalimpl.yarn.rmstatestore;
 
-import com.mysql.clusterj.Query;
-import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
-import com.mysql.clusterj.query.QueryBuilder;
-import com.mysql.clusterj.query.QueryDomainType;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.entity.yarn.appmasterrpc.HopAppMasterRPC;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
+import se.sics.hop.metadata.ndb.wrapper.HopsQuery;
+import se.sics.hop.metadata.ndb.wrapper.HopsQueryBuilder;
+import se.sics.hop.metadata.ndb.wrapper.HopsQueryDomainType;
+import se.sics.hop.metadata.ndb.wrapper.HopsSession;
 import se.sics.hop.metadata.yarn.dal.rmstatestore.AppMasterRPCDataAccess;
 import se.sics.hop.metadata.yarn.tabledef.appmasterrpc.AppMasterRPCTableDef;
 
@@ -57,7 +57,7 @@ public class AppMasterRPCClusterJ implements AppMasterRPCTableDef,
 
   @Override
   public HopAppMasterRPC findById(int id) throws StorageException {
-    Session session = connector.obtainSession();
+    HopsSession session = connector.obtainSession();
 
     AppMasterRPCClusterJ.AppMasterRPCDTO appMasterRPCDTO = null;
     if (session != null) {
@@ -73,7 +73,7 @@ public class AppMasterRPCClusterJ implements AppMasterRPCTableDef,
   @Override
   public void prepare(Collection<HopAppMasterRPC> modified,
           Collection<HopAppMasterRPC> removed) throws StorageException {
-    Session session = connector.obtainSession();
+    HopsSession session = connector.obtainSession();
     try {
       if (removed != null) {
         List<AppMasterRPCClusterJ.AppMasterRPCDTO> toRemove
@@ -100,13 +100,13 @@ public class AppMasterRPCClusterJ implements AppMasterRPCTableDef,
   @Override
   public List<HopAppMasterRPC> getAll() throws StorageException {
     try {
-      Session session = connector.obtainSession();
-      QueryBuilder qb = session.getQueryBuilder();
-      QueryDomainType<AppMasterRPCClusterJ.AppMasterRPCDTO> dobj = qb.
+      HopsSession session = connector.obtainSession();
+      HopsQueryBuilder qb = session.getQueryBuilder();
+      HopsQueryDomainType<AppMasterRPCClusterJ.AppMasterRPCDTO> dobj = qb.
               createQueryDefinition(AppMasterRPCClusterJ.AppMasterRPCDTO.class);
             //Predicate pred1 = dobj.get("applicationid").equal(dobj.param("applicationid"));
       //dobj.where(pred1);
-      Query<AppMasterRPCClusterJ.AppMasterRPCDTO> query = session.createQuery(
+      HopsQuery<AppMasterRPCClusterJ.AppMasterRPCDTO> query = session.createQuery(
               dobj);
       //query.setParameter("applicationid", applicationid);
       List<AppMasterRPCClusterJ.AppMasterRPCDTO> results = query.getResultList();
@@ -136,7 +136,7 @@ public class AppMasterRPCClusterJ implements AppMasterRPCTableDef,
 
   }
 
-  private AppMasterRPCDTO createPersistable(HopAppMasterRPC hop, Session session) {
+  private AppMasterRPCDTO createPersistable(HopAppMasterRPC hop, HopsSession session) throws StorageException {
     AppMasterRPCClusterJ.AppMasterRPCDTO appMasterRPCDTO = session.newInstance(
             AppMasterRPCClusterJ.AppMasterRPCDTO.class);
     appMasterRPCDTO.setid(hop.getId());

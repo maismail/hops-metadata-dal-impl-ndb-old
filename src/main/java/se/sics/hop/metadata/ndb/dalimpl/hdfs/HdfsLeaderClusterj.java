@@ -46,10 +46,10 @@ public class HdfsLeaderClusterj extends LeaderClusterj implements HdfsLeaderTabl
 
         void setHostname(String hostname);
 
-        @Column(name = AVG_REQUEST_PROCESSING_LATENCY)
-        int getAvgRequestProcessingLatency();
+        @Column(name = HTTP_ADDRESS)
+        String getHttpAddress();
 
-        void setAvgRequestProcessingLatency(int avgRequestProcessingLatency);
+        void setHttpAddress(String httpAddress);
     }
  
     public HdfsLeaderClusterj(){

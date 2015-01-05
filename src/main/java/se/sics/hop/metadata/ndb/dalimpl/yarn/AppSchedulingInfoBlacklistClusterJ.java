@@ -6,14 +6,9 @@
 
 package se.sics.hop.metadata.ndb.dalimpl.yarn;
 
-import com.mysql.clusterj.Query;
-import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
-import com.mysql.clusterj.query.Predicate;
-import com.mysql.clusterj.query.QueryBuilder;
-import com.mysql.clusterj.query.QueryDomainType;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -22,6 +17,11 @@ import java.util.Map;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.entity.yarn.HopAppSchedulingInfoBlacklist;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
+import se.sics.hop.metadata.ndb.wrapper.HopsPredicate;
+import se.sics.hop.metadata.ndb.wrapper.HopsQuery;
+import se.sics.hop.metadata.ndb.wrapper.HopsQueryBuilder;
+import se.sics.hop.metadata.ndb.wrapper.HopsQueryDomainType;
+import se.sics.hop.metadata.ndb.wrapper.HopsSession;
 import se.sics.hop.metadata.yarn.dal.AppSchedulingInfoBlacklistDataAccess;
 import se.sics.hop.metadata.yarn.tabledef.AppSchedulingInfoBlacklistTableDef;
 
@@ -50,13 +50,13 @@ public class AppSchedulingInfoBlacklistClusterJ implements AppSchedulingInfoBlac
     @Override
     public List<HopAppSchedulingInfoBlacklist> findById(String id) throws StorageException {
         try {
-            Session session = connector.obtainSession();
-            QueryBuilder qb = session.getQueryBuilder();
+            HopsSession session = connector.obtainSession();
+            HopsQueryBuilder qb = session.getQueryBuilder();
 
-            QueryDomainType<AppSchedulingInfoBlacklistClusterJ.AppSchedulingInfoBlacklistDTO> dobj = qb.createQueryDefinition(AppSchedulingInfoBlacklistClusterJ.AppSchedulingInfoBlacklistDTO.class);
-            Predicate pred1 = dobj.get("appschedulinginfo_id").equal(dobj.param("appschedulinginfo_id"));
+            HopsQueryDomainType<AppSchedulingInfoBlacklistClusterJ.AppSchedulingInfoBlacklistDTO> dobj = qb.createQueryDefinition(AppSchedulingInfoBlacklistClusterJ.AppSchedulingInfoBlacklistDTO.class);
+            HopsPredicate pred1 = dobj.get("appschedulinginfo_id").equal(dobj.param("appschedulinginfo_id"));
             dobj.where(pred1);
-            Query<AppSchedulingInfoBlacklistClusterJ.AppSchedulingInfoBlacklistDTO> query = session.createQuery(dobj);
+            HopsQuery<AppSchedulingInfoBlacklistClusterJ.AppSchedulingInfoBlacklistDTO> query = session.createQuery(dobj);
             query.setParameter("appschedulinginfo_id", id);
 
             List<AppSchedulingInfoBlacklistClusterJ.AppSchedulingInfoBlacklistDTO> results = query.getResultList();
@@ -68,12 +68,12 @@ public class AppSchedulingInfoBlacklistClusterJ implements AppSchedulingInfoBlac
 
   public Map<String, List<HopAppSchedulingInfoBlacklist>> getAll() throws
           StorageException {
-    Session session = connector.obtainSession();
-    QueryBuilder qb = session.getQueryBuilder();
-    QueryDomainType<AppSchedulingInfoBlacklistDTO> dobj
+    HopsSession session = connector.obtainSession();
+    HopsQueryBuilder qb = session.getQueryBuilder();
+    HopsQueryDomainType<AppSchedulingInfoBlacklistDTO> dobj
             = qb.createQueryDefinition(
                     AppSchedulingInfoBlacklistDTO.class);
-    Query<AppSchedulingInfoBlacklistDTO> query = session.
+    HopsQuery<AppSchedulingInfoBlacklistDTO> query = session.
             createQuery(dobj);
     List<AppSchedulingInfoBlacklistDTO> results = query.
             getResultList();
@@ -82,7 +82,7 @@ public class AppSchedulingInfoBlacklistClusterJ implements AppSchedulingInfoBlac
     
     @Override
     public void prepare(Collection<HopAppSchedulingInfoBlacklist> modified, Collection<HopAppSchedulingInfoBlacklist> removed) throws StorageException {
-        Session session = connector.obtainSession();
+        HopsSession session = connector.obtainSession();
         try {
             if (removed != null) {
                 List<AppSchedulingInfoBlacklistClusterJ.AppSchedulingInfoBlacklistDTO> toRemove = new ArrayList<AppSchedulingInfoBlacklistClusterJ.AppSchedulingInfoBlacklistDTO>();
@@ -110,7 +110,7 @@ public class AppSchedulingInfoBlacklistClusterJ implements AppSchedulingInfoBlac
                                                 appSchedulingInfoBlacklistDTO.getblacklisted());
     }
 
-    private AppSchedulingInfoBlacklistDTO createPersistable(HopAppSchedulingInfoBlacklist hop, Session session) {
+    private AppSchedulingInfoBlacklistDTO createPersistable(HopAppSchedulingInfoBlacklist hop, HopsSession session) throws StorageException {
         AppSchedulingInfoBlacklistClusterJ.AppSchedulingInfoBlacklistDTO appSchedulingInfoBlacklistDTO = session.newInstance(AppSchedulingInfoBlacklistClusterJ.AppSchedulingInfoBlacklistDTO.class);
         
         appSchedulingInfoBlacklistDTO.setappschedulinginfo_id(hop.getAppschedulinginfo_id());
