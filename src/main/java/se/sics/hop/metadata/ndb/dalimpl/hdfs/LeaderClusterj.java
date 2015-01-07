@@ -73,7 +73,7 @@ public abstract class LeaderClusterj implements LeaderTableDef, LeaderDataAccess
     // TODO[Hooman]: code repetition. Use query for fetching "ids less than".
     HopsSession dbSession = connector.obtainSession();
     HopsQueryBuilder qb = dbSession.getQueryBuilder();
-    HopsQueryDomainType dobj = qb.createQueryDefinition(LeaderDTO.class);
+    HopsQueryDomainType dobj = qb.createQueryDefinition(dto);
     HopsPredicateOperand propertyPredicate = dobj.get("id");
     String param = "id";
     HopsPredicateOperand propertyLimit = dobj.param(param);
@@ -88,7 +88,7 @@ public abstract class LeaderClusterj implements LeaderTableDef, LeaderDataAccess
   public int countAllSuccessors(long id) throws StorageException {
     HopsSession dbSession = connector.obtainSession();
     HopsQueryBuilder qb = dbSession.getQueryBuilder();
-    HopsQueryDomainType dobj = qb.createQueryDefinition(LeaderDTO.class);
+    HopsQueryDomainType dobj = qb.createQueryDefinition(dto);
     HopsPredicateOperand propertyPredicate = dobj.get("id");
     String param = "id";
     HopsPredicateOperand propertyLimit = dobj.param(param);
@@ -103,7 +103,7 @@ public abstract class LeaderClusterj implements LeaderTableDef, LeaderDataAccess
   public HopLeader findByPkey(long id, int partitionKey) throws StorageException {
     HopsSession dbSession = connector.obtainSession();
     Object[] keys = new Object[]{id, partitionKey};
-    LeaderDTO lTable = dbSession.find(LeaderDTO.class, keys);
+    LeaderDTO lTable = (LeaderDTO) dbSession.find(dto, keys);
     if (lTable != null) {
       HopLeader leader = createLeader(lTable);
       return leader;
@@ -115,7 +115,7 @@ public abstract class LeaderClusterj implements LeaderTableDef, LeaderDataAccess
   public Collection<HopLeader> findAllByCounterGT(long counter) throws StorageException {
     HopsSession dbSession = connector.obtainSession();
     HopsQueryBuilder qb = dbSession.getQueryBuilder();
-    HopsQueryDomainType dobj = qb.createQueryDefinition(LeaderDTO.class);
+    HopsQueryDomainType dobj = qb.createQueryDefinition(dto);
     HopsPredicateOperand propertyPredicate = dobj.get("counter");
     String param = "counter";
     HopsPredicateOperand propertyLimit = dobj.param(param);
@@ -130,7 +130,7 @@ public abstract class LeaderClusterj implements LeaderTableDef, LeaderDataAccess
   public Collection<HopLeader> findAllByIDLT(long id) throws StorageException {
     HopsSession dbSession = connector.obtainSession();
     HopsQueryBuilder qb = dbSession.getQueryBuilder();
-    HopsQueryDomainType dobj = qb.createQueryDefinition(LeaderDTO.class);
+    HopsQueryDomainType dobj = qb.createQueryDefinition(dto);
     HopsPredicateOperand propertyPredicate = dobj.get("id");
     String param = "id";
     HopsPredicateOperand propertyLimit = dobj.param(param);
@@ -145,7 +145,7 @@ public abstract class LeaderClusterj implements LeaderTableDef, LeaderDataAccess
   public Collection<HopLeader> findAll() throws StorageException {
     HopsSession dbSession = connector.obtainSession();
     HopsQueryBuilder qb = dbSession.getQueryBuilder();
-    HopsQueryDomainType<LeaderDTO> dobj = qb.createQueryDefinition(LeaderDTO.class);
+    HopsQueryDomainType<LeaderDTO> dobj = qb.createQueryDefinition(dto);
     HopsQuery<LeaderDTO> query = dbSession.createQuery(dobj);
     return createList(query.getResultList());
   }
@@ -156,19 +156,19 @@ public abstract class LeaderClusterj implements LeaderTableDef, LeaderDataAccess
     List<LeaderDTO> changes = new ArrayList<LeaderDTO>();
     List<LeaderDTO> deletions = new ArrayList<LeaderDTO>();
     for (HopLeader l : newed) {
-      LeaderDTO lTable = dbSession.newInstance(LeaderDTO.class);
+      LeaderDTO lTable = (LeaderDTO) dbSession.newInstance(dto);
       createPersistableLeaderInstance(l, lTable);
       changes.add(lTable);
     }
 
     for (HopLeader l : modified) {
-      LeaderDTO lTable = dbSession.newInstance(LeaderDTO.class);
+      LeaderDTO lTable = (LeaderDTO) dbSession.newInstance(dto);
       createPersistableLeaderInstance(l, lTable);
       changes.add(lTable);
     }
 
     for (HopLeader l : removed) {
-      LeaderDTO lTable = dbSession.newInstance(LeaderDTO.class);
+      LeaderDTO lTable = (LeaderDTO) dbSession.newInstance(dto);
       createPersistableLeaderInstance(l, lTable);
       deletions.add(lTable);
     }

@@ -11,13 +11,13 @@ import se.sics.hop.metadata.hdfs.entity.yarn.rmstatestore.HopRMStateVersion;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
 import se.sics.hop.metadata.ndb.wrapper.HopsSession;
 import se.sics.hop.metadata.yarn.dal.rmstatestore.RMStateVersionDataAccess;
-import se.sics.hop.metadata.yarn.tabledef.rmstatestore.VersionTableDef;
+import se.sics.hop.metadata.yarn.tabledef.rmstatestore.RMStateVersionTableDef;
 
 /**
  *
  * @author nickstanogias
  */
-public class RMStateVersionClusterJ implements VersionTableDef, RMStateVersionDataAccess<HopRMStateVersion> {
+public class RMStateVersionClusterJ implements RMStateVersionTableDef, RMStateVersionDataAccess<HopRMStateVersion> {
 
     @PersistenceCapable(table = TABLE_NAME)
     public interface VersionDTO {

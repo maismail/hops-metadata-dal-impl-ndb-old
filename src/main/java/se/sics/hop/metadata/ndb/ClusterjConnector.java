@@ -142,6 +142,12 @@ import se.sics.hop.metadata.hdfs.dal.HdfsLeaderDataAccess;
 import se.sics.hop.metadata.hdfs.dal.YarnLeaderDataAccess;
 import se.sics.hop.metadata.hdfs.tabledef.HdfsLeaderTableDef;
 import se.sics.hop.metadata.hdfs.tabledef.YarnLeaderTableDef;
+import se.sics.hop.metadata.ndb.dalimpl.yarn.rmstatestore.RMStateVersionClusterJ;
+import se.sics.hop.metadata.yarn.tabledef.rmstatestore.ApplicationAttemptStateTableDef;
+import se.sics.hop.metadata.yarn.tabledef.rmstatestore.ApplicationStateTableDef;
+import se.sics.hop.metadata.yarn.tabledef.rmstatestore.DelegationKeyTableDef;
+import se.sics.hop.metadata.yarn.tabledef.rmstatestore.DelegationTokenTableDef;
+import se.sics.hop.metadata.yarn.tabledef.rmstatestore.RMStateVersionTableDef;
 
 public class ClusterjConnector implements StorageConnector<DBSession> {
 
@@ -499,6 +505,16 @@ public class ClusterjConnector implements StorageConnector<DBSession> {
             truncate(transactional,SecretMamagerKeysTableDef.TABLE_NAME);
           } else if (e == AllocateResponseDataAccess.class){
             truncate(transactional,AllocateResponseTableDef.TABLE_NAME);
+          } else if (e == DelegationKeyDataAccess.class){
+            truncate(transactional, DelegationKeyTableDef.TABLE_NAME);
+          } else if (e== DelegationTokenDataAccess.class){
+            truncate(transactional, DelegationTokenTableDef.TABLE_NAME);
+          } else if (e == RMStateVersionDataAccess.class){
+            truncate(transactional, RMStateVersionTableDef.TABLE_NAME);
+          } else if (e == ApplicationAttemptStateDataAccess.class){
+            truncate(transactional, ApplicationAttemptStateTableDef.TABLE_NAME);
+          } else if (e == ApplicationStateDataAccess.class){
+            truncate(transactional, ApplicationStateTableDef.TABLE_NAME);
           } else if (e == YarnVariablesDataAccess.class) {
             HopsSession session = obtainSession();
             session.currentTransaction().begin();
@@ -509,10 +525,10 @@ public class ClusterjConnector implements StorageConnector<DBSession> {
               vd.setvalue(0);
               session.savePersistent(vd);
             }
-
+            session.currentTransaction().commit();
           }
         }
-        MysqlServerConnector.truncateTable(transactional, "path_memcached");
+//        MysqlServerConnector.truncateTable(transactional, "path_memcached");
         return true;
 
       } catch (SQLException ex) {
