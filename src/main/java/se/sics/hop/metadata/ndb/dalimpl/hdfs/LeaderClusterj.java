@@ -1,22 +1,25 @@
 package se.sics.hop.metadata.ndb.dalimpl.hdfs;
 
-import com.mysql.clusterj.Query;
-import com.mysql.clusterj.Session;
-import com.mysql.clusterj.query.Predicate;
-import com.mysql.clusterj.query.PredicateOperand;
-import com.mysql.clusterj.query.QueryBuilder;
-import com.mysql.clusterj.query.QueryDomainType;
+import com.mysql.clusterj.annotation.Column;
+import com.mysql.clusterj.annotation.PartitionKey;
+import com.mysql.clusterj.annotation.PersistenceCapable;
+import com.mysql.clusterj.annotation.PrimaryKey;
+import se.sics.hop.exception.StorageException;
+import se.sics.hop.metadata.hdfs.dal.LeaderDataAccess;
+import se.sics.hop.metadata.hdfs.entity.hop.HopLeader;
+import se.sics.hop.metadata.hdfs.tabledef.LeaderTableDef;
+import se.sics.hop.metadata.ndb.ClusterjConnector;
+import se.sics.hop.metadata.ndb.wrapper.HopsPredicate;
+import se.sics.hop.metadata.ndb.wrapper.HopsPredicateOperand;
+import se.sics.hop.metadata.ndb.wrapper.HopsQuery;
+import se.sics.hop.metadata.ndb.wrapper.HopsQueryBuilder;
+import se.sics.hop.metadata.ndb.wrapper.HopsQueryDomainType;
+import se.sics.hop.metadata.ndb.wrapper.HopsSession;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import org.apache.log4j.Logger;
-import se.sics.hop.metadata.hdfs.entity.hop.HopLeader;
-import se.sics.hop.metadata.hdfs.dal.LeaderDataAccess;
-import se.sics.hop.exception.StorageException;
-import se.sics.hop.metadata.ndb.ClusterjConnector;
-import se.sics.hop.metadata.hdfs.tabledef.LeaderTableDef;
 
 /**
  *
@@ -24,12 +27,11 @@ import se.sics.hop.metadata.hdfs.tabledef.LeaderTableDef;
  */
 public abstract class LeaderClusterj implements LeaderTableDef, LeaderDataAccess<HopLeader> {
 
-    static final Logger LOG = Logger.getLogger(LeaderClusterj.class);
-    
-    Class dto;
-
-    public interface LeaderDTO {
-
+  @PartitionKey(column=PARTITION_VAL)
+  
+  Class dto;
+  public interface LeaderDTO {
+      
         long getId();
 
         void setId(long id);
@@ -49,16 +51,16 @@ public abstract class LeaderClusterj implements LeaderTableDef, LeaderDataAccess
         String getHostname();
 
         void setHostname(String hostname);
+        
+        String getHttpAddress();
 
-        int getAvgRequestProcessingLatency();
+        void setHttpAddress(String httpAddress);
+  }
 
-        void setAvgRequestProcessingLatency(int avgRequestProcessingLatency);
-    }
-    
-    public LeaderClusterj(Class dto){
+  public LeaderClusterj(Class dto){
         this.dto = dto;
-    }
-          
+  }
+  
   private ClusterjConnector connector = ClusterjConnector.getInstance();
 
   @Override
@@ -68,160 +70,110 @@ public abstract class LeaderClusterj implements LeaderTableDef, LeaderDataAccess
 
   @Override
   public int countAllPredecessors(long id) throws StorageException {
-    try {
-      // TODO[Hooman]: code repetition. Use query for fetching "ids less than".
-      Session session = connector.obtainSession();
-      QueryBuilder qb = session.getQueryBuilder();
-      QueryDomainType dobj = qb.createQueryDefinition(dto);
-      PredicateOperand propertyPredicate = dobj.get("id");
-      String param = "id";
-      PredicateOperand propertyLimit = dobj.param(param);
-      Predicate lessThan = propertyPredicate.lessThan(propertyLimit);
-      dobj.where(lessThan);
-      Query query = session.createQuery(dobj);
-      query.setParameter(param, new Long(id));
-      return query.getResultList().size();
-    } catch (Exception e) {
-      throw new StorageException(e);
-    }
+    // TODO[Hooman]: code repetition. Use query for fetching "ids less than".
+    HopsSession dbSession = connector.obtainSession();
+    HopsQueryBuilder qb = dbSession.getQueryBuilder();
+    HopsQueryDomainType dobj = qb.createQueryDefinition(dto);
+    HopsPredicateOperand propertyPredicate = dobj.get("id");
+    String param = "id";
+    HopsPredicateOperand propertyLimit = dobj.param(param);
+    HopsPredicate lessThan = propertyPredicate.lessThan(propertyLimit);
+    dobj.where(lessThan);
+    HopsQuery query = dbSession.createQuery(dobj);
+    query.setParameter(param, new Long(id));
+    return query.getResultList().size();
   }
 
   @Override
   public int countAllSuccessors(long id) throws StorageException {
-    try {
-      Session session = connector.obtainSession();
-      QueryBuilder qb = session.getQueryBuilder();
-      QueryDomainType dobj = qb.createQueryDefinition(dto);
-      PredicateOperand propertyPredicate = dobj.get("id");
-      String param = "id";
-      PredicateOperand propertyLimit = dobj.param(param);
-      Predicate greaterThan = propertyPredicate.greaterThan(propertyLimit);
-      dobj.where(greaterThan);
-      Query query = session.createQuery(dobj);
-      query.setParameter(param, new Long(id));
-      return query.getResultList().size();
-    } catch (Exception e) {
-      throw new StorageException(e);
-    }
+    HopsSession dbSession = connector.obtainSession();
+    HopsQueryBuilder qb = dbSession.getQueryBuilder();
+    HopsQueryDomainType dobj = qb.createQueryDefinition(dto);
+    HopsPredicateOperand propertyPredicate = dobj.get("id");
+    String param = "id";
+    HopsPredicateOperand propertyLimit = dobj.param(param);
+    HopsPredicate greaterThan = propertyPredicate.greaterThan(propertyLimit);
+    dobj.where(greaterThan);
+    HopsQuery query = dbSession.createQuery(dobj);
+    query.setParameter(param, new Long(id));
+    return query.getResultList().size();
   }
 
-//    @Override
-//    public Leader findById(long id) throws StorageException
-//    {
-//        try
-//        {
-//            Session session = connector.obtainSession();
-//            LeaderDTO lTable = session.find(dto, id);
-//            if (lTable != null)
-//            {
-//                Leader leader = createLeader(lTable);
-//                return leader;
-//            }
-//            return null;
-//        } catch (Exception e)
-//        {
-//            throw new StorageException(e);
-//        }
-//    }
   @Override
   public HopLeader findByPkey(long id, int partitionKey) throws StorageException {
-
-    try {
-      Session session = connector.obtainSession();
-      Object[] keys = new Object[]{id, partitionKey};
-      LeaderDTO lTable = (LeaderDTO) session.find(dto, keys);
-      if (lTable != null) {
-        HopLeader leader = createLeader(lTable);
-        return leader;
-      }
-      return null;
-    } catch (Exception e) {
-      throw new StorageException(e);
+    HopsSession dbSession = connector.obtainSession();
+    Object[] keys = new Object[]{id, partitionKey};
+    LeaderDTO lTable = (LeaderDTO) dbSession.find(dto, keys);
+    if (lTable != null) {
+      HopLeader leader = createLeader(lTable);
+      return leader;
     }
+    return null;
   }
 
   @Override
   public Collection<HopLeader> findAllByCounterGT(long counter) throws StorageException {
-    try {
-      Session session = connector.obtainSession();
-      QueryBuilder qb = session.getQueryBuilder();
-      QueryDomainType dobj = qb.createQueryDefinition(dto);
-      PredicateOperand propertyPredicate = dobj.get("counter");
-      String param = "counter";
-      PredicateOperand propertyLimit = dobj.param(param);
-      Predicate greaterThan = propertyPredicate.greaterThan(propertyLimit);
-      dobj.where(greaterThan);
-      Query query = session.createQuery(dobj);
-      query.setParameter(param, new Long(counter));
-      return createList(query.getResultList());
-    } catch (Exception e) {
-      throw new StorageException(e);
-    }
+    HopsSession dbSession = connector.obtainSession();
+    HopsQueryBuilder qb = dbSession.getQueryBuilder();
+    HopsQueryDomainType dobj = qb.createQueryDefinition(dto);
+    HopsPredicateOperand propertyPredicate = dobj.get("counter");
+    String param = "counter";
+    HopsPredicateOperand propertyLimit = dobj.param(param);
+    HopsPredicate greaterThan = propertyPredicate.greaterThan(propertyLimit);
+    dobj.where(greaterThan);
+    HopsQuery query = dbSession.createQuery(dobj);
+    query.setParameter(param, new Long(counter));
+    return createList(query.getResultList());
   }
 
   @Override
   public Collection<HopLeader> findAllByIDLT(long id) throws StorageException {
-    try {
-      Session session = connector.obtainSession();
-      QueryBuilder qb = session.getQueryBuilder();
-      QueryDomainType dobj = qb.createQueryDefinition(dto);
-      PredicateOperand propertyPredicate = dobj.get("id");
-      String param = "id";
-      PredicateOperand propertyLimit = dobj.param(param);
-      Predicate greaterThan = propertyPredicate.lessThan(propertyLimit);
-      dobj.where(greaterThan);
-      Query query = session.createQuery(dobj);
-      query.setParameter(param, new Long(id));
-      return createList(query.getResultList());
-    } catch (Exception e) {
-      throw new StorageException(e);
-    }
+    HopsSession dbSession = connector.obtainSession();
+    HopsQueryBuilder qb = dbSession.getQueryBuilder();
+    HopsQueryDomainType dobj = qb.createQueryDefinition(dto);
+    HopsPredicateOperand propertyPredicate = dobj.get("id");
+    String param = "id";
+    HopsPredicateOperand propertyLimit = dobj.param(param);
+    HopsPredicate greaterThan = propertyPredicate.lessThan(propertyLimit);
+    dobj.where(greaterThan);
+    HopsQuery query = dbSession.createQuery(dobj);
+    query.setParameter(param, new Long(id));
+    return createList(query.getResultList());
   }
 
   @Override
   public Collection<HopLeader> findAll() throws StorageException {
-    try {
-      Session session = connector.obtainSession();
-      QueryBuilder qb = session.getQueryBuilder();
-      QueryDomainType<LeaderDTO> dobj = qb.createQueryDefinition(dto);
-      Query<LeaderDTO> query = session.createQuery(dobj);
-      return createList(query.getResultList());
-    } catch (Exception e) {
-      throw new StorageException(e);
-    }
+    HopsSession dbSession = connector.obtainSession();
+    HopsQueryBuilder qb = dbSession.getQueryBuilder();
+    HopsQueryDomainType<LeaderDTO> dobj = qb.createQueryDefinition(dto);
+    HopsQuery<LeaderDTO> query = dbSession.createQuery(dobj);
+    return createList(query.getResultList());
   }
 
   @Override
   public void prepare(Collection<HopLeader> removed, Collection<HopLeader> newed, Collection<HopLeader> modified) throws StorageException {
-    try {
-      Session session = connector.obtainSession();
-      List<LeaderDTO> changes = new ArrayList<LeaderDTO>();
-      List<LeaderDTO> deletions = new ArrayList<LeaderDTO>();
-      for (HopLeader l : newed) {
-        LOG.debug("adding " + l.getHostName() + " from leader table");
-        LeaderDTO lTable = (LeaderDTO) session.newInstance(dto);
-        createPersistableLeaderInstance(l, lTable);
-        changes.add(lTable);
-      }
-
-      for (HopLeader l : modified) {
-        LOG.debug("updating " + l.getHostName() + " from leader table");
-        LeaderDTO lTable = (LeaderDTO)session.newInstance(dto);
-        createPersistableLeaderInstance(l, lTable);
-        changes.add(lTable);
-      }
-
-      for (HopLeader l : removed) {
-        LOG.debug("removing " + l.getHostName() + " from leader table");
-        LeaderDTO lTable = (LeaderDTO)session.newInstance(dto);
-        createPersistableLeaderInstance(l, lTable);
-        deletions.add(lTable);
-      }
-      session.deletePersistentAll(deletions);
-      session.savePersistentAll(changes);
-    } catch (Exception e) {
-      throw new StorageException(e);
+    HopsSession dbSession = connector.obtainSession();
+    List<LeaderDTO> changes = new ArrayList<LeaderDTO>();
+    List<LeaderDTO> deletions = new ArrayList<LeaderDTO>();
+    for (HopLeader l : newed) {
+      LeaderDTO lTable = (LeaderDTO) dbSession.newInstance(dto);
+      createPersistableLeaderInstance(l, lTable);
+      changes.add(lTable);
     }
+
+    for (HopLeader l : modified) {
+      LeaderDTO lTable = (LeaderDTO) dbSession.newInstance(dto);
+      createPersistableLeaderInstance(l, lTable);
+      changes.add(lTable);
+    }
+
+    for (HopLeader l : removed) {
+      LeaderDTO lTable = (LeaderDTO) dbSession.newInstance(dto);
+      createPersistableLeaderInstance(l, lTable);
+      deletions.add(lTable);
+    }
+    dbSession.deletePersistentAll(deletions);
+    dbSession.savePersistentAll(changes);
   }
 
   private SortedSet<HopLeader> createList(List<LeaderDTO> list) {
@@ -235,11 +187,11 @@ public abstract class LeaderClusterj implements LeaderTableDef, LeaderDataAccess
 
   private HopLeader createLeader(LeaderDTO lTable) {
     return new HopLeader(lTable.getId(),
-            lTable.getCounter(),
-            lTable.getTimestamp(),
-            lTable.getHostname(),
-            lTable.getAvgRequestProcessingLatency(),
-            lTable.getPartitionVal());
+        lTable.getCounter(),
+        lTable.getTimestamp(),
+        lTable.getHostname(),
+        lTable.getHttpAddress(),
+        lTable.getPartitionVal());
   }
 
   private void createPersistableLeaderInstance(HopLeader leader, LeaderDTO lTable) {
@@ -247,7 +199,7 @@ public abstract class LeaderClusterj implements LeaderTableDef, LeaderDataAccess
     lTable.setCounter(leader.getCounter());
     lTable.setHostname(leader.getHostName());
     lTable.setTimestamp(leader.getTimeStamp());
-    lTable.setAvgRequestProcessingLatency(leader.getAvgRequestProcessingLatency());
+    lTable.setHttpAddress(leader.getHttpAddress());
     lTable.setPartitionVal(leader.getPartitionVal());
   }
 }

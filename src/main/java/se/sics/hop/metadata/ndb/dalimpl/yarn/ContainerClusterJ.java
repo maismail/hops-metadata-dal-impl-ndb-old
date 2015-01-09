@@ -1,12 +1,8 @@
 package se.sics.hop.metadata.ndb.dalimpl.yarn;
 
-import com.mysql.clusterj.Query;
-import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
-import com.mysql.clusterj.query.QueryBuilder;
-import com.mysql.clusterj.query.QueryDomainType;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -14,6 +10,10 @@ import java.util.Map;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.entity.yarn.HopContainer;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
+import se.sics.hop.metadata.ndb.wrapper.HopsQuery;
+import se.sics.hop.metadata.ndb.wrapper.HopsQueryBuilder;
+import se.sics.hop.metadata.ndb.wrapper.HopsQueryDomainType;
+import se.sics.hop.metadata.ndb.wrapper.HopsSession;
 import se.sics.hop.metadata.yarn.dal.ContainerDataAccess;
 import se.sics.hop.metadata.yarn.tabledef.ContainerTableDef;
 
@@ -39,7 +39,7 @@ public class ContainerClusterJ implements ContainerTableDef, ContainerDataAccess
 
     @Override
     public HopContainer findById(String id) throws StorageException {
-        Session session = connector.obtainSession();
+        HopsSession session = connector.obtainSession();
 
         ContainerDTO containerDTO = null;
         if (session != null) {
@@ -54,12 +54,12 @@ public class ContainerClusterJ implements ContainerTableDef, ContainerDataAccess
 
   @Override
   public Map<String, HopContainer> getAll() throws StorageException {
-    Session session = connector.obtainSession();
-    QueryBuilder qb = session.getQueryBuilder();
-    QueryDomainType<ContainerDTO> dobj
+    HopsSession session = connector.obtainSession();
+    HopsQueryBuilder qb = session.getQueryBuilder();
+    HopsQueryDomainType<ContainerDTO> dobj
             = qb.createQueryDefinition(
                     ContainerDTO.class);
-    Query<ContainerDTO> query = session.
+    HopsQuery<ContainerDTO> query = session.
             createQuery(dobj);
     List<ContainerDTO> results = query.
             getResultList();
@@ -68,7 +68,7 @@ public class ContainerClusterJ implements ContainerTableDef, ContainerDataAccess
     
     @Override
     public void prepare(Collection<HopContainer> modified, Collection<HopContainer> removed) throws StorageException {
-        Session session = connector.obtainSession();
+        HopsSession session = connector.obtainSession();
         try {
             if (removed != null) {
                 for (HopContainer hopContainer : removed) {
@@ -90,7 +90,7 @@ public class ContainerClusterJ implements ContainerTableDef, ContainerDataAccess
 
     @Override
     public void createContainer(HopContainer container) throws StorageException {
-        Session session = connector.obtainSession();
+        HopsSession session = connector.obtainSession();
         session.savePersistent(createPersistable(container, session));
     }
 
@@ -100,7 +100,7 @@ public class ContainerClusterJ implements ContainerTableDef, ContainerDataAccess
         return hop;
     }
 
-    private ContainerDTO createPersistable(HopContainer hopContainer, Session session) {
+    private ContainerDTO createPersistable(HopContainer hopContainer, HopsSession session) throws StorageException {
         ContainerDTO containerDTO = session.newInstance(ContainerDTO.class);
         containerDTO.setcontaineridid(hopContainer.getContainerIdID());
         containerDTO.setcontainerstate(hopContainer.getContainerstate());

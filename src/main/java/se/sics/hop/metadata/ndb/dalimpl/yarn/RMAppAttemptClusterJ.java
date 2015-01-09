@@ -6,7 +6,6 @@
 
 package se.sics.hop.metadata.ndb.dalimpl.yarn;
 
-import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
@@ -14,6 +13,7 @@ import java.util.Collection;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.entity.yarn.HopRMAppAttempt;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
+import se.sics.hop.metadata.ndb.wrapper.HopsSession;
 import se.sics.hop.metadata.yarn.dal.RMAppAttemptDataAccess;
 import se.sics.hop.metadata.yarn.tabledef.RMAppAttemptTableDef;
 
@@ -97,7 +97,7 @@ public class RMAppAttemptClusterJ implements RMAppAttemptTableDef, RMAppAttemptD
     
     @Override
     public HopRMAppAttempt findById(int id) throws StorageException {
-        Session session = connector.obtainSession();
+        HopsSession session = connector.obtainSession();
         
         RMAppAttemptClusterJ.RMAppAttemptDTO rMAppAttemptDTO = null;
         if (session != null) {
@@ -112,7 +112,7 @@ public class RMAppAttemptClusterJ implements RMAppAttemptTableDef, RMAppAttemptD
 
     @Override
     public void prepare(Collection<HopRMAppAttempt> modified, Collection<HopRMAppAttempt> removed) throws StorageException {
-        Session session = connector.obtainSession();
+        HopsSession session = connector.obtainSession();
         try {
             if (removed != null) {
                 for (HopRMAppAttempt hop : removed) {
@@ -150,7 +150,7 @@ public class RMAppAttemptClusterJ implements RMAppAttemptTableDef, RMAppAttemptD
                                     rMAppAttemptDTO.getuser());
     }
 
-    private RMAppAttemptDTO createPersistable(HopRMAppAttempt hop, Session session) {
+    private RMAppAttemptDTO createPersistable(HopRMAppAttempt hop, HopsSession session) throws StorageException {
          RMAppAttemptClusterJ.RMAppAttemptDTO rMAppAttemptDTO = session.newInstance(RMAppAttemptClusterJ.RMAppAttemptDTO.class);
          
          rMAppAttemptDTO.setappattemptidid(hop.getAppattemptidid());

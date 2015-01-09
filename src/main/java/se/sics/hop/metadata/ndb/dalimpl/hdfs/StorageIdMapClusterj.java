@@ -1,12 +1,8 @@
 package se.sics.hop.metadata.ndb.dalimpl.hdfs;
 
-import com.mysql.clusterj.Query;
-import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
-import com.mysql.clusterj.query.QueryBuilder;
-import com.mysql.clusterj.query.QueryDomainType;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -15,6 +11,10 @@ import se.sics.hop.metadata.hdfs.dal.StorageIdMapDataAccess;
 import se.sics.hop.metadata.hdfs.entity.hop.HopStorageId;
 import se.sics.hop.metadata.hdfs.tabledef.StorageIdMapTableDef;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
+import se.sics.hop.metadata.ndb.wrapper.HopsQuery;
+import se.sics.hop.metadata.ndb.wrapper.HopsQueryBuilder;
+import se.sics.hop.metadata.ndb.wrapper.HopsQueryDomainType;
+import se.sics.hop.metadata.ndb.wrapper.HopsSession;
 
 /**
  *
@@ -24,7 +24,6 @@ public class StorageIdMapClusterj implements StorageIdMapTableDef, StorageIdMapD
 
   @PersistenceCapable(table = TABLE_NAME)
   public interface StorageIdDTO {
-
     @PrimaryKey
     @Column(name = STORAGE_ID)
     String getStorageId();
@@ -40,41 +39,29 @@ public class StorageIdMapClusterj implements StorageIdMapTableDef, StorageIdMapD
 
   @Override
   public void add(HopStorageId s) throws StorageException {
-    try {
-      Session session = connector.obtainSession();
-      StorageIdDTO sdto = session.newInstance(StorageIdDTO.class);
-      sdto.setSId(s.getsId());
-      sdto.setStorageId(s.getStorageId());
-      session.savePersistent(sdto);
-    } catch (Exception e) {
-      throw new StorageException(e);
-    }
+    HopsSession session = connector.obtainSession();
+    StorageIdDTO sdto = session.newInstance(StorageIdDTO.class);
+    sdto.setSId(s.getsId());
+    sdto.setStorageId(s.getStorageId());
+    session.savePersistent(sdto);
   }
 
   @Override
   public HopStorageId findByPk(String storageId) throws StorageException {
-    try {
-      Session session = connector.obtainSession();
-      StorageIdDTO sdto = session.find(StorageIdDTO.class, storageId);
-      if(sdto == null)
-        return null;
-      return convert(sdto);
-    } catch (Exception e) {
-      throw new StorageException(e);
-    }
+    HopsSession session = connector.obtainSession();
+    StorageIdDTO sdto = session.find(StorageIdDTO.class, storageId);
+    if(sdto == null)
+      return null;
+    return convert(sdto);
   }
 
   @Override
   public Collection<HopStorageId> findAll() throws StorageException {
-    try {
-      Session session = connector.obtainSession();
-      QueryBuilder qb = session.getQueryBuilder();
-      QueryDomainType<StorageIdDTO> qdt = qb.createQueryDefinition(StorageIdDTO.class);
-      Query<StorageIdDTO> q = session.createQuery(qdt);
-      return convert(q.getResultList());
-    } catch (Exception e) {
-      throw new StorageException(e);
-    }
+    HopsSession session = connector.obtainSession();
+    HopsQueryBuilder qb = session.getQueryBuilder();
+    HopsQueryDomainType<StorageIdDTO> qdt = qb.createQueryDefinition(StorageIdDTO.class);
+    HopsQuery<StorageIdDTO> q = session.createQuery(qdt);
+    return convert(q.getResultList());
   }
 
   private Collection<HopStorageId> convert(List<StorageIdDTO> dtos) {

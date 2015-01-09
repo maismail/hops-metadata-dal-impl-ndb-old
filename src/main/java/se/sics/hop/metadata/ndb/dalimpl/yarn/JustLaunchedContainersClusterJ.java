@@ -1,13 +1,8 @@
 package se.sics.hop.metadata.ndb.dalimpl.yarn;
 
-import com.mysql.clusterj.Query;
-import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
-import com.mysql.clusterj.query.Predicate;
-import com.mysql.clusterj.query.QueryBuilder;
-import com.mysql.clusterj.query.QueryDomainType;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -16,6 +11,11 @@ import java.util.Map;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.entity.yarn.HopJustLaunchedContainers;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
+import se.sics.hop.metadata.ndb.wrapper.HopsPredicate;
+import se.sics.hop.metadata.ndb.wrapper.HopsQuery;
+import se.sics.hop.metadata.ndb.wrapper.HopsQueryBuilder;
+import se.sics.hop.metadata.ndb.wrapper.HopsQueryDomainType;
+import se.sics.hop.metadata.ndb.wrapper.HopsSession;
 import se.sics.hop.metadata.yarn.dal.JustLaunchedContainersDataAccess;
 import se.sics.hop.metadata.yarn.tabledef.JustLaunchedContainersTableDef;
 
@@ -45,7 +45,7 @@ public class JustLaunchedContainersClusterJ implements JustLaunchedContainersTab
 
     @Override
     public HopJustLaunchedContainers findEntry(String rmnodeid, int commandport, int containerid) throws StorageException {
-        Session session = connector.obtainSession();
+        HopsSession session = connector.obtainSession();
         Object[] objarr = new Object[2];
         objarr[0] = rmnodeid;
         objarr[1] = containerid;
@@ -62,7 +62,7 @@ public class JustLaunchedContainersClusterJ implements JustLaunchedContainersTab
 
     @Override
     public void prepare(Collection<HopJustLaunchedContainers> modified, Collection<HopJustLaunchedContainers> removed) throws StorageException {
-        Session session = connector.obtainSession();
+        HopsSession session = connector.obtainSession();
         try {
             if (removed != null) {
                 List<JustLaunchedContainersDTO> toRemove = new ArrayList<JustLaunchedContainersDTO>(removed.size());
@@ -89,11 +89,11 @@ public class JustLaunchedContainersClusterJ implements JustLaunchedContainersTab
     @Override
     public List<HopJustLaunchedContainers> findAll() throws StorageException {
         try {
-            Session session = connector.obtainSession();
-            QueryBuilder qb = session.getQueryBuilder();
+            HopsSession session = connector.obtainSession();
+            HopsQueryBuilder qb = session.getQueryBuilder();
 
-            QueryDomainType<JustLaunchedContainersDTO> dobj = qb.createQueryDefinition(JustLaunchedContainersDTO.class);
-            Query<JustLaunchedContainersDTO> query = session.createQuery(dobj);
+            HopsQueryDomainType<JustLaunchedContainersDTO> dobj = qb.createQueryDefinition(JustLaunchedContainersDTO.class);
+            HopsQuery<JustLaunchedContainersDTO> query = session.createQuery(dobj);
 
             List<JustLaunchedContainersDTO> results = query.getResultList();
             return createJustLaunchedContainersList(results);
@@ -105,13 +105,13 @@ public class JustLaunchedContainersClusterJ implements JustLaunchedContainersTab
     @Override
     public List<HopJustLaunchedContainers> findByRMNode(String rmnodeId) throws StorageException {
         try {
-            Session session = connector.obtainSession();
-            QueryBuilder qb = session.getQueryBuilder();
+            HopsSession session = connector.obtainSession();
+            HopsQueryBuilder qb = session.getQueryBuilder();
 
-            QueryDomainType<JustLaunchedContainersDTO> dobj = qb.createQueryDefinition(JustLaunchedContainersDTO.class);
-            Predicate pred = dobj.get("rmnodeid").equal(dobj.param("rmnodeid"));
+            HopsQueryDomainType<JustLaunchedContainersDTO> dobj = qb.createQueryDefinition(JustLaunchedContainersDTO.class);
+            HopsPredicate pred = dobj.get("rmnodeid").equal(dobj.param("rmnodeid"));
             dobj.where(pred);
-            Query<JustLaunchedContainersDTO> query = session.createQuery(dobj);
+            HopsQuery<JustLaunchedContainersDTO> query = session.createQuery(dobj);
             query.setParameter("rmnodeid", rmnodeId);
             List<JustLaunchedContainersDTO> results = query.getResultList();
             return createJustLaunchedContainersList(results);
@@ -122,12 +122,12 @@ public class JustLaunchedContainersClusterJ implements JustLaunchedContainersTab
 
   @Override
   public Map<String, List<HopJustLaunchedContainers>> getAll() throws StorageException {
-    Session session = connector.obtainSession();
-    QueryBuilder qb = session.getQueryBuilder();
+    HopsSession session = connector.obtainSession();
+    HopsQueryBuilder qb = session.getQueryBuilder();
 
-    QueryDomainType<JustLaunchedContainersDTO> dobj = qb.createQueryDefinition(
+    HopsQueryDomainType<JustLaunchedContainersDTO> dobj = qb.createQueryDefinition(
             JustLaunchedContainersDTO.class);
-    Query<JustLaunchedContainersDTO> query = session.createQuery(dobj);
+    HopsQuery<JustLaunchedContainersDTO> query = session.createQuery(dobj);
 
     List<JustLaunchedContainersDTO> results = query.getResultList();
     return createMap(results);
@@ -145,7 +145,7 @@ public class JustLaunchedContainersClusterJ implements JustLaunchedContainersTab
      * @param session
      * @return
      */
-    private JustLaunchedContainersDTO createPersistable(HopJustLaunchedContainers entry, Session session) {
+    private JustLaunchedContainersDTO createPersistable(HopJustLaunchedContainers entry, HopsSession session) throws StorageException {
         JustLaunchedContainersDTO dto = session.newInstance(JustLaunchedContainersDTO.class);
         dto.setcontainerid(entry.getContainerId());
         dto.setrmnodeid(entry.getRmnodeid());

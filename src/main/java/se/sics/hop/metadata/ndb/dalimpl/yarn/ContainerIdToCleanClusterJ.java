@@ -1,13 +1,8 @@
 package se.sics.hop.metadata.ndb.dalimpl.yarn;
 
-import com.mysql.clusterj.Query;
-import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
-import com.mysql.clusterj.query.Predicate;
-import com.mysql.clusterj.query.QueryBuilder;
-import com.mysql.clusterj.query.QueryDomainType;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -18,6 +13,11 @@ import java.util.Set;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.entity.yarn.HopContainerId;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
+import se.sics.hop.metadata.ndb.wrapper.HopsPredicate;
+import se.sics.hop.metadata.ndb.wrapper.HopsQuery;
+import se.sics.hop.metadata.ndb.wrapper.HopsQueryBuilder;
+import se.sics.hop.metadata.ndb.wrapper.HopsQueryDomainType;
+import se.sics.hop.metadata.ndb.wrapper.HopsSession;
 import se.sics.hop.metadata.yarn.dal.ContainerIdToCleanDataAccess;
 import se.sics.hop.metadata.yarn.tabledef.ContainerIdToCleanTableDef;
 
@@ -46,7 +46,7 @@ public class ContainerIdToCleanClusterJ implements ContainerIdToCleanTableDef, C
 
     @Override
     public HopContainerId findEntry(String rmnodeid, String containerid) throws StorageException {
-        Session session = connector.obtainSession();
+        HopsSession session = connector.obtainSession();
         ContainerIdToCleanDTO dto = null;
         Object[] pk = new Object[2];
         pk[0] = rmnodeid;
@@ -64,13 +64,13 @@ public class ContainerIdToCleanClusterJ implements ContainerIdToCleanTableDef, C
     @Override
     public List<HopContainerId> findByRMNode(String rmnodeId) throws StorageException { 
         try {
-            Session session = connector.obtainSession();
-            QueryBuilder qb = session.getQueryBuilder();
+            HopsSession session = connector.obtainSession();
+            HopsQueryBuilder qb = session.getQueryBuilder();
 
-            QueryDomainType<ContainerIdToCleanDTO> dobj = qb.createQueryDefinition(ContainerIdToCleanDTO.class);
-            Predicate pred = dobj.get("rmnodeid").equal(dobj.param("rmnodeid"));
+            HopsQueryDomainType<ContainerIdToCleanDTO> dobj = qb.createQueryDefinition(ContainerIdToCleanDTO.class);
+            HopsPredicate pred = dobj.get("rmnodeid").equal(dobj.param("rmnodeid"));
             dobj.where(pred);
-            Query<ContainerIdToCleanDTO> query = session.createQuery(dobj);
+            HopsQuery<ContainerIdToCleanDTO> query = session.createQuery(dobj);
             query.setParameter("rmnodeid", rmnodeId);
             List<ContainerIdToCleanDTO> results = query.getResultList();
             return createContainersToCleanList(results);
@@ -81,12 +81,12 @@ public class ContainerIdToCleanClusterJ implements ContainerIdToCleanTableDef, C
 
   @Override
   public Map<String, Set<HopContainerId>> getAll() throws StorageException {
-    Session session = connector.obtainSession();
-    QueryBuilder qb = session.getQueryBuilder();
-    QueryDomainType<ContainerIdToCleanDTO> dobj
+    HopsSession session = connector.obtainSession();
+    HopsQueryBuilder qb = session.getQueryBuilder();
+    HopsQueryDomainType<ContainerIdToCleanDTO> dobj
             = qb.createQueryDefinition(
                     ContainerIdToCleanDTO.class);
-    Query<ContainerIdToCleanDTO> query = session.
+    HopsQuery<ContainerIdToCleanDTO> query = session.
             createQuery(dobj);
     List<ContainerIdToCleanDTO> results = query.
             getResultList();
@@ -95,7 +95,7 @@ public class ContainerIdToCleanClusterJ implements ContainerIdToCleanTableDef, C
     
     @Override
     public void prepare(Collection<HopContainerId> modified, Collection<HopContainerId> removed) throws StorageException {
-        Session session = connector.obtainSession();
+        HopsSession session = connector.obtainSession();
         try {
             if (removed != null) {
                 List<ContainerIdToCleanDTO> toRemove = new ArrayList<ContainerIdToCleanDTO>();
@@ -116,7 +116,7 @@ public class ContainerIdToCleanClusterJ implements ContainerIdToCleanTableDef, C
         }
     }
 
-    private ContainerIdToCleanDTO createPersistable(HopContainerId hop, Session session) {
+    private ContainerIdToCleanDTO createPersistable(HopContainerId hop, HopsSession session) throws StorageException {
         ContainerIdToCleanDTO dto = session.newInstance(ContainerIdToCleanDTO.class);
         //Set values to persist new ContainerStatus
         dto.setrmnodeid(hop.getRmnodeid());

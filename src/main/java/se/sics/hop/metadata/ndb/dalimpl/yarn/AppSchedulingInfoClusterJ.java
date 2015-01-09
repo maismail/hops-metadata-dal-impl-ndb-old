@@ -5,13 +5,9 @@
  */
 package se.sics.hop.metadata.ndb.dalimpl.yarn;
 
-import com.mysql.clusterj.Query;
-import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
-import com.mysql.clusterj.query.QueryBuilder;
-import com.mysql.clusterj.query.QueryDomainType;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -19,6 +15,10 @@ import java.util.List;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.entity.yarn.HopAppSchedulingInfo;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
+import se.sics.hop.metadata.ndb.wrapper.HopsQuery;
+import se.sics.hop.metadata.ndb.wrapper.HopsQueryBuilder;
+import se.sics.hop.metadata.ndb.wrapper.HopsQueryDomainType;
+import se.sics.hop.metadata.ndb.wrapper.HopsSession;
 import se.sics.hop.metadata.yarn.dal.AppSchedulingInfoDataAccess;
 import se.sics.hop.metadata.yarn.tabledef.AppSchedulingInfoTableDef;
 import static se.sics.hop.metadata.yarn.tabledef.AppSchedulingInfoTableDef.PENDING;
@@ -71,7 +71,7 @@ public class AppSchedulingInfoClusterJ implements AppSchedulingInfoTableDef, App
 
   @Override
   public HopAppSchedulingInfo findById(String id) throws StorageException {
-    Session session = connector.obtainSession();
+    HopsSession session = connector.obtainSession();
 
     AppSchedulingInfoClusterJ.AppSchedulingInfoDTO appSchedulingInfoDTO = null;
     if (session != null) {
@@ -86,10 +86,10 @@ public class AppSchedulingInfoClusterJ implements AppSchedulingInfoTableDef, App
 
   @Override
   public List<HopAppSchedulingInfo> findAll() throws StorageException, IOException {
-    Session session = connector.obtainSession();
-    QueryBuilder qb = session.getQueryBuilder();
-    QueryDomainType<AppSchedulingInfoClusterJ.AppSchedulingInfoDTO> dobj = qb.createQueryDefinition(AppSchedulingInfoClusterJ.AppSchedulingInfoDTO.class);
-    Query<AppSchedulingInfoClusterJ.AppSchedulingInfoDTO> query = session.createQuery(dobj);
+    HopsSession session = connector.obtainSession();
+    HopsQueryBuilder qb = session.getQueryBuilder();
+    HopsQueryDomainType<AppSchedulingInfoClusterJ.AppSchedulingInfoDTO> dobj = qb.createQueryDefinition(AppSchedulingInfoClusterJ.AppSchedulingInfoDTO.class);
+    HopsQuery<AppSchedulingInfoClusterJ.AppSchedulingInfoDTO> query = session.createQuery(dobj);
     List<AppSchedulingInfoClusterJ.AppSchedulingInfoDTO> results = query.getResultList();
 
     return createHopAppSchedulingInfoList(results);
@@ -106,7 +106,7 @@ public class AppSchedulingInfoClusterJ implements AppSchedulingInfoTableDef, App
 
   @Override
   public void prepare(Collection<HopAppSchedulingInfo> modified, Collection<HopAppSchedulingInfo> removed) throws StorageException {
-    Session session = connector.obtainSession();
+    HopsSession session = connector.obtainSession();
     try {
       if (removed != null) {
         for (HopAppSchedulingInfo hop : removed) {
@@ -136,7 +136,7 @@ public class AppSchedulingInfoClusterJ implements AppSchedulingInfoTableDef, App
             appSchedulingInfoDTO.getStoped());
   }
 
-  private AppSchedulingInfoDTO createPersistable(HopAppSchedulingInfo hop, Session session) {
+  private AppSchedulingInfoDTO createPersistable(HopAppSchedulingInfo hop, HopsSession session) throws StorageException {
     AppSchedulingInfoClusterJ.AppSchedulingInfoDTO appSchedulingInfoDTO = 
             session.newInstance(AppSchedulingInfoClusterJ.AppSchedulingInfoDTO.class);
 

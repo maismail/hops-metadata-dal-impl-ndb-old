@@ -5,18 +5,18 @@
  */
 package se.sics.hop.metadata.ndb.dalimpl.yarn.rmstatestore;
 
-import com.mysql.clusterj.Query;
-import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
-import com.mysql.clusterj.query.QueryBuilder;
-import com.mysql.clusterj.query.QueryDomainType;
 import java.util.ArrayList;
 import java.util.List;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.entity.yarn.rmstatestore.HopAllocateResponse;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
+import se.sics.hop.metadata.ndb.wrapper.HopsQuery;
+import se.sics.hop.metadata.ndb.wrapper.HopsQueryBuilder;
+import se.sics.hop.metadata.ndb.wrapper.HopsQueryDomainType;
+import se.sics.hop.metadata.ndb.wrapper.HopsSession;
 import se.sics.hop.metadata.yarn.dal.rmstatestore.AllocateResponseDataAccess;
 import se.sics.hop.metadata.yarn.tabledef.rmstatestore.AllocateResponseTableDef;
 
@@ -44,21 +44,21 @@ public class AllocateResponseClusterJ implements AllocateResponseTableDef, Alloc
 
   @Override
   public void addAllocateResponse(HopAllocateResponse entry) throws StorageException {
-    Session session = connector.obtainSession();
+    HopsSession session = connector.obtainSession();
     session.savePersistent(createPersistable(entry, session));
   }
 
   @Override
   public List<HopAllocateResponse> getAll() throws StorageException {
-     Session session = connector.obtainSession();
-      QueryBuilder qb = session.getQueryBuilder();
-      QueryDomainType<AllocateResponseDTO> dobj = qb.createQueryDefinition(AllocateResponseDTO.class);
-      Query<AllocateResponseDTO> query = session.createQuery(dobj);
+     HopsSession session = connector.obtainSession();
+      HopsQueryBuilder qb = session.getQueryBuilder();
+      HopsQueryDomainType<AllocateResponseDTO> dobj = qb.createQueryDefinition(AllocateResponseDTO.class);
+      HopsQuery<AllocateResponseDTO> query = session.createQuery(dobj);
       List<AllocateResponseDTO> results = query.getResultList();
       return createHopAllocateResponseList(results);
   }
 
-  private AllocateResponseDTO createPersistable(HopAllocateResponse hop, Session session) {
+  private AllocateResponseDTO createPersistable(HopAllocateResponse hop, HopsSession session) throws StorageException {
     AllocateResponseDTO allocateResponseDTO = session.newInstance(AllocateResponseDTO.class);
 
     allocateResponseDTO.setapplicationattemptid(hop.getApplicationattemptid());

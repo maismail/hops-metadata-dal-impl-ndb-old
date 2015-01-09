@@ -5,19 +5,19 @@
  */
 package se.sics.hop.metadata.ndb.dalimpl.yarn.rmstatestore;
 
-import com.mysql.clusterj.Query;
-import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
-import com.mysql.clusterj.query.QueryBuilder;
-import com.mysql.clusterj.query.QueryDomainType;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.entity.yarn.rmstatestore.HopSecretMamagerKey;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
+import se.sics.hop.metadata.ndb.wrapper.HopsQuery;
+import se.sics.hop.metadata.ndb.wrapper.HopsQueryBuilder;
+import se.sics.hop.metadata.ndb.wrapper.HopsQueryDomainType;
+import se.sics.hop.metadata.ndb.wrapper.HopsSession;
 import se.sics.hop.metadata.yarn.dal.rmstatestore.SecretMamagerKeysDataAccess;
 import se.sics.hop.metadata.yarn.tabledef.rmstatestore.SecretMamagerKeysTableDef;
 
@@ -45,7 +45,7 @@ public class SecretMamagerKeysClusterJ implements SecretMamagerKeysTableDef, Sec
 
   @Override
   public HopSecretMamagerKey findByKeyId(String id) throws StorageException {
-    Session session = connector.obtainSession();
+    HopsSession session = connector.obtainSession();
 
     SecretMamagerKeysDTO secretMamagerKeysDTO = null;
     if (session != null) {
@@ -58,10 +58,10 @@ public class SecretMamagerKeysClusterJ implements SecretMamagerKeysTableDef, Sec
   @Override
   public List<HopSecretMamagerKey> getAll() throws StorageException{
  
-      Session session = connector.obtainSession();
-      QueryBuilder qb = session.getQueryBuilder();
-      QueryDomainType<SecretMamagerKeysDTO> dobj = qb.createQueryDefinition(SecretMamagerKeysDTO.class);
-      Query<SecretMamagerKeysDTO> query = session.createQuery(dobj);
+      HopsSession session = connector.obtainSession();
+      HopsQueryBuilder qb = session.getQueryBuilder();
+      HopsQueryDomainType<SecretMamagerKeysDTO> dobj = qb.createQueryDefinition(SecretMamagerKeysDTO.class);
+      HopsQuery<SecretMamagerKeysDTO> query = session.createQuery(dobj);
       List<SecretMamagerKeysDTO> results = query.getResultList();
       return createHopSecretMamagerKeyList(results);
     
@@ -69,7 +69,7 @@ public class SecretMamagerKeysClusterJ implements SecretMamagerKeysTableDef, Sec
 
   @Override
   public void prepare(Collection<HopSecretMamagerKey> modified, Collection<HopSecretMamagerKey> removed) throws StorageException {
-    Session session = connector.obtainSession();
+    HopsSession session = connector.obtainSession();
     try {
       if (removed != null) {
         List<SecretMamagerKeysDTO> toRemove = new ArrayList<SecretMamagerKeysDTO>();
@@ -90,7 +90,7 @@ public class SecretMamagerKeysClusterJ implements SecretMamagerKeysTableDef, Sec
     }
   }
 
-  private SecretMamagerKeysDTO createPersistable(HopSecretMamagerKey hop, Session session) {
+  private SecretMamagerKeysDTO createPersistable(HopSecretMamagerKey hop, HopsSession session) throws StorageException {
     SecretMamagerKeysDTO keyDTO = session.newInstance(SecretMamagerKeysDTO.class);
     keyDTO.setkeyid(hop.getKeyType());
     keyDTO.setkey(hop.getKey());

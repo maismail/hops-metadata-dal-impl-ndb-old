@@ -1,18 +1,18 @@
 package se.sics.hop.metadata.ndb.dalimpl.yarn;
 
-import com.mysql.clusterj.Query;
-import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
-import com.mysql.clusterj.query.QueryBuilder;
-import com.mysql.clusterj.query.QueryDomainType;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.entity.yarn.HopRMContextInactiveNodes;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
+import se.sics.hop.metadata.ndb.wrapper.HopsQuery;
+import se.sics.hop.metadata.ndb.wrapper.HopsQueryBuilder;
+import se.sics.hop.metadata.ndb.wrapper.HopsQueryDomainType;
+import se.sics.hop.metadata.ndb.wrapper.HopsSession;
 import se.sics.hop.metadata.yarn.dal.RMContextInactiveNodesDataAccess;
 import se.sics.hop.metadata.yarn.tabledef.RMContextInactiveNodesTableDef;
 
@@ -35,7 +35,7 @@ public class RMContextInactiveNodesClusterJ implements RMContextInactiveNodesTab
 
     @Override
     public HopRMContextInactiveNodes findById(String host) throws StorageException {
-        Session session = connector.obtainSession();
+        HopsSession session = connector.obtainSession();
 
         RMContextInactiveNodesDTO entry = null;
         if (session != null) {
@@ -51,11 +51,11 @@ public class RMContextInactiveNodesClusterJ implements RMContextInactiveNodesTab
     @Override
     public List<HopRMContextInactiveNodes> findAll() throws StorageException {
         try {
-            Session session = connector.obtainSession();
-            QueryBuilder qb = session.getQueryBuilder();
+            HopsSession session = connector.obtainSession();
+            HopsQueryBuilder qb = session.getQueryBuilder();
 
-            QueryDomainType<RMContextInactiveNodesDTO> dobj = qb.createQueryDefinition(RMContextInactiveNodesDTO.class);
-            Query<RMContextInactiveNodesDTO> query = session.createQuery(dobj);
+            HopsQueryDomainType<RMContextInactiveNodesDTO> dobj = qb.createQueryDefinition(RMContextInactiveNodesDTO.class);
+            HopsQuery<RMContextInactiveNodesDTO> query = session.createQuery(dobj);
 
             List<RMContextInactiveNodesDTO> results = query.getResultList();
             return createRMContextInactiveNodesList(results);
@@ -66,7 +66,7 @@ public class RMContextInactiveNodesClusterJ implements RMContextInactiveNodesTab
 
     @Override
     public void prepare(Collection<HopRMContextInactiveNodes> modified, Collection<HopRMContextInactiveNodes> removed) throws StorageException {
-        Session session = connector.obtainSession();
+        HopsSession session = connector.obtainSession();
         try {
             if (removed != null) {
                 List<RMContextInactiveNodesDTO> toRemove = new ArrayList<RMContextInactiveNodesDTO>();
@@ -89,7 +89,7 @@ public class RMContextInactiveNodesClusterJ implements RMContextInactiveNodesTab
 
     @Override
     public void createRMContextInactiveNodesEntry(HopRMContextInactiveNodes entry) throws StorageException {
-        Session session = connector.obtainSession();
+        HopsSession session = connector.obtainSession();
         session.savePersistent(createPersistable(entry, session));
     }
 
@@ -97,7 +97,7 @@ public class RMContextInactiveNodesClusterJ implements RMContextInactiveNodesTab
         return new HopRMContextInactiveNodes( entry.getrmnodeid());
     }
 
-    private RMContextInactiveNodesDTO createPersistable(HopRMContextInactiveNodes entry, Session session) {
+    private RMContextInactiveNodesDTO createPersistable(HopRMContextInactiveNodes entry, HopsSession session) throws StorageException {
         RMContextInactiveNodesDTO persistable = session.newInstance(RMContextInactiveNodesDTO.class);
         persistable.setrmnodeid(entry.getRmnodeid());
         return persistable;

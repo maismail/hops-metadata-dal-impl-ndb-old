@@ -1,6 +1,5 @@
 package se.sics.hop.metadata.ndb.dalimpl.yarn;
 
-import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
@@ -10,6 +9,7 @@ import java.util.List;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.entity.yarn.HopPriority;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
+import se.sics.hop.metadata.ndb.wrapper.HopsSession;
 import se.sics.hop.metadata.yarn.dal.PriorityDataAccess;
 import se.sics.hop.metadata.yarn.tabledef.PriorityTableDef;
 
@@ -37,7 +37,7 @@ public class PriorityClusterJ implements PriorityTableDef, PriorityDataAccess<Ho
 
     @Override
     public HopPriority findById(int id) throws StorageException {
-        Session session = connector.obtainSession();
+        HopsSession session = connector.obtainSession();
 
         PriorityDTO priorityDTO = null;
         if (session != null) {
@@ -52,7 +52,7 @@ public class PriorityClusterJ implements PriorityTableDef, PriorityDataAccess<Ho
 
     @Override
     public void prepare(Collection<HopPriority> modified, Collection<HopPriority> removed) throws StorageException {
-        Session session = connector.obtainSession();
+        HopsSession session = connector.obtainSession();
         try {
             if (removed != null) {
                 List<PriorityDTO> toRemove = new ArrayList<PriorityDTO>();
@@ -75,7 +75,7 @@ public class PriorityClusterJ implements PriorityTableDef, PriorityDataAccess<Ho
 
     @Override
     public void createPriority(HopPriority priority) throws StorageException {
-        Session session = connector.obtainSession();
+        HopsSession session = connector.obtainSession();
         session.savePersistent(createPersistable(priority, session));
     }
 
@@ -83,7 +83,7 @@ public class PriorityClusterJ implements PriorityTableDef, PriorityDataAccess<Ho
         return new HopPriority(priorityDTO.getid(), priorityDTO.getpriorityid());
     }
 
-    private PriorityDTO createPersistable(HopPriority priority, Session session) {
+    private PriorityDTO createPersistable(HopPriority priority, HopsSession session) throws StorageException {
         PriorityDTO priorityDTO = session.newInstance(PriorityDTO.class);
         //Set values to persist new rmnode
         priorityDTO.setid(priority.getId());

@@ -1,12 +1,8 @@
 package se.sics.hop.metadata.ndb.dalimpl.yarn;
 
-import com.mysql.clusterj.Query;
-import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
-import com.mysql.clusterj.query.QueryBuilder;
-import com.mysql.clusterj.query.QueryDomainType;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -15,6 +11,10 @@ import java.util.Map;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.entity.yarn.HopRMContainer;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
+import se.sics.hop.metadata.ndb.wrapper.HopsQuery;
+import se.sics.hop.metadata.ndb.wrapper.HopsQueryBuilder;
+import se.sics.hop.metadata.ndb.wrapper.HopsQueryDomainType;
+import se.sics.hop.metadata.ndb.wrapper.HopsSession;
 import se.sics.hop.metadata.yarn.dal.RMContainerDataAccess;
 import se.sics.hop.metadata.yarn.tabledef.RMContainerTableDef;
 
@@ -88,7 +88,7 @@ public class RMContainerClusterJ implements RMContainerTableDef, RMContainerData
 
   @Override
   public HopRMContainer findById(String id) throws StorageException {
-    Session session = connector.obtainSession();
+    HopsSession session = connector.obtainSession();
 
     RMContainerDTO rMContainerDTO = null;
     if (session != null) {
@@ -100,12 +100,12 @@ public class RMContainerClusterJ implements RMContainerTableDef, RMContainerData
 
   @Override
   public Map<String, HopRMContainer> getAll() throws StorageException {
-    Session session = connector.obtainSession();
-    QueryBuilder qb = session.getQueryBuilder();
-    QueryDomainType<RMContainerDTO> dobj
+    HopsSession session = connector.obtainSession();
+    HopsQueryBuilder qb = session.getQueryBuilder();
+    HopsQueryDomainType<RMContainerDTO> dobj
             = qb.createQueryDefinition(
                     RMContainerDTO.class);
-    Query<RMContainerDTO> query = session.
+    HopsQuery<RMContainerDTO> query = session.
             createQuery(dobj);
     List<RMContainerDTO> results = query.
             getResultList();
@@ -114,7 +114,7 @@ public class RMContainerClusterJ implements RMContainerTableDef, RMContainerData
   
   @Override
   public void prepare(Collection<HopRMContainer> modified, Collection<HopRMContainer> removed) throws StorageException {
-    Session session = connector.obtainSession();
+    HopsSession session = connector.obtainSession();
     try {
       if (removed != null) {
         List<RMContainerDTO> toRemove = new ArrayList<RMContainerDTO>(removed.size());
@@ -137,7 +137,7 @@ public class RMContainerClusterJ implements RMContainerTableDef, RMContainerData
 
   @Override
   public void createRMContainer(HopRMContainer rmcontainer) throws StorageException {
-    Session session = connector.obtainSession();
+    HopsSession session = connector.obtainSession();
     session.savePersistent(createPersistable(rmcontainer, session));
   }
 
@@ -158,7 +158,7 @@ public class RMContainerClusterJ implements RMContainerTableDef, RMContainerData
     
   }
 
-  private RMContainerDTO createPersistable(HopRMContainer hop, Session session) {
+  private RMContainerDTO createPersistable(HopRMContainer hop, HopsSession session) throws StorageException {
     RMContainerClusterJ.RMContainerDTO rMContainerDTO = session.newInstance(RMContainerClusterJ.RMContainerDTO.class);
 
     rMContainerDTO.setcontaineridid(hop.getContainerIdID());

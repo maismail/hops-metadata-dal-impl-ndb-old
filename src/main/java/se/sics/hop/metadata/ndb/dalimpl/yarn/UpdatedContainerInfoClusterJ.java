@@ -1,13 +1,8 @@
 package se.sics.hop.metadata.ndb.dalimpl.yarn;
 
-import com.mysql.clusterj.Query;
-import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
-import com.mysql.clusterj.query.Predicate;
-import com.mysql.clusterj.query.QueryBuilder;
-import com.mysql.clusterj.query.QueryDomainType;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -17,6 +12,11 @@ import java.util.Map;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.entity.yarn.HopUpdatedContainerInfo;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
+import se.sics.hop.metadata.ndb.wrapper.HopsPredicate;
+import se.sics.hop.metadata.ndb.wrapper.HopsQuery;
+import se.sics.hop.metadata.ndb.wrapper.HopsQueryBuilder;
+import se.sics.hop.metadata.ndb.wrapper.HopsQueryDomainType;
+import se.sics.hop.metadata.ndb.wrapper.HopsSession;
 import se.sics.hop.metadata.yarn.dal.UpdatedContainerInfoDataAccess;
 import se.sics.hop.metadata.yarn.tabledef.UpdatedContainerInfoTableDef;
 
@@ -47,7 +47,7 @@ public class UpdatedContainerInfoClusterJ implements UpdatedContainerInfoTableDe
     @Override
     public void clear(List<HopUpdatedContainerInfo> list) throws StorageException {
         List<UpdatedContainerInfoDTO> toRemove = new ArrayList<UpdatedContainerInfoDTO>();
-        Session session = connector.obtainSession();
+        HopsSession session = connector.obtainSession();
         for (HopUpdatedContainerInfo hop : list) {
             UpdatedContainerInfoDTO uci = session.newInstance(UpdatedContainerInfoDTO.class);
             uci.setrmnodeid(hop.getRmnodeid());
@@ -58,7 +58,7 @@ public class UpdatedContainerInfoClusterJ implements UpdatedContainerInfoTableDe
 
     @Override
     public HopUpdatedContainerInfo findEntry(String rmnodeid, int id) throws StorageException {
-        Session session = connector.obtainSession();
+        HopsSession session = connector.obtainSession();
         Object[] pk = new Object[2];
         pk[0] = rmnodeid;
         pk[1] = id;
@@ -72,14 +72,14 @@ public class UpdatedContainerInfoClusterJ implements UpdatedContainerInfoTableDe
     @Override
     public List<HopUpdatedContainerInfo> findByRMNode(String rmnodeid) throws StorageException {
         try {
-            Session session = connector.obtainSession();
-            QueryBuilder qb = session.getQueryBuilder();
+            HopsSession session = connector.obtainSession();
+            HopsQueryBuilder qb = session.getQueryBuilder();
 
-            QueryDomainType<UpdatedContainerInfoDTO> dobj = qb.createQueryDefinition(UpdatedContainerInfoDTO.class);
-            Predicate pred1 = dobj.get("rmnodeid").equal(dobj.param("rmnodeid"));
+            HopsQueryDomainType<UpdatedContainerInfoDTO> dobj = qb.createQueryDefinition(UpdatedContainerInfoDTO.class);
+            HopsPredicate pred1 = dobj.get("rmnodeid").equal(dobj.param("rmnodeid"));
             dobj.where(pred1);
 
-            Query<UpdatedContainerInfoDTO> query = session.createQuery(dobj);
+            HopsQuery<UpdatedContainerInfoDTO> query = session.createQuery(dobj);
             query.setParameter("rmnodeid", rmnodeid);
             List<UpdatedContainerInfoDTO> results = query.getResultList();
             return createUpdatedContainerInfoList(results);
@@ -91,12 +91,12 @@ public class UpdatedContainerInfoClusterJ implements UpdatedContainerInfoTableDe
   @Override
   public Map<String, List<HopUpdatedContainerInfo>> getAll() throws
           StorageException {
-    Session session = connector.obtainSession();
-    QueryBuilder qb = session.getQueryBuilder();
+    HopsSession session = connector.obtainSession();
+    HopsQueryBuilder qb = session.getQueryBuilder();
 
-    QueryDomainType<UpdatedContainerInfoDTO> dobj = qb.createQueryDefinition(
+    HopsQueryDomainType<UpdatedContainerInfoDTO> dobj = qb.createQueryDefinition(
             UpdatedContainerInfoDTO.class);
-    Query<UpdatedContainerInfoDTO> query = session.createQuery(dobj);
+    HopsQuery<UpdatedContainerInfoDTO> query = session.createQuery(dobj);
 
     List<UpdatedContainerInfoDTO> results = query.getResultList();
     return createMap(results);
@@ -104,7 +104,7 @@ public class UpdatedContainerInfoClusterJ implements UpdatedContainerInfoTableDe
     
     @Override
     public void prepare(Collection<HopUpdatedContainerInfo> modified, Collection<HopUpdatedContainerInfo> removed) throws StorageException {
-        Session session = connector.obtainSession();
+        HopsSession session = connector.obtainSession();
         try {
             if (removed != null) {
                 List<UpdatedContainerInfoDTO> toRemove = new ArrayList<UpdatedContainerInfoDTO>();
@@ -125,7 +125,7 @@ public class UpdatedContainerInfoClusterJ implements UpdatedContainerInfoTableDe
         }
     }
 
-    private UpdatedContainerInfoDTO createPersistable(HopUpdatedContainerInfo hop, Session session) {
+    private UpdatedContainerInfoDTO createPersistable(HopUpdatedContainerInfo hop, HopsSession session) throws StorageException {
         UpdatedContainerInfoDTO dto = session.newInstance(UpdatedContainerInfoDTO.class);
         dto.setrmnodeid(hop.getRmnodeid());
         dto.setcontainerid(hop.getContainerId());

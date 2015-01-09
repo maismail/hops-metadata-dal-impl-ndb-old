@@ -16,6 +16,10 @@ import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.entity.yarn.HopContainerStatus;
 import se.sics.hop.metadata.hdfs.entity.yarn.HopRMNode;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
+import se.sics.hop.metadata.ndb.wrapper.HopsQuery;
+import se.sics.hop.metadata.ndb.wrapper.HopsQueryBuilder;
+import se.sics.hop.metadata.ndb.wrapper.HopsQueryDomainType;
+import se.sics.hop.metadata.ndb.wrapper.HopsSession;
 import se.sics.hop.metadata.yarn.dal.ContainerStatusDataAccess;
 import se.sics.hop.metadata.yarn.tabledef.ContainerStatusTableDef;
 
@@ -58,7 +62,7 @@ public class ContainerStatusClusterJ implements ContainerStatusTableDef, Contain
 
     @Override
     public HopContainerStatus findById(String id) throws StorageException {
-        Session session = connector.obtainSession();
+        HopsSession session = connector.obtainSession();
 
         ContainerStatusDTO uciDTO = null;
         if (session != null) {
@@ -73,12 +77,12 @@ public class ContainerStatusClusterJ implements ContainerStatusTableDef, Contain
 
    @Override
   public Map<String, HopContainerStatus> getAll() throws StorageException {
-    Session session = connector.obtainSession();
-    QueryBuilder qb = session.getQueryBuilder();
+    HopsSession session = connector.obtainSession();
+     HopsQueryBuilder qb = session.getQueryBuilder();
 
-    QueryDomainType<ContainerStatusDTO> dobj = qb.createQueryDefinition(
+     HopsQueryDomainType<ContainerStatusDTO> dobj = qb.createQueryDefinition(
             ContainerStatusDTO.class);
-    Query<ContainerStatusDTO> query = session.createQuery(dobj);
+     HopsQuery<ContainerStatusDTO> query = session.createQuery(dobj);
 
     List<ContainerStatusDTO> results = query.getResultList();
     return createMap(results);
@@ -86,7 +90,7 @@ public class ContainerStatusClusterJ implements ContainerStatusTableDef, Contain
   
     @Override
     public void prepare(Collection<HopContainerStatus> modified, Collection<HopContainerStatus> removed) throws StorageException {
-        Session session = connector.obtainSession();
+        HopsSession session = connector.obtainSession();
         try {
             if (removed != null) {
                 List<ContainerStatusDTO> toRemove = new ArrayList<ContainerStatusDTO>();
@@ -109,11 +113,11 @@ public class ContainerStatusClusterJ implements ContainerStatusTableDef, Contain
 
     @Override
     public void createContainerStatus(HopContainerStatus containerstatus) throws StorageException {
-        Session session = connector.obtainSession();
+        HopsSession session = connector.obtainSession();
         session.savePersistent(createPersistable(containerstatus, session));
     }
 
-    private ContainerStatusDTO createPersistable(HopContainerStatus hopCS, Session session) {
+    private ContainerStatusDTO createPersistable(HopContainerStatus hopCS, HopsSession session) throws StorageException {
         ContainerStatusDTO csDTO = session.newInstance(ContainerStatusDTO.class);
         //Set values to persist new ContainerStatus
         csDTO.setcontainerid(hopCS.getContainerid());

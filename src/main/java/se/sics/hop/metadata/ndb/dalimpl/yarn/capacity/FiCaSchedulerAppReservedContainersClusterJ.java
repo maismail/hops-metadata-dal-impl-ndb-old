@@ -6,7 +6,6 @@
 
 package se.sics.hop.metadata.ndb.dalimpl.yarn.capacity;
 
-import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
@@ -14,6 +13,7 @@ import java.util.Collection;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.entity.yarn.capacity.HopFiCaSchedulerAppReservedContainers;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
+import se.sics.hop.metadata.ndb.wrapper.HopsSession;
 import se.sics.hop.metadata.yarn.dal.capacity.FiCaSchedulerAppReservedContainersDataAccess;
 import se.sics.hop.metadata.yarn.tabledef.capacity.FiCaSchedulerAppReservedContainersTableDef;
 import static se.sics.hop.metadata.yarn.tabledef.capacity.FiCaSchedulerAppReservedContainersTableDef.PRIORITY_ID;
@@ -49,7 +49,7 @@ public class FiCaSchedulerAppReservedContainersClusterJ implements FiCaScheduler
         
     @Override
     public HopFiCaSchedulerAppReservedContainers findById(int id) throws StorageException {
-        Session session = connector.obtainSession();
+        HopsSession session = connector.obtainSession();
         
         FiCaSchedulerAppReservedContainersClusterJ.FiCaSchedulerAppReservedContainersDTO fiCaSchedulerAppReservedContainersDTO = null;
         if(session !=  null) {
@@ -64,7 +64,7 @@ public class FiCaSchedulerAppReservedContainersClusterJ implements FiCaScheduler
 
     @Override
     public void prepare(Collection<HopFiCaSchedulerAppReservedContainers> modified, Collection<HopFiCaSchedulerAppReservedContainers> removed) throws StorageException {
-        Session session = connector.obtainSession();
+        HopsSession session = connector.obtainSession();
         try {
             if (removed != null) {
                 for (HopFiCaSchedulerAppReservedContainers hop : removed) {
@@ -90,7 +90,7 @@ public class FiCaSchedulerAppReservedContainersClusterJ implements FiCaScheduler
                                                          fiCaSchedulerAppReservedContainersDTO.getrmcontainerid());
     }
 
-    private FiCaSchedulerAppReservedContainersDTO createPersistable(HopFiCaSchedulerAppReservedContainers hop, Session session) {
+    private FiCaSchedulerAppReservedContainersDTO createPersistable(HopFiCaSchedulerAppReservedContainers hop, HopsSession session) throws StorageException {
         FiCaSchedulerAppReservedContainersClusterJ.FiCaSchedulerAppReservedContainersDTO fiCaSchedulerAppReservedContainersDTO = session.newInstance(FiCaSchedulerAppReservedContainersClusterJ.FiCaSchedulerAppReservedContainersDTO.class);
         
         fiCaSchedulerAppReservedContainersDTO.setschedulerappid(hop.getSchedulerapp_id());

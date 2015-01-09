@@ -1,6 +1,5 @@
 package se.sics.hop.metadata.ndb.dalimpl.yarn.rmstatestore;
 
-import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
@@ -10,6 +9,7 @@ import java.util.List;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.entity.yarn.rmstatestore.HopSequenceNumber;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
+import se.sics.hop.metadata.ndb.wrapper.HopsSession;
 import se.sics.hop.metadata.yarn.dal.rmstatestore.SequenceNumberDataAccess;
 import se.sics.hop.metadata.yarn.tabledef.rmstatestore.SequenceNumberTableDef;
 
@@ -37,7 +37,7 @@ public class SequenceNumberClusterJ implements SequenceNumberTableDef, SequenceN
 
     @Override
     public HopSequenceNumber findById(int id) throws StorageException {
-        Session session = connector.obtainSession();
+        HopsSession session = connector.obtainSession();
 
         SequenceNumberDTO sequenceNumberDTO = null;
         if (session != null) {
@@ -50,7 +50,7 @@ public class SequenceNumberClusterJ implements SequenceNumberTableDef, SequenceN
 
     @Override
     public void prepare(Collection<HopSequenceNumber> modified, Collection<HopSequenceNumber> removed) throws StorageException {
-        Session session = connector.obtainSession();
+        HopsSession session = connector.obtainSession();
         try {
             if (removed != null) {
                 List<SequenceNumberDTO> toRemove = new ArrayList<SequenceNumberDTO>();
@@ -79,7 +79,7 @@ public class SequenceNumberClusterJ implements SequenceNumberTableDef, SequenceN
       }
     }
 
-    private SequenceNumberDTO createPersistable(HopSequenceNumber hop, Session session) {
+    private SequenceNumberDTO createPersistable(HopSequenceNumber hop, HopsSession session) throws StorageException {
         SequenceNumberDTO sequenceNumberDTO = session.newInstance(SequenceNumberDTO.class);
         sequenceNumberDTO.setid(hop.getId());
         sequenceNumberDTO.setsequencenumber(hop.getSequencenumber());

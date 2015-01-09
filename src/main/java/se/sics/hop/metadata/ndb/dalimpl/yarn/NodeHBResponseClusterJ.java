@@ -1,12 +1,8 @@
 package se.sics.hop.metadata.ndb.dalimpl.yarn;
 
-import com.mysql.clusterj.Query;
-import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
-import com.mysql.clusterj.query.QueryBuilder;
-import com.mysql.clusterj.query.QueryDomainType;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -15,6 +11,10 @@ import java.util.Map;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.entity.yarn.HopNodeHBResponse;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
+import se.sics.hop.metadata.ndb.wrapper.HopsQuery;
+import se.sics.hop.metadata.ndb.wrapper.HopsQueryBuilder;
+import se.sics.hop.metadata.ndb.wrapper.HopsQueryDomainType;
+import se.sics.hop.metadata.ndb.wrapper.HopsSession;
 import se.sics.hop.metadata.yarn.dal.NodeHBResponseDataAccess;
 import se.sics.hop.metadata.yarn.tabledef.NodeHBResponseTableDef;
 
@@ -42,7 +42,7 @@ public class NodeHBResponseClusterJ implements NodeHBResponseTableDef, NodeHBRes
 
     @Override
     public HopNodeHBResponse findById(String rmnodeId) throws StorageException {
-        Session session = connector.obtainSession();
+        HopsSession session = connector.obtainSession();
         NodeHBResponseDTO nodeHBresponseDTO = null;
         if (session != null) {
             nodeHBresponseDTO = session.find(NodeHBResponseDTO.class, rmnodeId);
@@ -56,12 +56,12 @@ public class NodeHBResponseClusterJ implements NodeHBResponseTableDef, NodeHBRes
 
    @Override
   public Map<String, HopNodeHBResponse> getAll() throws StorageException {
-    Session session = connector.obtainSession();
-    QueryBuilder qb = session.getQueryBuilder();
-    QueryDomainType<NodeHBResponseDTO> dobj
+    HopsSession session = connector.obtainSession();
+     HopsQueryBuilder qb = session.getQueryBuilder();
+     HopsQueryDomainType<NodeHBResponseDTO> dobj
             = qb.createQueryDefinition(
                     NodeHBResponseDTO.class);
-    Query<NodeHBResponseDTO> query = session.
+     HopsQuery<NodeHBResponseDTO> query = session.
             createQuery(dobj);
     List<NodeHBResponseDTO> results = query.
             getResultList();
@@ -70,7 +70,7 @@ public class NodeHBResponseClusterJ implements NodeHBResponseTableDef, NodeHBRes
     
     @Override
     public void prepare(Collection<HopNodeHBResponse> modified, Collection<HopNodeHBResponse> removed) throws StorageException {
-        Session session = connector.obtainSession();
+        HopsSession session = connector.obtainSession();
         try {
             if (removed != null) {
                 List<NodeHBResponseDTO> toRemove = new ArrayList<NodeHBResponseDTO>();
@@ -94,7 +94,7 @@ public class NodeHBResponseClusterJ implements NodeHBResponseTableDef, NodeHBRes
 
     @Override
     public void createNodeHBResponse(HopNodeHBResponse nodehbresponse) throws StorageException {
-        Session session = connector.obtainSession();
+        HopsSession session = connector.obtainSession();
         createPersistable(nodehbresponse, session);
     }
 
@@ -102,7 +102,7 @@ public class NodeHBResponseClusterJ implements NodeHBResponseTableDef, NodeHBRes
         return new HopNodeHBResponse(nodeHBresponseDTO.getrmnodeid(), nodeHBresponseDTO.getresponse());
     }
 
-    private NodeHBResponseDTO createPersistable(HopNodeHBResponse nodehbresponse, Session session) {
+    private NodeHBResponseDTO createPersistable(HopNodeHBResponse nodehbresponse, HopsSession session) throws StorageException {
         NodeHBResponseDTO nodeHBResponseDT0 = session.newInstance(NodeHBResponseDTO.class);
         nodeHBResponseDT0.setrmnodeid(nodehbresponse.getRMNodeId());
         nodeHBResponseDT0.setresponse(nodehbresponse.getResponseid());

@@ -14,6 +14,7 @@ import java.util.Collection;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.entity.yarn.HopRMApp;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
+import se.sics.hop.metadata.ndb.wrapper.HopsSession;
 import se.sics.hop.metadata.yarn.dal.RMAppDataAccess;
 import se.sics.hop.metadata.yarn.tabledef.RMAppTableDef;
 /**
@@ -94,7 +95,7 @@ public class RMAppClusterJ implements RMAppTableDef, RMAppDataAccess<HopRMApp>{
 
     @Override
     public HopRMApp findById(int id) throws StorageException {
-        Session session = connector.obtainSession();
+        HopsSession session = connector.obtainSession();
 
         RMAppClusterJ.RMAppDTO rMAPDTO = null;
         if (session != null) {
@@ -109,7 +110,7 @@ public class RMAppClusterJ implements RMAppTableDef, RMAppDataAccess<HopRMApp>{
 
     @Override
     public void prepare(Collection<HopRMApp> modified, Collection<HopRMApp> removed) throws StorageException {
-        Session session = connector.obtainSession();
+        HopsSession session = connector.obtainSession();
         try {
             if (removed != null) {
                 for (HopRMApp hop : removed) {
@@ -147,7 +148,7 @@ public class RMAppClusterJ implements RMAppTableDef, RMAppDataAccess<HopRMApp>{
                             rMAPDTO.isappremovalrequestsent());
     }
     
-    private RMAppDTO createPersistable(HopRMApp hop, Session session) {
+    private RMAppDTO createPersistable(HopRMApp hop, HopsSession session) throws StorageException {
         RMAppClusterJ.RMAppDTO rMAPDTO = session.newInstance(RMAppClusterJ.RMAppDTO.class);
         
         rMAPDTO.setapplicationidid(hop.getApplicationidid());
