@@ -40,6 +40,12 @@ public class UpdatedContainerInfoClusterJ implements UpdatedContainerInfoTableDe
         String getcontainerid();
         
         void setcontainerid(String containerid);
+        
+        @PrimaryKey
+        @Column(name = UPDATEDCONTAINERINFOID)
+        int getupdatedcontainerinfoid();
+        
+        void setupdatedcontainerinfoid(int updatedcontainerinfoid);
 
     }
     private ClusterjConnector connector = ClusterjConnector.getInstance();
@@ -89,13 +95,15 @@ public class UpdatedContainerInfoClusterJ implements UpdatedContainerInfoTableDe
     }
     
   @Override
-  public Map<String, List<HopUpdatedContainerInfo>> getAll() throws
+  public Map<String, Map<Integer, List<HopUpdatedContainerInfo>>> getAll()
+          throws
           StorageException {
     HopsSession session = connector.obtainSession();
     HopsQueryBuilder qb = session.getQueryBuilder();
 
-    HopsQueryDomainType<UpdatedContainerInfoDTO> dobj = qb.createQueryDefinition(
-            UpdatedContainerInfoDTO.class);
+    HopsQueryDomainType<UpdatedContainerInfoDTO> dobj = qb.
+            createQueryDefinition(
+                    UpdatedContainerInfoDTO.class);
     HopsQuery<UpdatedContainerInfoDTO> query = session.createQuery(dobj);
 
     List<UpdatedContainerInfoDTO> results = query.getResultList();
@@ -129,6 +137,7 @@ public class UpdatedContainerInfoClusterJ implements UpdatedContainerInfoTableDe
         UpdatedContainerInfoDTO dto = session.newInstance(UpdatedContainerInfoDTO.class);
         dto.setrmnodeid(hop.getRmnodeid());
         dto.setcontainerid(hop.getContainerId());
+        dto.setupdatedcontainerinfoid(hop.getUpdatedContainerInfoId());
         return dto;
     }
 
@@ -139,7 +148,7 @@ public class UpdatedContainerInfoClusterJ implements UpdatedContainerInfoTableDe
      * @return HopRMNode
      */
     private HopUpdatedContainerInfo createHopUpdatedContainerInfo(UpdatedContainerInfoDTO dto) {
-        return new HopUpdatedContainerInfo(dto.getrmnodeid(), dto.getcontainerid());
+        return new HopUpdatedContainerInfo(dto.getrmnodeid(), dto.getcontainerid(), dto.getupdatedcontainerinfoid());
     }
 
     private List<HopUpdatedContainerInfo> createUpdatedContainerInfoList(List<UpdatedContainerInfoDTO> list) throws IOException {
@@ -150,16 +159,22 @@ public class UpdatedContainerInfoClusterJ implements UpdatedContainerInfoTableDe
         return updatedContainerInfos;
     }
     
-  private Map<String, List<HopUpdatedContainerInfo>> createMap(
+  private Map<String, Map<Integer, List<HopUpdatedContainerInfo>>> createMap(
           List<UpdatedContainerInfoDTO> results) {
-    Map<String, List<HopUpdatedContainerInfo>> map
-            = new HashMap<String, List<HopUpdatedContainerInfo>>();
+    Map<String, Map<Integer, List<HopUpdatedContainerInfo>>> map
+            = new HashMap<String, Map<Integer, List<HopUpdatedContainerInfo>>>();
     for (UpdatedContainerInfoDTO persistable : results) {
       HopUpdatedContainerInfo hop = createHopUpdatedContainerInfo(persistable);
       if (map.get(hop.getRmnodeid()) == null) {
-        map.put(hop.getRmnodeid(), new ArrayList<HopUpdatedContainerInfo>());
+        map.put(hop.getRmnodeid(),
+                new HashMap<Integer, List<HopUpdatedContainerInfo>>());
       }
-      map.get(hop.getRmnodeid()).add(hop);
+      if (map.get(hop.getRmnodeid()).get(hop.getUpdatedContainerInfoId())
+              == null) {
+        map.get(hop.getRmnodeid()).put(hop.getUpdatedContainerInfoId(),
+                new ArrayList<HopUpdatedContainerInfo>());
+      }
+      map.get(hop.getRmnodeid()).get(hop.getUpdatedContainerInfoId()).add(hop);
     }
     return map;
   }
