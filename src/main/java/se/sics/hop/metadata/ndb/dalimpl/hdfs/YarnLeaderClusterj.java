@@ -51,6 +51,7 @@ public class YarnLeaderClusterj extends LeaderClusterj implements YarnLeaderTabl
         String getHttpAddress();
 
         void setHttpAddress(String httpAddress);
+        
     }
    
     public YarnLeaderClusterj(){

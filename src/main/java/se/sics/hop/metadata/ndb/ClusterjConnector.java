@@ -142,6 +142,8 @@ import se.sics.hop.metadata.hdfs.dal.HdfsLeaderDataAccess;
 import se.sics.hop.metadata.hdfs.dal.YarnLeaderDataAccess;
 import se.sics.hop.metadata.hdfs.tabledef.HdfsLeaderTableDef;
 import se.sics.hop.metadata.hdfs.tabledef.YarnLeaderTableDef;
+import se.sics.hop.metadata.yarn.dal.RMLoadDataAccess;
+import se.sics.hop.metadata.yarn.tabledef.RMLoadTableDef;
 import se.sics.hop.metadata.yarn.tabledef.rmstatestore.ApplicationAttemptStateTableDef;
 import se.sics.hop.metadata.yarn.tabledef.rmstatestore.ApplicationStateTableDef;
 import se.sics.hop.metadata.yarn.tabledef.appmasterrpc.AppMasterRPCTableDef;
@@ -384,7 +386,7 @@ public class ClusterjConnector implements StorageConnector<DBSession> {
              FinishedApplicationsDataAccess.class,
             TokenDataAccess.class, RMContextInactiveNodesDataAccess.class, RMContextActiveNodesDataAccess.class,
             UpdatedContainerInfoDataAccess.class, YarnLeaderDataAccess.class, SecretMamagerKeysDataAccess.class,
-            AllocateResponseDataAccess.class
+            AllocateResponseDataAccess.class, RMLoadDataAccess.class
             );
   }
 
@@ -517,6 +519,8 @@ public class ClusterjConnector implements StorageConnector<DBSession> {
             truncate(transactional, ApplicationStateTableDef.TABLE_NAME);
           } else if (e == AppMasterRPCDataAccess.class){
             truncate(transactional, AppMasterRPCTableDef.TABLE_NAME);
+          } else if (e == RMLoadDataAccess.class){
+            truncate(transactional, RMLoadTableDef.TABLE_NAME);
           } else if (e == YarnVariablesDataAccess.class) {
             HopsSession session = obtainSession();
             session.currentTransaction().begin();

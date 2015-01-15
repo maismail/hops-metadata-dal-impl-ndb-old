@@ -55,6 +55,7 @@ public abstract class LeaderClusterj implements LeaderTableDef, LeaderDataAccess
         String getHttpAddress();
 
         void setHttpAddress(String httpAddress);
+        
   }
 
   public LeaderClusterj(Class dto){

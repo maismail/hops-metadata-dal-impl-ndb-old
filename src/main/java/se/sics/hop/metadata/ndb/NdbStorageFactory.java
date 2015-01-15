@@ -64,6 +64,7 @@ import se.sics.hop.metadata.ndb.dalimpl.yarn.QueueMetricsClusterJ;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.RMContainerClusterJ;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.RMContextInactiveNodesClusterJ;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.RMContextActiveNodesClusterJ;
+import se.sics.hop.metadata.ndb.dalimpl.yarn.RMLoadClusterJ;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.RMNodeClusterJ;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.ResourceClusterJ;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.ResourceRequestClusterJ;
@@ -102,6 +103,7 @@ import se.sics.hop.metadata.yarn.dal.QueueMetricsDataAccess;
 import se.sics.hop.metadata.yarn.dal.RMContainerDataAccess;
 import se.sics.hop.metadata.yarn.dal.RMContextInactiveNodesDataAccess;
 import se.sics.hop.metadata.yarn.dal.RMContextActiveNodesDataAccess;
+import se.sics.hop.metadata.yarn.dal.RMLoadDataAccess;
 import se.sics.hop.metadata.yarn.dal.RMNodeDataAccess;
 import se.sics.hop.metadata.yarn.dal.ResourceDataAccess;
 import se.sics.hop.metadata.yarn.dal.ResourceRequestDataAccess;
@@ -200,6 +202,7 @@ public class NdbStorageFactory implements DALStorageFactory {
     dataAccessMap.put(SecretMamagerKeysDataAccess.class, new SecretMamagerKeysClusterJ());
     dataAccessMap.put(AllocateResponseDataAccess.class, new AllocateResponseClusterJ());
     dataAccessMap.put(BlockChecksumDataAccess.class, new BlockChecksumClusterj());
+    dataAccessMap.put(RMLoadDataAccess.class, new RMLoadClusterJ());
   }
 
   @Override
