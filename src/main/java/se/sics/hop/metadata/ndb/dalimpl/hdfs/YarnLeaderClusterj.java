@@ -52,10 +52,6 @@ public class YarnLeaderClusterj extends LeaderClusterj implements YarnLeaderTabl
 
         void setHttpAddress(String httpAddress);
         
-        @Column(name = LOAD)
-        int getLoad();
-        
-        void setLoad(int load);
     }
    
     public YarnLeaderClusterj(){

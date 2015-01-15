@@ -51,10 +51,6 @@ public class HdfsLeaderClusterj extends LeaderClusterj implements HdfsLeaderTabl
 
         void setHttpAddress(String httpAddress);
         
-        @Column(name = LOAD)
-        int getLoad();
-        
-        void setLoad(int load);
     }
  
     public HdfsLeaderClusterj(){

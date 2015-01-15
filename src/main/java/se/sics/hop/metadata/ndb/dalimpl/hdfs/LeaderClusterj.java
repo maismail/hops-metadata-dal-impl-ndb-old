@@ -56,9 +56,6 @@ public abstract class LeaderClusterj implements LeaderTableDef, LeaderDataAccess
 
         void setHttpAddress(String httpAddress);
         
-        int getLoad();
-        
-        void setLoad(int load);
   }
 
   public LeaderClusterj(Class dto){
@@ -195,8 +192,7 @@ public abstract class LeaderClusterj implements LeaderTableDef, LeaderDataAccess
         lTable.getTimestamp(),
         lTable.getHostname(),
         lTable.getHttpAddress(),
-        lTable.getPartitionVal(),
-        lTable.getLoad());
+        lTable.getPartitionVal());
   }
 
   private void createPersistableLeaderInstance(HopLeader leader, LeaderDTO lTable) {
@@ -206,6 +202,5 @@ public abstract class LeaderClusterj implements LeaderTableDef, LeaderDataAccess
     lTable.setTimestamp(leader.getTimeStamp());
     lTable.setHttpAddress(leader.getHttpAddress());
     lTable.setPartitionVal(leader.getPartitionVal());
-    lTable.setLoad(leader.getLoad());
   }
 }
