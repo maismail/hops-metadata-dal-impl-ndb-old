@@ -8,9 +8,13 @@ package se.sics.hop.metadata.ndb.dalimpl.yarn.rmstatestore;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.zip.DataFormatException;
+
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.entity.yarn.rmstatestore.HopSecretMamagerKey;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
@@ -20,6 +24,7 @@ import se.sics.hop.metadata.ndb.wrapper.HopsQueryDomainType;
 import se.sics.hop.metadata.ndb.wrapper.HopsSession;
 import se.sics.hop.metadata.yarn.dal.rmstatestore.SecretMamagerKeysDataAccess;
 import se.sics.hop.metadata.yarn.tabledef.rmstatestore.SecretMamagerKeysTableDef;
+import se.sics.hop.util.CompressionUtils;
 
 /**
  *
@@ -93,21 +98,33 @@ public class SecretMamagerKeysClusterJ implements SecretMamagerKeysTableDef, Sec
   private SecretMamagerKeysDTO createPersistable(HopSecretMamagerKey hop, HopsSession session) throws StorageException {
     SecretMamagerKeysDTO keyDTO = session.newInstance(SecretMamagerKeysDTO.class);
     keyDTO.setkeyid(hop.getKeyType());
-    keyDTO.setkey(hop.getKey());
+    try {
+      keyDTO.setkey(CompressionUtils.compress(hop.getKey()));
+    } catch (IOException e) {
+      throw new StorageException(e);
+    }
 
     return keyDTO;
   }
 
-  private HopSecretMamagerKey createHopSecretMamagerKey(SecretMamagerKeysDTO keyDTO) {
+  private HopSecretMamagerKey createHopSecretMamagerKey(SecretMamagerKeysDTO keyDTO)
+      throws StorageException {
     if (keyDTO != null) {
-      return new HopSecretMamagerKey(keyDTO.getkeyid(),
-              keyDTO.getkey());
+      try {
+        return new HopSecretMamagerKey(keyDTO.getkeyid(),
+                CompressionUtils.decompress(keyDTO.getkey()));
+      } catch (IOException e) {
+        throw new StorageException(e);
+      } catch (DataFormatException e) {
+        throw new StorageException(e);
+      }
     } else {
       return null;
     }
   }
   
-   private List<HopSecretMamagerKey> createHopSecretMamagerKeyList(List<SecretMamagerKeysDTO> list) {
+   private List<HopSecretMamagerKey> createHopSecretMamagerKeyList(List<SecretMamagerKeysDTO> list)
+       throws StorageException {
         List<HopSecretMamagerKey> hopList = new ArrayList<HopSecretMamagerKey>();
         for (SecretMamagerKeysDTO dto : list) {
             hopList.add(createHopSecretMamagerKey(dto));

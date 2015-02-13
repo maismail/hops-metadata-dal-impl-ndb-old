@@ -8,8 +8,12 @@ package se.sics.hop.metadata.ndb.dalimpl.yarn.rmstatestore;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.zip.DataFormatException;
+
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.entity.yarn.rmstatestore.HopAllocateResponse;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
@@ -19,6 +23,7 @@ import se.sics.hop.metadata.ndb.wrapper.HopsQueryDomainType;
 import se.sics.hop.metadata.ndb.wrapper.HopsSession;
 import se.sics.hop.metadata.yarn.dal.rmstatestore.AllocateResponseDataAccess;
 import se.sics.hop.metadata.yarn.tabledef.rmstatestore.AllocateResponseTableDef;
+import se.sics.hop.util.CompressionUtils;
 
 /**
  *
@@ -62,12 +67,18 @@ public class AllocateResponseClusterJ implements AllocateResponseTableDef, Alloc
     AllocateResponseDTO allocateResponseDTO = session.newInstance(AllocateResponseDTO.class);
 
     allocateResponseDTO.setapplicationattemptid(hop.getApplicationattemptid());
-    allocateResponseDTO.setallocateresponse(hop.getAllocateResponse());
+    try {
+      allocateResponseDTO.setallocateresponse(
+          CompressionUtils.compress(hop.getAllocateResponse()));
+    } catch (IOException e) {
+      throw new StorageException(e);
+    }
 
     return allocateResponseDTO;
   }
   
-  private List<HopAllocateResponse> createHopAllocateResponseList(List<AllocateResponseDTO> list) {
+  private List<HopAllocateResponse> createHopAllocateResponseList(List<AllocateResponseDTO> list)
+      throws StorageException {
         List<HopAllocateResponse> hopList = new ArrayList<HopAllocateResponse>();
         for (AllocateResponseDTO dto : list) {
             hopList.add(createHopAllocateResponse(dto));
@@ -75,10 +86,18 @@ public class AllocateResponseClusterJ implements AllocateResponseTableDef, Alloc
         return hopList;
     }
 
-  private HopAllocateResponse createHopAllocateResponse(AllocateResponseDTO allocateResponseDTO) {
+  private HopAllocateResponse createHopAllocateResponse(AllocateResponseDTO allocateResponseDTO)
+      throws StorageException {
     if (allocateResponseDTO != null) {
-      return new HopAllocateResponse(allocateResponseDTO.getapplicationattemptid(),
-              allocateResponseDTO.getallocateresponse());
+      try {
+        return new HopAllocateResponse(allocateResponseDTO.getapplicationattemptid(),
+            CompressionUtils
+                .decompress(allocateResponseDTO.getallocateresponse()));
+      } catch (IOException e) {
+        throw new StorageException(e);
+      } catch (DataFormatException e) {
+        throw new StorageException(e);
+      }
     } else {
       return null;
     }

@@ -1,12 +1,9 @@
 package se.sics.hop.metadata.ndb.dalimpl.hdfs;
 
-import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PartitionKey;
-import com.mysql.clusterj.annotation.PersistenceCapable;
-import com.mysql.clusterj.annotation.PrimaryKey;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.dal.LeaderDataAccess;
-import se.sics.hop.metadata.hdfs.entity.hop.HopLeader;
+import se.sics.hop.metadata.hdfs.entity.hop.HopsLeader;
 import se.sics.hop.metadata.hdfs.tabledef.LeaderTableDef;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
 import se.sics.hop.metadata.ndb.wrapper.HopsPredicate;
@@ -25,7 +22,7 @@ import java.util.TreeSet;
  *
  * @author Salman <salman@sics.se>
  */
-public abstract class LeaderClusterj implements LeaderTableDef, LeaderDataAccess<HopLeader> {
+public abstract class LeaderClusterj implements LeaderTableDef, LeaderDataAccess<HopsLeader> {
 
   @PartitionKey(column=PARTITION_VAL)
   
@@ -101,19 +98,19 @@ public abstract class LeaderClusterj implements LeaderTableDef, LeaderDataAccess
   }
 
   @Override
-  public HopLeader findByPkey(long id, int partitionKey) throws StorageException {
+  public HopsLeader findByPkey(long id, int partitionKey) throws StorageException {
     HopsSession dbSession = connector.obtainSession();
     Object[] keys = new Object[]{id, partitionKey};
     LeaderDTO lTable = (LeaderDTO) dbSession.find(dto, keys);
     if (lTable != null) {
-      HopLeader leader = createLeader(lTable);
+      HopsLeader leader = createLeader(lTable);
       return leader;
     }
     return null;
   }
 
   @Override
-  public Collection<HopLeader> findAllByCounterGT(long counter) throws StorageException {
+  public Collection<HopsLeader> findAllByCounterGT(long counter) throws StorageException {
     HopsSession dbSession = connector.obtainSession();
     HopsQueryBuilder qb = dbSession.getQueryBuilder();
     HopsQueryDomainType dobj = qb.createQueryDefinition(dto);
@@ -128,7 +125,7 @@ public abstract class LeaderClusterj implements LeaderTableDef, LeaderDataAccess
   }
 
   @Override
-  public Collection<HopLeader> findAllByIDLT(long id) throws StorageException {
+  public Collection<HopsLeader> findAllByIDLT(long id) throws StorageException {
     HopsSession dbSession = connector.obtainSession();
     HopsQueryBuilder qb = dbSession.getQueryBuilder();
     HopsQueryDomainType dobj = qb.createQueryDefinition(dto);
@@ -143,7 +140,7 @@ public abstract class LeaderClusterj implements LeaderTableDef, LeaderDataAccess
   }
 
   @Override
-  public Collection<HopLeader> findAll() throws StorageException {
+  public Collection<HopsLeader> findAll() throws StorageException {
     HopsSession dbSession = connector.obtainSession();
     HopsQueryBuilder qb = dbSession.getQueryBuilder();
     HopsQueryDomainType<LeaderDTO> dobj = qb.createQueryDefinition(dto);
@@ -152,23 +149,23 @@ public abstract class LeaderClusterj implements LeaderTableDef, LeaderDataAccess
   }
 
   @Override
-  public void prepare(Collection<HopLeader> removed, Collection<HopLeader> newed, Collection<HopLeader> modified) throws StorageException {
+  public void prepare(Collection<HopsLeader> removed, Collection<HopsLeader> newed, Collection<HopsLeader> modified) throws StorageException {
     HopsSession dbSession = connector.obtainSession();
     List<LeaderDTO> changes = new ArrayList<LeaderDTO>();
     List<LeaderDTO> deletions = new ArrayList<LeaderDTO>();
-    for (HopLeader l : newed) {
+    for (HopsLeader l : newed) {
       LeaderDTO lTable = (LeaderDTO) dbSession.newInstance(dto);
       createPersistableLeaderInstance(l, lTable);
       changes.add(lTable);
     }
 
-    for (HopLeader l : modified) {
+    for (HopsLeader l : modified) {
       LeaderDTO lTable = (LeaderDTO) dbSession.newInstance(dto);
       createPersistableLeaderInstance(l, lTable);
       changes.add(lTable);
     }
 
-    for (HopLeader l : removed) {
+    for (HopsLeader l : removed) {
       LeaderDTO lTable = (LeaderDTO) dbSession.newInstance(dto);
       createPersistableLeaderInstance(l, lTable);
       deletions.add(lTable);
@@ -177,8 +174,8 @@ public abstract class LeaderClusterj implements LeaderTableDef, LeaderDataAccess
     dbSession.savePersistentAll(changes);
   }
 
-  private SortedSet<HopLeader> createList(List<LeaderDTO> list) {
-    SortedSet<HopLeader> finalSet = new TreeSet<HopLeader>();
+  private SortedSet<HopsLeader> createList(List<LeaderDTO> list) {
+    SortedSet<HopsLeader> finalSet = new TreeSet<HopsLeader>();
     for (LeaderDTO dto : list) {
       finalSet.add(createLeader(dto));
     }
@@ -186,16 +183,9 @@ public abstract class LeaderClusterj implements LeaderTableDef, LeaderDataAccess
     return finalSet;
   }
 
-  private HopLeader createLeader(LeaderDTO lTable) {
-    return new HopLeader(lTable.getId(),
-        lTable.getCounter(),
-        lTable.getTimestamp(),
-        lTable.getHostname(),
-        lTable.getHttpAddress(),
-        lTable.getPartitionVal());
-  }
+  protected abstract HopsLeader createLeader(LeaderDTO lTable);
 
-  private void createPersistableLeaderInstance(HopLeader leader, LeaderDTO lTable) {
+  private void createPersistableLeaderInstance(HopsLeader leader, LeaderDTO lTable) {
     lTable.setId(leader.getId());
     lTable.setCounter(leader.getCounter());
     lTable.setHostname(leader.getHostName());

@@ -3,13 +3,18 @@ package se.sics.hop.metadata.ndb.dalimpl.yarn;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
+
+import java.io.IOException;
 import java.util.Collection;
+import java.util.zip.DataFormatException;
+
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.entity.yarn.HopToken;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
 import se.sics.hop.metadata.ndb.wrapper.HopsSession;
 import se.sics.hop.metadata.yarn.dal.TokenDataAccess;
 import se.sics.hop.metadata.yarn.tabledef.TokenTableDef;
+import se.sics.hop.util.CompressionUtils;
 
 /**
  *
@@ -91,23 +96,37 @@ public class TokenClusterJ implements TokenTableDef, TokenDataAccess<HopToken> {
         createPersistable(token, session);
     }
 
-    private HopToken createHopToken(TokenDTO tokenDTO) {
+    private HopToken createHopToken(TokenDTO tokenDTO) throws StorageException {
+      try {
         return new HopToken(
                 tokenDTO.getid(),
-                tokenDTO.getidentifier(),
+                CompressionUtils.decompress(tokenDTO.getidentifier()),
                 tokenDTO.getkind(),
-                tokenDTO.getpassword(),
+                CompressionUtils.decompress(tokenDTO.getpassword()),
                 tokenDTO.getservice());
+      } catch (IOException e) {
+        throw new StorageException(e);
+      } catch (DataFormatException e) {
+        throw new StorageException(e);
+      }
     }
 
     private TokenDTO createPersistable(HopToken token, HopsSession session) throws StorageException {
         TokenDTO tokenDTO = session.newInstance(TokenDTO.class);
         //Set values to persist new rmnode
         tokenDTO.setid(token.getId());
-        tokenDTO.setidentifier(token.getIdentifier());
-        tokenDTO.setkind(token.getKind());
-        tokenDTO.setpassword(token.getPassword());
-        tokenDTO.setservice(token.getService());
+      try {
+        tokenDTO.setidentifier(CompressionUtils.compress(token.getIdentifier()));
+      } catch (IOException e) {
+        throw new StorageException(e);
+      }
+      tokenDTO.setkind(token.getKind());
+      try {
+        tokenDTO.setpassword(CompressionUtils.compress(token.getPassword()));
+      } catch (IOException e) {
+        throw new StorageException(e);
+      }
+      tokenDTO.setservice(token.getService());
         return tokenDTO;
     }
 }

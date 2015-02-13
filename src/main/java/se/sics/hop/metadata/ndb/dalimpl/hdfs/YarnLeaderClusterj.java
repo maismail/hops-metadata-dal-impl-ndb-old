@@ -8,7 +8,7 @@ package se.sics.hop.metadata.ndb.dalimpl.hdfs;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
-import static se.sics.hop.metadata.hdfs.tabledef.LeaderTableDef.HTTP_ADDRESS;
+import se.sics.hop.metadata.hdfs.entity.hop.HopsLeader;
 import se.sics.hop.metadata.hdfs.tabledef.YarnLeaderTableDef;
 
 /**
@@ -17,42 +17,52 @@ import se.sics.hop.metadata.hdfs.tabledef.YarnLeaderTableDef;
  */
 public class YarnLeaderClusterj extends LeaderClusterj implements YarnLeaderTableDef {
 
-    @PersistenceCapable(table = TABLE_NAME)
-    public interface YarnLeaderDTO extends LeaderDTO{
+  @PersistenceCapable(table = TABLE_NAME)
+  public interface YarnLeaderDTO extends LeaderDTO{
 
-        @PrimaryKey
-        @Column(name = ID)
-        long getId();
+    @PrimaryKey
+    @Column(name = ID)
+    long getId();
 
-        void setId(long id);
+    void setId(long id);
 
-        @PrimaryKey
-        @Column(name = PARTITION_VAL)
-        int getPartitionVal();
+    @PrimaryKey
+    @Column(name = PARTITION_VAL)
+    int getPartitionVal();
 
-        void setPartitionVal(int partitionVal);
+    void setPartitionVal(int partitionVal);
 
-        @Column(name = COUNTER)
-        long getCounter();
+    @Column(name = COUNTER)
+    long getCounter();
 
-        void setCounter(long counter);
+    void setCounter(long counter);
 
-        @Column(name = TIMESTAMP)
-        long getTimestamp();
+    @Column(name = TIMESTAMP)
+    long getTimestamp();
 
-        void setTimestamp(long timestamp);
+    void setTimestamp(long timestamp);
 
-        @Column(name = HOSTNAME)
-        String getHostname();
+    @Column(name = HOSTNAME)
+    String getHostname();
 
-        void setHostname(String hostname);
+    void setHostname(String hostname);
 
-        @Column(name = HTTP_ADDRESS)
-        String getHttpAddress();
+    @Column(name = HTTP_ADDRESS)
+    String getHttpAddress();
 
-        void setHttpAddress(String httpAddress);
-        
-    }
+    void setHttpAddress(String httpAddress);
+
+  }
+
+  @Override
+  protected HopsLeader createLeader(LeaderDTO lTable) {
+    return new HopsLeader.HopsYarnLeader(lTable.getId(),
+        lTable.getCounter(),
+        lTable.getTimestamp(),
+        lTable.getHostname(),
+        lTable.getHttpAddress(),
+        lTable.getPartitionVal());
+  }
    
     public YarnLeaderClusterj(){
         super(YarnLeaderDTO.class);

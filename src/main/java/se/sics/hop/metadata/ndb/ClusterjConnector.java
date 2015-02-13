@@ -16,6 +16,7 @@ import se.sics.hop.metadata.hdfs.dal.ExcessReplicaDataAccess;
 import se.sics.hop.metadata.hdfs.dal.INodeAttributesDataAccess;
 import se.sics.hop.metadata.hdfs.dal.INodeDataAccess;
 import se.sics.hop.metadata.hdfs.dal.InvalidateBlockDataAccess;
+import se.sics.hop.metadata.hdfs.dal.LeaderDataAccess;
 import se.sics.hop.metadata.hdfs.dal.LeaseDataAccess;
 import se.sics.hop.metadata.hdfs.dal.LeasePathDataAccess;
 import se.sics.hop.metadata.hdfs.dal.MisReplicatedRangeQueueDataAccess;
@@ -37,6 +38,7 @@ import se.sics.hop.metadata.hdfs.tabledef.ExcessReplicaTableDef;
 import se.sics.hop.metadata.hdfs.tabledef.INodeAttributesTableDef;
 import se.sics.hop.metadata.hdfs.tabledef.INodeTableDef;
 import se.sics.hop.metadata.hdfs.tabledef.InvalidatedBlockTableDef;
+import se.sics.hop.metadata.hdfs.tabledef.LeaderTableDef;
 import se.sics.hop.metadata.hdfs.tabledef.LeasePathTableDef;
 import se.sics.hop.metadata.hdfs.tabledef.LeaseTableDef;
 import se.sics.hop.metadata.hdfs.tabledef.MisReplicatedRangeQueueTableDef;
@@ -211,9 +213,8 @@ public class ClusterjConnector implements StorageConnector<DBSession> {
    * begin a transaction.
    */
   @Override
-  public void beginTransaction(String name) throws StorageException {
+  public void beginTransaction() throws StorageException {
     HopsSession session = obtainSession();
-    LOG.debug(name + " begin transaction for thread " + Thread.currentThread().getId());
     if (session.currentTransaction().isActive()) {
       LOG.fatal("Prevented starting transaction within a transaction.");
       throw new Error("Can not start Tx inside another Tx");
@@ -359,35 +360,37 @@ public class ClusterjConnector implements StorageConnector<DBSession> {
   }
 
   private boolean format(boolean transactional) throws StorageException {
-    return format(transactional, VariableDataAccess.class, 
-//            INodeDataAccess.class, BlockInfoDataAccess.class,
-//            LeaseDataAccess.class, LeasePathDataAccess.class, ReplicaDataAccess.class,
-//            ReplicaUnderConstructionDataAccess.class, InvalidateBlockDataAccess.class,
-//            ExcessReplicaDataAccess.class, PendingBlockDataAccess.class, CorruptReplicaDataAccess.class,
-//            UnderReplicatedBlockDataAccess.class, HdfsLeaderDataAccess.class,
-//            INodeAttributesDataAccess.class, StorageIdMapDataAccess.class,
-//            BlockLookUpDataAccess.class, SafeBlocksDataAccess.class, MisReplicatedRangeQueueDataAccess.class,
-//            QuotaUpdateDataAccess.class, EncodingStatusDataAccess.class, BlockChecksumDataAccess.class,
-            
-            AppMasterRPCDataAccess.class,
-            ApplicationStateDataAccess.class, ApplicationAttemptStateDataAccess.class, DelegationKeyDataAccess.class,
-            DelegationTokenDataAccess.class, SequenceNumberDataAccess.class,
-            RMStateVersionDataAccess.class, YarnVariablesDataAccess.class,
-            AppSchedulingInfoDataAccess.class, AppSchedulingInfoBlacklistDataAccess.class,
-            ContainerDataAccess.class,  ContainerIdToCleanDataAccess.class,
-            ContainerStatusDataAccess.class, FiCaSchedulerAppLastScheduledContainerDataAccess.class,
-            FiCaSchedulerAppLiveContainersDataAccess.class, FiCaSchedulerAppNewlyAllocatedContainersDataAccess.class,
-            FiCaSchedulerAppReservationsDataAccess.class, FiCaSchedulerAppReservedContainersDataAccess.class,
-            FiCaSchedulerAppSchedulingOpportunitiesDataAccess.class, FiCaSchedulerNodeDataAccess.class,
-            JustLaunchedContainersDataAccess.class, LaunchedContainersDataAccess.class,
-            NodeDataAccess.class, QueueMetricsDataAccess.class,
-            ResourceDataAccess.class, ResourceRequestDataAccess.class, RMContainerDataAccess.class,
-            RMNodeDataAccess.class, SchedulerApplicationDataAccess.class, SequenceNumberDataAccess.class,
-             FinishedApplicationsDataAccess.class,
-            TokenDataAccess.class, RMContextInactiveNodesDataAccess.class, RMContextActiveNodesDataAccess.class,
-            UpdatedContainerInfoDataAccess.class, YarnLeaderDataAccess.class, SecretMamagerKeysDataAccess.class,
-            AllocateResponseDataAccess.class, RMLoadDataAccess.class
-            );
+    return format(transactional,
+        // shared
+        VariableDataAccess.class,
+        // HDFS
+        INodeDataAccess.class, BlockInfoDataAccess.class,
+        LeaseDataAccess.class, LeasePathDataAccess.class, ReplicaDataAccess.class,
+        ReplicaUnderConstructionDataAccess.class, InvalidateBlockDataAccess.class,
+        ExcessReplicaDataAccess.class, PendingBlockDataAccess.class, CorruptReplicaDataAccess.class,
+        UnderReplicatedBlockDataAccess.class, HdfsLeaderDataAccess.class,
+        INodeAttributesDataAccess.class, StorageIdMapDataAccess.class,
+        BlockLookUpDataAccess.class, SafeBlocksDataAccess.class, MisReplicatedRangeQueueDataAccess.class,
+        QuotaUpdateDataAccess.class, EncodingStatusDataAccess.class, BlockChecksumDataAccess.class,
+        // YARN
+        AppMasterRPCDataAccess.class,
+        ApplicationStateDataAccess.class, ApplicationAttemptStateDataAccess.class, DelegationKeyDataAccess.class,
+        DelegationTokenDataAccess.class, SequenceNumberDataAccess.class,
+        RMStateVersionDataAccess.class, YarnVariablesDataAccess.class,
+        AppSchedulingInfoDataAccess.class, AppSchedulingInfoBlacklistDataAccess.class,
+        ContainerDataAccess.class,  ContainerIdToCleanDataAccess.class,
+        ContainerStatusDataAccess.class, FiCaSchedulerAppLastScheduledContainerDataAccess.class,
+        FiCaSchedulerAppLiveContainersDataAccess.class, FiCaSchedulerAppNewlyAllocatedContainersDataAccess.class,
+        FiCaSchedulerAppReservationsDataAccess.class, FiCaSchedulerAppReservedContainersDataAccess.class,
+        FiCaSchedulerAppSchedulingOpportunitiesDataAccess.class, FiCaSchedulerNodeDataAccess.class,
+        JustLaunchedContainersDataAccess.class, LaunchedContainersDataAccess.class,
+        NodeDataAccess.class, QueueMetricsDataAccess.class,
+        ResourceDataAccess.class, ResourceRequestDataAccess.class, RMContainerDataAccess.class,
+        RMNodeDataAccess.class, SchedulerApplicationDataAccess.class, SequenceNumberDataAccess.class,
+         FinishedApplicationsDataAccess.class,
+        TokenDataAccess.class, RMContextInactiveNodesDataAccess.class, RMContextActiveNodesDataAccess.class,
+        UpdatedContainerInfoDataAccess.class, YarnLeaderDataAccess.class,
+        SecretMamagerKeysDataAccess.class, AllocateResponseDataAccess.class, RMLoadDataAccess.class);
   }
 
   private boolean format(boolean transactional, Class<? extends EntityDataAccess>... das) throws StorageException {
@@ -418,9 +421,7 @@ public class ClusterjConnector implements StorageConnector<DBSession> {
           } else if (e == UnderReplicatedBlockDataAccess.class) {
             MysqlServerConnector.truncateTable(transactional, UnderReplicatedBlockTableDef.TABLE_NAME);
           } else if (e == HdfsLeaderDataAccess.class) {
-            MysqlServerConnector.truncateTable(transactional,HdfsLeaderTableDef.TABLE_NAME);
-          } else if (e == YarnLeaderDataAccess.class) {
-            MysqlServerConnector.truncateTable(transactional,YarnLeaderTableDef.TABLE_NAME);
+            MysqlServerConnector.truncateTable(transactional, HdfsLeaderTableDef.TABLE_NAME);
           } else if (e == INodeAttributesDataAccess.class) {
             MysqlServerConnector.truncateTable(transactional, INodeAttributesTableDef.TABLE_NAME);
           } else if (e == VariableDataAccess.class) {
@@ -436,7 +437,8 @@ public class ClusterjConnector implements StorageConnector<DBSession> {
             }
             session.currentTransaction().commit();
           } else if (e == StorageIdMapDataAccess.class) {
-            MysqlServerConnector.truncateTable(transactional, StorageIdMapTableDef.TABLE_NAME);
+            MysqlServerConnector.truncateTable(transactional,
+                StorageIdMapTableDef.TABLE_NAME);
           } else if (e == BlockLookUpDataAccess.class) {
             MysqlServerConnector.truncateTable(transactional, BlockLookUpTableDef.TABLE_NAME);
           } else if (e == SafeBlocksDataAccess.class) {
@@ -449,6 +451,8 @@ public class ClusterjConnector implements StorageConnector<DBSession> {
             MysqlServerConnector.truncateTable(transactional, EncodingStatusTableDef.TABLE_NAME);
           } else if (e == BlockChecksumDataAccess.class) {
             MysqlServerConnector.truncateTable(transactional, BlockChecksumTableDef.TABLE_NAME);
+          } else if (e == YarnLeaderDataAccess.class) {
+            MysqlServerConnector.truncateTable(transactional, YarnLeaderTableDef.TABLE_NAME);
           } else if (e == AppSchedulingInfoDataAccess.class) {
             truncate(transactional,AppSchedulingInfoTableDef.TABLE_NAME);
           } else if (e == AppSchedulingInfoBlacklistDataAccess.class) {
@@ -488,7 +492,8 @@ public class ClusterjConnector implements StorageConnector<DBSession> {
           } else if (e == RMContainerDataAccess.class) {
             truncate(transactional,RMContainerTableDef.TABLE_NAME);
           } else if (e == RMNodeDataAccess.class) {
-            truncate(transactional,RMNodeTableDef.TABLE_NAME);
+            // Truncate does not work with foreign keys
+            truncate(true, RMNodeTableDef.TABLE_NAME);
           } else if (e == SchedulerApplicationDataAccess.class) {
             truncate(transactional,SchedulerApplicationTableDef.TABLE_NAME);
           } else if (e == SequenceNumberDataAccess.class) {
@@ -534,7 +539,7 @@ public class ClusterjConnector implements StorageConnector<DBSession> {
             session.currentTransaction().commit();
           }
         }
-//        MysqlServerConnector.truncateTable(transactional, "path_memcached");
+        MysqlServerConnector.truncateTable(transactional, "path_memcached");
         return true;
 
       } catch (SQLException ex) {

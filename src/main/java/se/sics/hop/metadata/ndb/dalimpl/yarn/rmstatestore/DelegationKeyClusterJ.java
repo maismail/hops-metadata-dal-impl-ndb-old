@@ -3,9 +3,13 @@ package se.sics.hop.metadata.ndb.dalimpl.yarn.rmstatestore;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.zip.DataFormatException;
+
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.entity.yarn.rmstatestore.HopDelegationKey;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
@@ -15,6 +19,7 @@ import se.sics.hop.metadata.ndb.wrapper.HopsQueryDomainType;
 import se.sics.hop.metadata.ndb.wrapper.HopsSession;
 import se.sics.hop.metadata.yarn.dal.rmstatestore.DelegationKeyDataAccess;
 import se.sics.hop.metadata.yarn.tabledef.rmstatestore.DelegationKeyTableDef;
+import se.sics.hop.util.CompressionUtils;
 
 /**
  *
@@ -96,11 +101,20 @@ public class DelegationKeyClusterJ implements DelegationKeyTableDef, DelegationK
 
     }
 
-    private HopDelegationKey createHopDelegationKey(DelegationKeyDTO delegationKeyDTO) {
-        return new HopDelegationKey(delegationKeyDTO.getkey(), delegationKeyDTO.getdelegationkey());
+    private HopDelegationKey createHopDelegationKey(DelegationKeyDTO delegationKeyDTO)
+        throws StorageException {
+      try {
+        return new HopDelegationKey(delegationKeyDTO.getkey(), CompressionUtils
+            .decompress(delegationKeyDTO.getdelegationkey()));
+      } catch (IOException e) {
+        throw new StorageException(e);
+      } catch (DataFormatException e) {
+        throw new StorageException(e);
+      }
     }
 
-    private List<HopDelegationKey> createHopDelegationKeyList(List<DelegationKeyClusterJ.DelegationKeyDTO> list) {
+    private List<HopDelegationKey> createHopDelegationKeyList(List<DelegationKeyClusterJ.DelegationKeyDTO> list)
+        throws StorageException {
         List<HopDelegationKey> hopList = new ArrayList<HopDelegationKey>();
         for (DelegationKeyClusterJ.DelegationKeyDTO dto : list) {
             hopList.add(createHopDelegationKey(dto));
@@ -111,8 +125,13 @@ public class DelegationKeyClusterJ implements DelegationKeyTableDef, DelegationK
     private DelegationKeyDTO createPersistable(HopDelegationKey hop, HopsSession session) throws StorageException {
         DelegationKeyClusterJ.DelegationKeyDTO delegationKeyDTO = session.newInstance(DelegationKeyClusterJ.DelegationKeyDTO.class);
         delegationKeyDTO.setkey(hop.getKey());
-        delegationKeyDTO.setdelegationkey(hop.getDelegationkey());
+      try {
+        delegationKeyDTO.setdelegationkey(
+            CompressionUtils.compress(hop.getDelegationkey()));
+      } catch (IOException e) {
+        throw new StorageException(e);
+      }
 
-        return delegationKeyDTO;
+      return delegationKeyDTO;
     }
 }

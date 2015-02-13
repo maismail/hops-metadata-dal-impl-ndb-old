@@ -1,15 +1,8 @@
 package se.sics.hop.metadata.ndb.dalimpl.yarn.rmstatestore;
 
-import com.mysql.clusterj.Query;
-import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
-import com.mysql.clusterj.query.QueryBuilder;
-import com.mysql.clusterj.query.QueryDomainType;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.entity.yarn.rmstatestore.HopApplicationState;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
@@ -19,6 +12,13 @@ import se.sics.hop.metadata.ndb.wrapper.HopsQueryDomainType;
 import se.sics.hop.metadata.ndb.wrapper.HopsSession;
 import se.sics.hop.metadata.yarn.dal.rmstatestore.ApplicationStateDataAccess;
 import se.sics.hop.metadata.yarn.tabledef.rmstatestore.ApplicationStateTableDef;
+import se.sics.hop.util.CompressionUtils;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.zip.DataFormatException;
 
 /**
  *
@@ -111,17 +111,26 @@ public class ApplicationStateClusterJ implements ApplicationStateTableDef, Appli
     }
 
   private HopApplicationState createHopApplicationState(
-          ApplicationStateDTO appStateDTO) {
+          ApplicationStateDTO appStateDTO) throws StorageException {
     if (appStateDTO != null) {
-      return new HopApplicationState(appStateDTO.getapplicationid(),
-              appStateDTO.getappstate(), appStateDTO.getappuser(),
-              appStateDTO.getappname(), appStateDTO.getappsmstate());
+      HopApplicationState state = null;
+      try {
+        state = new HopApplicationState(appStateDTO.getapplicationid(),
+            CompressionUtils.decompress(appStateDTO.getappstate()), appStateDTO.getappuser(),
+                appStateDTO.getappname(), appStateDTO.getappsmstate());
+      } catch (IOException e) {
+        throw new StorageException(e);
+      } catch (DataFormatException e) {
+        throw new StorageException(e);
+      }
+      return state;
     } else {
       return null;
     }
   }
 
-    private List<HopApplicationState> createHopApplicationStateList(List<ApplicationStateDTO> list) {
+    private List<HopApplicationState> createHopApplicationStateList(List<ApplicationStateDTO> list)
+        throws StorageException {
         List<HopApplicationState> hopList = new ArrayList<HopApplicationState>();
         for (ApplicationStateDTO dto : list) {
             hopList.add(createHopApplicationState(dto));
@@ -135,7 +144,11 @@ public class ApplicationStateClusterJ implements ApplicationStateTableDef, Appli
     ApplicationStateDTO appStateDTO = session.newInstance(
             ApplicationStateClusterJ.ApplicationStateDTO.class);
     appStateDTO.setapplicationid(hop.getApplicationid());
-    appStateDTO.setappstate(hop.getAppstate());
+    try {
+      appStateDTO.setappstate(CompressionUtils.compress(hop.getAppstate()));
+    } catch (IOException e) {
+      throw new StorageException(e);
+    }
     appStateDTO.setappuser(hop.getUser());
     appStateDTO.setappname(hop.getName());
     appStateDTO.setappsmstate(hop.getState());

@@ -8,6 +8,7 @@ package se.sics.hop.metadata.ndb.dalimpl.hdfs;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
+import se.sics.hop.metadata.hdfs.entity.hop.HopsLeader;
 import se.sics.hop.metadata.hdfs.tabledef.HdfsLeaderTableDef;
 
 /**
@@ -52,6 +53,16 @@ public class HdfsLeaderClusterj extends LeaderClusterj implements HdfsLeaderTabl
         void setHttpAddress(String httpAddress);
         
     }
+
+  @Override
+  protected HopsLeader createLeader(LeaderDTO lTable) {
+    return new HopsLeader.HopsHdfsLeader(lTable.getId(),
+        lTable.getCounter(),
+        lTable.getTimestamp(),
+        lTable.getHostname(),
+        lTable.getHttpAddress(),
+        lTable.getPartitionVal());
+  }
  
     public HdfsLeaderClusterj(){
         super(HdfsLeaderDTO.class);

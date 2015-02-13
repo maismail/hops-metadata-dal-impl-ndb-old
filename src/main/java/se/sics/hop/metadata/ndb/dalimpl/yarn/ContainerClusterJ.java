@@ -3,10 +3,14 @@ package se.sics.hop.metadata.ndb.dalimpl.yarn;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
+
+import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.zip.DataFormatException;
+
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.entity.yarn.HopContainer;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
@@ -16,6 +20,7 @@ import se.sics.hop.metadata.ndb.wrapper.HopsQueryDomainType;
 import se.sics.hop.metadata.ndb.wrapper.HopsSession;
 import se.sics.hop.metadata.yarn.dal.ContainerDataAccess;
 import se.sics.hop.metadata.yarn.tabledef.ContainerTableDef;
+import se.sics.hop.util.CompressionUtils;
 
 /**
  *
@@ -94,22 +99,35 @@ public class ContainerClusterJ implements ContainerTableDef, ContainerDataAccess
         session.savePersistent(createPersistable(container, session));
     }
 
-    private HopContainer createHopContainer(ContainerDTO containerDTO) {
-        HopContainer hop = new HopContainer(containerDTO.getcontaineridid(),
-                containerDTO.getcontainerstate());
-        return hop;
+    private HopContainer createHopContainer(ContainerDTO containerDTO)
+        throws StorageException {
+      HopContainer hop = null;
+      try {
+        hop = new HopContainer(containerDTO.getcontaineridid(),
+                CompressionUtils.decompress(containerDTO.getcontainerstate()));
+      } catch (IOException e) {
+        throw new StorageException(e);
+      } catch (DataFormatException e) {
+        throw new StorageException(e);
+      }
+      return hop;
     }
 
     private ContainerDTO createPersistable(HopContainer hopContainer, HopsSession session) throws StorageException {
         ContainerDTO containerDTO = session.newInstance(ContainerDTO.class);
         containerDTO.setcontaineridid(hopContainer.getContainerIdID());
-        containerDTO.setcontainerstate(hopContainer.getContainerstate());
-        
-        return containerDTO;
+      try {
+        containerDTO.setcontainerstate(
+            CompressionUtils.compress(hopContainer.getContainerstate()));
+      } catch (IOException e) {
+        throw new StorageException(e);
+      }
+
+      return containerDTO;
     }
     
   private Map<String,HopContainer> createMap(
-          List<ContainerDTO> results) {
+          List<ContainerDTO> results) throws StorageException {
     Map<String, HopContainer> map
             = new HashMap<String, HopContainer>();
     for (ContainerDTO dto : results) {

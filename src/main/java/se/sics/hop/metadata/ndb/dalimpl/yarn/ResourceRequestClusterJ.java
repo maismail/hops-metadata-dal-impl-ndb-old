@@ -6,19 +6,18 @@
 
 package se.sics.hop.metadata.ndb.dalimpl.yarn;
 
-import com.mysql.clusterj.Query;
-import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
-import com.mysql.clusterj.query.Predicate;
-import com.mysql.clusterj.query.QueryBuilder;
-import com.mysql.clusterj.query.QueryDomainType;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.zip.DataFormatException;
+
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.entity.yarn.HopResourceRequest;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
@@ -29,6 +28,7 @@ import se.sics.hop.metadata.ndb.wrapper.HopsQueryDomainType;
 import se.sics.hop.metadata.ndb.wrapper.HopsSession;
 import se.sics.hop.metadata.yarn.dal.ResourceRequestDataAccess;
 import se.sics.hop.metadata.yarn.tabledef.ResourceRequestTableDef;
+import se.sics.hop.util.CompressionUtils;
 
 /**
  *
@@ -118,11 +118,20 @@ public class ResourceRequestClusterJ implements ResourceRequestTableDef, Resourc
         }
     }
     
-    private HopResourceRequest createHopResourceRequest(ResourceRequestDTO resourceRequestDTO) {
+    private HopResourceRequest createHopResourceRequest(ResourceRequestDTO resourceRequestDTO)
+        throws StorageException {
+      try {
         return new HopResourceRequest(resourceRequestDTO.getappschedulinginfo_id(),
                                         resourceRequestDTO.getpriority(),
                                         resourceRequestDTO.getname(),
-                                        resourceRequestDTO.getresourcerequeststate());
+                                        CompressionUtils.decompress(
+                                            resourceRequestDTO
+                                                .getresourcerequeststate()));
+      } catch (IOException e) {
+        throw new StorageException(e);
+      } catch (DataFormatException e) {
+        throw new StorageException(e);
+      }
     }
 
     private ResourceRequestDTO createPersistable(HopResourceRequest hop, HopsSession session) throws StorageException {
@@ -131,12 +140,18 @@ public class ResourceRequestClusterJ implements ResourceRequestTableDef, Resourc
         resourceRequestDTO.setappschedulinginfo_id(hop.getId());
         resourceRequestDTO.setpriority(hop.getPriority());
         resourceRequestDTO.setname(hop.getName());
-        resourceRequestDTO.setresourcerequeststate(hop.getResourcerequeststate());
-        
-        return resourceRequestDTO;
+      try {
+        resourceRequestDTO.setresourcerequeststate(
+            CompressionUtils.compress(hop.getResourcerequeststate()));
+      } catch (IOException e) {
+        throw new StorageException(e);
+      }
+
+      return resourceRequestDTO;
     }
     
-    private List<HopResourceRequest> createResourceRequestList(List<ResourceRequestClusterJ.ResourceRequestDTO> results) {
+    private List<HopResourceRequest> createResourceRequestList(List<ResourceRequestClusterJ.ResourceRequestDTO> results)
+        throws StorageException {
         List<HopResourceRequest> resourceRequests = new ArrayList<HopResourceRequest>();
         for (ResourceRequestClusterJ.ResourceRequestDTO persistable : results) {
             resourceRequests.add(createHopResourceRequest(persistable));
@@ -144,7 +159,8 @@ public class ResourceRequestClusterJ implements ResourceRequestTableDef, Resourc
         return resourceRequests;
     }
     
-    private Map<String, List<HopResourceRequest>> createMap(List<ResourceRequestDTO> results){
+    private Map<String, List<HopResourceRequest>> createMap(List<ResourceRequestDTO> results)
+        throws StorageException {
       Map<String, List<HopResourceRequest>> map = new HashMap<String, List<HopResourceRequest>>();
       for(ResourceRequestDTO dto: results){
         HopResourceRequest hop = createHopResourceRequest(dto);

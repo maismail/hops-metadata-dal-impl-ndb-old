@@ -8,9 +8,13 @@ package se.sics.hop.metadata.ndb.dalimpl.yarn.rmstatestore;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.zip.DataFormatException;
+
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.entity.yarn.appmasterrpc.HopAppMasterRPC;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
@@ -20,6 +24,7 @@ import se.sics.hop.metadata.ndb.wrapper.HopsQueryDomainType;
 import se.sics.hop.metadata.ndb.wrapper.HopsSession;
 import se.sics.hop.metadata.yarn.dal.rmstatestore.AppMasterRPCDataAccess;
 import se.sics.hop.metadata.yarn.tabledef.appmasterrpc.AppMasterRPCTableDef;
+import se.sics.hop.util.CompressionUtils;
 
 /**
  *
@@ -120,14 +125,24 @@ public class AppMasterRPCClusterJ implements AppMasterRPCTableDef,
     }
   }
 
-  private HopAppMasterRPC createHopAppMasterRPC(AppMasterRPCDTO appMasterRPCDTO) {
-    return new HopAppMasterRPC(appMasterRPCDTO.getid(), HopAppMasterRPC.Type.
-            valueOf(appMasterRPCDTO.gettype()), appMasterRPCDTO.getrpc(),
-            appMasterRPCDTO.getuserId());
+  private HopAppMasterRPC createHopAppMasterRPC(AppMasterRPCDTO appMasterRPCDTO)
+      throws StorageException {
+    try {
+      return new HopAppMasterRPC(
+          appMasterRPCDTO.getid(),
+          HopAppMasterRPC.Type.valueOf(appMasterRPCDTO.gettype()),
+          CompressionUtils.decompress(appMasterRPCDTO.getrpc()),
+          appMasterRPCDTO.getuserId());
+    } catch (IOException e) {
+      throw new StorageException(e);
+    } catch (DataFormatException e) {
+      throw new StorageException(e);
+    }
   }
 
   private List<HopAppMasterRPC> createHopAppMasterRPCList(
-          List<AppMasterRPCClusterJ.AppMasterRPCDTO> list) {
+          List<AppMasterRPCClusterJ.AppMasterRPCDTO> list)
+      throws StorageException {
     List<HopAppMasterRPC> hopList = new ArrayList<HopAppMasterRPC>();
     for (AppMasterRPCClusterJ.AppMasterRPCDTO dto : list) {
       hopList.add(createHopAppMasterRPC(dto));
@@ -136,12 +151,17 @@ public class AppMasterRPCClusterJ implements AppMasterRPCTableDef,
 
   }
 
-  private AppMasterRPCDTO createPersistable(HopAppMasterRPC hop, HopsSession session) throws StorageException {
+  private AppMasterRPCDTO createPersistable(HopAppMasterRPC hop, HopsSession session)
+      throws StorageException {
     AppMasterRPCClusterJ.AppMasterRPCDTO appMasterRPCDTO = session.newInstance(
             AppMasterRPCClusterJ.AppMasterRPCDTO.class);
     appMasterRPCDTO.setid(hop.getId());
     appMasterRPCDTO.settype(hop.getType().name());
-    appMasterRPCDTO.setrpc(hop.getRpc());
+    try {
+      appMasterRPCDTO.setrpc(CompressionUtils.compress(hop.getRpc()));
+    } catch (IOException e) {
+      throw new StorageException(e);
+    }
     appMasterRPCDTO.setuserId(hop.getUserId());
 
     return appMasterRPCDTO;
