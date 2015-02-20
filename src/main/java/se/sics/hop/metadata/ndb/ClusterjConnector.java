@@ -394,7 +394,7 @@ public class ClusterjConnector implements StorageConnector<DBSession> {
   }
 
   private boolean format(boolean transactional, Class<? extends EntityDataAccess>... das) throws StorageException {
-    final int RETRIES = 5; // in test 
+    final int RETRIES = 5; // in test
     for (int i = 0; i < RETRIES; i++) {
       try {
         for (Class e : das) {
@@ -544,7 +544,6 @@ public class ClusterjConnector implements StorageConnector<DBSession> {
 
       } catch (SQLException ex) {
         LOG.error(ex.getMessage(), ex);
-        throw HopsSQLExceptionHelper.wrap(ex);
       }
     } // end retry loop
     return false;
