@@ -16,4 +16,6 @@ mvn  deploy:deploy-file -Durl=scpexe://kompics.i.sics.se/home/maven/repository \
                        -Dversion=$version \
                        -Dpackaging=jar \
                        -DpomFile=./pom.xml \
-                       -DgeneratePom.description="Hop DAL Interface" \
+                       -DgeneratePom.description="Hops DAL Interface" \
+
+scp target/hop-metadata-dal-impl-ndb-1.0-SNAPSHOT.jar glassfish@snurran.sics.se:/var/www/hops/ndb-dal-2.4.0.jar
