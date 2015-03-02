@@ -21,7 +21,12 @@ import java.util.Properties;
 public class MysqlServerConnector implements StorageConnector<Connection> {
 
   private final static MysqlServerConnector instance = new MysqlServerConnector();
-  private static HikariDataSource connectionPool;
+  private Properties conf;
+  /**
+   * Never access this variable directly. Use getConnectionPool
+   * @see MysqlServerConnector#getConnectionPool()
+   **/
+  private static volatile HikariDataSource connectionPool;
   private ThreadLocal<Connection> connection = new ThreadLocal<Connection>();
 
   public static MysqlServerConnector getInstance() {
@@ -30,7 +35,7 @@ public class MysqlServerConnector implements StorageConnector<Connection> {
   
   @Override
   public void setConfiguration(Properties conf) throws StorageException {
-    initializeConnectionPool(conf);
+    this.conf = conf;
   }
 
   private void initializeConnectionPool(Properties conf) {
@@ -57,6 +62,7 @@ public class MysqlServerConnector implements StorageConnector<Connection> {
   public Connection obtainSession() throws StorageException {
     Connection conn = connection.get();
     if (conn == null) {
+      HikariDataSource connectionPool = getConnectionPool();
       try {
         conn = connectionPool.getConnection();
         connection.set(conn);
@@ -65,6 +71,22 @@ public class MysqlServerConnector implements StorageConnector<Connection> {
       }
     }
     return conn;
+  }
+
+  /**
+   * This method uses the dupple-checked locking method to safely implement
+   * a multithreaded lazy init.
+   * http://www.cs.umd.edu/~pugh/java/memoryModel/DoubleCheckedLocking.html
+   * @return
+   */
+  private HikariDataSource getConnectionPool() {
+    if (connectionPool == null) {
+      synchronized(this) {
+        if (connectionPool == null)
+          initializeConnectionPool(conf);
+      }
+    }
+    return connectionPool;
   }
 
   public void closeSession() throws StorageException {
