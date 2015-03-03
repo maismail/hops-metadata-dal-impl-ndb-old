@@ -11,6 +11,7 @@ import java.util.Map;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.entity.yarn.HopRMNode;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
+import se.sics.hop.metadata.ndb.NdbBoolean;
 import se.sics.hop.metadata.ndb.wrapper.HopsPredicate;
 import se.sics.hop.metadata.ndb.wrapper.HopsQuery;
 import se.sics.hop.metadata.ndb.wrapper.HopsQueryBuilder;
@@ -61,9 +62,9 @@ public class RMNodeClusterJ implements RMNodeTableDef, RMNodeDataAccess<HopRMNod
         void setHttpaddress(String httpAddress);
 
         @Column(name = NEXT_HEARTBEAT)
-        boolean getNextheartbeat();
+        byte getNextheartbeat();
 
-        void setNextheartbeat(boolean nexthearbeat);
+        void setNextheartbeat(byte nexthearbeat);
 
         @Column(name = HEALTH_REPORT)
         String getHealthreport();
@@ -193,7 +194,7 @@ public class RMNodeClusterJ implements RMNodeTableDef, RMNodeDataAccess<HopRMNod
         rmDTO.setHttpport(hopRMNode.getHttpPort());
         rmDTO.setNodeaddress(hopRMNode.getNodeAddress());
         rmDTO.setHttpaddress(hopRMNode.getHttpAddress());
-        rmDTO.setNextheartbeat(hopRMNode.isNextHeartbeat());
+        rmDTO.setNextheartbeat(NdbBoolean.convert(hopRMNode.isNextHeartbeat()));
         rmDTO.setHealthreport(hopRMNode.getHealthReport());
         rmDTO.setLasthealthreporttime(hopRMNode.getLastHealthReportTime());
         rmDTO.setcurrentstate(hopRMNode.getCurrentState());
@@ -210,9 +211,9 @@ public class RMNodeClusterJ implements RMNodeTableDef, RMNodeDataAccess<HopRMNod
      */
     private HopRMNode createHopRMNode(RMNodeDTO rmDTO) {
         return new HopRMNode(rmDTO.getNodeid(), rmDTO.getHostname(), rmDTO.getCommandport(), 
-                rmDTO.getHttpport(), rmDTO.getNodeaddress(), rmDTO.getHttpaddress(), 
-                rmDTO.getNextheartbeat(), rmDTO.getHealthreport(), 
-                /*rmDTO.getRMContextid(),*/ rmDTO.getLasthealthreporttime(), rmDTO.getcurrentstate(), 
+                rmDTO.getHttpport(), rmDTO.getNodeaddress(), rmDTO.getHttpaddress(),
+                NdbBoolean.convert(rmDTO.getNextheartbeat()), rmDTO.getHealthreport(),
+                /*rmDTO.getRMContextid(),*/ rmDTO.getLasthealthreporttime(), rmDTO.getcurrentstate(),
                 rmDTO.getnodemanagerversion(), rmDTO.getovercommittimeout());
     }
     

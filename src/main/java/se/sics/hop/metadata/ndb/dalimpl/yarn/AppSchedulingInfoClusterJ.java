@@ -15,6 +15,7 @@ import java.util.List;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.entity.yarn.HopAppSchedulingInfo;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
+import se.sics.hop.metadata.ndb.NdbBoolean;
 import se.sics.hop.metadata.ndb.wrapper.HopsQuery;
 import se.sics.hop.metadata.ndb.wrapper.HopsQueryBuilder;
 import se.sics.hop.metadata.ndb.wrapper.HopsQueryDomainType;
@@ -58,14 +59,14 @@ public class AppSchedulingInfoClusterJ implements AppSchedulingInfoTableDef, App
     void setcontaineridcounter(int containeridcounter);
 
     @Column(name = PENDING)
-    boolean getPending();
+    byte getPending();
 
-    void setPending(boolean pending);
+    void setPending(byte pending);
     
      @Column(name = STOPED)
-    boolean getStoped();
+    byte getStoped();
 
-    void setStoped(boolean stoped);
+    void setStoped(byte stoped);
   }
   private final ClusterjConnector connector = ClusterjConnector.getInstance();
 
@@ -132,8 +133,8 @@ public class AppSchedulingInfoClusterJ implements AppSchedulingInfoTableDef, App
             appSchedulingInfoDTO.getqueuename(),
             appSchedulingInfoDTO.getuser(),
             appSchedulingInfoDTO.getcontaineridcounter(),
-            appSchedulingInfoDTO.getPending(),
-            appSchedulingInfoDTO.getStoped());
+            NdbBoolean.convert(appSchedulingInfoDTO.getPending()),
+            NdbBoolean.convert(appSchedulingInfoDTO.getStoped()));
   }
 
   private AppSchedulingInfoDTO createPersistable(HopAppSchedulingInfo hop, HopsSession session) throws StorageException {
@@ -145,8 +146,8 @@ public class AppSchedulingInfoClusterJ implements AppSchedulingInfoTableDef, App
     appSchedulingInfoDTO.setcontaineridcounter(hop.getContaineridcounter());
     appSchedulingInfoDTO.setqueuename(hop.getQueuename());
     appSchedulingInfoDTO.setuser(hop.getUser());
-    appSchedulingInfoDTO.setPending(hop.isPending());
-    appSchedulingInfoDTO.setStoped(hop.isStoped());
+    appSchedulingInfoDTO.setPending(NdbBoolean.convert(hop.isPending()));
+    appSchedulingInfoDTO.setStoped(NdbBoolean.convert(hop.isStoped()));
     
     return appSchedulingInfoDTO;
   }

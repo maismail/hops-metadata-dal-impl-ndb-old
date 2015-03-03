@@ -12,6 +12,7 @@ import se.sics.hop.metadata.hdfs.entity.hdfs.HopINode;
 import se.sics.hop.metadata.hdfs.entity.hdfs.ProjectedINode;
 import se.sics.hop.metadata.hdfs.tabledef.INodeTableDef;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
+import se.sics.hop.metadata.ndb.NdbBoolean;
 import se.sics.hop.metadata.ndb.mysqlserver.HopsSQLExceptionHelper;
 import se.sics.hop.metadata.ndb.mysqlserver.MySQLQueryHelper;
 import se.sics.hop.metadata.ndb.mysqlserver.MysqlServerConnector;
@@ -115,14 +116,14 @@ public class INodeClusterj implements INodeTableDef, INodeDataAccess<HopINode> {
     void setSymlink(String symlink);
 
     @Column(name = DIR)
-    boolean getDir();
+    byte getDir();
 
-    void setDir(boolean dir);
+    void setDir(byte dir);
 
     @Column(name = QUOTA_ENABLED)
-    boolean getQuotaEnabled();
+    byte getQuotaEnabled();
 
-    void setQuotaEnabled(boolean quotaEnabled);
+    void setQuotaEnabled(byte quotaEnabled);
 
     @Column(name = UNDER_CONSTRUCTION)
     boolean getUnderConstruction();
@@ -130,9 +131,9 @@ public class INodeClusterj implements INodeTableDef, INodeDataAccess<HopINode> {
     void setUnderConstruction(boolean underConstruction);
 
     @Column(name = SUBTREE_LOCKED)
-    boolean getSubtreeLocked();
+    byte getSubtreeLocked();
 
-    void setSubtreeLocked(boolean locked);
+    void setSubtreeLocked(byte locked);
 
     @Column(name = SUBTREE_LOCK_OWNER)
     long getSubtreeLockOwner();
@@ -288,7 +289,7 @@ public class INodeClusterj implements INodeTableDef, INodeDataAccess<HopINode> {
     HopsPredicate pred2 = dobj.get("id").between(dobj.param("startId"), dobj.param("endId"));
     dobj.where(pred.and(pred2));
     HopsQuery<InodeDTO> query = session.createQuery(dobj);
-    query.setParameter("isDirParam", false);
+    query.setParameter("isDirParam", NdbBoolean.convert(false));
     //FIXME: InodeId is integer
     //startId is inclusive and endId exclusive
     query.setParameter("startId", (int)startId);
@@ -342,8 +343,8 @@ public class INodeClusterj implements INodeTableDef, INodeDataAccess<HopINode> {
         persistable.getId(),
         persistable.getName(),
         persistable.getParentId(),
-        persistable.getDir(),
-        persistable.getQuotaEnabled(),
+        NdbBoolean.convert(persistable.getDir()),
+        NdbBoolean.convert(persistable.getQuotaEnabled()),
         persistable.getModificationTime(),
         persistable.getATime(),
         persistable.getPermission(),
@@ -354,7 +355,7 @@ public class INodeClusterj implements INodeTableDef, INodeDataAccess<HopINode> {
         persistable.getGenerationStamp(),
         persistable.getHeader(),
         persistable.getSymlink(),
-        persistable.getSubtreeLocked(),
+        NdbBoolean.convert(persistable.getSubtreeLocked()),
         persistable.getSubtreeLockOwner());
   }
 
@@ -362,8 +363,8 @@ public class INodeClusterj implements INodeTableDef, INodeDataAccess<HopINode> {
     persistable.setId(inode.getId());
     persistable.setName(inode.getName());
     persistable.setParentId(inode.getParentId());
-    persistable.setDir(inode.isDir());
-    persistable.setQuotaEnabled(inode.isDirWithQuota());
+    persistable.setDir((NdbBoolean.convert(inode.isDir())));
+    persistable.setQuotaEnabled(NdbBoolean.convert(inode.isDirWithQuota()));
     persistable.setModificationTime(inode.getModificationTime());
     persistable.setATime(inode.getAccessTime());
     persistable.setPermission(inode.getPermission());
@@ -374,7 +375,7 @@ public class INodeClusterj implements INodeTableDef, INodeDataAccess<HopINode> {
     persistable.setGenerationStamp(inode.getGenerationStamp());
     persistable.setHeader(inode.getHeader());
     persistable.setSymlink(inode.getSymlink());
-    persistable.setSubtreeLocked(inode.isSubtreeLocked());
+    persistable.setSubtreeLocked(NdbBoolean.convert(inode.isSubtreeLocked()));
     persistable.setSubtreeLockOwner(inode.getSubtreeLockOwner());
   }
 

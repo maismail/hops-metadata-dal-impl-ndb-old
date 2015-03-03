@@ -11,6 +11,7 @@ import se.sics.hop.metadata.hdfs.dal.EncodingStatusDataAccess;
 import se.sics.hop.metadata.hdfs.entity.hop.HopEncodingStatus;
 import se.sics.hop.metadata.hdfs.tabledef.EncodingStatusTableDef;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
+import se.sics.hop.metadata.ndb.NdbBoolean;
 import se.sics.hop.metadata.ndb.mysqlserver.CountHelper;
 import se.sics.hop.metadata.ndb.mysqlserver.HopsSQLExceptionHelper;
 import se.sics.hop.metadata.ndb.mysqlserver.MysqlServerConnector;
@@ -96,9 +97,9 @@ public class EncodingStatusClusterj implements EncodingStatusTableDef, EncodingS
     void setLostParityBlockCount(int n);
 
     @Column(name = REVOKED)
-    Boolean getRevoked();
+    byte getRevoked();
 
-    void setRevoked(Boolean revoked);
+    void setRevoked(byte revoked);
   }
 
   @Override
@@ -175,7 +176,7 @@ public class EncodingStatusClusterj implements EncodingStatusTableDef, EncodingS
     }
     Boolean revoked = status.getRevoked();
     if (revoked != null) {
-      dto.setRevoked(revoked);
+      dto.setRevoked(NdbBoolean.convert(revoked));
     }
   }
 
@@ -334,7 +335,7 @@ public class EncodingStatusClusterj implements EncodingStatusTableDef, EncodingS
         .createQueryDefinition(EncodingStatusDto.class);
     domain.where(domain.get("revoked").equal(domain.param(REVOKED)));
     HopsQuery<EncodingStatusDto> query = session.createQuery(domain);
-    query.setParameter(REVOKED, true);
+    query.setParameter(REVOKED, NdbBoolean.convert(true));
 
     List<EncodingStatusDto> results = query.getResultList();
     return createHopEncodings(results);
@@ -363,7 +364,7 @@ public class EncodingStatusClusterj implements EncodingStatusTableDef, EncodingS
     return new HopEncodingStatus(dto.getInodeId(), parityInodeId, dto.getStatus(), dto.getCodec(),
         dto.getTargetReplication(), dto.getStatusModificationTime(), dto.getParityStatus(),
         dto.getParityStatusModificationTime(), dto.getParityFileName(), dto.getLostBlockCount(),
-        dto.getLostParityBlockCount(), dto.getRevoked());
+        dto.getLostParityBlockCount(), NdbBoolean.convert(dto.getRevoked()));
   }
 
   private List<HopEncodingStatus> findAllWithStatus(int status) throws StorageException {
