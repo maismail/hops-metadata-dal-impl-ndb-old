@@ -115,11 +115,6 @@ public class INodeClusterj implements INodeTableDef, INodeDataAccess<HopINode> {
 
     void setSymlink(String symlink);
 
-    @Column(name = DIR)
-    byte getDir();
-
-    void setDir(byte dir);
-
     @Column(name = QUOTA_ENABLED)
     byte getQuotaEnabled();
 
@@ -217,8 +212,8 @@ public class INodeClusterj implements INodeTableDef, INodeDataAccess<HopINode> {
 
   @Override
   public List<ProjectedINode> findInodesForSubtreeOperationsWithReadLock(int parentId) throws StorageException {
-    final String query = String.format("SELECT %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s FROM %s WHERE %s=%d LOCK IN SHARE MODE",
-        ID, NAME, PARENT_ID, PERMISSION, HEADER, DIR, SYMLINK, QUOTA_ENABLED, UNDER_CONSTRUCTION,
+    final String query = String.format("SELECT %s, %s, %s, %s, %s, %s, %s, %s, %s, %s FROM %s WHERE %s=%d LOCK IN SHARE MODE",
+        ID, NAME, PARENT_ID, PERMISSION, HEADER, SYMLINK, QUOTA_ENABLED, UNDER_CONSTRUCTION,
         SUBTREE_LOCKED, SUBTREE_LOCK_OWNER, TABLE_NAME, PARENT_ID, parentId);
     ArrayList<ProjectedINode> resultList;
     try {
@@ -235,7 +230,6 @@ public class INodeClusterj implements INodeTableDef, INodeDataAccess<HopINode> {
             result.getBytes(PERMISSION),
             result.getLong(HEADER),
             result.getString(SYMLINK) == null ? false : true,
-            result.getBoolean(DIR),
             result.getBoolean(QUOTA_ENABLED),
             result.getBoolean(UNDER_CONSTRUCTION),
             result.getBoolean(SUBTREE_LOCKED),
@@ -285,11 +279,11 @@ public class INodeClusterj implements INodeTableDef, INodeDataAccess<HopINode> {
     HopsSession session = connector.obtainSession();
     HopsQueryBuilder qb = session.getQueryBuilder();
     HopsQueryDomainType<InodeDTO> dobj = qb.createQueryDefinition(InodeDTO.class);
-    HopsPredicate pred = dobj.get("dir").equal(dobj.param("isDirParam"));
+    HopsPredicate pred = dobj.get("header").equal(dobj.param("isDirParam"));
     HopsPredicate pred2 = dobj.get("id").between(dobj.param("startId"), dobj.param("endId"));
-    dobj.where(pred.and(pred2));
+    dobj.where(pred.not().and(pred2));
     HopsQuery<InodeDTO> query = session.createQuery(dobj);
-    query.setParameter("isDirParam", NdbBoolean.convert(false));
+    query.setParameter("isDirParam", 0L);
     //FIXME: InodeId is integer
     //startId is inclusive and endId exclusive
     query.setParameter("startId", (int)startId);
@@ -305,27 +299,32 @@ public class INodeClusterj implements INodeTableDef, INodeDataAccess<HopINode> {
   
   @Override
   public boolean haveFilesWithIdsBetween(long startId, long endId) throws StorageException {
-    return MySQLQueryHelper.exists(TABLE_NAME, String.format("%s=0 and %s between %d and %d", DIR, ID, startId, (endId - 1)));
+    return MySQLQueryHelper.exists(TABLE_NAME, String.format("%s<>0 and %s " +
+        "between %d and %d", HEADER, ID, startId, (endId - 1)));
   }
   
   @Override
   public boolean haveFilesWithIdsGreaterThan(long id) throws StorageException {
-     return MySQLQueryHelper.exists(TABLE_NAME, String.format("%s=0 and %s>%d", DIR, ID, id));
+     return MySQLQueryHelper.exists(TABLE_NAME, String.format("%s<>0 and " +
+         "%s>%d", HEADER, ID, id));
   }
   
   @Override
   public long getMinFileId() throws StorageException {
-    return MySQLQueryHelper.minInt(TABLE_NAME, ID, String.format("%s=0", DIR));
+    return MySQLQueryHelper.minInt(TABLE_NAME, ID, String.format("%s<>0",
+        HEADER));
   }
 
   @Override
   public long getMaxFileId() throws StorageException {
-    return MySQLQueryHelper.maxInt(TABLE_NAME, ID, String.format("%s=0", DIR));
+    return MySQLQueryHelper.maxInt(TABLE_NAME, ID, String.format("%s<>0",
+        HEADER));
   }
 
   @Override
   public int countAllFiles() throws StorageException {
-    return MySQLQueryHelper.countWithCriterion(TABLE_NAME, String.format("%s=0", DIR));
+    return MySQLQueryHelper.countWithCriterion(TABLE_NAME, String.format
+        ("%s<>0", HEADER));
   }
   
   private List<HopINode> createInodeList(List<InodeDTO> list) {
@@ -343,7 +342,6 @@ public class INodeClusterj implements INodeTableDef, INodeDataAccess<HopINode> {
         persistable.getId(),
         persistable.getName(),
         persistable.getParentId(),
-        NdbBoolean.convert(persistable.getDir()),
         NdbBoolean.convert(persistable.getQuotaEnabled()),
         persistable.getModificationTime(),
         persistable.getATime(),
@@ -363,7 +361,6 @@ public class INodeClusterj implements INodeTableDef, INodeDataAccess<HopINode> {
     persistable.setId(inode.getId());
     persistable.setName(inode.getName());
     persistable.setParentId(inode.getParentId());
-    persistable.setDir((NdbBoolean.convert(inode.isDir())));
     persistable.setQuotaEnabled(NdbBoolean.convert(inode.isDirWithQuota()));
     persistable.setModificationTime(inode.getModificationTime());
     persistable.setATime(inode.getAccessTime());
