@@ -108,12 +108,12 @@ public class DBSessionProvider implements Runnable {
         }
     }
 
-    public void returnSession(DBSession returnedSession, boolean forced) {
+    public void returnSession(DBSession returnedSession, boolean forceClose) {
         //session has been used, increment the use counter
         returnedSession.setSessionUseCount(returnedSession.getSessionUseCount() + 1);
 
         if ((returnedSession.getSessionUseCount() >= returnedSession.getMaxReuseCount())
-                || forced) { // session can be closed even before the reuse count has expired. Close the session incase of database errors.
+                || forceClose) { // session can be closed even before the reuse count has expired. Close the session incase of database errors.
             toGC.add(returnedSession);
         } else { // increment the count and return it to the pool
             sessionPool.add(returnedSession);
@@ -144,7 +144,7 @@ public class DBSessionProvider implements Runnable {
                 int toGCSize = toGC.size();
 
                 if (toGCSize > 0) {
-                   LOG.warn("Going to CG " + toGCSize);
+                   LOG.info("Going to CG " + toGCSize);
                     for (int i = 0; i < toGCSize; i++) {
                         DBSession session = toGC.remove();
                         session.getSession().close();

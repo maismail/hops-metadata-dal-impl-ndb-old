@@ -16,7 +16,6 @@ import se.sics.hop.metadata.hdfs.dal.ExcessReplicaDataAccess;
 import se.sics.hop.metadata.hdfs.dal.INodeAttributesDataAccess;
 import se.sics.hop.metadata.hdfs.dal.INodeDataAccess;
 import se.sics.hop.metadata.hdfs.dal.InvalidateBlockDataAccess;
-import se.sics.hop.metadata.hdfs.dal.LeaderDataAccess;
 import se.sics.hop.metadata.hdfs.dal.LeaseDataAccess;
 import se.sics.hop.metadata.hdfs.dal.LeasePathDataAccess;
 import se.sics.hop.metadata.hdfs.dal.MisReplicatedRangeQueueDataAccess;
@@ -38,7 +37,6 @@ import se.sics.hop.metadata.hdfs.tabledef.ExcessReplicaTableDef;
 import se.sics.hop.metadata.hdfs.tabledef.INodeAttributesTableDef;
 import se.sics.hop.metadata.hdfs.tabledef.INodeTableDef;
 import se.sics.hop.metadata.hdfs.tabledef.InvalidatedBlockTableDef;
-import se.sics.hop.metadata.hdfs.tabledef.LeaderTableDef;
 import se.sics.hop.metadata.hdfs.tabledef.LeasePathTableDef;
 import se.sics.hop.metadata.hdfs.tabledef.LeaseTableDef;
 import se.sics.hop.metadata.hdfs.tabledef.MisReplicatedRangeQueueTableDef;
@@ -140,8 +138,8 @@ import se.sics.hop.metadata.ndb.wrapper.HopsTransaction;
 
 import java.sql.SQLException;
 import java.util.Properties;
-import se.sics.hop.metadata.hdfs.dal.HdfsLeaderDataAccess;
-import se.sics.hop.metadata.hdfs.dal.YarnLeaderDataAccess;
+import se.sics.hop.metadata.hdfs.dal.HdfsLeDescriptorDataAccess;
+import se.sics.hop.metadata.hdfs.dal.YarnLeDescriptorDataAccess;
 import se.sics.hop.metadata.hdfs.tabledef.HdfsLeaderTableDef;
 import se.sics.hop.metadata.hdfs.tabledef.YarnLeaderTableDef;
 import se.sics.hop.metadata.yarn.dal.RMLoadDataAccess;
@@ -325,9 +323,9 @@ public class ClusterjConnector implements StorageConnector<DBSession> {
       cls = LeaseClusterj.LeaseDTO.class;
     } else if (className == LeasePathDataAccess.class) {
       cls = LeasePathClusterj.LeasePathsDTO.class;
-    } else if (className == HdfsLeaderDataAccess.class) {
+    } else if (className == HdfsLeDescriptorDataAccess.class) {
       cls = HdfsLeaderClusterj.HdfsLeaderDTO.class;
-    } else if (className == YarnLeaderDataAccess.class) {
+    } else if (className == YarnLeDescriptorDataAccess.class) {
       cls = YarnLeaderClusterj.YarnLeaderDTO.class;
     } else if (className == ReplicaDataAccess.class) {
       cls = ReplicaClusterj.ReplicaDTO.class;
@@ -368,7 +366,7 @@ public class ClusterjConnector implements StorageConnector<DBSession> {
         LeaseDataAccess.class, LeasePathDataAccess.class, ReplicaDataAccess.class,
         ReplicaUnderConstructionDataAccess.class, InvalidateBlockDataAccess.class,
         ExcessReplicaDataAccess.class, PendingBlockDataAccess.class, CorruptReplicaDataAccess.class,
-        UnderReplicatedBlockDataAccess.class, HdfsLeaderDataAccess.class,
+        UnderReplicatedBlockDataAccess.class, HdfsLeDescriptorDataAccess.class,
         INodeAttributesDataAccess.class, StorageIdMapDataAccess.class,
         BlockLookUpDataAccess.class, SafeBlocksDataAccess.class, MisReplicatedRangeQueueDataAccess.class,
         QuotaUpdateDataAccess.class, EncodingStatusDataAccess.class, BlockChecksumDataAccess.class,
@@ -389,7 +387,7 @@ public class ClusterjConnector implements StorageConnector<DBSession> {
         RMNodeDataAccess.class, SchedulerApplicationDataAccess.class, SequenceNumberDataAccess.class,
          FinishedApplicationsDataAccess.class,
         TokenDataAccess.class, RMContextInactiveNodesDataAccess.class, RMContextActiveNodesDataAccess.class,
-        UpdatedContainerInfoDataAccess.class, YarnLeaderDataAccess.class,
+        UpdatedContainerInfoDataAccess.class, YarnLeDescriptorDataAccess.class,
         SecretMamagerKeysDataAccess.class, AllocateResponseDataAccess.class, RMLoadDataAccess.class);
   }
 
@@ -420,7 +418,7 @@ public class ClusterjConnector implements StorageConnector<DBSession> {
             MysqlServerConnector.truncateTable(transactional, CorruptReplicaTableDef.TABLE_NAME);
           } else if (e == UnderReplicatedBlockDataAccess.class) {
             MysqlServerConnector.truncateTable(transactional, UnderReplicatedBlockTableDef.TABLE_NAME);
-          } else if (e == HdfsLeaderDataAccess.class) {
+          } else if (e == HdfsLeDescriptorDataAccess.class) {
             MysqlServerConnector.truncateTable(transactional, HdfsLeaderTableDef.TABLE_NAME);
           } else if (e == INodeAttributesDataAccess.class) {
             MysqlServerConnector.truncateTable(transactional, INodeAttributesTableDef.TABLE_NAME);
@@ -451,7 +449,7 @@ public class ClusterjConnector implements StorageConnector<DBSession> {
             MysqlServerConnector.truncateTable(transactional, EncodingStatusTableDef.TABLE_NAME);
           } else if (e == BlockChecksumDataAccess.class) {
             MysqlServerConnector.truncateTable(transactional, BlockChecksumTableDef.TABLE_NAME);
-          } else if (e == YarnLeaderDataAccess.class) {
+          } else if (e == YarnLeDescriptorDataAccess.class) {
             MysqlServerConnector.truncateTable(transactional, YarnLeaderTableDef.TABLE_NAME);
           } else if (e == AppSchedulingInfoDataAccess.class) {
             truncate(transactional,AppSchedulingInfoTableDef.TABLE_NAME);

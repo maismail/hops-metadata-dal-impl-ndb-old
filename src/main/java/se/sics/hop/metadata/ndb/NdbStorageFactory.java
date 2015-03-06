@@ -136,12 +136,11 @@ public class NdbStorageFactory implements DALStorageFactory {
       MysqlServerConnector.getInstance().setConfiguration(conf);
       initDataAccessMap();
     } catch (IOException ex) {
-      throw new StorageInitializtionException(ex);
+     throw new StorageInitializtionException(ex);
     }
   }
 
   private void initDataAccessMap() {
-    //RM STATE STORE
     dataAccessMap.put(RMStateVersionDataAccess.class, new RMStateVersionClusterJ());
     dataAccessMap.put(ApplicationStateDataAccess.class, new ApplicationStateClusterJ());
     dataAccessMap.put(ApplicationAttemptStateDataAccess.class, new ApplicationAttemptStateClusterJ());
@@ -184,8 +183,8 @@ public class NdbStorageFactory implements DALStorageFactory {
     dataAccessMap.put(INodeAttributesDataAccess.class, new INodeAttributesClusterj());
     dataAccessMap.put(LeaseDataAccess.class, new LeaseClusterj());
     dataAccessMap.put(LeasePathDataAccess.class, new LeasePathClusterj());
-    dataAccessMap.put(HdfsLeaderDataAccess.class, new HdfsLeaderClusterj());
-    dataAccessMap.put(YarnLeaderDataAccess.class, new YarnLeaderClusterj());
+    dataAccessMap.put(HdfsLeDescriptorDataAccess.class, new HdfsLeaderClusterj());
+    dataAccessMap.put(YarnLeDescriptorDataAccess.class, new YarnLeaderClusterj());
     dataAccessMap.put(ReplicaDataAccess.class, new ReplicaClusterj());
     dataAccessMap.put(CorruptReplicaDataAccess.class, new CorruptReplicaClusterj());
     dataAccessMap.put(ExcessReplicaDataAccess.class, new ExcessReplicaClusterj());

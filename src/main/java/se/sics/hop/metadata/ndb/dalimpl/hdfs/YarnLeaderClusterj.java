@@ -8,14 +8,16 @@ package se.sics.hop.metadata.ndb.dalimpl.hdfs;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
-import se.sics.hop.metadata.hdfs.entity.hop.HopsLeader;
+import java.security.InvalidParameterException;
+import se.sics.hop.metadata.hdfs.entity.hop.election.LeDescriptor;
+import se.sics.hop.metadata.hdfs.entity.hop.election.LeDescriptor.YarnLeDescriptor;
 import se.sics.hop.metadata.hdfs.tabledef.YarnLeaderTableDef;
 
 /**
  *
  * @author gautier
  */
-public class YarnLeaderClusterj extends LeaderClusterj implements YarnLeaderTableDef {
+public class YarnLeaderClusterj extends LeDescriptorClusterj implements YarnLeaderTableDef {
 
   @PersistenceCapable(table = TABLE_NAME)
   public interface YarnLeaderDTO extends LeaderDTO{
@@ -37,11 +39,6 @@ public class YarnLeaderClusterj extends LeaderClusterj implements YarnLeaderTabl
 
     void setCounter(long counter);
 
-    @Column(name = TIMESTAMP)
-    long getTimestamp();
-
-    void setTimestamp(long timestamp);
-
     @Column(name = HOSTNAME)
     String getHostname();
 
@@ -55,13 +52,14 @@ public class YarnLeaderClusterj extends LeaderClusterj implements YarnLeaderTabl
   }
 
   @Override
-  protected HopsLeader createLeader(LeaderDTO lTable) {
-    return new HopsLeader.HopsYarnLeader(lTable.getId(),
-        lTable.getCounter(),
-        lTable.getTimestamp(),
-        lTable.getHostname(),
-        lTable.getHttpAddress(),
-        lTable.getPartitionVal());
+  protected LeDescriptor createDescriptor(LeaderDTO lTable) {
+    if (lTable.getPartitionVal() != 0) {
+      throw new InvalidParameterException("Psrtition key should be zero");
+    }
+    return new YarnLeDescriptor(lTable.getId(),
+            lTable.getCounter(),
+            lTable.getHostname(),
+            lTable.getHttpAddress());
   }
    
     public YarnLeaderClusterj(){

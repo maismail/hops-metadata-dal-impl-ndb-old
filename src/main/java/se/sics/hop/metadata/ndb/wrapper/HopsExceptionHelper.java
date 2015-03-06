@@ -35,7 +35,13 @@ public class HopsExceptionHelper {
     if (e instanceof ClusterJDatastoreException) {
       // TODO identify transient exceptions
       // http://dev.mysql.com/doc/ndbapi/en/ndb-error-codes.html
-      if (e.getMessage().contains("code 266")) {
+      if (e.getMessage().contains("code 266")) { // dead lock
+        return true;
+      } else if (e.getMessage().contains("code 274")) { // dead lock.Transaction had timed out when trying to commit it
+        return true;
+      } else if (e.getMessage().contains("code 245")) { // too many active scans errors
+        return true;
+      } else if (e.getMessage().contains("code 146")) { //  message Time-out in NDB, probably caused by deadlock .
         return true;
       }
     }
