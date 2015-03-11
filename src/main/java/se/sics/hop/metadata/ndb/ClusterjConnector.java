@@ -369,26 +369,27 @@ public class ClusterjConnector implements StorageConnector<DBSession> {
         UnderReplicatedBlockDataAccess.class, HdfsLeDescriptorDataAccess.class,
         INodeAttributesDataAccess.class, StorageIdMapDataAccess.class,
         BlockLookUpDataAccess.class, SafeBlocksDataAccess.class, MisReplicatedRangeQueueDataAccess.class,
-        QuotaUpdateDataAccess.class, EncodingStatusDataAccess.class, BlockChecksumDataAccess.class,
+        QuotaUpdateDataAccess.class, EncodingStatusDataAccess.class, BlockChecksumDataAccess.class
         // YARN
-        AppMasterRPCDataAccess.class,
-        ApplicationStateDataAccess.class, ApplicationAttemptStateDataAccess.class, DelegationKeyDataAccess.class,
-        DelegationTokenDataAccess.class, SequenceNumberDataAccess.class,
-        RMStateVersionDataAccess.class, YarnVariablesDataAccess.class,
-        AppSchedulingInfoDataAccess.class, AppSchedulingInfoBlacklistDataAccess.class,
-        ContainerDataAccess.class,  ContainerIdToCleanDataAccess.class,
-        ContainerStatusDataAccess.class, FiCaSchedulerAppLastScheduledContainerDataAccess.class,
-        FiCaSchedulerAppLiveContainersDataAccess.class, FiCaSchedulerAppNewlyAllocatedContainersDataAccess.class,
-        FiCaSchedulerAppReservationsDataAccess.class, FiCaSchedulerAppReservedContainersDataAccess.class,
-        FiCaSchedulerAppSchedulingOpportunitiesDataAccess.class, FiCaSchedulerNodeDataAccess.class,
-        JustLaunchedContainersDataAccess.class, LaunchedContainersDataAccess.class,
-        NodeDataAccess.class, QueueMetricsDataAccess.class,
-        ResourceDataAccess.class, ResourceRequestDataAccess.class, RMContainerDataAccess.class,
-        RMNodeDataAccess.class, SchedulerApplicationDataAccess.class, SequenceNumberDataAccess.class,
-         FinishedApplicationsDataAccess.class,
-        TokenDataAccess.class, RMContextInactiveNodesDataAccess.class, RMContextActiveNodesDataAccess.class,
-        UpdatedContainerInfoDataAccess.class, YarnLeDescriptorDataAccess.class,
-        SecretMamagerKeysDataAccess.class, AllocateResponseDataAccess.class, RMLoadDataAccess.class);
+//        ,AppMasterRPCDataAccess.class,
+//        ApplicationStateDataAccess.class, ApplicationAttemptStateDataAccess.class, DelegationKeyDataAccess.class,
+//        DelegationTokenDataAccess.class, SequenceNumberDataAccess.class,
+//        RMStateVersionDataAccess.class, YarnVariablesDataAccess.class,
+//        AppSchedulingInfoDataAccess.class, AppSchedulingInfoBlacklistDataAccess.class,
+//        ContainerDataAccess.class,  ContainerIdToCleanDataAccess.class,
+//        ContainerStatusDataAccess.class, FiCaSchedulerAppLastScheduledContainerDataAccess.class,
+//        FiCaSchedulerAppLiveContainersDataAccess.class, FiCaSchedulerAppNewlyAllocatedContainersDataAccess.class,
+//        FiCaSchedulerAppReservationsDataAccess.class, FiCaSchedulerAppReservedContainersDataAccess.class,
+//        FiCaSchedulerAppSchedulingOpportunitiesDataAccess.class, FiCaSchedulerNodeDataAccess.class,
+//        JustLaunchedContainersDataAccess.class, LaunchedContainersDataAccess.class,
+//        NodeDataAccess.class, QueueMetricsDataAccess.class,
+//        ResourceDataAccess.class, ResourceRequestDataAccess.class, RMContainerDataAccess.class,
+//        RMNodeDataAccess.class, SchedulerApplicationDataAccess.class, SequenceNumberDataAccess.class,
+//         FinishedApplicationsDataAccess.class,
+//        TokenDataAccess.class, RMContextInactiveNodesDataAccess.class, RMContextActiveNodesDataAccess.class,
+//        UpdatedContainerInfoDataAccess.class, YarnLeDescriptorDataAccess.class,
+//        SecretMamagerKeysDataAccess.class, AllocateResponseDataAccess.class, RMLoadDataAccess.class
+        );
   }
 
   private boolean format(boolean transactional, Class<? extends EntityDataAccess>... das) throws StorageException {
