@@ -53,4 +53,9 @@ public class HopsSessionFactory {
       throw HopsExceptionHelper.wrap(e);
     }
   }
+  
+  public void releaseResourcesForThisThread(){
+      factory.releaseResourcesForThisThread();
+  }
+  
 }

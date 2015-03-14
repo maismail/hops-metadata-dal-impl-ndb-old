@@ -551,4 +551,6 @@ public class ClusterjConnector implements StorageConnector<DBSession> {
    private void truncate(boolean transactional, String tableName) throws StorageException, SQLException {
     MysqlServerConnector.truncateTable(transactional,tableName);
   }
+   
+   
 }

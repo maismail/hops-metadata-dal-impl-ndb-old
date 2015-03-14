@@ -38,6 +38,8 @@ public class DBSessionProvider implements Runnable {
     private AtomicInteger rollingAvgIndex = new AtomicInteger(-1);
     private boolean automaticRefresh = false;
     private Thread thread;
+    private int initialPoolSize;
+    private boolean threadStopped;
 
     public DBSessionProvider(Properties conf, int reuseCount, int initialPoolSize) throws StorageException {
         this.conf = conf;
@@ -48,10 +50,16 @@ public class DBSessionProvider implements Runnable {
         this.MAX_REUSE_COUNT = reuseCount;
         rand = new Random(System.currentTimeMillis());
         rollingAvg = new long[initialPoolSize];
-        start(initialPoolSize);
+        this.initialPoolSize = initialPoolSize;
+        this.threadStopped = false;
+        start();
+    }
+    
+    public HopsSessionFactory getSessionFactory(){
+        return sessionFactory;
     }
 
-    private void start(int initialPoolSize) throws StorageException {
+    private void start() throws StorageException {
         System.out.println("Database connect string: " + conf.get(Constants.PROPERTY_CLUSTER_CONNECTSTRING));
         System.out.println("Database name: " + conf.get(Constants.PROPERTY_CLUSTER_DATABASE));
         System.out.println("Max Transactions: " + conf.get(Constants.PROPERTY_CLUSTER_MAX_TRANSACTIONS));
@@ -66,7 +74,6 @@ public class DBSessionProvider implements Runnable {
         }
 
         thread = new Thread(this, "Session Pool Refresh Daemon");
-        thread.setDaemon(true);
         automaticRefresh = true;
         thread.start();
     }
@@ -91,11 +98,31 @@ public class DBSessionProvider implements Runnable {
     }
 
     public void stop() throws StorageException {
+        LOG.info("Session pool is closing now...");
         automaticRefresh = false;
+        while(!threadStopped){
+            try{
+                Thread.sleep(100);
+            }catch(Exception e){
+                
+            }
+        }
+        LOG.info("Session pool thread stopped.");
         while (!sessionPool.isEmpty()) {
             DBSession dbsession = sessionPool.remove();
             closeSession(dbsession);
         }
+        while(!toGC.isEmpty()){
+            DBSession dbsession = toGC.remove();
+            closeSession(dbsession);
+        }
+        LOG.info("All sessions closed.");
+        sessionFactory.close();
+        sessionFactory = null;
+        sessionPool.clear();
+        toGC.clear();
+        LOG.info("Session factory closed.");
+        
     }
 
     public DBSession getSession() throws StorageException {
@@ -118,6 +145,8 @@ public class DBSessionProvider implements Runnable {
         } else { // increment the count and return it to the pool
             sessionPool.add(returnedSession);
         }
+        
+        sessionFactory.releaseResourcesForThisThread();
     }
 
     public double getSessionCreationRollingAvg() {
@@ -140,50 +169,43 @@ public class DBSessionProvider implements Runnable {
     @Override
     public void run() {
         while (automaticRefresh) {
+            //System.out.print("+");
+            
             try {
-                int toGCSize = toGC.size();
+                
+                int gced = 0;
+                int news = 0;
 
-                if (toGCSize > 0) {
-                   LOG.info("Going to CG " + toGCSize);
-                    for (int i = 0; i < toGCSize; i++) {
+                    while(!toGC.isEmpty()){
                         DBSession session = toGC.remove();
                         session.getSession().close();
+                        gced++;
                     }
-                    //System.out.println("CGed " + toGCSize);
+                    
 
-                    for (int i = 0; i < toGCSize; i++) {
+                    for (int i = 0; i < gced; i++) {
                         sessionPool.add(initSession());
                     }
-                    //System.out.println("Created " + toGCSize);
-                }
-//                for (int i = 0; i < 100; i++) {
-//                    DBSession session = sessionPool.remove();
-//                    double percent = (((double) session.getSessionUseCount() / (double) session.getMaxReuseCount()) * (double) 100);
-//                    // System.out.print(session.getSessionUseCount()+","+session.getMaxReuseCount()+","+percent+" ");
-//                    if (percent > 80) { // more than 80% used then recyle it
-//                        session.getSession().close();
-//                        System.out.println("Recycled a session");
-//                        //add a new session
-//                        sessionPool.add(initSession());
-//                    } else {
-//                        sessionPool.add(session);
-//                    }
-//                }
-                Thread.sleep(5);
-            } catch (NoSuchElementException e) {
-                //System.out.print(".");
-                for (int i = 0; i < 100; i++) {
-                    try {
-                        sessionPool.add(initSession());
-                    } catch (StorageException e1) {
-                        LOG.error(e1);
+                    news +=gced;
+                    
+                    if(getAvailableSessions()< (initialPoolSize/2)){
+                        int moreSessions = initialPoolSize/2;
+                        for(int i = 0; i < moreSessions; i++){
+                            sessionPool.add(initSession());
+                        }
+                        news += moreSessions;
                     }
-                }
-            } catch (InterruptedException ex) {
-                LOG.warn(ex);
-            } catch (StorageException e) {
-                LOG.error(e);
+                    
+//                    if(gced>0 || news > 0){
+//                       LOG.debug("CGed " + gced+" New "+ news);
+//                   }
+                
+                Thread.sleep(50);
+                
+            }  catch (Exception ex) {
+                LOG.error(ex);
             }
         }
+        threadStopped = true;
     }
 }
