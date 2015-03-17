@@ -19,10 +19,6 @@ import se.sics.hop.metadata.ndb.wrapper.HopsSession;
 import se.sics.hop.metadata.yarn.dal.LaunchedContainersDataAccess;
 import se.sics.hop.metadata.yarn.tabledef.LaunchedContainersTableDef;
 
-/**
- *
- * @author Theofilos Kakantousis <tkak@sics.se>
- */
 public class LaunchedContainersClusterJ implements LaunchedContainersTableDef, LaunchedContainersDataAccess<HopLaunchedContainers> {
 
     @PersistenceCapable(table = TABLE_NAME)

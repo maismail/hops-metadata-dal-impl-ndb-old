@@ -16,10 +16,6 @@ import se.sics.hop.metadata.ndb.wrapper.HopsSession;
 import se.sics.hop.metadata.yarn.dal.FiCaSchedulerNodeDataAccess;
 import se.sics.hop.metadata.yarn.tabledef.FiCaSchedulerNodeTableDef;
 
-/**
- *
- * @author Theofilos Kakantousis <tkak@sics.se>
- */
 public class FiCaSchedulerNodeClusterJ implements FiCaSchedulerNodeTableDef, FiCaSchedulerNodeDataAccess<HopFiCaSchedulerNode> {
 
     @PersistenceCapable(table = TABLE_NAME)

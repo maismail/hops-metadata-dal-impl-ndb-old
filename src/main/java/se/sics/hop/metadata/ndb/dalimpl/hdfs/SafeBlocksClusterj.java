@@ -20,10 +20,6 @@ import se.sics.hop.metadata.ndb.mysqlserver.MySQLQueryHelper;
 import se.sics.hop.metadata.ndb.mysqlserver.MysqlServerConnector;
 import se.sics.hop.metadata.ndb.wrapper.HopsSession;
 
-/**
- *
- * @author Mahmoud Ismail <maism@sics.se>
- */
 public class SafeBlocksClusterj implements SafeBlocksTableDef, SafeBlocksDataAccess {
   
   @PersistenceCapable(table = TABLE_NAME)

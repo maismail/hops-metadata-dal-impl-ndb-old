@@ -14,10 +14,6 @@ import se.sics.hop.metadata.hdfs.entity.hop.election.LeDescriptor.HdfsLeDescript
 
 import se.sics.hop.metadata.hdfs.tabledef.HdfsLeaderTableDef;
 
-/**
- *
- * @author gautier
- */
 public class HdfsLeaderClusterj extends LeDescriptorClusterj implements HdfsLeaderTableDef {
 
     @PersistenceCapable(table = TABLE_NAME)

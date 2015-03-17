@@ -18,10 +18,6 @@ import se.sics.hop.metadata.yarn.dal.capacity.FiCaSchedulerAppReservedContainers
 import se.sics.hop.metadata.yarn.tabledef.capacity.FiCaSchedulerAppReservedContainersTableDef;
 import static se.sics.hop.metadata.yarn.tabledef.capacity.FiCaSchedulerAppReservedContainersTableDef.PRIORITY_ID;
 
-/**
- *
- * @author nickstanogias
- */
 public class FiCaSchedulerAppReservedContainersClusterJ implements FiCaSchedulerAppReservedContainersTableDef, FiCaSchedulerAppReservedContainersDataAccess<HopFiCaSchedulerAppReservedContainers>{
 
     @PersistenceCapable(table = TABLE_NAME)

@@ -19,10 +19,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-/**
- *
- * @author Salman <salman@sics.se>
- */
 public abstract class LeDescriptorClusterj implements LeDescriptorTableDef, LeDescriptorDataAccess<LeDescriptor> {
 
   private ClusterjConnector connector = ClusterjConnector.getInstance();

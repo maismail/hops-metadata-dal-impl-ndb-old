@@ -20,10 +20,6 @@ import se.sics.hop.metadata.yarn.dal.fair.FSSchedulerNodeDataAccess;
 import se.sics.hop.metadata.yarn.tabledef.fair.FSSchedulerNodeTableDef;
 import static se.sics.hop.metadata.yarn.tabledef.fair.FSSchedulerNodeTableDef.RMNODEID;
 
-/**
- *
- * @author Nikos Stanogias <niksta@sics.se>
- */
 public class FSSchedulerNodeClusterJ implements FSSchedulerNodeTableDef, FSSchedulerNodeDataAccess<HopFSSchedulerNode>{
 
     @PersistenceCapable(table = TABLE_NAME)

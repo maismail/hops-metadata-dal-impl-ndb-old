@@ -25,10 +25,6 @@ import se.sics.hop.metadata.ndb.wrapper.HopsSession;
 import se.sics.hop.metadata.yarn.dal.FiCaSchedulerAppLiveContainersDataAccess;
 import se.sics.hop.metadata.yarn.tabledef.FiCaSchedulerAppLiveContainersTableDef;
 
-/**
- *
- * @author Nikos Stanogias <niksta@sics.se>
- */
 public class FiCaSchedulerAppLiveContainersClusterJ implements FiCaSchedulerAppLiveContainersTableDef, FiCaSchedulerAppLiveContainersDataAccess<HopFiCaSchedulerAppLiveContainers>{
 
     @PersistenceCapable(table = TABLE_NAME)

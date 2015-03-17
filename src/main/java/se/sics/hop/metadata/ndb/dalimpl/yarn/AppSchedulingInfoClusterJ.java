@@ -24,10 +24,6 @@ import se.sics.hop.metadata.yarn.dal.AppSchedulingInfoDataAccess;
 import se.sics.hop.metadata.yarn.tabledef.AppSchedulingInfoTableDef;
 import static se.sics.hop.metadata.yarn.tabledef.AppSchedulingInfoTableDef.PENDING;
 
-/**
- *
- * @author nickstanogias
- */
 public class AppSchedulingInfoClusterJ implements AppSchedulingInfoTableDef, AppSchedulingInfoDataAccess<HopAppSchedulingInfo> {
 
   @PersistenceCapable(table = TABLE_NAME)

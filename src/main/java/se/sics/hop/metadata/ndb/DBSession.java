@@ -6,10 +6,6 @@ package se.sics.hop.metadata.ndb;
 
 import se.sics.hop.metadata.ndb.wrapper.HopsSession;
 
-/**
- *
- * @author salman
- */
 public class DBSession {
     
     private HopsSession session;

@@ -23,10 +23,6 @@ import se.sics.hop.metadata.ndb.wrapper.HopsSession;
 import se.sics.hop.metadata.yarn.dal.ContainerStatusDataAccess;
 import se.sics.hop.metadata.yarn.tabledef.ContainerStatusTableDef;
 
-/**
- *
- * @author Theofilos Kakantousis <tkak@sics.se>
- */
 public class ContainerStatusClusterJ implements ContainerStatusTableDef, ContainerStatusDataAccess<HopContainerStatus> {
 
     @PersistenceCapable(table = TABLE_NAME)

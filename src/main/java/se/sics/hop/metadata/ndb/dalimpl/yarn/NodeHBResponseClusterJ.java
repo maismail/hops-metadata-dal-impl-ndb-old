@@ -23,10 +23,6 @@ import se.sics.hop.metadata.yarn.dal.NodeHBResponseDataAccess;
 import se.sics.hop.metadata.yarn.tabledef.NodeHBResponseTableDef;
 import se.sics.hop.util.CompressionUtils;
 
-/**
- *
- * @author Theofilos Kakantousis <tkak@sics.se>
- */
 public class NodeHBResponseClusterJ implements NodeHBResponseTableDef, NodeHBResponseDataAccess<HopNodeHBResponse> {
 
     @PersistenceCapable(table = TABLE_NAME)

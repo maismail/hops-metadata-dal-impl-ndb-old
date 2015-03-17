@@ -13,10 +13,6 @@ import se.sics.hop.metadata.hdfs.entity.hop.election.LeDescriptor;
 import se.sics.hop.metadata.hdfs.entity.hop.election.LeDescriptor.YarnLeDescriptor;
 import se.sics.hop.metadata.hdfs.tabledef.YarnLeaderTableDef;
 
-/**
- *
- * @author gautier
- */
 public class YarnLeaderClusterj extends LeDescriptorClusterj implements YarnLeaderTableDef {
 
   @PersistenceCapable(table = TABLE_NAME)

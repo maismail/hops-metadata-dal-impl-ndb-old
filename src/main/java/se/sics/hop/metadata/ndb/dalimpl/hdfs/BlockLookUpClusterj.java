@@ -15,10 +15,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-/**
- *
- * @author salman <salman@sics.se>
- */
 public class BlockLookUpClusterj implements BlockLookUpTableDef, BlockLookUpDataAccess<HopBlockLookUp> {
 
   @PersistenceCapable(table = TABLE_NAME)

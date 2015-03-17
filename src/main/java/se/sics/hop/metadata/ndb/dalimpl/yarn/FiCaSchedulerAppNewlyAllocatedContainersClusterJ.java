@@ -26,10 +26,6 @@ import se.sics.hop.metadata.ndb.wrapper.HopsSession;
 import se.sics.hop.metadata.yarn.dal.FiCaSchedulerAppNewlyAllocatedContainersDataAccess;
 import se.sics.hop.metadata.yarn.tabledef.FiCaSchedulerAppNewlyAllocatedContainersTableDef;
 
-/**
- *
- * @author Nikos Stanogias <niksta@sics.se>
- */
 public class FiCaSchedulerAppNewlyAllocatedContainersClusterJ implements FiCaSchedulerAppNewlyAllocatedContainersTableDef, FiCaSchedulerAppNewlyAllocatedContainersDataAccess<HopFiCaSchedulerAppNewlyAllocatedContainers> {
 
 

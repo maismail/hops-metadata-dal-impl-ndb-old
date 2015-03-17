@@ -17,10 +17,6 @@ import se.sics.hop.metadata.ndb.wrapper.HopsSession;
 import se.sics.hop.metadata.yarn.dal.RMAppAttemptDataAccess;
 import se.sics.hop.metadata.yarn.tabledef.RMAppAttemptTableDef;
 
-/**
- *
- * @author nickstanogias
- */
 public class RMAppAttemptClusterJ implements RMAppAttemptTableDef, RMAppAttemptDataAccess<HopRMAppAttempt>{
 
 

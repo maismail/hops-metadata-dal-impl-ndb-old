@@ -8,8 +8,6 @@ import se.sics.hop.exception.StorageException;
 
 /**
  * This class is to do count operations using Mysql Server.
- *
- * @author hooman
  */
 public class MySQLQueryHelper {
 

@@ -13,10 +13,6 @@ import se.sics.hop.metadata.ndb.wrapper.HopsSession;
 import se.sics.hop.metadata.yarn.dal.PriorityDataAccess;
 import se.sics.hop.metadata.yarn.tabledef.PriorityTableDef;
 
-/**
- *
- * @author Theofilos Kakantousis <tkak@sics.se>
- */
 public class PriorityClusterJ implements PriorityTableDef, PriorityDataAccess<HopPriority> {
 
     @PersistenceCapable(table = TABLE_NAME)

@@ -18,10 +18,6 @@ import se.sics.hop.metadata.ndb.wrapper.HopsSession;
 import se.sics.hop.metadata.yarn.dal.capacity.FiCaSchedulerAppSchedulingOpportunitiesDataAccess;
 import se.sics.hop.metadata.yarn.tabledef.capacity.FiCaSchedulerAppSchedulingOpportunitiesTableDef;
 
-/**
- *
- * @author nickstanogias
- */
 public class FiCaSchedulerAppSchedulingOpportunitiesClusterJ implements FiCaSchedulerAppSchedulingOpportunitiesTableDef, FiCaSchedulerAppSchedulingOpportunitiesDataAccess<HopFiCaSchedulerAppSchedulingOpportunities>{
 
     

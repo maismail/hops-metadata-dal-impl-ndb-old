@@ -18,10 +18,6 @@ import se.sics.hop.metadata.ndb.wrapper.HopsSession;
 import se.sics.hop.metadata.yarn.dal.RMContainerDataAccess;
 import se.sics.hop.metadata.yarn.tabledef.RMContainerTableDef;
 
-/**
- *
- * @author Theofilos Kakantousis <tkak@sics.se>
- */
 public class RMContainerClusterJ implements RMContainerTableDef, RMContainerDataAccess<HopRMContainer> {
 
   @PersistenceCapable(table = TABLE_NAME)

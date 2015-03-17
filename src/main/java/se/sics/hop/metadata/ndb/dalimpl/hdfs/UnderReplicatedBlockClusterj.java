@@ -22,10 +22,6 @@ import se.sics.hop.metadata.ndb.wrapper.HopsQueryBuilder;
 import se.sics.hop.metadata.ndb.wrapper.HopsQueryDomainType;
 import se.sics.hop.metadata.ndb.wrapper.HopsSession;
 
-/**
- *
- * @author kamal hakimzadeh <kamal@sics.se>
- */
 public class UnderReplicatedBlockClusterj implements UnderReplicatedBlockTableDef, UnderReplicatedBlockDataAccess<HopUnderReplicatedBlock> {
 
   @Override

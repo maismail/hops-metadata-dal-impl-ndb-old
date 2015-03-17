@@ -20,10 +20,6 @@ import java.util.Random;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
-/**
- *
- * @author salman
- */
 public class DBSessionProvider implements Runnable {
 
     static final Log LOG = LogFactory.getLog(DBSessionProvider.class);

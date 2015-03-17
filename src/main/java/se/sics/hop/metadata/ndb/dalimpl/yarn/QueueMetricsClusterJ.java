@@ -24,10 +24,6 @@ import se.sics.hop.metadata.yarn.tabledef.QueueMetricsTableDef;
 import static se.sics.hop.metadata.yarn.tabledef.QueueMetricsTableDef.PENDING_VCORES;
 import static se.sics.hop.metadata.yarn.tabledef.QueueMetricsTableDef.RESERVED_MB;
 
-/**
- *
- * @author nickstanogias
- */
 public class QueueMetricsClusterJ implements QueueMetricsTableDef, QueueMetricsDataAccess<HopQueueMetrics> {
 
   @PersistenceCapable(table = TABLE_NAME)

@@ -22,10 +22,6 @@ import se.sics.hop.metadata.ndb.wrapper.HopsQueryBuilder;
 import se.sics.hop.metadata.ndb.wrapper.HopsQueryDomainType;
 import se.sics.hop.metadata.ndb.wrapper.HopsSession;
 
-/**
- * @author Hooman <hooman@sics.se>
- * @author Salman <salman@sics.se>
- */
 public class LeasePathClusterj
     implements LeasePathTableDef, LeasePathDataAccess<HopLeasePath> {
 

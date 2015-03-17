@@ -17,10 +17,6 @@ import se.sics.hop.metadata.ndb.wrapper.HopsSession;
 import se.sics.hop.metadata.yarn.dal.capacity.FiCaSchedulerAppLastScheduledContainerDataAccess;
 import se.sics.hop.metadata.yarn.tabledef.capacity.FiCaSchedulerAppLastScheduledContainerTableDef;
 
-/**
- *
- * @author Nikos Stanogias <niksta@sics.se>
- */
 public class FiCaSchedulerAppLastScheduledContainerClusterJ implements FiCaSchedulerAppLastScheduledContainerTableDef, FiCaSchedulerAppLastScheduledContainerDataAccess<HopFiCaSchedulerAppLastScheduledContainer>{
 
 

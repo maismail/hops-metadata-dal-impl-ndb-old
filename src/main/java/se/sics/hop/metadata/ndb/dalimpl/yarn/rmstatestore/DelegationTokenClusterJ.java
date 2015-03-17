@@ -21,10 +21,6 @@ import se.sics.hop.metadata.yarn.dal.rmstatestore.DelegationTokenDataAccess;
 import se.sics.hop.metadata.yarn.tabledef.rmstatestore.DelegationTokenTableDef;
 import se.sics.hop.util.CompressionUtils;
 
-/**
- *
- * @author nickstanogias
- */
 public class DelegationTokenClusterJ implements DelegationTokenTableDef, DelegationTokenDataAccess<HopDelegationToken> {
 
     @PersistenceCapable(table = TABLE_NAME)

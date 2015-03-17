@@ -15,10 +15,6 @@ import se.sics.hop.metadata.ndb.ClusterjConnector;
 import se.sics.hop.metadata.ndb.mysqlserver.MySQLQueryHelper;
 import se.sics.hop.metadata.ndb.wrapper.HopsSession;
 
-/**
- *
- * @author Mahmoud Ismail <maism@sics.se>
- */
 public class MisReplicatedRangeQueueClusterj implements MisReplicatedRangeQueueTableDef, MisReplicatedRangeQueueDataAccess {
 
   @PersistenceCapable(table = TABLE_NAME)

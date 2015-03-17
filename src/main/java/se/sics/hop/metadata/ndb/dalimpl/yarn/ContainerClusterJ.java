@@ -22,10 +22,6 @@ import se.sics.hop.metadata.yarn.dal.ContainerDataAccess;
 import se.sics.hop.metadata.yarn.tabledef.ContainerTableDef;
 import se.sics.hop.util.CompressionUtils;
 
-/**
- *
- * @author Theofilos Kakantousis <tkak@sics.se>
- */
 public class ContainerClusterJ implements ContainerTableDef, ContainerDataAccess<HopContainer> {
 
     @PersistenceCapable(table = TABLE_NAME)

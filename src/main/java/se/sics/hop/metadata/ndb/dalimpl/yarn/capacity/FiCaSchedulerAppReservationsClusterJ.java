@@ -17,10 +17,6 @@ import se.sics.hop.metadata.ndb.wrapper.HopsSession;
 import se.sics.hop.metadata.yarn.dal.capacity.FiCaSchedulerAppReservationsDataAccess;
 import se.sics.hop.metadata.yarn.tabledef.capacity.FiCaSchedulerAppReservationsTableDef;
 
-/**
- *
- * @author nickstanogias
- */
 public class FiCaSchedulerAppReservationsClusterJ implements FiCaSchedulerAppReservationsTableDef, FiCaSchedulerAppReservationsDataAccess<HopFiCaSchedulerAppReservations>{
 
     @PersistenceCapable(table = TABLE_NAME)

@@ -21,10 +21,6 @@ import se.sics.hop.metadata.ndb.wrapper.HopsSession;
 import se.sics.hop.metadata.yarn.dal.RMLoadDataAccess;
 import se.sics.hop.metadata.yarn.tabledef.RMLoadTableDef;
 
-/**
- *
- * @author gautier
- */
 public class RMLoadClusterJ implements RMLoadTableDef, RMLoadDataAccess<HopLoad> {
 
   @PersistenceCapable(table = TABLE_NAME)

@@ -17,10 +17,7 @@ import se.sics.hop.metadata.ndb.ClusterjConnector;
 import se.sics.hop.metadata.ndb.wrapper.HopsSession;
 import se.sics.hop.metadata.yarn.dal.RMAppDataAccess;
 import se.sics.hop.metadata.yarn.tabledef.RMAppTableDef;
-/**
- *
- * @author nickstanogias
- */
+
 public class RMAppClusterJ implements RMAppTableDef, RMAppDataAccess<HopRMApp>{
     
     @PersistenceCapable(table = TABLE_NAME)

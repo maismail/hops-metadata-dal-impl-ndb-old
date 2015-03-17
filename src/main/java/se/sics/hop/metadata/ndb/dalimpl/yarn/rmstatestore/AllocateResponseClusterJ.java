@@ -25,10 +25,6 @@ import se.sics.hop.metadata.yarn.dal.rmstatestore.AllocateResponseDataAccess;
 import se.sics.hop.metadata.yarn.tabledef.rmstatestore.AllocateResponseTableDef;
 import se.sics.hop.util.CompressionUtils;
 
-/**
- *
- * @author gautier
- */
 public class AllocateResponseClusterJ implements AllocateResponseTableDef, AllocateResponseDataAccess<HopAllocateResponse> {
 
   @PersistenceCapable(table = TABLE_NAME)

@@ -16,8 +16,6 @@ import se.sics.hop.metadata.yarn.tabledef.YarnVariablesTableDef;
 /**
  * Table with one row that is used to obtain unique ids for tables. This
  * solution can be dropped once ClusterJ implements auto-increment.
- *
- * @author Theofilos Kakantousis <tkak@sics.se>
  */
 public class YarnVariablesClusterJ implements YarnVariablesTableDef, YarnVariablesDataAccess<YarnVariables> {
 

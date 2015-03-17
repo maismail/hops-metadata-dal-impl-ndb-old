@@ -19,10 +19,6 @@ import se.sics.hop.metadata.ndb.wrapper.HopsSession;
 import se.sics.hop.metadata.yarn.dal.ResourceDataAccess;
 import se.sics.hop.metadata.yarn.tabledef.ResourceTableDef;
 
-/**
- *
- * @author Theofilos Kakantousis <tkak@sics.se>
- */
 public class ResourceClusterJ implements ResourceTableDef, ResourceDataAccess<HopResource> {
 
     @PersistenceCapable(table = TABLE_NAME)

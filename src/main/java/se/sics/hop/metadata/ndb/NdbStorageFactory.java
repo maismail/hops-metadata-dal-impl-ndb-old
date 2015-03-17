@@ -121,10 +121,6 @@ import se.sics.hop.metadata.yarn.dal.rmstatestore.RMStateVersionDataAccess;
 import se.sics.hop.metadata.yarn.dal.rmstatestore.SecretMamagerKeysDataAccess;
 import se.sics.hop.metadata.yarn.dal.rmstatestore.SequenceNumberDataAccess;
 
-/**
- *
- * @author Mahmoud Ismail <maism@sics.se>
- */
 public class NdbStorageFactory implements DALStorageFactory {
 
   private Map<Class, EntityDataAccess> dataAccessMap = new HashMap<Class, EntityDataAccess>();

@@ -22,10 +22,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-/**
- *
- * @author Hooman <hooman@sics.se>
- */
 public class PendingBlockClusterj implements PendingBlockTableDef, PendingBlockDataAccess<HopPendingBlockInfo> {
 
   @Override

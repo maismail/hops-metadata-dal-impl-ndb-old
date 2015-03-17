@@ -19,10 +19,6 @@ import se.sics.hop.metadata.ndb.wrapper.HopsSession;
 import se.sics.hop.metadata.yarn.dal.NodeDataAccess;
 import se.sics.hop.metadata.yarn.tabledef.NodeTableDef;
 
-/**
- *
- * @author Theofilos Kakantousis <tkak@sics.se>
- */
 public class NodeClusterJ implements NodeTableDef, NodeDataAccess<HopNode> {
 
     @PersistenceCapable(table = TABLE_NAME)

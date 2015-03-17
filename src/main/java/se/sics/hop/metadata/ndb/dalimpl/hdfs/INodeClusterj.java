@@ -31,11 +31,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-/**
- *
- * @author Hooman <hooman@sics.se>
- * @author Salman <salman@sics.se>
- */
 public class INodeClusterj implements INodeTableDef, INodeDataAccess<HopINode> {
 
   @Override

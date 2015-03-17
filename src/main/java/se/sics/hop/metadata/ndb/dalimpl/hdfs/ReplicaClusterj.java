@@ -22,10 +22,6 @@ import se.sics.hop.metadata.ndb.wrapper.HopsQueryBuilder;
 import se.sics.hop.metadata.ndb.wrapper.HopsQueryDomainType;
 import se.sics.hop.metadata.ndb.wrapper.HopsSession;
 
-/**
- *
- * @author Hooman <hooman@sics.se>
- */
 public class ReplicaClusterj implements ReplicaTableDef, ReplicaDataAccess<HopIndexedReplica> {
 //  static final Log LOG = LogFactory.getLog(ReplicaClusterj.class);
   static final Logger LOG = Logger.getLogger(ReplicaClusterj.class);

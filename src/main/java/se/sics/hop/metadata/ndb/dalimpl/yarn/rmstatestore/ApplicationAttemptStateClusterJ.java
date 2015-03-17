@@ -25,10 +25,6 @@ import se.sics.hop.metadata.yarn.dal.rmstatestore.ApplicationAttemptStateDataAcc
 import se.sics.hop.metadata.yarn.tabledef.rmstatestore.ApplicationAttemptStateTableDef;
 import se.sics.hop.util.CompressionUtils;
 
-/**
- *
- * @author nickstanogias
- */
 public class ApplicationAttemptStateClusterJ implements ApplicationAttemptStateTableDef, ApplicationAttemptStateDataAccess<HopApplicationAttemptState> {
 
     @PersistenceCapable(table = TABLE_NAME)

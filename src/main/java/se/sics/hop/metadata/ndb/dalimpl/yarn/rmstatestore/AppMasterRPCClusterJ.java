@@ -26,10 +26,6 @@ import se.sics.hop.metadata.yarn.dal.rmstatestore.AppMasterRPCDataAccess;
 import se.sics.hop.metadata.yarn.tabledef.appmasterrpc.AppMasterRPCTableDef;
 import se.sics.hop.util.CompressionUtils;
 
-/**
- *
- * @author Nikos Stanogias <niksta@sics.se>
- */
 public class AppMasterRPCClusterJ implements AppMasterRPCTableDef,
         AppMasterRPCDataAccess<HopAppMasterRPC> {
 

@@ -23,11 +23,6 @@ import se.sics.hop.metadata.ndb.wrapper.HopsQueryBuilder;
 import se.sics.hop.metadata.ndb.wrapper.HopsQueryDomainType;
 import se.sics.hop.metadata.ndb.wrapper.HopsSession;
 
-/**
- *
- * @author Hooman <hooman@sics.se>
- * @author salman <salman@sics.se>
- */
 public class LeaseClusterj implements LeaseTableDef, LeaseDataAccess<HopLease> {
 
   @PersistenceCapable(table = TABLE_NAME)

@@ -20,10 +20,6 @@ import se.sics.hop.metadata.ndb.wrapper.HopsSession;
 import se.sics.hop.metadata.yarn.dal.UpdatedContainerInfoDataAccess;
 import se.sics.hop.metadata.yarn.tabledef.UpdatedContainerInfoTableDef;
 
-/**
- *
- * @author Theofilos Kakantousis <tkak@sics.se>
- */
 public class UpdatedContainerInfoClusterJ implements UpdatedContainerInfoTableDef, UpdatedContainerInfoDataAccess<HopUpdatedContainerInfo> {
 
     @PersistenceCapable(table = TABLE_NAME)

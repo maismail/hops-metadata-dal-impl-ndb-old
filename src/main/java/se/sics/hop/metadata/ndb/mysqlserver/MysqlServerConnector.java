@@ -15,8 +15,6 @@ import java.util.Properties;
 /**
  * This class presents a singleton connector to Mysql Server.
  * It creates connections to Mysql Server and loads the driver.
- * 
- * @author hooman
  */
 public class MysqlServerConnector implements StorageConnector<Connection> {
 

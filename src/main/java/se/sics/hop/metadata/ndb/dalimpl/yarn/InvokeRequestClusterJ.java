@@ -20,10 +20,6 @@ import se.sics.hop.metadata.ndb.wrapper.HopsSession;
 import se.sics.hop.metadata.yarn.dal.InvokeRequestDataAccess;
 import se.sics.hop.metadata.yarn.tabledef.InvokeRequestTableDef;
 
-/**
- *
- * @author Theofilos Kakantousis <tkak@sics.se>
- */
 public class InvokeRequestClusterJ implements InvokeRequestTableDef, InvokeRequestDataAccess<InvokeRequest> {
 
     @PersistenceCapable(table = TABLE_NAME)

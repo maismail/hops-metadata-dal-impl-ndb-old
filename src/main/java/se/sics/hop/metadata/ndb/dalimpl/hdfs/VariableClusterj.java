@@ -13,10 +13,6 @@ import se.sics.hop.metadata.ndb.ClusterjConnector;
 import se.sics.hop.metadata.hdfs.tabledef.VariableTableDef;
 import se.sics.hop.metadata.ndb.wrapper.HopsSession;
 
-/**
- *
- * @author Mahmoud Ismail <maism@sics.se>
- */
 public class VariableClusterj implements VariableTableDef, VariableDataAccess<HopVariable, HopVariable.Finder> {
 
   @PersistenceCapable(table = TABLE_NAME)

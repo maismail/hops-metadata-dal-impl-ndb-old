@@ -26,10 +26,6 @@ import se.sics.hop.metadata.yarn.dal.rmstatestore.SecretMamagerKeysDataAccess;
 import se.sics.hop.metadata.yarn.tabledef.rmstatestore.SecretMamagerKeysTableDef;
 import se.sics.hop.util.CompressionUtils;
 
-/**
- *
- * @author gautier
- */
 public class SecretMamagerKeysClusterJ implements SecretMamagerKeysTableDef, SecretMamagerKeysDataAccess<HopSecretMamagerKey> {
 
   @PersistenceCapable(table = TABLE_NAME)

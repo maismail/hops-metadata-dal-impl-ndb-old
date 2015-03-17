@@ -16,10 +16,6 @@ import se.sics.hop.metadata.ndb.wrapper.HopsSession;
 import se.sics.hop.metadata.yarn.dal.RMContextInactiveNodesDataAccess;
 import se.sics.hop.metadata.yarn.tabledef.RMContextInactiveNodesTableDef;
 
-/**
- *
- * @author Theofilos Kakantousis <tkak@sics.se>
- */
 public class RMContextInactiveNodesClusterJ implements RMContextInactiveNodesTableDef, RMContextInactiveNodesDataAccess<HopRMContextInactiveNodes> {
 
     @PersistenceCapable(table = TABLE_NAME)

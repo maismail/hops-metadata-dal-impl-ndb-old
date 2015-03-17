@@ -16,10 +16,6 @@ import se.sics.hop.metadata.yarn.dal.TokenDataAccess;
 import se.sics.hop.metadata.yarn.tabledef.TokenTableDef;
 import se.sics.hop.util.CompressionUtils;
 
-/**
- *
- * @author Theofilos Kakantousis <tkak@sics.se>
- */
 public class TokenClusterJ implements TokenTableDef, TokenDataAccess<HopToken> {
 
     @PersistenceCapable(table = TABLE_NAME)

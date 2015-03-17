@@ -21,10 +21,6 @@ import se.sics.hop.metadata.yarn.dal.rmstatestore.DelegationKeyDataAccess;
 import se.sics.hop.metadata.yarn.tabledef.rmstatestore.DelegationKeyTableDef;
 import se.sics.hop.util.CompressionUtils;
 
-/**
- *
- * @author nickstanogias
- */
 public class DelegationKeyClusterJ implements DelegationKeyTableDef, DelegationKeyDataAccess<HopDelegationKey> {
 
     @PersistenceCapable(table = TABLE_NAME)

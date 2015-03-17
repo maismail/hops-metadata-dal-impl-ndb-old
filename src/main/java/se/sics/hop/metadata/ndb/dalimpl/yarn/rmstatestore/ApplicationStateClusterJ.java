@@ -20,10 +20,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.zip.DataFormatException;
 
-/**
- *
- * @author nickstanogias
- */
 public class ApplicationStateClusterJ implements ApplicationStateTableDef, ApplicationStateDataAccess<HopApplicationState> {
 
     @PersistenceCapable(table = TABLE_NAME)

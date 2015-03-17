@@ -22,8 +22,6 @@ import se.sics.hop.metadata.yarn.tabledef.RMNodeTableDef;
 
 /**
  * Implements connection of RMNodeImpl to NDB.
- *
- * @author Theofilos Kakantousis <tkak@sics.se>
  */
 public class RMNodeClusterJ implements RMNodeTableDef, RMNodeDataAccess<HopRMNode> {
 

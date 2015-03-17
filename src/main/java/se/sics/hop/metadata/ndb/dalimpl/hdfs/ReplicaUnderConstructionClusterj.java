@@ -20,10 +20,6 @@ import se.sics.hop.metadata.ndb.wrapper.HopsQueryBuilder;
 import se.sics.hop.metadata.ndb.wrapper.HopsQueryDomainType;
 import se.sics.hop.metadata.ndb.wrapper.HopsSession;
 
-/**
- *
- * @author Hooman <hooman@sics.se>
- */
 public class ReplicaUnderConstructionClusterj implements ReplicaUnderConstructionTableDef, ReplicaUnderConstructionDataAccess<HopReplicaUnderConstruction> {
 
   @PersistenceCapable(table = TABLE_NAME)

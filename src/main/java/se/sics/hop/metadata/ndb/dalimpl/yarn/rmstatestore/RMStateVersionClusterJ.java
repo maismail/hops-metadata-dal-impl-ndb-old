@@ -13,10 +13,6 @@ import se.sics.hop.metadata.ndb.wrapper.HopsSession;
 import se.sics.hop.metadata.yarn.dal.rmstatestore.RMStateVersionDataAccess;
 import se.sics.hop.metadata.yarn.tabledef.rmstatestore.RMStateVersionTableDef;
 
-/**
- *
- * @author nickstanogias
- */
 public class RMStateVersionClusterJ implements RMStateVersionTableDef, RMStateVersionDataAccess<HopRMStateVersion> {
 
     @PersistenceCapable(table = TABLE_NAME)

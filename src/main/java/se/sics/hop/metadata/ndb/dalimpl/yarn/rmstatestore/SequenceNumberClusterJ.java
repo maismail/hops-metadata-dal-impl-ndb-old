@@ -13,10 +13,6 @@ import se.sics.hop.metadata.ndb.wrapper.HopsSession;
 import se.sics.hop.metadata.yarn.dal.rmstatestore.SequenceNumberDataAccess;
 import se.sics.hop.metadata.yarn.tabledef.rmstatestore.SequenceNumberTableDef;
 
-/**
- *
- * @author nickstanogias
- */
 public class SequenceNumberClusterJ implements SequenceNumberTableDef, SequenceNumberDataAccess<HopSequenceNumber> {
 
     @PersistenceCapable(table = TABLE_NAME)

@@ -17,10 +17,6 @@ import se.sics.hop.metadata.yarn.dal.RMContextActiveNodesDataAccess;
 
 import se.sics.hop.metadata.yarn.tabledef.RMContextActiveNodesTableDef;
 
-/**
- *
- * @author Theofilos Kakantousis <tkak@sics.se>
- */
 public class RMContextActiveNodesClusterJ implements RMContextActiveNodesTableDef, RMContextActiveNodesDataAccess<HopRMContextActiveNodes> {
 
     @PersistenceCapable(table = TABLE_NAME)

@@ -30,10 +30,6 @@ import se.sics.hop.metadata.yarn.dal.ResourceRequestDataAccess;
 import se.sics.hop.metadata.yarn.tabledef.ResourceRequestTableDef;
 import se.sics.hop.util.CompressionUtils;
 
-/**
- *
- * @author Nikos Stanogias <niksta@sics.se>
- */
 public class ResourceRequestClusterJ implements ResourceRequestTableDef, ResourceRequestDataAccess<HopResourceRequest> {
 
     @PersistenceCapable(table = TABLE_NAME)
