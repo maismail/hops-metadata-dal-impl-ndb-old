@@ -16,15 +16,25 @@ public class HopsExceptionHelper {
 
   private static boolean isTransient(ClusterJException e) {
     if (e instanceof ClusterJDatastoreException) {
-      // TODO identify transient exceptions
-      // http://dev.mysql.com/doc/ndbapi/en/ndb-error-codes.html
-      if (e.getMessage().contains("code 266")) { // dead lock
+      // http://dev.mysql.com/doc/ndbapi/en/ndb-error-classifications.html
+      // The classifications can be found in ndberror.h and ndberror.c in the ndb sources
+      if (e.getMessage().contains("classification 7")) {
+        // Temporary Resource error (TR)
         return true;
-      } else if (e.getMessage().contains("code 274")) { // dead lock.Transaction had timed out when trying to commit it
+      } else if (e.getMessage().contains("classification 8")) {
+        // Node Recovery error (NR)
         return true;
-      } else if (e.getMessage().contains("code 245")) { // too many active scans errors
+      } else if (e.getMessage().contains("classification 9")) {
+        // Overload error (OL)
         return true;
-      } else if (e.getMessage().contains("code 146")) { //  message Time-out in NDB, probably caused by deadlock .
+      } else if (e.getMessage().contains("classification 10")) {
+        // Timeout expired (TO)
+        return true;
+      } else if (e.getMessage().contains("classification 15")) {
+        // Node shutdown (NS)
+        return true;
+      } else if (e.getMessage().contains("classification 18")) {
+        // Internal temporary (IT)
         return true;
       }
     }
