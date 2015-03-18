@@ -145,8 +145,6 @@ public class DBSessionProvider implements Runnable {
         } else { // increment the count and return it to the pool
             sessionPool.add(returnedSession);
         }
-        
-        sessionFactory.releaseResourcesForThisThread();
     }
 
     public double getSessionCreationRollingAvg() {
