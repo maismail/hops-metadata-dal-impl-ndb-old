@@ -4,12 +4,11 @@ package se.sics.hop.metadata.ndb.dalimpl.yarn.rmstatestore;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
-
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.zip.DataFormatException;
-
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.entity.yarn.rmstatestore.HopAllocateResponse;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
@@ -40,11 +39,29 @@ public class AllocateResponseClusterJ implements AllocateResponseTableDef, Alloc
   private final ClusterjConnector connector = ClusterjConnector.getInstance();
 
   @Override
-  public void addAllocateResponse(HopAllocateResponse entry) throws StorageException {
+  public void addAll(Collection<HopAllocateResponse> toAdd) throws
+          StorageException {
     HopsSession session = connector.obtainSession();
-    session.savePersistent(createPersistable(entry, session));
+    List<AllocateResponseDTO> toPersist = new ArrayList<AllocateResponseDTO>();
+    for (HopAllocateResponse req : toAdd) {
+      toPersist.add(createPersistable(req, session));
+    }
+    session.savePersistentAll(toPersist);
   }
 
+  @Override
+  public void removeAll(Collection<HopAllocateResponse> toAdd) throws
+          StorageException {
+    HopsSession session = connector.obtainSession();
+    List<AllocateResponseDTO> toPersist = new ArrayList<AllocateResponseDTO>();
+    for (HopAllocateResponse req : toAdd) {
+      AllocateResponseDTO persistable = session.newInstance(AllocateResponseDTO.class,
+              req.getApplicationattemptid());
+      toPersist.add(persistable);
+    }
+    session.deletePersistentAll(toPersist);
+  }
+  
   @Override
   public List<HopAllocateResponse> getAll() throws StorageException {
      HopsSession session = connector.obtainSession();
@@ -55,13 +72,15 @@ public class AllocateResponseClusterJ implements AllocateResponseTableDef, Alloc
       return createHopAllocateResponseList(results);
   }
 
-  private AllocateResponseDTO createPersistable(HopAllocateResponse hop, HopsSession session) throws StorageException {
-    AllocateResponseDTO allocateResponseDTO = session.newInstance(AllocateResponseDTO.class);
+  private AllocateResponseDTO createPersistable(HopAllocateResponse hop,
+          HopsSession session) throws StorageException {
+    AllocateResponseDTO allocateResponseDTO = session.newInstance(
+            AllocateResponseDTO.class);
 
     allocateResponseDTO.setapplicationattemptid(hop.getApplicationattemptid());
     try {
-      allocateResponseDTO.setallocateresponse(
-          CompressionUtils.compress(hop.getAllocateResponse()));
+      allocateResponseDTO.setallocateresponse(CompressionUtils.compress(hop.
+              getAllocateResponse()));
     } catch (IOException e) {
       throw new StorageException(e);
     }
@@ -69,8 +88,7 @@ public class AllocateResponseClusterJ implements AllocateResponseTableDef, Alloc
     return allocateResponseDTO;
   }
   
-  private List<HopAllocateResponse> createHopAllocateResponseList(List<AllocateResponseDTO> list)
-      throws StorageException {
+  private List<HopAllocateResponse> createHopAllocateResponseList(List<AllocateResponseDTO> list) throws StorageException {
         List<HopAllocateResponse> hopList = new ArrayList<HopAllocateResponse>();
         for (AllocateResponseDTO dto : list) {
             hopList.add(createHopAllocateResponse(dto));
@@ -78,13 +96,14 @@ public class AllocateResponseClusterJ implements AllocateResponseTableDef, Alloc
         return hopList;
     }
 
-  private HopAllocateResponse createHopAllocateResponse(AllocateResponseDTO allocateResponseDTO)
-      throws StorageException {
+  private HopAllocateResponse createHopAllocateResponse(
+          AllocateResponseDTO allocateResponseDTO) throws StorageException {
     if (allocateResponseDTO != null) {
       try {
-        return new HopAllocateResponse(allocateResponseDTO.getapplicationattemptid(),
-            CompressionUtils
-                .decompress(allocateResponseDTO.getallocateresponse()));
+        return new HopAllocateResponse(allocateResponseDTO.
+                getapplicationattemptid(),
+                CompressionUtils.
+                decompress(allocateResponseDTO.getallocateresponse()));
       } catch (IOException e) {
         throw new StorageException(e);
       } catch (DataFormatException e) {

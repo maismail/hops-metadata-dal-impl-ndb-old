@@ -6,7 +6,6 @@ import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.entity.yarn.HopAppSchedulingInfo;
@@ -63,21 +62,6 @@ public class AppSchedulingInfoClusterJ implements AppSchedulingInfoTableDef, App
   private final ClusterjConnector connector = ClusterjConnector.getInstance();
 
   @Override
-  public HopAppSchedulingInfo findById(String id) throws StorageException {
-    HopsSession session = connector.obtainSession();
-
-    AppSchedulingInfoClusterJ.AppSchedulingInfoDTO appSchedulingInfoDTO = null;
-    if (session != null) {
-      appSchedulingInfoDTO = session.find(AppSchedulingInfoClusterJ.AppSchedulingInfoDTO.class, id);
-    }
-    if (appSchedulingInfoDTO == null) {
-      throw new StorageException("HOP :: Error while retrieving row");
-    }
-
-    return createHopAppSchedulingInfo(appSchedulingInfoDTO);
-  }
-
-  @Override
   public List<HopAppSchedulingInfo> findAll() throws StorageException, IOException {
     HopsSession session = connector.obtainSession();
     HopsQueryBuilder qb = session.getQueryBuilder();
@@ -89,37 +73,30 @@ public class AppSchedulingInfoClusterJ implements AppSchedulingInfoTableDef, App
 
   }
 
-  private List<HopAppSchedulingInfo> createHopAppSchedulingInfoList(List<AppSchedulingInfoClusterJ.AppSchedulingInfoDTO> list) throws IOException {
+  
+  @Override
+  public void add(HopAppSchedulingInfo toAdd) throws StorageException {
+    HopsSession session = connector.obtainSession();
+    AppSchedulingInfoClusterJ.AppSchedulingInfoDTO persistable
+            = createPersistable(toAdd, session);
+    session.savePersistent(persistable);
+  }
+  
+  public void remove(HopAppSchedulingInfo toRemove) throws StorageException{
+    HopsSession session = connector.obtainSession();
+    session.deletePersistent(session.newInstance(AppSchedulingInfoDTO.class,
+            toRemove.getSchedulerAppId()));
+  }
+  
+  
+    private List<HopAppSchedulingInfo> createHopAppSchedulingInfoList(List<AppSchedulingInfoClusterJ.AppSchedulingInfoDTO> list) throws IOException {
     List<HopAppSchedulingInfo> queueMetricsList = new ArrayList<HopAppSchedulingInfo>();
     for (AppSchedulingInfoClusterJ.AppSchedulingInfoDTO persistable : list) {
       queueMetricsList.add(createHopAppSchedulingInfo(persistable));
     }
     return queueMetricsList;
   }
-
-  @Override
-  public void prepare(Collection<HopAppSchedulingInfo> modified, Collection<HopAppSchedulingInfo> removed) throws StorageException {
-    HopsSession session = connector.obtainSession();
-    try {
-      if (removed != null) {
-        for (HopAppSchedulingInfo hop : removed) {
-          AppSchedulingInfoClusterJ.AppSchedulingInfoDTO persistable = 
-                  session.newInstance(AppSchedulingInfoClusterJ.AppSchedulingInfoDTO.class, 
-                          hop.getAppId());
-          session.deletePersistent(persistable);
-        }
-      }
-      if (modified != null) {
-        for (HopAppSchedulingInfo hop : modified) {
-          AppSchedulingInfoClusterJ.AppSchedulingInfoDTO persistable = createPersistable(hop, session);
-          session.savePersistent(persistable);
-        }
-      }
-    } catch (Exception e) {
-      throw new StorageException(e);
-    }
-  }
-
+    
   private HopAppSchedulingInfo createHopAppSchedulingInfo(AppSchedulingInfoDTO appSchedulingInfoDTO) {
     return new HopAppSchedulingInfo(appSchedulingInfoDTO.getschedulerapp_id(), appSchedulingInfoDTO.getappid(),
             appSchedulingInfoDTO.getqueuename(),

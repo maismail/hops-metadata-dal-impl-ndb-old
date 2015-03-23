@@ -44,16 +44,6 @@ public class RMContainerClusterJ implements RMContainerTableDef, RMContainerData
 
     void setuser(String user);
 
-//    @Column(name = RESERVED_NODEID_ID)
-//    String getreservednodeid();
-//
-//    void setreservednodeid(String reservednodeid);
-
-//    @Column(name = RESERVED_PRIORITY_ID)
-//    int getreservedpriorityid();
-//
-//    void setreservedpriorityid(int reservedpriorityid);
-
     @Column(name = STARTTIME)
     long getstarttime();
 
@@ -80,19 +70,7 @@ public class RMContainerClusterJ implements RMContainerTableDef, RMContainerData
     void setexitstatus(int exitstatus);
 
   }
-  private ClusterjConnector connector = ClusterjConnector.getInstance();
-
-  @Override
-  public HopRMContainer findById(String id) throws StorageException {
-    HopsSession session = connector.obtainSession();
-
-    RMContainerDTO rMContainerDTO = null;
-    if (session != null) {
-      rMContainerDTO = session.find(RMContainerDTO.class, id);
-    }
-
-    return createHopRMContainer(rMContainerDTO);
-  }
+  private final ClusterjConnector connector = ClusterjConnector.getInstance();
 
   @Override
   public Map<String, HopRMContainer> getAll() throws StorageException {
@@ -107,62 +85,64 @@ public class RMContainerClusterJ implements RMContainerTableDef, RMContainerData
             getResultList();
     return createMap(results);
   }
-  
+
   @Override
-  public void prepare(Collection<HopRMContainer> modified, Collection<HopRMContainer> removed) throws StorageException {
+
+  public void addAll(Collection<HopRMContainer> toAdd) throws StorageException {
     HopsSession session = connector.obtainSession();
-    try {
-      if (removed != null) {
-        List<RMContainerDTO> toRemove = new ArrayList<RMContainerDTO>(removed.size());
-        for (HopRMContainer hop : removed) {
-          toRemove.add(session.newInstance(RMContainerClusterJ.RMContainerDTO.class, hop.getContainerIdID()));
-        }
-        session.deletePersistentAll(toRemove);
-      }
-      if (modified != null) {
-        List<RMContainerDTO> toModify = new ArrayList<RMContainerDTO>(modified.size());
-        for (HopRMContainer hop : modified) {
-          toModify.add(createPersistable(hop, session));
-        }
-        session.savePersistentAll(toModify);
-      }
-    } catch (Exception e) {
-      throw new StorageException(e);
+
+    List<RMContainerDTO> toPersist = new ArrayList<RMContainerDTO>(toAdd.size());
+    for (HopRMContainer hop : toAdd) {
+      toPersist.add(createPersistable(hop, session));
     }
+
+    session.savePersistentAll(toPersist);
   }
 
   @Override
-  public void createRMContainer(HopRMContainer rmcontainer) throws StorageException {
+  public void removeAll(Collection<HopRMContainer> toRemove) throws
+          StorageException {
+    HopsSession session = connector.obtainSession();
+    List<RMContainerDTO> toPersist = new ArrayList<RMContainerDTO>(toRemove.
+            size());
+    for (HopRMContainer hop : toRemove) {
+      toPersist.add(session.
+              newInstance(RMContainerClusterJ.RMContainerDTO.class, hop.
+                      getContainerIdID()));
+    }
+    session.deletePersistentAll(toPersist);
+  }
+
+  @Override
+  public void add(HopRMContainer rmcontainer) throws StorageException {
     HopsSession session = connector.obtainSession();
     session.savePersistent(createPersistable(rmcontainer, session));
   }
 
   private HopRMContainer createHopRMContainer(RMContainerDTO rMContainerDTO) {
-  
-      return new HopRMContainer(
-              rMContainerDTO.getcontaineridid(),
-              rMContainerDTO.getappattemptidid(),
-              rMContainerDTO.getnodeidid(),
-              rMContainerDTO.getuser(),
-//              rMContainerDTO.getreservednodeid(),
-//              rMContainerDTO.getreservedpriorityid(),
-              rMContainerDTO.getstarttime(),
-              rMContainerDTO.getfinishtime(),
-              rMContainerDTO.getstate(), /*null, null,*/
-              rMContainerDTO.getfinishedstatusstate(),
-              rMContainerDTO.getexitstatus());
-    
+
+    return new HopRMContainer(
+            rMContainerDTO.getcontaineridid(),
+            rMContainerDTO.getappattemptidid(),
+            rMContainerDTO.getnodeidid(),
+            rMContainerDTO.getuser(),
+            rMContainerDTO.getstarttime(),
+            rMContainerDTO.getfinishtime(),
+            rMContainerDTO.getstate(),
+            rMContainerDTO.getfinishedstatusstate(),
+            rMContainerDTO.getexitstatus());
+
   }
 
-  private RMContainerDTO createPersistable(HopRMContainer hop, HopsSession session) throws StorageException {
-    RMContainerClusterJ.RMContainerDTO rMContainerDTO = session.newInstance(RMContainerClusterJ.RMContainerDTO.class);
+  private RMContainerDTO createPersistable(HopRMContainer hop,
+          HopsSession session) throws StorageException {
+    RMContainerClusterJ.RMContainerDTO rMContainerDTO = session.newInstance(
+            RMContainerClusterJ.RMContainerDTO.class);
 
     rMContainerDTO.setcontaineridid(hop.getContainerIdID());
     rMContainerDTO.setappattemptidid(hop.getApplicationAttemptIdID());
     rMContainerDTO.setnodeidid(hop.getNodeIdID());
     rMContainerDTO.setuser(hop.getUser());
-//    rMContainerDTO.setreservednodeid(hop.getReservedNodeIdID());
-//    rMContainerDTO.setreservedpriorityid(hop.getReservedPriorityID());
     rMContainerDTO.setstarttime(hop.getStarttime());
     rMContainerDTO.setfinishtime(hop.getFinishtime());
     rMContainerDTO.setstate(hop.getState());
@@ -171,7 +151,7 @@ public class RMContainerClusterJ implements RMContainerTableDef, RMContainerData
 
     return rMContainerDTO;
   }
-  
+
   private Map<String, HopRMContainer> createMap(
           List<RMContainerDTO> results) {
     Map<String, HopRMContainer> map

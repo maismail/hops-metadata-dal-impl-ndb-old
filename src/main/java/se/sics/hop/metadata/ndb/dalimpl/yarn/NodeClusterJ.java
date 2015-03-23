@@ -8,10 +8,11 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.entity.yarn.HopNode;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
-import se.sics.hop.metadata.ndb.wrapper.HopsPredicate;
 import se.sics.hop.metadata.ndb.wrapper.HopsQuery;
 import se.sics.hop.metadata.ndb.wrapper.HopsQueryBuilder;
 import se.sics.hop.metadata.ndb.wrapper.HopsQueryDomainType;
@@ -21,78 +22,57 @@ import se.sics.hop.metadata.yarn.tabledef.NodeTableDef;
 
 public class NodeClusterJ implements NodeTableDef, NodeDataAccess<HopNode> {
 
-    @PersistenceCapable(table = TABLE_NAME)
-    public interface NodeDTO {
+  private static final Log LOG = LogFactory.getLog(NodeClusterJ.class);
 
-        @PrimaryKey
-        @Column(name = NODEID)
-        String getnodeid();
+  @PersistenceCapable(table = TABLE_NAME)
+  public interface NodeDTO extends RMNodeComponentDTO {
 
-        void setnodeid(String id);
+    @PrimaryKey
+    @Column(name = NODEID)
+    String getnodeid();
 
-        @Column(name = NAME)
-        String getName();
+    void setnodeid(String id);
 
-        void setName(String host);
+    @Column(name = NAME)
+    String getName();
 
-        @Column(name = LOCATION)
-        String getLocation();
+    void setName(String host);
 
-        void setLocation(String location);
+    @Column(name = LOCATION)
+    String getLocation();
 
-        @Column(name = LEVEL)
-        int getLevel();
+    void setLocation(String location);
 
-        void setLevel(int level);
+    @Column(name = LEVEL)
+    int getLevel();
 
-        @Column(name = PARENT)
-        String getParent();
+    void setLevel(int level);
 
-        void setParent(String parent);
-    }
-    private ClusterjConnector connector = ClusterjConnector.getInstance();
+    @Column(name = PARENT)
+    String getParent();
 
-    @Override
-    public HopNode findById(String id) throws StorageException {
-        HopsSession session = connector.obtainSession();
+    void setParent(String parent);
+  }
+  private final ClusterjConnector connector = ClusterjConnector.getInstance();
 
-        NodeDTO nodeDTO = null;
-        if (session != null) {
-            nodeDTO = session.find(NodeDTO.class, id);
-        }
-        if (nodeDTO == null) {
-            throw new StorageException("HOP :: Error while retrieving row:" + id);
-        }
-
+  @Override
+  public HopNode findById(String id) throws StorageException {
+    LOG.debug("HOP :: ClusterJ Node.findById - START:" + id);
+    HopsSession session = connector.obtainSession();
+    NodeDTO nodeDTO;
+    if (session != null) {
+      nodeDTO = session.find(NodeDTO.class, id);
+      LOG.debug("HOP :: ClusterJ Node.findById - FINISH:" + id);
+      if (nodeDTO != null) {
         return createHopNode(nodeDTO);
+      }
     }
+    return null;
+  }
 
-    @Override
-    public HopNode findByNameLocation(String name, String location) throws StorageException {
-        try {
-            HopsSession session = connector.obtainSession();
-            HopsQueryBuilder qb = session.getQueryBuilder();
-            HopsQueryDomainType<NodeDTO> dobj = qb.createQueryDefinition(NodeDTO.class);
-            HopsPredicate pred1 = dobj.get("name").equal(dobj.param("name"));
-            HopsPredicate pred2 = dobj.get("location").equal(dobj.param("location"));
-            pred1 = pred1.and(pred2);
-            dobj.where(pred1);
-            HopsQuery<NodeDTO> query = session.createQuery(dobj);
-            query.setParameter("name", name);
-            query.setParameter("location", location);
-            List<NodeDTO> results = query.getResultList();
-            if (results != null && !results.isEmpty()) {
-                return createHopNode(results.get(0));
-            } else {
-                throw new StorageException("HOP - findByNameLocation :: Node was not found");
-            }
-        } catch (Exception e) {
-            throw new StorageException(e);
-        }
-    }
-
-   @Override
+  @Override
   public Map<String, HopNode> getAll() throws StorageException {
+    LOG.debug("HOP :: ClusterJ Node.getAll - START");
     HopsSession session = connector.obtainSession();
     HopsQueryBuilder qb = session.getQueryBuilder();
 
@@ -100,61 +80,51 @@ public class NodeClusterJ implements NodeTableDef, NodeDataAccess<HopNode> {
     HopsQuery<NodeDTO> query = session.createQuery(dobj);
 
     List<NodeDTO> results = query.getResultList();
+    LOG.debug("HOP :: ClusterJ Node.getAll - FINISH");
     return createMap(results);
   }
-    
-    @Override
-    public void prepare(Collection<HopNode> modified, Collection<HopNode> removed) throws StorageException {
-        HopsSession session = connector.obtainSession();
-        try {
-            if (removed != null) {
-                List<NodeDTO> toRemove = new ArrayList<NodeDTO>();
-                for (HopNode node : removed) {
-                    toRemove.add(session.newInstance(NodeDTO.class, node.getId()));
-                }
-                session.deletePersistentAll(toRemove);
-            }
-            if (modified != null) {
-                List<NodeDTO> toModify = new ArrayList<NodeDTO>();
-                for (HopNode node : modified) {
-                    toModify.add(createPersistable(node, session));
-                }
-                session.savePersistentAll(toModify);
-            }
-        } catch (Exception e) {
-            throw new StorageException("Error while modifying Node, error:" + e.getMessage());
-        }
+
+  @Override
+  public void addAll(Collection<HopNode> toAdd) throws StorageException {
+    HopsSession session = connector.obtainSession();
+    List<NodeDTO> toPersist = new ArrayList<NodeDTO>();
+    for (HopNode node : toAdd) {
+      toPersist.add(createPersistable(node, session));
     }
+    session.savePersistentAll(toPersist);
+    session.flush();
+  }
 
-    @Override
-    public void createNode(HopNode node) throws StorageException {
-        HopsSession session = connector.obtainSession();
+  @Override
+  public void createNode(HopNode node) throws StorageException {
+    HopsSession session = connector.obtainSession();
+    session.savePersistent(createPersistable(node, session));
+  }
 
-        session.savePersistent(createPersistable(node, session));
+  private NodeDTO createPersistable(HopNode hopNode, HopsSession session) throws
+          StorageException {
+    NodeDTO nodeDTO = session.newInstance(NodeDTO.class);
+    //Set values to persist new rmnode
+    nodeDTO.setnodeid(hopNode.getId());
+    nodeDTO.setName(hopNode.getName());
+    nodeDTO.setLocation(hopNode.getLocation());
+    nodeDTO.setLevel(hopNode.getLevel());
+    nodeDTO.setParent(hopNode.getParent());
+    return nodeDTO;
+  }
 
-    }
+  /**
+   * Transforms a DTO to Hop object.
+   *
+   * <p>
+   * @param nodeDTO
+   * @return HopRMNode
+   */
+  public static HopNode createHopNode(NodeDTO nodeDTO) {
+    return new HopNode(nodeDTO.getnodeid(), nodeDTO.getName(), nodeDTO.
+            getLocation(), nodeDTO.getLevel(), nodeDTO.getParent());
+  }
 
-    private NodeDTO createPersistable(HopNode hopNode, HopsSession session) throws StorageException {
-        NodeDTO nodeDTO = session.newInstance(NodeDTO.class);
-        //Set values to persist new rmnode
-        nodeDTO.setnodeid(hopNode.getId());
-        nodeDTO.setName(hopNode.getName());
-        nodeDTO.setLocation(hopNode.getLocation());
-        nodeDTO.setLevel(hopNode.getLevel());
-        nodeDTO.setParent(hopNode.getParent());
-        return nodeDTO;
-    }
-
-    /**
-     * Transforms a DTO to Hop object.
-     *
-     * @param rmDTO
-     * @return HopRMNode
-     */
-    private HopNode createHopNode(NodeDTO nodeDTO) {
-        return new HopNode(nodeDTO.getnodeid(), nodeDTO.getName(), nodeDTO.getLocation(), nodeDTO.getLevel(), nodeDTO.getParent());
-    }
-    
   private Map<String, HopNode> createMap(List<NodeDTO> results) {
     Map<String, HopNode> map = new HashMap<String, HopNode>();
     for (NodeDTO persistable : results) {

@@ -43,28 +43,11 @@ public class RMStateVersionClusterJ implements RMStateVersionTableDef, RMStateVe
         return createHopVersion(versionDTO);
     }
 
-    @Override
-    public void prepare(Collection<HopRMStateVersion> modified, Collection<HopRMStateVersion> removed) throws StorageException {
-        HopsSession session = connector.obtainSession();
-        try {
-            if (removed != null) {
-                List<VersionDTO> toRemove = new ArrayList<VersionDTO>();
-                for (HopRMStateVersion hop : removed) {
-                    toRemove.add(session.newInstance(RMStateVersionClusterJ.VersionDTO.class, hop.getId()));
-                }
-                session.deletePersistentAll(toRemove);
-            }
-            if (modified != null) {
-                List<VersionDTO> toModify = new ArrayList<VersionDTO>();
-                for (HopRMStateVersion hop : modified) {
-                    toModify.add(createPersistable(hop, session));
-                }
-                session.savePersistentAll(toModify);
-            }
-        } catch (Exception e) {
-            throw new StorageException(e);
-        }
-    }
+  @Override
+  public void add(HopRMStateVersion toAdd) throws StorageException {
+    HopsSession session = connector.obtainSession();
+    session.savePersistent(createPersistable(toAdd, session));
+  }
 
     private HopRMStateVersion createHopVersion(VersionDTO versionDTO) {
       if(versionDTO!=null){

@@ -18,90 +18,64 @@ import se.sics.hop.metadata.yarn.tabledef.FiCaSchedulerNodeTableDef;
 
 public class FiCaSchedulerNodeClusterJ implements FiCaSchedulerNodeTableDef, FiCaSchedulerNodeDataAccess<HopFiCaSchedulerNode> {
 
-    @PersistenceCapable(table = TABLE_NAME)
-    public interface FiCaSchedulerNodeDTO {
+  @PersistenceCapable(table = TABLE_NAME)
+  public interface FiCaSchedulerNodeDTO {
 
-        @PrimaryKey
-        @Column(name = RMNODEID)
-        String getrmnodeid();
+    @PrimaryKey
+    @Column(name = RMNODEID)
+    String getrmnodeid();
 
-        void setrmnodeid(String rmnodeid);
+    void setrmnodeid(String rmnodeid);
 
-        @Column(name = NODENAME)
-        String getnodename();
+    @Column(name = NODENAME)
+    String getnodename();
 
-        void setnodename(String nodename);
+    void setnodename(String nodename);
 
-        @Column(name = NUMCONTAINERS)
-        int getnumcontainers();
+    @Column(name = NUMCONTAINERS)
+    int getnumcontainers();
 
-        void setnumcontainers(int numcontainers);
+    void setnumcontainers(int numcontainers);
 
+  }
+  private final ClusterjConnector connector = ClusterjConnector.getInstance();
+
+  @Override
+
+  public void add(HopFiCaSchedulerNode toAdd) throws
+          StorageException {
+    HopsSession session = connector.obtainSession();
+    FiCaSchedulerNodeDTO persistable = createPersistable(toAdd, session);
+    session.savePersistent(persistable);
+  }
+
+  @Override
+  public void addAll(Collection<HopFiCaSchedulerNode> toAdd) throws
+          StorageException {
+    HopsSession session = connector.obtainSession();
+    List<FiCaSchedulerNodeDTO> toPersist = new ArrayList<FiCaSchedulerNodeDTO>();
+    for (HopFiCaSchedulerNode hop : toAdd) {
+      FiCaSchedulerNodeDTO persistable = createPersistable(hop, session);
+      toPersist.add(persistable);
+
+      session.savePersistentAll(toPersist);
     }
-    private ClusterjConnector connector = ClusterjConnector.getInstance();
+  }
 
-    @Override
-    public HopFiCaSchedulerNode findById(String id) throws StorageException {
-        HopsSession session = connector.obtainSession();
-
-        FiCaSchedulerNodeDTO ficaschedulernodeDTO = null;
-        if (session != null) {
-            ficaschedulernodeDTO = session.find(FiCaSchedulerNodeDTO.class, id);
-        }
-        if (ficaschedulernodeDTO == null) {
-            throw new StorageException("HOP :: Error while retrieving row");
-        }
-
-        return createHopFiCaSchedulerNode(ficaschedulernodeDTO);
+  @Override
+  public void removeAll(Collection<HopFiCaSchedulerNode> toRemove) throws
+          StorageException {
+    HopsSession session = connector.obtainSession();
+    List<FiCaSchedulerNodeDTO> toPersist = new ArrayList<FiCaSchedulerNodeDTO>();
+    for (HopFiCaSchedulerNode hop : toRemove) {
+      FiCaSchedulerNodeDTO persistable = session.newInstance(
+              FiCaSchedulerNodeDTO.class, hop.getRmnodeId());
+      toPersist.add(persistable);
     }
+    session.deletePersistentAll(toPersist);
+  }
 
-    @Override
-    public void prepare(Collection<HopFiCaSchedulerNode> modified, Collection<HopFiCaSchedulerNode> removed) throws StorageException {
-        HopsSession session = connector.obtainSession();
-        try {
-            if (removed != null) {
-                List<FiCaSchedulerNodeDTO> toRemove = new ArrayList<FiCaSchedulerNodeDTO>();
-                for (HopFiCaSchedulerNode hop : removed) {
-                    FiCaSchedulerNodeDTO persistable = session.newInstance(FiCaSchedulerNodeDTO.class, hop.getRmnodeId());
-                    toRemove.add(persistable);
-                }
-                session.deletePersistentAll(toRemove);
-            }
-            if (modified != null) {
-                List<FiCaSchedulerNodeDTO> toModify = new ArrayList<FiCaSchedulerNodeDTO>();
-                for (HopFiCaSchedulerNode hop : modified) {
-                    FiCaSchedulerNodeDTO persistable = createPersistable(hop, session);
-                    toModify.add(persistable);
-                }
-                session.savePersistentAll(toModify);
-            }
-        } catch (Exception e) {
-            throw new StorageException(e);
-        }
-    }
-
-    @Override
-    public void createFiCaSchedulerNode(HopFiCaSchedulerNode node) throws StorageException {
-        HopsSession session = connector.obtainSession();
-        session.savePersistent(createPersistable(node, session));
-    }
-
-    private HopFiCaSchedulerNode createHopFiCaSchedulerNode(FiCaSchedulerNodeDTO ficaschedulernodeDTO) {
-        HopFiCaSchedulerNode hop = new HopFiCaSchedulerNode(ficaschedulernodeDTO.getrmnodeid(),
-                ficaschedulernodeDTO.getnodename(),
-                ficaschedulernodeDTO.getnumcontainers());
-        return hop;
-    }
-
-    private FiCaSchedulerNodeDTO createPersistable(HopFiCaSchedulerNode hop, HopsSession session) throws StorageException {
-        FiCaSchedulerNodeDTO ficaDTO = session.newInstance(FiCaSchedulerNodeDTO.class);
-        ficaDTO.setrmnodeid(hop.getRmnodeId());
-        ficaDTO.setnodename(hop.getNodeName());
-        ficaDTO.setnumcontainers(hop.getNumOfContainers());
-        return ficaDTO;
-    }
-
-    @Override
+      @Override
     public List<HopFiCaSchedulerNode> getAll() throws StorageException {
         try {
             HopsSession session = connector.obtainSession();
@@ -116,17 +90,30 @@ public class FiCaSchedulerNodeClusterJ implements FiCaSchedulerNodeTableDef, FiC
             throw new StorageException(e);
         }
     }
-
-    private List<HopFiCaSchedulerNode> createFiCaSchedulerNodeList(List<FiCaSchedulerNodeClusterJ.FiCaSchedulerNodeDTO> results) {
-        List<HopFiCaSchedulerNode> fifoSchedulerNodes = new ArrayList<HopFiCaSchedulerNode>();
-        for (FiCaSchedulerNodeClusterJ.FiCaSchedulerNodeDTO persistable : results) {
-            fifoSchedulerNodes.add(createFiCaSchedulerNode(persistable));
-        }
-        return fifoSchedulerNodes;
+    
+    
+    private FiCaSchedulerNodeDTO createPersistable(HopFiCaSchedulerNode hop, HopsSession session) throws StorageException {
+        FiCaSchedulerNodeDTO ficaDTO = session.newInstance(FiCaSchedulerNodeDTO.class);
+        ficaDTO.setrmnodeid(hop.getRmnodeId());
+        ficaDTO.setnodename(hop.getNodeName());
+        ficaDTO.setnumcontainers(hop.getNumOfContainers());
+        return ficaDTO;
     }
 
-    private HopFiCaSchedulerNode createFiCaSchedulerNode(FiCaSchedulerNodeDTO entry) {
-        HopFiCaSchedulerNode hop = new HopFiCaSchedulerNode(entry.getrmnodeid(), entry.getnodename(), entry.getnumcontainers());
-        return hop;
+  private List<HopFiCaSchedulerNode> createFiCaSchedulerNodeList(
+          List<FiCaSchedulerNodeClusterJ.FiCaSchedulerNodeDTO> results) {
+    List<HopFiCaSchedulerNode> fifoSchedulerNodes
+            = new ArrayList<HopFiCaSchedulerNode>();
+    for (FiCaSchedulerNodeClusterJ.FiCaSchedulerNodeDTO persistable : results) {
+      fifoSchedulerNodes.add(createHopFiCaSchedulerNode(persistable));
     }
+    return fifoSchedulerNodes;
+  }
+
+  private HopFiCaSchedulerNode createHopFiCaSchedulerNode(
+          FiCaSchedulerNodeDTO entry) {
+    HopFiCaSchedulerNode hop = new HopFiCaSchedulerNode(entry.getrmnodeid(),
+            entry.getnodename(), entry.getnumcontainers());
+    return hop;
+  }
 }

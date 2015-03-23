@@ -3,12 +3,13 @@ package se.sics.hop.metadata.ndb.dalimpl.yarn;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.entity.yarn.HopFinishedApplications;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
@@ -22,45 +23,55 @@ import se.sics.hop.metadata.yarn.tabledef.FinishedApplicationsTableDef;
 
 public class FinishedApplicationsClusterJ implements FinishedApplicationsTableDef, FinishedApplicationsDataAccess<HopFinishedApplications> {
 
-    @PersistenceCapable(table = TABLE_NAME)
-    public interface FinishedApplicationsDTO {
+  private static final Log LOG = LogFactory.getLog(
+          FinishedApplicationsClusterJ.class);
 
-        @PrimaryKey
-        @Column(name = RMNODEID)
-        String getrmnodeid();
+  @PersistenceCapable(table = TABLE_NAME)
+  public interface FinishedApplicationsDTO {
 
-        void setrmnodeid(String rmnodeid);
+    @PrimaryKey
+    @Column(name = RMNODEID)
+    String getrmnodeid();
 
-        @PrimaryKey
-        @Column(name = APPLICATIONID)
-        String getapplicationid();
+    void setrmnodeid(String rmnodeid);
 
-        void setapplicationid(String applicationid);
+    @PrimaryKey
+    @Column(name = APPLICATIONID)
+    String getapplicationid();
+
+    void setapplicationid(String applicationid);
+  }
+  private final ClusterjConnector connector = ClusterjConnector.getInstance();
+
+  @Override
+  public List<HopFinishedApplications> findByRMNode(String rmnodeid) throws
+          StorageException {
+    LOG.debug("HOP :: ClusterJ FinishedApplications.findByRMNode - START:"
+            + rmnodeid);
+    HopsSession session = connector.obtainSession();
+    HopsQueryBuilder qb = session.getQueryBuilder();
+
+    HopsQueryDomainType<FinishedApplicationsDTO> dobj = qb.
+            createQueryDefinition(FinishedApplicationsDTO.class);
+    HopsPredicate pred1 = dobj.get(RMNODEID).equal(dobj.param(RMNODEID));
+    dobj.where(pred1);
+
+    HopsQuery<FinishedApplicationsDTO> query = session.createQuery(dobj);
+    query.setParameter(RMNODEID, rmnodeid);
+    List<FinishedApplicationsDTO> results = query.getResultList();
+    LOG.debug("HOP :: ClusterJ FinishedApplications.findByRMNode - FINISH:"
+            + rmnodeid);
+    if (results != null && !results.isEmpty()) {
+      return createUpdatedContainerInfoList(results);
     }
-    private ClusterjConnector connector = ClusterjConnector.getInstance();
+    return null;
 
-    @Override
-    public List<HopFinishedApplications> findByRMNode(String rmnodeid) throws StorageException {
-        try {
-            HopsSession session = connector.obtainSession();
-            HopsQueryBuilder qb = session.getQueryBuilder();
-
-            HopsQueryDomainType<FinishedApplicationsDTO> dobj = qb.createQueryDefinition(FinishedApplicationsDTO.class);
-            HopsPredicate pred1 = dobj.get("rmnodeid").equal(dobj.param("rmnodeid"));
-            dobj.where(pred1);
-
-            HopsQuery<FinishedApplicationsDTO> query = session.createQuery(dobj);
-            query.setParameter("rmnodeid", rmnodeid);
-            List<FinishedApplicationsDTO> results = query.getResultList();
-            return createUpdatedContainerInfoList(results);
-        } catch (Exception e) {
-            throw new StorageException(e);
-        }
-    }
+  }
 
   @Override
   public Map<String, List<HopFinishedApplications>> getAll() throws
           StorageException {
+    LOG.debug("HOP :: ClusterJ FinishedApplications.getAll - START");
     HopsSession session = connector.obtainSession();
     HopsQueryBuilder qb = session.getQueryBuilder();
     HopsQueryDomainType<FinishedApplicationsDTO> dobj
@@ -70,64 +81,60 @@ public class FinishedApplicationsClusterJ implements FinishedApplicationsTableDe
             createQuery(dobj);
     List<FinishedApplicationsDTO> results = query.
             getResultList();
+    LOG.debug("HOP :: ClusterJ FinishedApplications.getAll - FINISH");
     return createMap(results);
   }
-    
-    @Override
-    public HopFinishedApplications findEntry(String rmnodeId, int applicationId) throws StorageException {
-        HopsSession session = connector.obtainSession();
-        Object[] pk = new Object[2];
-        pk[0] = rmnodeId;
-        pk[1] = applicationId;
-        FinishedApplicationsDTO dto = session.find(FinishedApplicationsDTO.class, pk);
-        if (dto == null) {
-            throw new StorageException("Error while retrieving finishedapplication:" + rmnodeId + "," + applicationId);
-        }
-        return createHopFinishedApplications(dto);
-    }
 
-    @Override
-    public void prepare(Collection<HopFinishedApplications> modified, Collection<HopFinishedApplications> removed) throws StorageException {
-        HopsSession session = connector.obtainSession();
-        try {
-            if (removed != null) {
-                List<FinishedApplicationsDTO> toRemove = new ArrayList<FinishedApplicationsDTO>();
-                for (HopFinishedApplications entry : removed) {
-                    toRemove.add(createPersistable(entry, session));
-                }
-                session.deletePersistentAll(toRemove);
-            }
-            if (modified != null) {
-                List<FinishedApplicationsDTO> toModify = new ArrayList<FinishedApplicationsDTO>();
-                for (HopFinishedApplications entry : modified) {
-                    toModify.add(createPersistable(entry, session));
-                }
-                session.savePersistentAll(toModify);
-            }
-        } catch (Exception e) {
-            throw new StorageException("Error while rmnode table:" + e.getMessage());
-        }
+  @Override
+  public void addAll(Collection<HopFinishedApplications> applications) throws
+          StorageException {
+    HopsSession session = connector.obtainSession();
+    List<FinishedApplicationsDTO> toModify
+            = new ArrayList<FinishedApplicationsDTO>();
+    for (HopFinishedApplications entry : applications) {
+      toModify.add(createPersistable(entry, session));
     }
+    session.savePersistentAll(toModify);
+    session.flush();
+  }
 
-    private HopFinishedApplications createHopFinishedApplications(FinishedApplicationsDTO dto) {
-        return new HopFinishedApplications(dto.getrmnodeid(), dto.getapplicationid());
+  @Override
+  public void removeAll(Collection<HopFinishedApplications> applications) throws
+          StorageException {
+    HopsSession session = connector.obtainSession();
+    List<FinishedApplicationsDTO> toRemove
+            = new ArrayList<FinishedApplicationsDTO>();
+    for (HopFinishedApplications entry : applications) {
+      toRemove.add(createPersistable(entry, session));
     }
+    session.deletePersistentAll(toRemove);
+    session.flush();
+  }
 
-    private FinishedApplicationsDTO createPersistable(HopFinishedApplications hop, HopsSession session) throws StorageException {
-        FinishedApplicationsDTO dto = session.newInstance(FinishedApplicationsDTO.class);
-        dto.setrmnodeid(hop.getRMNodeID());
-        dto.setapplicationid(hop.getApplicationId());
-        return dto;
-    }
+  private HopFinishedApplications createHopFinishedApplications(
+          FinishedApplicationsDTO dto) {
+    return new HopFinishedApplications(dto.getrmnodeid(), dto.getapplicationid());
+  }
 
-    private List<HopFinishedApplications> createUpdatedContainerInfoList(List<FinishedApplicationsDTO> list) throws IOException {
-        List<HopFinishedApplications> finishedApps = new ArrayList<HopFinishedApplications>();
-        for (FinishedApplicationsDTO persistable : list) {
-            finishedApps.add(createHopFinishedApplications(persistable));
-        }
-        return finishedApps;
+  private FinishedApplicationsDTO createPersistable(HopFinishedApplications hop,
+          HopsSession session) throws StorageException {
+    FinishedApplicationsDTO dto = session.newInstance(
+            FinishedApplicationsDTO.class);
+    dto.setrmnodeid(hop.getRMNodeID());
+    dto.setapplicationid(hop.getApplicationId());
+    return dto;
+  }
+
+  private List<HopFinishedApplications> createUpdatedContainerInfoList(
+          List<FinishedApplicationsDTO> list) {
+    List<HopFinishedApplications> finishedApps
+            = new ArrayList<HopFinishedApplications>();
+    for (FinishedApplicationsDTO persistable : list) {
+      finishedApps.add(createHopFinishedApplications(persistable));
     }
-    
+    return finishedApps;
+  }
+
   private Map<String, List<HopFinishedApplications>> createMap(
           List<FinishedApplicationsDTO> results) {
     Map<String, List<HopFinishedApplications>> map

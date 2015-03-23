@@ -8,6 +8,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.entity.yarn.HopJustLaunchedContainers;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
@@ -21,141 +23,132 @@ import se.sics.hop.metadata.yarn.tabledef.JustLaunchedContainersTableDef;
 
 public class JustLaunchedContainersClusterJ implements JustLaunchedContainersTableDef, JustLaunchedContainersDataAccess<HopJustLaunchedContainers> {
 
-    @PersistenceCapable(table = TABLE_NAME)
-    public interface JustLaunchedContainersDTO {
+  private static final Log LOG = LogFactory.getLog(
+          JustLaunchedContainersClusterJ.class);
 
-        @PrimaryKey
-        @Column(name = RMNODEID)
-        String getrmnodeid();
+  @PersistenceCapable(table = TABLE_NAME)
+  public interface JustLaunchedContainersDTO {
 
-        void setrmnodeid(String rmnodeid);
+    @PrimaryKey
+    @Column(name = RMNODEID)
+    String getrmnodeid();
 
-        @PrimaryKey
-        @Column(name = CONTAINERID)
-        String getcontainerid();
+    void setrmnodeid(String rmnodeid);
 
-        void setcontainerid(String containerid);
+    @PrimaryKey
+    @Column(name = CONTAINERID)
+    String getcontainerid();
 
-    }
-    private ClusterjConnector connector = ClusterjConnector.getInstance();
+    void setcontainerid(String containerid);
 
-    @Override
-    public HopJustLaunchedContainers findEntry(String rmnodeid, int commandport, int containerid) throws StorageException {
-        HopsSession session = connector.obtainSession();
-        Object[] objarr = new Object[2];
-        objarr[0] = rmnodeid;
-        objarr[1] = containerid;
-        JustLaunchedContainersDTO container = null;
-        if (session != null) {
-            container = session.find(JustLaunchedContainersDTO.class, objarr);
-        }
-        if (container == null) {
-            throw new StorageException("HOP :: Error while retrieving row");
-        }
-
-        return createJustLaunchedContainers(container);
-    }
-
-    @Override
-    public void prepare(Collection<HopJustLaunchedContainers> modified, Collection<HopJustLaunchedContainers> removed) throws StorageException {
-        HopsSession session = connector.obtainSession();
-        try {
-            if (removed != null) {
-                List<JustLaunchedContainersDTO> toRemove = new ArrayList<JustLaunchedContainersDTO>(removed.size());
-                for (HopJustLaunchedContainers hopContainerId : removed) {
-                    Object[] objarr = new Object[2];
-                    objarr[0] = hopContainerId.getRmnodeid();
-                    objarr[1] = hopContainerId.getContainerId();
-                    toRemove.add(session.newInstance(JustLaunchedContainersDTO.class, objarr));
-                }
-                session.deletePersistentAll(toRemove);
-            }
-            if (modified != null) {
-                List<JustLaunchedContainersDTO> toModify = new ArrayList<JustLaunchedContainersDTO>(modified.size());
-                for (HopJustLaunchedContainers hop : modified) {
-                    toModify.add(createPersistable(hop, session));
-                }
-                session.savePersistentAll(toModify);
-            }
-        } catch (Exception e) {
-            throw new StorageException(e);
-        }
-    }
-
-    @Override
-    public List<HopJustLaunchedContainers> findAll() throws StorageException {
-        try {
-            HopsSession session = connector.obtainSession();
-            HopsQueryBuilder qb = session.getQueryBuilder();
-
-            HopsQueryDomainType<JustLaunchedContainersDTO> dobj = qb.createQueryDefinition(JustLaunchedContainersDTO.class);
-            HopsQuery<JustLaunchedContainersDTO> query = session.createQuery(dobj);
-
-            List<JustLaunchedContainersDTO> results = query.getResultList();
-            return createJustLaunchedContainersList(results);
-        } catch (Exception e) {
-            throw new StorageException(e);
-        }
-    }
-
-    @Override
-    public List<HopJustLaunchedContainers> findByRMNode(String rmnodeId) throws StorageException {
-        try {
-            HopsSession session = connector.obtainSession();
-            HopsQueryBuilder qb = session.getQueryBuilder();
-
-            HopsQueryDomainType<JustLaunchedContainersDTO> dobj = qb.createQueryDefinition(JustLaunchedContainersDTO.class);
-            HopsPredicate pred = dobj.get("rmnodeid").equal(dobj.param("rmnodeid"));
-            dobj.where(pred);
-            HopsQuery<JustLaunchedContainersDTO> query = session.createQuery(dobj);
-            query.setParameter("rmnodeid", rmnodeId);
-            List<JustLaunchedContainersDTO> results = query.getResultList();
-            return createJustLaunchedContainersList(results);
-        } catch (Exception e) {
-            throw new StorageException(e);
-        }
-    }
+  }
+  private final ClusterjConnector connector = ClusterjConnector.getInstance();
 
   @Override
-  public Map<String, List<HopJustLaunchedContainers>> getAll() throws StorageException {
+  public void addAll(Collection<HopJustLaunchedContainers> containers) throws
+          StorageException {
+    HopsSession session = connector.obtainSession();
+    List<JustLaunchedContainersDTO> toModify
+            = new ArrayList<JustLaunchedContainersDTO>(containers.size());
+    for (HopJustLaunchedContainers hop : containers) {
+      toModify.add(createPersistable(hop, session));
+    }
+    session.savePersistentAll(toModify);
+    session.flush();
+  }
+
+  @Override
+  public void removeAll(Collection<HopJustLaunchedContainers> containers) throws
+          StorageException {
+    HopsSession session = connector.obtainSession();
+    List<JustLaunchedContainersDTO> toRemove
+            = new ArrayList<JustLaunchedContainersDTO>(containers.size());
+    for (HopJustLaunchedContainers hopContainerId : containers) {
+      Object[] objarr = new Object[2];
+      objarr[0] = hopContainerId.getRmnodeid();
+      objarr[1] = hopContainerId.getContainerId();
+      toRemove.add(session.newInstance(JustLaunchedContainersDTO.class, objarr));
+    }
+    session.deletePersistentAll(toRemove);
+    session.flush();
+  }
+
+  @Override
+  public List<HopJustLaunchedContainers> findByRMNode(String rmnodeId) throws
+          StorageException {
+    LOG.debug("HOP :: ClusterJ JustLaunchedContainers.findByRMNode - START:"
+            + rmnodeId);
     HopsSession session = connector.obtainSession();
     HopsQueryBuilder qb = session.getQueryBuilder();
 
-    HopsQueryDomainType<JustLaunchedContainersDTO> dobj = qb.createQueryDefinition(
-            JustLaunchedContainersDTO.class);
+    HopsQueryDomainType<JustLaunchedContainersDTO> dobj = qb.
+            createQueryDefinition(JustLaunchedContainersDTO.class);
+    HopsPredicate pred = dobj.get(RMNODEID).equal(dobj.param(RMNODEID));
+    dobj.where(pred);
     HopsQuery<JustLaunchedContainersDTO> query = session.createQuery(dobj);
-
+    query.setParameter(RMNODEID, rmnodeId);
     List<JustLaunchedContainersDTO> results = query.getResultList();
-    return createMap(results);
+    LOG.debug("HOP :: ClusterJ JustLaunchedContainers.findByRMNode - FINISH:"
+            + rmnodeId);
+    if (results != null && !results.isEmpty()) {
+      return createJustLaunchedContainersList(results);
+    }
+    return null;
   }
 
-    private HopJustLaunchedContainers createJustLaunchedContainers(JustLaunchedContainersDTO dto) {
-        HopJustLaunchedContainers hop = new HopJustLaunchedContainers(dto.getrmnodeid(), dto.getcontainerid());
-        return hop;
+  @Override
+  public Map<String, List<HopJustLaunchedContainers>> getAll() throws
+          StorageException {
+    LOG.debug("HOP :: ClusterJ JustLaunchedContainers.getAll - START");
+    HopsSession session = connector.obtainSession();
+    HopsQueryBuilder qb = session.getQueryBuilder();
+    HopsQueryDomainType<JustLaunchedContainersDTO> dobj = qb.
+            createQueryDefinition(
+                    JustLaunchedContainersDTO.class);
+    HopsQuery<JustLaunchedContainersDTO> query = session.createQuery(dobj);
+    List<JustLaunchedContainersDTO> results = query.getResultList();
+    LOG.debug("HOP :: ClusterJ JustLaunchedContainers.getAll - FINISH");
+    if (results != null && !results.isEmpty()) {
+      return createMap(results);
+    } else {
+      return null;
     }
+  }
 
-    /**
-     * Persist new map entry.
-     *
-     * @param entry
-     * @param session
-     * @return
-     */
-    private JustLaunchedContainersDTO createPersistable(HopJustLaunchedContainers entry, HopsSession session) throws StorageException {
-        JustLaunchedContainersDTO dto = session.newInstance(JustLaunchedContainersDTO.class);
-        dto.setcontainerid(entry.getContainerId());
-        dto.setrmnodeid(entry.getRmnodeid());
-        return dto;
-    }
+  private HopJustLaunchedContainers createJustLaunchedContainers(
+          JustLaunchedContainersDTO dto) {
+    HopJustLaunchedContainers hop = new HopJustLaunchedContainers(dto.
+            getrmnodeid(), dto.getcontainerid());
+    return hop;
+  }
 
-    private List<HopJustLaunchedContainers> createJustLaunchedContainersList(List<JustLaunchedContainersDTO> results) {
-        List<HopJustLaunchedContainers> justLaunchedContainers = new ArrayList<HopJustLaunchedContainers>();
-        for (JustLaunchedContainersDTO persistable : results) {
-            justLaunchedContainers.add(createJustLaunchedContainers(persistable));
-        }
-        return justLaunchedContainers;
+  /**
+   * Persist new map entry.
+   *
+   * @param entry
+   * @param session
+   * @return
+   */
+  private JustLaunchedContainersDTO createPersistable(
+          HopJustLaunchedContainers entry, HopsSession session) throws
+          StorageException {
+    JustLaunchedContainersDTO dto = session.newInstance(
+            JustLaunchedContainersDTO.class);
+    dto.setcontainerid(entry.getContainerId());
+    dto.setrmnodeid(entry.getRmnodeid());
+    return dto;
+  }
+
+  private List<HopJustLaunchedContainers> createJustLaunchedContainersList(
+          List<JustLaunchedContainersDTO> results) {
+    List<HopJustLaunchedContainers> justLaunchedContainers
+            = new ArrayList<HopJustLaunchedContainers>();
+    for (JustLaunchedContainersDTO persistable : results) {
+      justLaunchedContainers.add(createJustLaunchedContainers(persistable));
     }
-    
+    return justLaunchedContainers;
+  }
+
   private Map<String, List<HopJustLaunchedContainers>> createMap(
           List<JustLaunchedContainersDTO> results) {
     Map<String, List<HopJustLaunchedContainers>> map

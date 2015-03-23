@@ -56,10 +56,13 @@ import se.sics.hop.metadata.ndb.dalimpl.yarn.capacity.FiCaSchedulerAppReservedCo
 import se.sics.hop.metadata.ndb.dalimpl.yarn.capacity.FiCaSchedulerAppSchedulingOpportunitiesClusterJ;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.FiCaSchedulerNodeClusterJ;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.FinishedApplicationsClusterJ;
+import se.sics.hop.metadata.ndb.dalimpl.yarn.FullRMNodeClusterJ;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.JustLaunchedContainersClusterJ;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.LaunchedContainersClusterJ;
+import se.sics.hop.metadata.ndb.dalimpl.yarn.NextHeartbeatClusterJ;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.NodeClusterJ;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.NodeHBResponseClusterJ;
+import se.sics.hop.metadata.ndb.dalimpl.yarn.PendingEventClusterJ;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.QueueMetricsClusterJ;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.RMContainerClusterJ;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.RMContextInactiveNodesClusterJ;
@@ -73,7 +76,7 @@ import se.sics.hop.metadata.ndb.dalimpl.yarn.UpdatedContainerInfoClusterJ;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.YarnVariablesClusterJ;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.fair.FSSchedulerNodeClusterJ;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.rmstatestore.AllocateResponseClusterJ;
-import se.sics.hop.metadata.ndb.dalimpl.yarn.rmstatestore.AppMasterRPCClusterJ;
+import se.sics.hop.metadata.ndb.dalimpl.yarn.rmstatestore.RPCClusterJ;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.rmstatestore.ApplicationAttemptStateClusterJ;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.rmstatestore.ApplicationStateClusterJ;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.rmstatestore.DelegationKeyClusterJ;
@@ -95,10 +98,13 @@ import se.sics.hop.metadata.yarn.dal.capacity.FiCaSchedulerAppReservedContainers
 import se.sics.hop.metadata.yarn.dal.capacity.FiCaSchedulerAppSchedulingOpportunitiesDataAccess;
 import se.sics.hop.metadata.yarn.dal.FiCaSchedulerNodeDataAccess;
 import se.sics.hop.metadata.yarn.dal.FinishedApplicationsDataAccess;
+import se.sics.hop.metadata.yarn.dal.FullRMNodeDataAccess;
 import se.sics.hop.metadata.yarn.dal.JustLaunchedContainersDataAccess;
 import se.sics.hop.metadata.yarn.dal.LaunchedContainersDataAccess;
+import se.sics.hop.metadata.yarn.dal.NextHeartbeatDataAccess;
 import se.sics.hop.metadata.yarn.dal.NodeDataAccess;
 import se.sics.hop.metadata.yarn.dal.NodeHBResponseDataAccess;
+import se.sics.hop.metadata.yarn.dal.PendingEventDataAccess;
 import se.sics.hop.metadata.yarn.dal.QueueMetricsDataAccess;
 import se.sics.hop.metadata.yarn.dal.RMContainerDataAccess;
 import se.sics.hop.metadata.yarn.dal.RMContextInactiveNodesDataAccess;
@@ -112,7 +118,7 @@ import se.sics.hop.metadata.yarn.dal.UpdatedContainerInfoDataAccess;
 import se.sics.hop.metadata.yarn.dal.YarnVariablesDataAccess;
 import se.sics.hop.metadata.yarn.dal.fair.FSSchedulerNodeDataAccess;
 import se.sics.hop.metadata.yarn.dal.rmstatestore.AllocateResponseDataAccess;
-import se.sics.hop.metadata.yarn.dal.rmstatestore.AppMasterRPCDataAccess;
+import se.sics.hop.metadata.yarn.dal.rmstatestore.RPCDataAccess;
 import se.sics.hop.metadata.yarn.dal.rmstatestore.ApplicationAttemptStateDataAccess;
 import se.sics.hop.metadata.yarn.dal.rmstatestore.ApplicationStateDataAccess;
 import se.sics.hop.metadata.yarn.dal.rmstatestore.DelegationKeyDataAccess;
@@ -144,7 +150,7 @@ public class NdbStorageFactory implements DALStorageFactory {
     dataAccessMap.put(SequenceNumberDataAccess.class, new SequenceNumberClusterJ());
     dataAccessMap.put(DelegationKeyDataAccess.class, new DelegationKeyClusterJ());
     dataAccessMap.put(YarnVariablesDataAccess.class, new YarnVariablesClusterJ());
-    dataAccessMap.put(AppMasterRPCDataAccess.class, new AppMasterRPCClusterJ());
+    dataAccessMap.put(RPCDataAccess.class, new RPCClusterJ());
     dataAccessMap.put(QueueMetricsDataAccess.class, new QueueMetricsClusterJ());
     dataAccessMap.put(FiCaSchedulerNodeDataAccess.class, new FiCaSchedulerNodeClusterJ());
     dataAccessMap.put(ResourceDataAccess.class, new ResourceClusterJ());
@@ -196,8 +202,11 @@ public class NdbStorageFactory implements DALStorageFactory {
     dataAccessMap.put(QuotaUpdateDataAccess.class, new QuotaUpdateClusterj());
     dataAccessMap.put(SecretMamagerKeysDataAccess.class, new SecretMamagerKeysClusterJ());
     dataAccessMap.put(AllocateResponseDataAccess.class, new AllocateResponseClusterJ());
+    dataAccessMap.put(PendingEventDataAccess.class, new PendingEventClusterJ());
     dataAccessMap.put(BlockChecksumDataAccess.class, new BlockChecksumClusterj());
+    dataAccessMap.put(NextHeartbeatDataAccess.class, new NextHeartbeatClusterJ());
     dataAccessMap.put(RMLoadDataAccess.class, new RMLoadClusterJ());
+    dataAccessMap.put(FullRMNodeDataAccess.class, new FullRMNodeClusterJ());
   }
 
   @Override

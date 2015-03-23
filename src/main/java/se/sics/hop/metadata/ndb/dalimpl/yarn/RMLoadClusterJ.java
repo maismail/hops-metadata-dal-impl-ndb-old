@@ -33,7 +33,7 @@ public class RMLoadClusterJ implements RMLoadTableDef, RMLoadDataAccess<HopLoad>
 
     void setload(long load);
   }
-  private ClusterjConnector connector = ClusterjConnector.getInstance();
+  private final ClusterjConnector connector = ClusterjConnector.getInstance();
 
   @Override
   public void update(HopLoad entry) throws StorageException {

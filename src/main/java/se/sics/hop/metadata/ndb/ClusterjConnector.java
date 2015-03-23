@@ -68,7 +68,7 @@ import se.sics.hop.metadata.ndb.dalimpl.hdfs.YarnLeaderClusterj;
 import se.sics.hop.metadata.ndb.dalimpl.yarn.YarnVariablesClusterJ;
 import se.sics.hop.metadata.yarn.dal.AppSchedulingInfoBlacklistDataAccess;
 import se.sics.hop.metadata.yarn.dal.AppSchedulingInfoDataAccess;
-import se.sics.hop.metadata.yarn.dal.rmstatestore.AppMasterRPCDataAccess;
+import se.sics.hop.metadata.yarn.dal.rmstatestore.RPCDataAccess;
 import se.sics.hop.metadata.yarn.dal.ContainerDataAccess;
 import se.sics.hop.metadata.yarn.dal.ContainerIdToCleanDataAccess;
 import se.sics.hop.metadata.yarn.dal.ContainerStatusDataAccess;
@@ -91,7 +91,6 @@ import se.sics.hop.metadata.yarn.dal.RMNodeDataAccess;
 import se.sics.hop.metadata.yarn.dal.ResourceDataAccess;
 import se.sics.hop.metadata.yarn.dal.ResourceRequestDataAccess;
 import se.sics.hop.metadata.yarn.dal.SchedulerApplicationDataAccess;
-import se.sics.hop.metadata.yarn.dal.TokenDataAccess;
 import se.sics.hop.metadata.yarn.dal.UpdatedContainerInfoDataAccess;
 import se.sics.hop.metadata.yarn.dal.YarnVariablesDataAccess;
 import se.sics.hop.metadata.yarn.dal.rmstatestore.ApplicationAttemptStateDataAccess;
@@ -124,13 +123,14 @@ import se.sics.hop.metadata.yarn.tabledef.RMNodeTableDef;
 import se.sics.hop.metadata.yarn.tabledef.ResourceRequestTableDef;
 import se.sics.hop.metadata.yarn.tabledef.ResourceTableDef;
 import se.sics.hop.metadata.yarn.tabledef.SchedulerApplicationTableDef;
-import se.sics.hop.metadata.yarn.tabledef.TokenTableDef;
 import se.sics.hop.metadata.yarn.tabledef.UpdatedContainerInfoTableDef;
 import se.sics.hop.metadata.yarn.tabledef.rmstatestore.SequenceNumberTableDef;
 import se.sics.hop.metadata.ndb.mysqlserver.HopsSQLExceptionHelper;
 import se.sics.hop.metadata.ndb.mysqlserver.MysqlServerConnector;
+import se.sics.hop.metadata.yarn.dal.PendingEventDataAccess;
 import se.sics.hop.metadata.yarn.dal.rmstatestore.AllocateResponseDataAccess;
 import se.sics.hop.metadata.yarn.dal.rmstatestore.SecretMamagerKeysDataAccess;
+import se.sics.hop.metadata.yarn.tabledef.PendingEventTableDef;
 import se.sics.hop.metadata.yarn.tabledef.rmstatestore.AllocateResponseTableDef;
 import se.sics.hop.metadata.yarn.tabledef.rmstatestore.SecretMamagerKeysTableDef;
 import se.sics.hop.metadata.ndb.wrapper.HopsSession;
@@ -142,11 +142,13 @@ import se.sics.hop.metadata.hdfs.dal.HdfsLeDescriptorDataAccess;
 import se.sics.hop.metadata.hdfs.dal.YarnLeDescriptorDataAccess;
 import se.sics.hop.metadata.hdfs.tabledef.HdfsLeaderTableDef;
 import se.sics.hop.metadata.hdfs.tabledef.YarnLeaderTableDef;
+import se.sics.hop.metadata.yarn.dal.NextHeartbeatDataAccess;
+import se.sics.hop.metadata.yarn.tabledef.NextHeartbeatTableDef;
 import se.sics.hop.metadata.yarn.dal.RMLoadDataAccess;
 import se.sics.hop.metadata.yarn.tabledef.RMLoadTableDef;
 import se.sics.hop.metadata.yarn.tabledef.rmstatestore.ApplicationAttemptStateTableDef;
 import se.sics.hop.metadata.yarn.tabledef.rmstatestore.ApplicationStateTableDef;
-import se.sics.hop.metadata.yarn.tabledef.appmasterrpc.AppMasterRPCTableDef;
+import se.sics.hop.metadata.yarn.tabledef.appmasterrpc.RPCTableDef;
 import se.sics.hop.metadata.yarn.tabledef.rmstatestore.DelegationKeyTableDef;
 import se.sics.hop.metadata.yarn.tabledef.rmstatestore.DelegationTokenTableDef;
 import se.sics.hop.metadata.yarn.tabledef.rmstatestore.RMStateVersionTableDef;
@@ -209,6 +211,8 @@ public class ClusterjConnector implements StorageConnector<DBSession> {
 
   /**
    * begin a transaction.
+   * @param name
+   * @throws se.sics.hop.exception.StorageException
    */
   @Override
   public void beginTransaction() throws StorageException {
@@ -222,6 +226,7 @@ public class ClusterjConnector implements StorageConnector<DBSession> {
 
   /**
    * Commit a transaction.
+   * @throws se.sics.hop.exception.StorageException
    */
   @Override
   public void commit() throws StorageException {
@@ -371,7 +376,7 @@ public class ClusterjConnector implements StorageConnector<DBSession> {
         BlockLookUpDataAccess.class, SafeBlocksDataAccess.class, MisReplicatedRangeQueueDataAccess.class,
         QuotaUpdateDataAccess.class, EncodingStatusDataAccess.class, BlockChecksumDataAccess.class,
         // YARN
-        AppMasterRPCDataAccess.class,
+        RPCDataAccess.class,
         ApplicationStateDataAccess.class, ApplicationAttemptStateDataAccess.class, DelegationKeyDataAccess.class,
         DelegationTokenDataAccess.class, SequenceNumberDataAccess.class,
         RMStateVersionDataAccess.class, YarnVariablesDataAccess.class,
@@ -385,8 +390,7 @@ public class ClusterjConnector implements StorageConnector<DBSession> {
         NodeDataAccess.class, QueueMetricsDataAccess.class,
         ResourceDataAccess.class, ResourceRequestDataAccess.class, RMContainerDataAccess.class,
         RMNodeDataAccess.class, SchedulerApplicationDataAccess.class, SequenceNumberDataAccess.class,
-         FinishedApplicationsDataAccess.class,
-        TokenDataAccess.class, RMContextInactiveNodesDataAccess.class, RMContextActiveNodesDataAccess.class,
+         FinishedApplicationsDataAccess.class, RMContextInactiveNodesDataAccess.class, RMContextActiveNodesDataAccess.class,
         UpdatedContainerInfoDataAccess.class, YarnLeDescriptorDataAccess.class,
         SecretMamagerKeysDataAccess.class, AllocateResponseDataAccess.class, RMLoadDataAccess.class);
   }
@@ -498,8 +502,6 @@ public class ClusterjConnector implements StorageConnector<DBSession> {
             truncate(transactional,SequenceNumberTableDef.TABLE_NAME);
           } else if (e == FinishedApplicationsDataAccess.class) {
             truncate(transactional,FinishedApplicationsTableDef.TABLE_NAME);
-          } else if (e == TokenDataAccess.class) {
-            truncate(transactional,TokenTableDef.TABLE_NAME);
           } else if (e == RMContextInactiveNodesDataAccess.class) {
             truncate(transactional,RMContextInactiveNodesTableDef.TABLE_NAME);
           } else if (e == RMContextActiveNodesDataAccess.class) {
@@ -520,8 +522,8 @@ public class ClusterjConnector implements StorageConnector<DBSession> {
             truncate(transactional, ApplicationAttemptStateTableDef.TABLE_NAME);
           } else if (e == ApplicationStateDataAccess.class){
             truncate(transactional, ApplicationStateTableDef.TABLE_NAME);
-          } else if (e == AppMasterRPCDataAccess.class){
-            truncate(transactional, AppMasterRPCTableDef.TABLE_NAME);
+          } else if (e == RPCDataAccess.class){
+            truncate(transactional, RPCTableDef.TABLE_NAME);
           } else if (e == RMLoadDataAccess.class){
             truncate(transactional, RMLoadTableDef.TABLE_NAME);
           } else if (e == YarnVariablesDataAccess.class) {
@@ -535,6 +537,11 @@ public class ClusterjConnector implements StorageConnector<DBSession> {
               session.savePersistent(vd);
             }
             session.currentTransaction().commit();
+          }
+          else if (e == PendingEventDataAccess.class){
+            truncate(transactional, PendingEventTableDef.TABLE_NAME);
+          } else if (e == NextHeartbeatDataAccess.class){
+            truncate(transactional, NextHeartbeatTableDef.TABLE_NAME);
           }
         }
         MysqlServerConnector.truncateTable(transactional, "path_memcached");

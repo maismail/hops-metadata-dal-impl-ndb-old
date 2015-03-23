@@ -44,28 +44,11 @@ public class SequenceNumberClusterJ implements SequenceNumberTableDef, SequenceN
         return createHopSequenceNumber(sequenceNumberDTO);
     }
 
-    @Override
-    public void prepare(Collection<HopSequenceNumber> modified, Collection<HopSequenceNumber> removed) throws StorageException {
-        HopsSession session = connector.obtainSession();
-        try {
-            if (removed != null) {
-                List<SequenceNumberDTO> toRemove = new ArrayList<SequenceNumberDTO>();
-                for (HopSequenceNumber hop : removed) {
-                    toRemove.add(session.newInstance(SequenceNumberClusterJ.SequenceNumberDTO.class, hop.getId()));
-                }
-                session.deletePersistentAll(toRemove);
-            }
-            if (modified != null) {
-                List<SequenceNumberDTO> toModify = new ArrayList<SequenceNumberDTO>();
-                for (HopSequenceNumber hop : modified) {
-                    toModify.add(createPersistable(hop, session));
-                }
-                session.savePersistentAll(toModify);
-            }
-        } catch (Exception e) {
-            throw new StorageException(e);
-        }
-    }
+  @Override
+  public void add(HopSequenceNumber toAdd) throws StorageException {
+    HopsSession session = connector.obtainSession();
+    session.savePersistent(createPersistable(toAdd, session));
+  }
 
     private HopSequenceNumber createHopSequenceNumber(SequenceNumberDTO sequenceNumberDTO) {
       if(sequenceNumberDTO !=null){

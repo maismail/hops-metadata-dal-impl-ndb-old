@@ -4,13 +4,11 @@ package se.sics.hop.metadata.ndb.dalimpl.yarn.rmstatestore;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.zip.DataFormatException;
-
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.entity.yarn.rmstatestore.HopSecretMamagerKey;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
@@ -41,18 +39,6 @@ public class SecretMamagerKeysClusterJ implements SecretMamagerKeysTableDef, Sec
   private final ClusterjConnector connector = ClusterjConnector.getInstance();
 
   @Override
-  public HopSecretMamagerKey findByKeyId(String id) throws StorageException {
-    HopsSession session = connector.obtainSession();
-
-    SecretMamagerKeysDTO secretMamagerKeysDTO = null;
-    if (session != null) {
-      secretMamagerKeysDTO = session.find(SecretMamagerKeysDTO.class, id);
-    }
-
-    return createHopSecretMamagerKey(secretMamagerKeysDTO);
-  }
-
-  @Override
   public List<HopSecretMamagerKey> getAll() throws StorageException{
  
       HopsSession session = connector.obtainSession();
@@ -65,30 +51,22 @@ public class SecretMamagerKeysClusterJ implements SecretMamagerKeysTableDef, Sec
   }
 
   @Override
-  public void prepare(Collection<HopSecretMamagerKey> modified, Collection<HopSecretMamagerKey> removed) throws StorageException {
+  public void add(HopSecretMamagerKey toAdd) throws StorageException {
     HopsSession session = connector.obtainSession();
-    try {
-      if (removed != null) {
-        List<SecretMamagerKeysDTO> toRemove = new ArrayList<SecretMamagerKeysDTO>();
-        for (HopSecretMamagerKey hop : removed) {
-          toRemove.add(session.newInstance(SecretMamagerKeysDTO.class, hop.getKeyType()));
-        }
-        session.deletePersistentAll(toRemove);
-      }
-      if (modified != null) {
-        List<SecretMamagerKeysDTO> toModify = new ArrayList<SecretMamagerKeysDTO>();
-        for (HopSecretMamagerKey hop : modified) {
-          toModify.add(createPersistable(hop, session));
-        }
-        session.savePersistentAll(toModify);
-      }
-    } catch (Exception e) {
-      throw new StorageException(e);
-    }
+    session.savePersistent(createPersistable(toAdd, session));
   }
 
-  private SecretMamagerKeysDTO createPersistable(HopSecretMamagerKey hop, HopsSession session) throws StorageException {
-    SecretMamagerKeysDTO keyDTO = session.newInstance(SecretMamagerKeysDTO.class);
+  @Override
+  public void remove(HopSecretMamagerKey toRemove) throws StorageException {
+    HopsSession session = connector.obtainSession();
+    session.deletePersistent(session.newInstance(SecretMamagerKeysDTO.class,
+            toRemove.getKeyType()));
+  }
+  
+  private SecretMamagerKeysDTO createPersistable(HopSecretMamagerKey hop,
+          HopsSession session) throws StorageException {
+    SecretMamagerKeysDTO keyDTO = session.
+            newInstance(SecretMamagerKeysDTO.class);
     keyDTO.setkeyid(hop.getKeyType());
     try {
       keyDTO.setkey(CompressionUtils.compress(hop.getKey()));
@@ -99,8 +77,8 @@ public class SecretMamagerKeysClusterJ implements SecretMamagerKeysTableDef, Sec
     return keyDTO;
   }
 
-  private HopSecretMamagerKey createHopSecretMamagerKey(SecretMamagerKeysDTO keyDTO)
-      throws StorageException {
+  private HopSecretMamagerKey createHopSecretMamagerKey(
+          SecretMamagerKeysDTO keyDTO) throws StorageException {
     if (keyDTO != null) {
       try {
         return new HopSecretMamagerKey(keyDTO.getkeyid(),
@@ -115,8 +93,7 @@ public class SecretMamagerKeysClusterJ implements SecretMamagerKeysTableDef, Sec
     }
   }
   
-   private List<HopSecretMamagerKey> createHopSecretMamagerKeyList(List<SecretMamagerKeysDTO> list)
-       throws StorageException {
+   private List<HopSecretMamagerKey> createHopSecretMamagerKeyList(List<SecretMamagerKeysDTO> list) throws StorageException {
         List<HopSecretMamagerKey> hopList = new ArrayList<HopSecretMamagerKey>();
         for (SecretMamagerKeysDTO dto : list) {
             hopList.add(createHopSecretMamagerKey(dto));

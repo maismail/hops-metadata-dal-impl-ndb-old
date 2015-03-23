@@ -1,20 +1,17 @@
 package se.sics.hop.metadata.ndb.dalimpl.yarn;
 
-import com.mysql.clusterj.Query;
-import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
-import com.mysql.clusterj.query.QueryBuilder;
-import com.mysql.clusterj.query.QueryDomainType;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import se.sics.hop.exception.StorageException;
 import se.sics.hop.metadata.hdfs.entity.yarn.HopContainerStatus;
-import se.sics.hop.metadata.hdfs.entity.yarn.HopRMNode;
 import se.sics.hop.metadata.ndb.ClusterjConnector;
 import se.sics.hop.metadata.ndb.wrapper.HopsQuery;
 import se.sics.hop.metadata.ndb.wrapper.HopsQueryBuilder;
@@ -25,121 +22,108 @@ import se.sics.hop.metadata.yarn.tabledef.ContainerStatusTableDef;
 
 public class ContainerStatusClusterJ implements ContainerStatusTableDef, ContainerStatusDataAccess<HopContainerStatus> {
 
-    @PersistenceCapable(table = TABLE_NAME)
-    public interface ContainerStatusDTO {
+  private static final Log LOG = LogFactory.
+          getLog(ContainerStatusClusterJ.class);
 
-        @PrimaryKey
-        @Column(name = CONTAINERID)
-        String getcontainerid();
+  @PersistenceCapable(table = TABLE_NAME)
+  public interface ContainerStatusDTO {
 
-        void setcontainerid(String containerid);
+    @PrimaryKey
+    @Column(name = CONTAINERID)
+    String getcontainerid();
 
-        @Column(name = STATE)
-        String getstate();
+    void setcontainerid(String containerid);
 
-        void setstate(String state);
+    @PrimaryKey
+    @Column(name = RMNODEID)
+    String getrmnodeid();
 
-        @Column(name = DIAGNOSTICS)
-        String getdiagnostics();
+    void setrmnodeid(String rmnodeid);
 
-        void setdiagnostics(String diagnostics);
+    @Column(name = STATE)
+    String getstate();
 
-        @Column(name = EXIT_STATUS)
-        int getexitstatus();
+    void setstate(String state);
 
-        void setexitstatus(int exitstatus);
-        
-        @Column(name= RMNODEID)
-        String getrmnodeid();
-        
-        void setrmnodeid(String rmnodeid);
-    }
-    private ClusterjConnector connector = ClusterjConnector.getInstance();
+    @Column(name = DIAGNOSTICS)
+    String getdiagnostics();
 
-    @Override
-    public HopContainerStatus findById(String id) throws StorageException {
-        HopsSession session = connector.obtainSession();
+    void setdiagnostics(String diagnostics);
 
-        ContainerStatusDTO uciDTO = null;
-        if (session != null) {
-            uciDTO = session.find(ContainerStatusDTO.class, id);
-        }
-        if (uciDTO == null) {
-            throw new StorageException("HOP :: Error while retrieving " + id);
-        }
+    @Column(name = EXIT_STATUS)
+    int getexitstatus();
 
-        return createHopContainerStatus(uciDTO);
-    }
+    void setexitstatus(int exitstatus);
 
-   @Override
-  public Map<String, HopContainerStatus> getAll() throws StorageException {
+  }
+  private final ClusterjConnector connector = ClusterjConnector.getInstance();
+
+  @Override
+  public HopContainerStatus findEntry(String containerId, String rmNodeId) throws StorageException {
+    LOG.debug("HOP :: ClusterJ ContainerStatus.findById - START");
     HopsSession session = connector.obtainSession();
-     HopsQueryBuilder qb = session.getQueryBuilder();
 
-     HopsQueryDomainType<ContainerStatusDTO> dobj = qb.createQueryDefinition(
+    ContainerStatusDTO uciDTO;
+    if (session != null) {
+      uciDTO = session.find(ContainerStatusDTO.class, new Object[]{containerId,rmNodeId});
+      LOG.debug("HOP :: ClusterJ ContainerStatus.findById - FINISH");
+      if (uciDTO != null) {
+        return createHopContainerStatus(uciDTO);
+      }
+    }
+    return null;
+  }
+
+  @Override
+  public Map<String, HopContainerStatus> getAll() throws StorageException {
+    LOG.debug("HOP :: ClusterJ ContainerStatus.getAll - START");
+    HopsSession session = connector.obtainSession();
+    HopsQueryBuilder qb = session.getQueryBuilder();
+
+    HopsQueryDomainType<ContainerStatusDTO> dobj = qb.createQueryDefinition(
             ContainerStatusDTO.class);
-     HopsQuery<ContainerStatusDTO> query = session.createQuery(dobj);
+    HopsQuery<ContainerStatusDTO> query = session.createQuery(dobj);
 
     List<ContainerStatusDTO> results = query.getResultList();
+    LOG.debug("HOP :: ClusterJ ContainerStatus.getAll - START");
     return createMap(results);
   }
-  
-    @Override
-    public void prepare(Collection<HopContainerStatus> modified, Collection<HopContainerStatus> removed) throws StorageException {
-        HopsSession session = connector.obtainSession();
-        try {
-            if (removed != null) {
-                List<ContainerStatusDTO> toRemove = new ArrayList<ContainerStatusDTO>();
-                for (HopContainerStatus hopUCI : removed) {
-                    toRemove.add(session.newInstance(ContainerStatusDTO.class, hopUCI.getContainerid()));
-                }
-                session.deletePersistentAll(toRemove);
-            }
-            if (modified != null) {
-                List<ContainerStatusDTO> toModify = new ArrayList<ContainerStatusDTO>();
-                for (HopContainerStatus hopUCI : modified) {
-                    toModify.add(createPersistable(hopUCI, session));
-                }
-                session.savePersistentAll(toModify);
-            }
-        } catch (Exception e) {
-            throw new StorageException(e);
-        }
-    }
 
-    @Override
-    public void createContainerStatus(HopContainerStatus containerstatus) throws StorageException {
-        HopsSession session = connector.obtainSession();
-        session.savePersistent(createPersistable(containerstatus, session));
+  @Override
+  public void addAll(Collection<HopContainerStatus> containersStatus) throws
+          StorageException {
+    HopsSession session = connector.obtainSession();
+    List<ContainerStatusDTO> toAdd = new ArrayList<ContainerStatusDTO>();
+    for (HopContainerStatus containerStatus : containersStatus) {
+      toAdd.add(createPersistable(containerStatus, session));
     }
+    session.savePersistentAll(toAdd);
+    session.flush();
+  }
 
-    private ContainerStatusDTO createPersistable(HopContainerStatus hopCS, HopsSession session) throws StorageException {
-        ContainerStatusDTO csDTO = session.newInstance(ContainerStatusDTO.class);
-        //Set values to persist new ContainerStatus
-        csDTO.setcontainerid(hopCS.getContainerid());
-        csDTO.setstate(hopCS.getState());
-        csDTO.setdiagnostics(hopCS.getDiagnostics());
-        csDTO.setexitstatus(hopCS.getExitstatus());
-        csDTO.setrmnodeid(hopCS.getRMNodeId());
-        return csDTO;
-    }
+  private ContainerStatusDTO createPersistable(HopContainerStatus hopCS,
+          HopsSession session) throws StorageException {
+    ContainerStatusDTO csDTO = session.newInstance(ContainerStatusDTO.class);
+    //Set values to persist new ContainerStatus
+    csDTO.setcontainerid(hopCS.getContainerid());
+    csDTO.setstate(hopCS.getState());
+    csDTO.setdiagnostics(hopCS.getDiagnostics());
+    csDTO.setexitstatus(hopCS.getExitstatus());
+    csDTO.setrmnodeid(hopCS.getRMNodeId());
+    return csDTO;
+  }
 
-    private HopContainerStatus createHopContainerStatus(ContainerStatusDTO csDTO) {
-        HopContainerStatus hop = new HopContainerStatus(csDTO.getcontainerid(), csDTO.getstate(), csDTO.getdiagnostics(), csDTO.getexitstatus(),
-        csDTO.getrmnodeid());
-        return hop;
-    }
+  private static HopContainerStatus createHopContainerStatus(ContainerStatusDTO csDTO) {
+    HopContainerStatus hop = new HopContainerStatus(csDTO.getcontainerid(),
+            csDTO.getstate(), csDTO.getdiagnostics(), csDTO.getexitstatus(),
+            csDTO.getrmnodeid());
+    return hop;
+  }
 
-    private List<HopContainerStatus> createHopContainerStatusList(List<ContainerStatusDTO> listDTO) {
-        List<HopContainerStatus> hopList = new ArrayList<HopContainerStatus>();
-        for (ContainerStatusDTO persistable : listDTO) {
-            hopList.add(createHopContainerStatus(persistable));
-        }
-        return hopList;
-    }
-    
-     private Map<String, HopContainerStatus> createMap(List<ContainerStatusDTO> results) {
-    Map<String, HopContainerStatus> map = new HashMap<String, HopContainerStatus>();
+  public static Map<String, HopContainerStatus> createMap(
+          List<ContainerStatusDTO> results) {
+    Map<String, HopContainerStatus> map
+            = new HashMap<String, HopContainerStatus>();
     for (ContainerStatusDTO persistable : results) {
       HopContainerStatus hop = createHopContainerStatus(persistable);
       map.put(hop.getContainerid(), hop);
