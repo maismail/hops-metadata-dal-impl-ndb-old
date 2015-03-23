@@ -18,7 +18,7 @@ import io.hops.metadata.ndb.wrapper.HopsQueryDomainType;
 import io.hops.metadata.ndb.wrapper.HopsSession;
 import io.hops.metadata.yarn.tabledef.rmstatestore.ApplicationAttemptStateTableDef;
 import io.hops.util.CompressionUtils;
-import io.hops.metadata.hdfs.entity.yarn.rmstatestore.HopApplicationAttemptState;
+import io.hops.metadata.yarn.entity.rmstatestore.HopApplicationAttemptState;
 import io.hops.metadata.ndb.ClusterjConnector;
 import io.hops.metadata.ndb.wrapper.HopsQuery;
 import io.hops.metadata.yarn.dal.rmstatestore.ApplicationAttemptStateDataAccess;

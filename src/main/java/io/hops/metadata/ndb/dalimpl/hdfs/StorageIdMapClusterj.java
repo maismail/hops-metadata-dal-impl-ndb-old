@@ -9,7 +9,7 @@ import java.util.List;
 
 import io.hops.exception.StorageException;
 import io.hops.metadata.hdfs.dal.StorageIdMapDataAccess;
-import io.hops.metadata.hdfs.entity.hop.HopStorageId;
+import io.hops.metadata.hdfs.entity.StorageId;
 import io.hops.metadata.hdfs.tabledef.StorageIdMapTableDef;
 import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
 import io.hops.metadata.ndb.wrapper.HopsQueryDomainType;
@@ -18,7 +18,7 @@ import io.hops.metadata.ndb.ClusterjConnector;
 import io.hops.metadata.ndb.wrapper.HopsQuery;
 
 public class StorageIdMapClusterj implements StorageIdMapTableDef,
-    StorageIdMapDataAccess<HopStorageId> {
+    StorageIdMapDataAccess<StorageId> {
 
   @PersistenceCapable(table = TABLE_NAME)
   public interface StorageIdDTO {
@@ -36,7 +36,7 @@ public class StorageIdMapClusterj implements StorageIdMapTableDef,
   private ClusterjConnector connector = ClusterjConnector.getInstance();
 
   @Override
-  public void add(HopStorageId s) throws StorageException {
+  public void add(StorageId s) throws StorageException {
     HopsSession session = connector.obtainSession();
     StorageIdDTO sdto = session.newInstance(StorageIdDTO.class);
     sdto.setSId(s.getsId());
@@ -45,7 +45,7 @@ public class StorageIdMapClusterj implements StorageIdMapTableDef,
   }
 
   @Override
-  public HopStorageId findByPk(String storageId) throws StorageException {
+  public StorageId findByPk(String storageId) throws StorageException {
     HopsSession session = connector.obtainSession();
     StorageIdDTO sdto = session.find(StorageIdDTO.class, storageId);
     if(sdto == null)
@@ -54,7 +54,7 @@ public class StorageIdMapClusterj implements StorageIdMapTableDef,
   }
 
   @Override
-  public Collection<HopStorageId> findAll() throws StorageException {
+  public Collection<StorageId> findAll() throws StorageException {
     HopsSession session = connector.obtainSession();
     HopsQueryBuilder qb = session.getQueryBuilder();
     HopsQueryDomainType<StorageIdDTO> qdt = qb.createQueryDefinition(StorageIdDTO.class);
@@ -62,15 +62,15 @@ public class StorageIdMapClusterj implements StorageIdMapTableDef,
     return convert(q.getResultList());
   }
 
-  private Collection<HopStorageId> convert(List<StorageIdDTO> dtos) {
-    List<HopStorageId> hopstorageId = new ArrayList<HopStorageId>();
+  private Collection<StorageId> convert(List<StorageIdDTO> dtos) {
+    List<StorageId> hopstorageId = new ArrayList<StorageId>();
     for (StorageIdDTO sdto : dtos) {
       hopstorageId.add(convert(sdto));
     }
     return hopstorageId;
   }
 
-  private HopStorageId convert(StorageIdDTO sdto) {
-    return new HopStorageId(sdto.getStorageId(), sdto.getSId());
+  private StorageId convert(StorageIdDTO sdto) {
+    return new StorageId(sdto.getStorageId(), sdto.getSId());
   }
 }

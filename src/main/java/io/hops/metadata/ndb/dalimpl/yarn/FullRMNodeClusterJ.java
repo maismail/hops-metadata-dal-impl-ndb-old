@@ -5,18 +5,18 @@ import java.util.List;
 import java.util.Map;
 
 import io.hops.exception.StorageException;
-import io.hops.metadata.hdfs.entity.yarn.HopContainerId;
-import io.hops.metadata.hdfs.entity.yarn.HopFinishedApplications;
-import io.hops.metadata.hdfs.entity.yarn.HopJustLaunchedContainers;
-import io.hops.metadata.hdfs.entity.yarn.HopNextHeartbeat;
-import io.hops.metadata.hdfs.entity.yarn.HopNode;
-import io.hops.metadata.hdfs.entity.yarn.HopRMNodeComps;
-import io.hops.metadata.hdfs.entity.yarn.HopResource;
+import io.hops.metadata.yarn.entity.HopContainerId;
+import io.hops.metadata.yarn.entity.HopFinishedApplications;
+import io.hops.metadata.yarn.entity.HopJustLaunchedContainers;
+import io.hops.metadata.yarn.entity.HopNextHeartbeat;
+import io.hops.metadata.yarn.entity.HopNode;
+import io.hops.metadata.yarn.entity.HopRMNodeComps;
+import io.hops.metadata.yarn.entity.HopResource;
 import io.hops.metadata.ndb.wrapper.HopsSession;
 import io.hops.metadata.yarn.dal.FullRMNodeDataAccess;
-import io.hops.metadata.hdfs.entity.yarn.HopNodeHBResponse;
-import io.hops.metadata.hdfs.entity.yarn.HopRMNode;
-import io.hops.metadata.hdfs.entity.yarn.HopUpdatedContainerInfo;
+import io.hops.metadata.yarn.entity.HopNodeHBResponse;
+import io.hops.metadata.yarn.entity.HopRMNode;
+import io.hops.metadata.yarn.entity.HopUpdatedContainerInfo;
 import io.hops.metadata.ndb.ClusterjConnector;
 
 public class FullRMNodeClusterJ implements

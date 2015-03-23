@@ -13,7 +13,7 @@ import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
 import io.hops.metadata.ndb.wrapper.HopsSession;
 import io.hops.metadata.yarn.dal.QueueMetricsDataAccess;
 import io.hops.exception.StorageException;
-import io.hops.metadata.hdfs.entity.yarn.HopQueueMetrics;
+import io.hops.metadata.yarn.entity.HopQueueMetrics;
 import io.hops.metadata.ndb.ClusterjConnector;
 import io.hops.metadata.ndb.wrapper.HopsQuery;
 import io.hops.metadata.ndb.wrapper.HopsQueryDomainType;

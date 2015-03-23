@@ -12,7 +12,7 @@ import java.util.List;
 
 import io.hops.exception.StorageException;
 import io.hops.metadata.hdfs.dal.ReplicaDataAccess;
-import io.hops.metadata.hdfs.entity.hop.HopIndexedReplica;
+import io.hops.metadata.hdfs.entity.IndexedReplica;
 import io.hops.metadata.hdfs.tabledef.ReplicaTableDef;
 import io.hops.metadata.ndb.mysqlserver.MySQLQueryHelper;
 import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
@@ -24,7 +24,7 @@ import io.hops.metadata.ndb.wrapper.HopsPredicate;
 import io.hops.metadata.ndb.wrapper.HopsQuery;
 
 public class ReplicaClusterj implements ReplicaTableDef,
-    ReplicaDataAccess<HopIndexedReplica> {
+    ReplicaDataAccess<IndexedReplica> {
 //  static final Log LOG = LogFactory.getLog(ReplicaClusterj.class);
   static final Logger LOG = Logger.getLogger(ReplicaClusterj.class);
   @PersistenceCapable(table = TABLE_NAME)
@@ -55,7 +55,7 @@ public class ReplicaClusterj implements ReplicaTableDef,
   private final static int NOT_FOUND_ROW = -1000;
   
   @Override
-  public List<HopIndexedReplica> findReplicasById(long blockId, int inodeId) throws
+  public List<IndexedReplica> findReplicasById(long blockId, int inodeId) throws
       StorageException {
     HopsSession session = connector.obtainSession();
     HopsQueryBuilder qb = session.getQueryBuilder();
@@ -71,7 +71,7 @@ public class ReplicaClusterj implements ReplicaTableDef,
   
   
   @Override
-  public List<HopIndexedReplica> findReplicasByINodeId(int inodeId) throws StorageException {
+  public List<IndexedReplica> findReplicasByINodeId(int inodeId) throws StorageException {
     HopsSession session = connector.obtainSession();
     HopsQueryBuilder qb = session.getQueryBuilder();
     HopsQueryDomainType<ReplicaDTO> dobj = qb.createQueryDefinition(ReplicaDTO.class);
@@ -84,7 +84,7 @@ public class ReplicaClusterj implements ReplicaTableDef,
   
 
   @Override
-  public List<HopIndexedReplica> findReplicasByINodeIds(int[] inodeIds) throws StorageException {
+  public List<IndexedReplica> findReplicasByINodeIds(int[] inodeIds) throws StorageException {
     HopsSession session = connector.obtainSession();
     HopsQueryBuilder qb = session.getQueryBuilder();
     HopsQueryDomainType<ReplicaDTO> dobj = qb.createQueryDefinition(ReplicaDTO.class);
@@ -96,7 +96,7 @@ public class ReplicaClusterj implements ReplicaTableDef,
   }
   
   @Override
-  public List<HopIndexedReplica> findReplicasByStorageId(int storageId) throws StorageException {
+  public List<IndexedReplica> findReplicasByStorageId(int storageId) throws StorageException {
     HopsSession session = connector.obtainSession();
     List<ReplicaDTO> res = getReplicas(session, storageId);
     //ClusterjConnector.LOG.error("xxxa: got replicas " + res.size() + " in " + (System.currentTimeMillis() - t));
@@ -104,7 +104,7 @@ public class ReplicaClusterj implements ReplicaTableDef,
   }
 
   @Override
-  public List<HopIndexedReplica> findReplicasByPKS(final long[] blockIds, final int[] inodeIds, final int[] sids) throws StorageException {
+  public List<IndexedReplica> findReplicasByPKS(final long[] blockIds, final int[] inodeIds, final int[] sids) throws StorageException {
     HopsSession session = connector.obtainSession();
     List<ReplicaDTO> dtos = new ArrayList<ReplicaDTO>();
     for (int i = 0; i < blockIds.length; i++) {
@@ -120,23 +120,23 @@ public class ReplicaClusterj implements ReplicaTableDef,
 
   
   @Override
-  public void prepare(Collection<HopIndexedReplica> removed, Collection<HopIndexedReplica> newed, Collection<HopIndexedReplica> modified) throws StorageException {
+  public void prepare(Collection<IndexedReplica> removed, Collection<IndexedReplica> newed, Collection<IndexedReplica> modified) throws StorageException {
     List<ReplicaDTO> changes = new ArrayList<ReplicaDTO>();
     List<ReplicaDTO> deletions = new ArrayList<ReplicaDTO>();
     HopsSession session = connector.obtainSession();
-    for (HopIndexedReplica replica : removed) {
+    for (IndexedReplica replica : removed) {
       ReplicaDTO newInstance = session.newInstance(ReplicaDTO.class);
       createPersistable(replica, newInstance);
       deletions.add(newInstance);
     }
 
-    for (HopIndexedReplica replica : newed) {
+    for (IndexedReplica replica : newed) {
       ReplicaDTO newInstance = session.newInstance(ReplicaDTO.class);
       createPersistable(replica, newInstance);
       changes.add(newInstance);
     }
 
-    for (HopIndexedReplica replica : modified) {
+    for (IndexedReplica replica : modified) {
       ReplicaDTO newInstance = session.newInstance(ReplicaDTO.class);
       createPersistable(replica, newInstance);
       changes.add(newInstance);
@@ -163,17 +163,17 @@ public class ReplicaClusterj implements ReplicaTableDef,
   }
 
 
-  private List<HopIndexedReplica> createReplicaList(List<ReplicaDTO> triplets) {
-    List<HopIndexedReplica> replicas = new ArrayList<HopIndexedReplica>(triplets.size());
+  private List<IndexedReplica> createReplicaList(List<ReplicaDTO> triplets) {
+    List<IndexedReplica> replicas = new ArrayList<IndexedReplica>(triplets.size());
     for (ReplicaDTO t : triplets) {
       if (t.getIndex() != NOT_FOUND_ROW) {
-        replicas.add(new HopIndexedReplica(t.getBlockId(), t.getStorageId(), t.getINodeId(), t.getIndex()));
+        replicas.add(new IndexedReplica(t.getBlockId(), t.getStorageId(), t.getINodeId(), t.getIndex()));
       }
     }
     return replicas;
   }
 
-  private void createPersistable(HopIndexedReplica replica, ReplicaDTO newInstance) {
+  private void createPersistable(IndexedReplica replica, ReplicaDTO newInstance) {
     newInstance.setBlockId(replica.getBlockId());
     newInstance.setIndex(replica.getIndex());
     newInstance.setStorageId(replica.getStorageId());

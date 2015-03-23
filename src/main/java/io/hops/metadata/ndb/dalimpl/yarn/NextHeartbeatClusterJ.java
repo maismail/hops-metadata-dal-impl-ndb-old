@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import io.hops.metadata.hdfs.entity.yarn.HopNextHeartbeat;
+import io.hops.metadata.yarn.entity.HopNextHeartbeat;
 import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
 import io.hops.metadata.ndb.wrapper.HopsSession;
 import io.hops.exception.StorageException;

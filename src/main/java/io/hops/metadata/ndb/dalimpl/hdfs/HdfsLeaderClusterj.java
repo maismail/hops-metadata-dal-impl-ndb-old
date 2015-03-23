@@ -5,12 +5,8 @@ import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
 import java.security.InvalidParameterException;
 
-import io.hops.metadata.hdfs.entity.hop.election.LeDescriptor;
-import io.hops.metadata.hdfs.tabledef.HdfsLeaderTableDef;
-import io.hops.metadata.hdfs.entity.hop.election.LeDescriptor;
-import io.hops.metadata.hdfs.entity.hop.election.LeDescriptor.HdfsLeDescriptor;
-
-import io.hops.metadata.hdfs.tabledef.HdfsLeaderTableDef;
+import io.hops.metadata.election.entity.LeDescriptor;
+import io.hops.metadata.election.tabledef.HdfsLeaderTableDef;
 
 public class HdfsLeaderClusterj extends LeDescriptorClusterj implements
     HdfsLeaderTableDef {

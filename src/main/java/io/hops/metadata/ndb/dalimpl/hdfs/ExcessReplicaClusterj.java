@@ -11,23 +11,18 @@ import io.hops.metadata.ndb.mysqlserver.MySQLQueryHelper;
 import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
 import io.hops.metadata.ndb.wrapper.HopsQueryDomainType;
 import io.hops.metadata.ndb.wrapper.HopsSession;
-import io.hops.exception.StorageException;
 import io.hops.metadata.hdfs.dal.ExcessReplicaDataAccess;
-import io.hops.metadata.hdfs.entity.hop.HopExcessReplica;
+import io.hops.metadata.hdfs.entity.ExcessReplica;
 import io.hops.metadata.hdfs.tabledef.ExcessReplicaTableDef;
 import io.hops.metadata.ndb.ClusterjConnector;
-import io.hops.metadata.ndb.mysqlserver.MySQLQueryHelper;
 import io.hops.metadata.ndb.wrapper.HopsPredicate;
 import io.hops.metadata.ndb.wrapper.HopsQuery;
-import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
-import io.hops.metadata.ndb.wrapper.HopsQueryDomainType;
-import io.hops.metadata.ndb.wrapper.HopsSession;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public class ExcessReplicaClusterj implements ExcessReplicaTableDef, ExcessReplicaDataAccess<HopExcessReplica> {
+public class ExcessReplicaClusterj implements ExcessReplicaTableDef, ExcessReplicaDataAccess<ExcessReplica> {
 
 
 
@@ -59,18 +54,18 @@ public class ExcessReplicaClusterj implements ExcessReplicaTableDef, ExcessRepli
   }
 
   @Override
-  public void prepare(Collection<HopExcessReplica> removed, Collection<HopExcessReplica> newed, Collection<HopExcessReplica> modified) throws StorageException {
+  public void prepare(Collection<ExcessReplica> removed, Collection<ExcessReplica> newed, Collection<ExcessReplica> modified) throws StorageException {
     HopsSession session = connector.obtainSession();
     List<ExcessReplicaDTO> changes = new ArrayList<ExcessReplicaDTO>();
     List<ExcessReplicaDTO> deletions = new ArrayList<ExcessReplicaDTO>();
-    for (HopExcessReplica exReplica : newed) {
+    for (ExcessReplica exReplica : newed) {
       ExcessReplicaDTO newInstance = session.newInstance(
           ExcessReplicaDTO.class);
       createPersistable(exReplica, newInstance);
       changes.add(newInstance);
     }
 
-    for (HopExcessReplica exReplica : removed) {
+    for (ExcessReplica exReplica : removed) {
       ExcessReplicaDTO newInstance = session.newInstance(
           ExcessReplicaDTO.class);
       createPersistable(exReplica, newInstance);
@@ -81,7 +76,7 @@ public class ExcessReplicaClusterj implements ExcessReplicaTableDef, ExcessRepli
   }
 
   @Override
-  public List<HopExcessReplica> findExcessReplicaByStorageId(int storageId) throws StorageException {
+  public List<ExcessReplica> findExcessReplicaByStorageId(int storageId) throws StorageException {
     HopsSession session = connector.obtainSession();
     HopsQueryBuilder qb = session.getQueryBuilder();
     HopsQueryDomainType<ExcessReplicaDTO> qdt = qb.createQueryDefinition(ExcessReplicaDTO.class);
@@ -92,7 +87,7 @@ public class ExcessReplicaClusterj implements ExcessReplicaTableDef, ExcessRepli
   }
 
   @Override
-  public List<HopExcessReplica> findExcessReplicaByBlockId(long bId, int inodeId) throws StorageException {
+  public List<ExcessReplica> findExcessReplicaByBlockId(long bId, int inodeId) throws StorageException {
     HopsSession session = connector.obtainSession();
     HopsQueryBuilder qb = session.getQueryBuilder();
     HopsQueryDomainType<ExcessReplicaDTO> qdt = qb.createQueryDefinition(ExcessReplicaDTO.class);
@@ -106,7 +101,7 @@ public class ExcessReplicaClusterj implements ExcessReplicaTableDef, ExcessRepli
   }
   
     @Override
-  public List<HopExcessReplica> findExcessReplicaByINodeId(int inodeId) throws StorageException {
+  public List<ExcessReplica> findExcessReplicaByINodeId(int inodeId) throws StorageException {
     HopsSession session = connector.obtainSession();
     HopsQueryBuilder qb = session.getQueryBuilder();
     HopsQueryDomainType<ExcessReplicaDTO> qdt =
@@ -119,7 +114,7 @@ public class ExcessReplicaClusterj implements ExcessReplicaTableDef, ExcessRepli
   }
 
   @Override
-  public List<HopExcessReplica> findExcessReplicaByINodeIds(int[] inodeIds) throws StorageException {
+  public List<ExcessReplica> findExcessReplicaByINodeIds(int[] inodeIds) throws StorageException {
     HopsSession session = connector.obtainSession();
     HopsQueryBuilder qb = session.getQueryBuilder();
     HopsQueryDomainType<ExcessReplicaDTO> qdt = qb.createQueryDefinition(ExcessReplicaDTO.class);
@@ -131,7 +126,7 @@ public class ExcessReplicaClusterj implements ExcessReplicaTableDef, ExcessRepli
   }
       
   @Override
-  public HopExcessReplica findByPK(long bId, int sId, int inodeId) throws StorageException {
+  public ExcessReplica findByPK(long bId, int sId, int inodeId) throws StorageException {
     HopsSession session = connector.obtainSession();
     Object[] pk = new Object[4];
     pk[0] = inodeId;
@@ -142,7 +137,7 @@ public class ExcessReplicaClusterj implements ExcessReplicaTableDef, ExcessRepli
     if (invTable == null) {
       return null;
     }
-    HopExcessReplica result = createReplica(invTable);
+    ExcessReplica result = createReplica(invTable);
     return result;
   }
 
@@ -152,19 +147,19 @@ public class ExcessReplicaClusterj implements ExcessReplicaTableDef, ExcessRepli
     session.deletePersistentAll(ExcessReplicaDTO.class);
   }
 
-  private List<HopExcessReplica> createList(List<ExcessReplicaDTO> list) {
-    List<HopExcessReplica> result = new ArrayList<HopExcessReplica>();
+  private List<ExcessReplica> createList(List<ExcessReplicaDTO> list) {
+    List<ExcessReplica> result = new ArrayList<ExcessReplica>();
     for (ExcessReplicaDTO item : list) {
       result.add(createReplica(item));
     }
     return result;
   }
 
-  private HopExcessReplica createReplica(ExcessReplicaDTO exReplicaTable) {
-    return new HopExcessReplica(exReplicaTable.getStorageId(), exReplicaTable.getBlockId(), exReplicaTable.getINodeId());
+  private ExcessReplica createReplica(ExcessReplicaDTO exReplicaTable) {
+    return new ExcessReplica(exReplicaTable.getStorageId(), exReplicaTable.getBlockId(), exReplicaTable.getINodeId());
   }
 
-  private void createPersistable(HopExcessReplica exReplica, ExcessReplicaDTO exReplicaTable) {
+  private void createPersistable(ExcessReplica exReplica, ExcessReplicaDTO exReplicaTable) {
     exReplicaTable.setBlockId(exReplica.getBlockId());
     exReplicaTable.setStorageId(exReplica.getStorageId());
     exReplicaTable.setINodeId(exReplica.getInodeId());

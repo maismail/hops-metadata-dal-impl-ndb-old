@@ -12,7 +12,7 @@ import java.util.Map;
 import java.util.Set;
 
 import io.hops.exception.StorageException;
-import io.hops.metadata.hdfs.entity.yarn.HopContainerId;
+import io.hops.metadata.yarn.entity.HopContainerId;
 import io.hops.metadata.ndb.wrapper.HopsQuery;
 import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
 import io.hops.metadata.ndb.wrapper.HopsQueryDomainType;

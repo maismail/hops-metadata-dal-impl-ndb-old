@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.zip.DataFormatException;
 
 import io.hops.exception.StorageException;
-import io.hops.metadata.hdfs.entity.yarn.rmstatestore.HopSecretMamagerKey;
+import io.hops.metadata.yarn.entity.rmstatestore.HopSecretMamagerKey;
 import io.hops.metadata.ndb.wrapper.HopsQuery;
 import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
 import io.hops.metadata.ndb.wrapper.HopsQueryDomainType;

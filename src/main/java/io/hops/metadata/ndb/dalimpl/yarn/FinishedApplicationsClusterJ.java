@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import io.hops.metadata.hdfs.entity.yarn.HopFinishedApplications;
+import io.hops.metadata.yarn.entity.HopFinishedApplications;
 import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
 import io.hops.metadata.ndb.wrapper.HopsSession;
 import org.apache.commons.logging.Log;

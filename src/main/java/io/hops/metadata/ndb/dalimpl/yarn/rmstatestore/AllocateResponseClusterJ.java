@@ -19,7 +19,7 @@ import io.hops.metadata.ndb.wrapper.HopsSession;
 import io.hops.metadata.yarn.dal.rmstatestore.AllocateResponseDataAccess;
 import io.hops.metadata.yarn.tabledef.rmstatestore.AllocateResponseTableDef;
 import io.hops.util.CompressionUtils;
-import io.hops.metadata.hdfs.entity.yarn.rmstatestore.HopAllocateResponse;
+import io.hops.metadata.yarn.entity.rmstatestore.HopAllocateResponse;
 
 public class AllocateResponseClusterJ implements AllocateResponseTableDef,
     AllocateResponseDataAccess<HopAllocateResponse> {

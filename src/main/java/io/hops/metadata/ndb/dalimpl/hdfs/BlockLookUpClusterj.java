@@ -6,13 +6,7 @@ import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
 import io.hops.exception.StorageException;
 import io.hops.metadata.hdfs.dal.BlockLookUpDataAccess;
-import io.hops.metadata.hdfs.entity.hop.HopBlockLookUp;
-import io.hops.metadata.hdfs.tabledef.BlockLookUpTableDef;
-import io.hops.metadata.ndb.ClusterjConnector;
-import io.hops.metadata.ndb.wrapper.HopsSession;
-import io.hops.exception.StorageException;
-import io.hops.metadata.hdfs.dal.BlockLookUpDataAccess;
-import io.hops.metadata.hdfs.entity.hop.HopBlockLookUp;
+import io.hops.metadata.hdfs.entity.BlockLookUp;
 import io.hops.metadata.hdfs.tabledef.BlockLookUpTableDef;
 import io.hops.metadata.ndb.ClusterjConnector;
 import io.hops.metadata.ndb.wrapper.HopsSession;
@@ -22,7 +16,7 @@ import java.util.Collection;
 import java.util.List;
 
 public class BlockLookUpClusterj implements BlockLookUpTableDef,
-    BlockLookUpDataAccess<HopBlockLookUp> {
+    BlockLookUpDataAccess<BlockLookUp> {
 
   @PersistenceCapable(table = TABLE_NAME)
   public interface BlockLookUpDTO {
@@ -43,17 +37,17 @@ public class BlockLookUpClusterj implements BlockLookUpTableDef,
   private final static int NOT_FOUND_ROW = -1000;
 
   @Override
-  public void prepare(Collection<HopBlockLookUp> modified, Collection<HopBlockLookUp> removed) throws
+  public void prepare(Collection<BlockLookUp> modified, Collection<BlockLookUp> removed) throws
       StorageException {
     HopsSession session = connector.obtainSession();
-    for (HopBlockLookUp block_lookup : removed) {
+    for (BlockLookUp block_lookup : removed) {
       BlockLookUpClusterj.BlockLookUpDTO bTable = session
           .newInstance(BlockLookUpClusterj.BlockLookUpDTO.class,
               block_lookup.getBlockId());
       session.deletePersistent(bTable);
     }
 
-    for (HopBlockLookUp block_lookup : modified) {
+    for (BlockLookUp block_lookup : modified) {
       BlockLookUpClusterj.BlockLookUpDTO bTable =
           session.newInstance(BlockLookUpClusterj.BlockLookUpDTO.class);
       createPersistable(block_lookup, bTable);
@@ -62,7 +56,7 @@ public class BlockLookUpClusterj implements BlockLookUpTableDef,
   }
 
   @Override
-  public HopBlockLookUp findByBlockId(long blockId) throws StorageException {
+  public BlockLookUp findByBlockId(long blockId) throws StorageException {
     HopsSession session = connector.obtainSession();
     BlockLookUpClusterj.BlockLookUpDTO lookup =
         session.find(BlockLookUpClusterj.BlockLookUpDTO.class, blockId);
@@ -110,12 +104,12 @@ public class BlockLookUpClusterj implements BlockLookUpTableDef,
     return Ints.toArray(inodeIds);
   }
   
-  protected static HopBlockLookUp createBlockInfo(BlockLookUpClusterj.BlockLookUpDTO dto) {
-    HopBlockLookUp lookup = new HopBlockLookUp(dto.getBlockId(), dto.getINodeId());
+  protected static BlockLookUp createBlockInfo(BlockLookUpClusterj.BlockLookUpDTO dto) {
+    BlockLookUp lookup = new BlockLookUp(dto.getBlockId(), dto.getINodeId());
     return lookup;
   }
 
-  protected static void createPersistable(HopBlockLookUp lookup, BlockLookUpClusterj.BlockLookUpDTO persistable) {
+  protected static void createPersistable(BlockLookUp lookup, BlockLookUpClusterj.BlockLookUpDTO persistable) {
     persistable.setBlockId(lookup.getBlockId());
     persistable.setINodeId(lookup.getInodeId());
   }

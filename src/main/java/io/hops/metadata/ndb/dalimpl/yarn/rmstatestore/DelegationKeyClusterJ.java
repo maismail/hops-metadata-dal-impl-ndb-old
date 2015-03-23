@@ -13,7 +13,7 @@ import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
 import io.hops.metadata.ndb.wrapper.HopsQueryDomainType;
 import io.hops.metadata.ndb.wrapper.HopsSession;
 import io.hops.util.CompressionUtils;
-import io.hops.metadata.hdfs.entity.yarn.rmstatestore.HopDelegationKey;
+import io.hops.metadata.yarn.entity.rmstatestore.HopDelegationKey;
 import io.hops.metadata.ndb.ClusterjConnector;
 import io.hops.metadata.ndb.wrapper.HopsQuery;
 import io.hops.metadata.yarn.dal.rmstatestore.DelegationKeyDataAccess;

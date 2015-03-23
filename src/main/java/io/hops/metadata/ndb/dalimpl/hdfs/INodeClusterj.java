@@ -8,11 +8,10 @@ import com.mysql.clusterj.annotation.PrimaryKey;
 import io.hops.exception.StorageException;
 import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
 import io.hops.metadata.ndb.wrapper.HopsSession;
-import io.hops.exception.StorageException;
-import io.hops.metadata.INodeIdentifier;
+import io.hops.metadata.hdfs.entity.INodeIdentifier;
 import io.hops.metadata.hdfs.dal.INodeDataAccess;
-import io.hops.metadata.hdfs.entity.hdfs.HopINode;
-import io.hops.metadata.hdfs.entity.hdfs.ProjectedINode;
+import io.hops.metadata.hdfs.entity.INode;
+import io.hops.metadata.hdfs.entity.ProjectedINode;
 import io.hops.metadata.hdfs.tabledef.INodeTableDef;
 import io.hops.metadata.ndb.ClusterjConnector;
 import io.hops.metadata.ndb.NdbBoolean;
@@ -21,11 +20,8 @@ import io.hops.metadata.ndb.mysqlserver.MySQLQueryHelper;
 import io.hops.metadata.ndb.mysqlserver.MysqlServerConnector;
 import io.hops.metadata.ndb.wrapper.HopsPredicate;
 import io.hops.metadata.ndb.wrapper.HopsQuery;
-import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
 import io.hops.metadata.ndb.wrapper.HopsQueryDomainType;
-import io.hops.metadata.ndb.wrapper.HopsSession;
 
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -34,7 +30,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public class INodeClusterj implements INodeTableDef, INodeDataAccess<HopINode> {
+public class INodeClusterj implements INodeTableDef, INodeDataAccess<INode> {
 
   @Override
   public int countAll() throws StorageException {
@@ -139,11 +135,11 @@ public class INodeClusterj implements INodeTableDef, INodeDataAccess<HopINode> {
   private final static int NOT_FOUND_ROW = -1000;
   
   @Override
-  public void prepare(Collection<HopINode> removed, Collection<HopINode> newEntries, Collection<HopINode> modified) throws StorageException {
+  public void prepare(Collection<INode> removed, Collection<INode> newEntries, Collection<INode> modified) throws StorageException {
     HopsSession session = connector.obtainSession();
     List<InodeDTO> changes = new ArrayList<InodeDTO>();
     List<InodeDTO> deletions = new ArrayList<InodeDTO>();
-    for (HopINode inode : removed) {
+    for (INode inode : removed) {
       Object[] pk = new Object[2];
       pk[0] = inode.getParentId();
       pk[1] = inode.getName();
@@ -151,13 +147,13 @@ public class INodeClusterj implements INodeTableDef, INodeDataAccess<HopINode> {
       deletions.add(persistable);
     }
 
-    for (HopINode inode : newEntries) {
+    for (INode inode : newEntries) {
       InodeDTO persistable = session.newInstance(InodeDTO.class);
       createPersistable(inode, persistable);
       changes.add(persistable);
     }
 
-    for (HopINode inode : modified) {
+    for (INode inode : modified) {
       InodeDTO persistable = session.newInstance(InodeDTO.class);
       createPersistable(inode, persistable);
       changes.add(persistable);
@@ -167,7 +163,7 @@ public class INodeClusterj implements INodeTableDef, INodeDataAccess<HopINode> {
   }
 
   @Override
-  public HopINode indexScanfindInodeById(int inodeId) throws StorageException {
+  public INode indexScanfindInodeById(int inodeId) throws StorageException {
     //System.out.println("*** pruneScanfindInodeById, Id "+inodeId);
     HopsSession session = connector.obtainSession();
 
@@ -192,7 +188,7 @@ public class INodeClusterj implements INodeTableDef, INodeDataAccess<HopINode> {
   }
 
   @Override
-  public List<HopINode> indexScanFindInodesByParentId(int parentId) throws StorageException {
+  public List<INode> indexScanFindInodesByParentId(int parentId) throws StorageException {
     //System.out.println("*** indexScanFindInodesByParentId ");
     HopsSession session = connector.obtainSession();
 
@@ -242,7 +238,7 @@ public class INodeClusterj implements INodeTableDef, INodeDataAccess<HopINode> {
   }
 
   @Override
-  public HopINode pkLookUpFindInodeByNameAndParentId(String name, int parentId) throws StorageException {
+  public INode pkLookUpFindInodeByNameAndParentId(String name, int parentId) throws StorageException {
     HopsSession session = connector.obtainSession();
 
     Object[] pk = new Object[2];
@@ -258,7 +254,7 @@ public class INodeClusterj implements INodeTableDef, INodeDataAccess<HopINode> {
   }
 
   @Override
-  public List<HopINode> getINodesPkBatched(String[] names, int[] parentIds) throws StorageException {
+  public List<INode> getINodesPkBatched(String[] names, int[] parentIds) throws StorageException {
     HopsSession session = connector.obtainSession();
     List<InodeDTO> dtos = new ArrayList<InodeDTO>();
     for (int i = 0; i < names.length; i++) {
@@ -325,8 +321,8 @@ public class INodeClusterj implements INodeTableDef, INodeDataAccess<HopINode> {
         ("%s<>0", HEADER));
   }
   
-  private List<HopINode> createInodeList(List<InodeDTO> list) {
-    List<HopINode> inodes = new ArrayList<HopINode>();
+  private List<INode> createInodeList(List<InodeDTO> list) {
+    List<INode> inodes = new ArrayList<INode>();
     for (InodeDTO persistable : list) {
       if(persistable.getId() != NOT_FOUND_ROW){
         inodes.add(createInode(persistable));
@@ -335,8 +331,8 @@ public class INodeClusterj implements INodeTableDef, INodeDataAccess<HopINode> {
     return inodes;
   }
 
-  private HopINode createInode(InodeDTO persistable) {
-    return new HopINode(
+  private INode createInode(InodeDTO persistable) {
+    return new INode(
         persistable.getId(),
         persistable.getName(),
         persistable.getParentId(),
@@ -355,7 +351,7 @@ public class INodeClusterj implements INodeTableDef, INodeDataAccess<HopINode> {
         persistable.getSubtreeLockOwner());
   }
 
-  private void createPersistable(HopINode inode, InodeDTO persistable) {
+  private void createPersistable(INode inode, InodeDTO persistable) {
     persistable.setId(inode.getId());
     persistable.setName(inode.getName());
     persistable.setParentId(inode.getParentId());

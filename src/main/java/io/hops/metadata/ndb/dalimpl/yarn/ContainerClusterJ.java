@@ -12,7 +12,7 @@ import java.util.Map;
 import java.util.zip.DataFormatException;
 
 import io.hops.exception.StorageException;
-import io.hops.metadata.hdfs.entity.yarn.HopContainer;
+import io.hops.metadata.yarn.entity.HopContainer;
 import io.hops.metadata.ndb.ClusterjConnector;
 import io.hops.metadata.ndb.wrapper.HopsQuery;
 import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;

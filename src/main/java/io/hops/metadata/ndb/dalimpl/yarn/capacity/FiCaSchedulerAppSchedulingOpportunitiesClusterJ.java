@@ -11,7 +11,7 @@ import io.hops.exception.StorageException;
 import io.hops.metadata.ndb.wrapper.HopsSession;
 import io.hops.metadata.yarn.dal.capacity.FiCaSchedulerAppSchedulingOpportunitiesDataAccess;
 import io.hops.metadata.yarn.tabledef.capacity.FiCaSchedulerAppSchedulingOpportunitiesTableDef;
-import io.hops.metadata.hdfs.entity.yarn.capacity.HopFiCaSchedulerAppSchedulingOpportunities;
+import io.hops.metadata.yarn.entity.capacity.HopFiCaSchedulerAppSchedulingOpportunities;
 import io.hops.metadata.ndb.ClusterjConnector;
 
 public class FiCaSchedulerAppSchedulingOpportunitiesClusterJ implements

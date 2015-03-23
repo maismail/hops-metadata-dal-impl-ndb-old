@@ -9,14 +9,12 @@ import java.util.List;
 
 import io.hops.exception.StorageException;
 import io.hops.metadata.ndb.wrapper.HopsSession;
-import io.hops.metadata.hdfs.entity.hop.var.HopVariable;
+import io.hops.metadata.common.entity.Variable;
 import io.hops.metadata.hdfs.dal.VariableDataAccess;
-import io.hops.exception.StorageException;
 import io.hops.metadata.ndb.ClusterjConnector;
 import io.hops.metadata.hdfs.tabledef.VariableTableDef;
-import io.hops.metadata.ndb.wrapper.HopsSession;
 
-public class VariableClusterj implements VariableTableDef, VariableDataAccess<HopVariable, HopVariable.Finder> {
+public class VariableClusterj implements VariableTableDef, VariableDataAccess<Variable, Variable.Finder> {
 
   @PersistenceCapable(table = TABLE_NAME)
   public interface VariableDTO {
@@ -35,36 +33,36 @@ public class VariableClusterj implements VariableTableDef, VariableDataAccess<Ho
   private ClusterjConnector connector = ClusterjConnector.getInstance();
 
   @Override
-  public HopVariable getVariable(HopVariable.Finder varType) throws
+  public Variable getVariable(Variable.Finder varType) throws
       StorageException {
     HopsSession session = connector.obtainSession();
     VariableDTO var = session.find(VariableDTO.class, varType.getId());
     if (var == null) {
       throw new StorageException("There is no variable entry with id " + varType.getId());
     }
-    return HopVariable.initVariable(varType, var.getValue());
+    return Variable.initVariable(varType, var.getValue());
   }
 
   @Override
-  public void setVariable(HopVariable var) throws StorageException {
+  public void setVariable(Variable var) throws StorageException {
     HopsSession session = connector.obtainSession();
     VariableDTO vd = createVariableDTO(session, var);
     session.savePersistent(vd);
   }
 
   @Override
-  public void prepare(Collection<HopVariable> newVariables, Collection<HopVariable> updatedVariables, Collection<HopVariable> removedVariables) throws StorageException {
+  public void prepare(Collection<Variable> newVariables, Collection<Variable> updatedVariables, Collection<Variable> removedVariables) throws StorageException {
     HopsSession session = connector.obtainSession();
     removeVariables(session, removedVariables);
     updateVariables(session, newVariables);
     updateVariables(session, updatedVariables);
   }
 
-  private void removeVariables(HopsSession session, Collection<HopVariable> vars)
+  private void removeVariables(HopsSession session, Collection<Variable> vars)
       throws StorageException {
     if (vars != null) {
       List<VariableDTO> removed = new ArrayList<VariableDTO>();
-      for (HopVariable var : vars) {
+      for (Variable var : vars) {
         VariableDTO vd = session.newInstance(VariableDTO.class,
             var.getType().getId());
         removed.add(vd);
@@ -73,15 +71,15 @@ public class VariableClusterj implements VariableTableDef, VariableDataAccess<Ho
     }
   }
 
-  private void updateVariables(HopsSession session, Collection<HopVariable> vars) throws StorageException {
+  private void updateVariables(HopsSession session, Collection<Variable> vars) throws StorageException {
     List<VariableDTO> changes= new ArrayList<VariableDTO>();
-    for (HopVariable var : vars) {
+    for (Variable var : vars) {
       changes.add(createVariableDTO(session, var));
     }
     session.savePersistentAll(changes);
   }
 
-  private VariableDTO createVariableDTO(HopsSession session, HopVariable var) throws StorageException {
+  private VariableDTO createVariableDTO(HopsSession session, Variable var) throws StorageException {
     byte[] varVal = var.getBytes();
     if (varVal.length > MAX_VARIABLE_SIZE) {
       throw new StorageException("wrong variable size" + varVal.length + ", variable size should be less or equal to " + MAX_VARIABLE_SIZE);

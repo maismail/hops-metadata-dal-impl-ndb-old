@@ -17,7 +17,7 @@ import io.hops.metadata.ndb.wrapper.HopsSession;
 import io.hops.metadata.yarn.tabledef.UpdatedContainerInfoTableDef;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import io.hops.metadata.hdfs.entity.yarn.HopUpdatedContainerInfo;
+import io.hops.metadata.yarn.entity.HopUpdatedContainerInfo;
 import io.hops.metadata.ndb.ClusterjConnector;
 import io.hops.metadata.ndb.wrapper.HopsPredicate;
 import io.hops.metadata.yarn.dal.UpdatedContainerInfoDataAccess;

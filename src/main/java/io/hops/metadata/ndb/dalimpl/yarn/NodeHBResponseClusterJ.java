@@ -18,7 +18,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import java.util.zip.DataFormatException;
 
-import io.hops.metadata.hdfs.entity.yarn.HopNodeHBResponse;
+import io.hops.metadata.yarn.entity.HopNodeHBResponse;
 import io.hops.metadata.ndb.ClusterjConnector;
 import io.hops.metadata.ndb.wrapper.HopsQuery;
 import io.hops.metadata.yarn.dal.NodeHBResponseDataAccess;

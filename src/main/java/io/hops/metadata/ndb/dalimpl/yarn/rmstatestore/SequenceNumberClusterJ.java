@@ -8,7 +8,7 @@ import io.hops.exception.StorageException;
 import io.hops.metadata.ndb.wrapper.HopsSession;
 import io.hops.metadata.yarn.dal.rmstatestore.SequenceNumberDataAccess;
 import io.hops.metadata.yarn.tabledef.rmstatestore.SequenceNumberTableDef;
-import io.hops.metadata.hdfs.entity.yarn.rmstatestore.HopSequenceNumber;
+import io.hops.metadata.yarn.entity.rmstatestore.HopSequenceNumber;
 import io.hops.metadata.ndb.ClusterjConnector;
 
 public class SequenceNumberClusterJ implements SequenceNumberTableDef,

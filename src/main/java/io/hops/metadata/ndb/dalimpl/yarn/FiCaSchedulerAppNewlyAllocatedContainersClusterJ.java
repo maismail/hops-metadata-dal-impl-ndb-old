@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 import io.hops.exception.StorageException;
-import io.hops.metadata.hdfs.entity.yarn.HopFiCaSchedulerAppNewlyAllocatedContainers;
+import io.hops.metadata.yarn.entity.HopFiCaSchedulerAppNewlyAllocatedContainers;
 import io.hops.metadata.ndb.ClusterjConnector;
 import io.hops.metadata.ndb.wrapper.HopsPredicate;
 import io.hops.metadata.ndb.wrapper.HopsQuery;

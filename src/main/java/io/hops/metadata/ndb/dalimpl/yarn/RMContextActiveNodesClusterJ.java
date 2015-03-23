@@ -8,7 +8,7 @@ import java.util.Collection;
 import java.util.List;
 
 import io.hops.exception.StorageException;
-import io.hops.metadata.hdfs.entity.yarn.HopRMContextActiveNodes;
+import io.hops.metadata.yarn.entity.HopRMContextActiveNodes;
 import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
 import io.hops.metadata.ndb.wrapper.HopsQueryDomainType;
 import io.hops.metadata.ndb.wrapper.HopsSession;

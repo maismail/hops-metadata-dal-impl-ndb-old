@@ -10,7 +10,7 @@ import java.util.Collection;
 import io.hops.exception.StorageException;
 import io.hops.metadata.ndb.wrapper.HopsSession;
 import io.hops.metadata.yarn.tabledef.capacity.FiCaSchedulerAppReservedContainersTableDef;
-import io.hops.metadata.hdfs.entity.yarn.capacity.HopFiCaSchedulerAppReservedContainers;
+import io.hops.metadata.yarn.entity.capacity.HopFiCaSchedulerAppReservedContainers;
 import io.hops.metadata.ndb.ClusterjConnector;
 import io.hops.metadata.yarn.dal.capacity.FiCaSchedulerAppReservedContainersDataAccess;
 

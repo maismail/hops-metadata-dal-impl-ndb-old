@@ -6,7 +6,7 @@ import com.mysql.clusterj.annotation.PrimaryKey;
 
 import io.hops.exception.StorageException;
 import io.hops.metadata.ndb.wrapper.HopsSession;
-import io.hops.metadata.hdfs.entity.yarn.rmstatestore.HopRMStateVersion;
+import io.hops.metadata.yarn.entity.rmstatestore.HopRMStateVersion;
 import io.hops.metadata.ndb.ClusterjConnector;
 import io.hops.metadata.yarn.dal.rmstatestore.RMStateVersionDataAccess;
 import io.hops.metadata.yarn.tabledef.rmstatestore.RMStateVersionTableDef;

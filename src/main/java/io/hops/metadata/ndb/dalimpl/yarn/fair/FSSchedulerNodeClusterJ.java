@@ -11,7 +11,7 @@ import java.util.List;
 
 import io.hops.metadata.ndb.wrapper.HopsSession;
 import io.hops.exception.StorageException;
-import io.hops.metadata.hdfs.entity.yarn.fair.HopFSSchedulerNode;
+import io.hops.metadata.yarn.entity.fair.HopFSSchedulerNode;
 import io.hops.metadata.ndb.ClusterjConnector;
 import io.hops.metadata.yarn.dal.fair.FSSchedulerNodeDataAccess;
 import io.hops.metadata.yarn.tabledef.fair.FSSchedulerNodeTableDef;

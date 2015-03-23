@@ -5,7 +5,7 @@ import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import io.hops.StorageConnector;
 import io.hops.exception.StorageException;
-import io.hops.metadata.hdfs.dal.EntityDataAccess;
+import io.hops.metadata.common.EntityDataAccess;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

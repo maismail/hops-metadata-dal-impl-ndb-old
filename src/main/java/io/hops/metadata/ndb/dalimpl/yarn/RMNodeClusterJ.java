@@ -16,7 +16,7 @@ import io.hops.metadata.ndb.wrapper.HopsSession;
 import io.hops.metadata.yarn.dal.RMNodeDataAccess;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import io.hops.metadata.hdfs.entity.yarn.HopRMNode;
+import io.hops.metadata.yarn.entity.HopRMNode;
 import io.hops.metadata.ndb.ClusterjConnector;
 import io.hops.metadata.ndb.wrapper.HopsQuery;
 import io.hops.metadata.yarn.tabledef.RMNodeTableDef;

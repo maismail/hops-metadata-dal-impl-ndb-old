@@ -8,7 +8,7 @@ import io.hops.metadata.hdfs.dal.QuotaUpdateDataAccess;
 import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
 import io.hops.metadata.ndb.wrapper.HopsQueryDomainType;
 import io.hops.metadata.ndb.wrapper.HopsSession;
-import io.hops.metadata.hdfs.entity.hop.QuotaUpdate;
+import io.hops.metadata.hdfs.entity.QuotaUpdate;
 import io.hops.metadata.hdfs.tabledef.QuotaUpdateTableDef;
 import io.hops.metadata.ndb.ClusterjConnector;
 import io.hops.metadata.ndb.mysqlserver.HopsSQLExceptionHelper;

@@ -1,7 +1,6 @@
 package io.hops.metadata.ndb.dalimpl.hdfs;
 
 import com.google.common.primitives.Ints;
-import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PartitionKey;
 import com.mysql.clusterj.annotation.PersistenceCapable;
@@ -19,20 +18,11 @@ import io.hops.metadata.ndb.wrapper.HopsQuery;
 import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
 import io.hops.metadata.ndb.wrapper.HopsQueryDomainType;
 import io.hops.metadata.ndb.wrapper.HopsSession;
-import io.hops.metadata.hdfs.dal.ReplicaUnderConstructionDataAccess;
-import io.hops.metadata.hdfs.entity.hdfs.HopReplicaUnderConstruction;
-import io.hops.exception.StorageException;
-import io.hops.metadata.ndb.ClusterjConnector;
-import io.hops.metadata.hdfs.tabledef.ReplicaUnderConstructionTableDef;
-import io.hops.metadata.ndb.wrapper.HopsPredicate;
-import io.hops.metadata.ndb.wrapper.HopsQuery;
-import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
-import io.hops.metadata.ndb.wrapper.HopsQueryDomainType;
-import io.hops.metadata.ndb.wrapper.HopsSession;
+import io.hops.metadata.hdfs.entity.ReplicaUnderConstruction;
 
 public class ReplicaUnderConstructionClusterj implements
     ReplicaUnderConstructionTableDef,
-    ReplicaUnderConstructionDataAccess<HopReplicaUnderConstruction> {
+    ReplicaUnderConstructionDataAccess<ReplicaUnderConstruction> {
 
   @PersistenceCapable(table = TABLE_NAME)
   @PartitionKey(column=INODE_ID)
@@ -64,18 +54,18 @@ public class ReplicaUnderConstructionClusterj implements
   private ClusterjConnector connector = ClusterjConnector.getInstance();
 
   @Override
-  public void prepare(Collection<HopReplicaUnderConstruction> removed, Collection<HopReplicaUnderConstruction> newed, Collection<HopReplicaUnderConstruction> modified) throws
+  public void prepare(Collection<ReplicaUnderConstruction> removed, Collection<ReplicaUnderConstruction> newed, Collection<ReplicaUnderConstruction> modified) throws
       StorageException {
     HopsSession session = connector.obtainSession();
     List<ReplicaUcDTO> changes = new ArrayList<ReplicaUcDTO>();
     List<ReplicaUcDTO> deletions = new ArrayList<ReplicaUcDTO>();
-    for (HopReplicaUnderConstruction replica : removed) {
+    for (ReplicaUnderConstruction replica : removed) {
       ReplicaUcDTO newInstance = session.newInstance(ReplicaUcDTO.class);
       createPersistable(replica, newInstance);
       deletions.add(newInstance);
     }
 
-    for (HopReplicaUnderConstruction replica : newed) {
+    for (ReplicaUnderConstruction replica : newed) {
       ReplicaUcDTO newInstance = session.newInstance(ReplicaUcDTO.class);
       createPersistable(replica, newInstance);
       changes.add(newInstance);
@@ -85,7 +75,7 @@ public class ReplicaUnderConstructionClusterj implements
   }
 
   @Override
-  public List<HopReplicaUnderConstruction> findReplicaUnderConstructionByBlockId(long blockId, int inodeId) throws StorageException {
+  public List<ReplicaUnderConstruction> findReplicaUnderConstructionByBlockId(long blockId, int inodeId) throws StorageException {
     HopsSession session = connector.obtainSession();
     HopsQueryBuilder qb = session.getQueryBuilder();
     HopsQueryDomainType<ReplicaUcDTO> dobj = qb.createQueryDefinition(ReplicaUcDTO.class);
@@ -99,7 +89,7 @@ public class ReplicaUnderConstructionClusterj implements
   }
   
   @Override
-  public List<HopReplicaUnderConstruction> findReplicaUnderConstructionByINodeId(int inodeId) throws StorageException {
+  public List<ReplicaUnderConstruction> findReplicaUnderConstructionByINodeId(int inodeId) throws StorageException {
     HopsSession session = connector.obtainSession();
     HopsQueryBuilder qb = session.getQueryBuilder();
     HopsQueryDomainType<ReplicaUcDTO> dobj = qb.createQueryDefinition(ReplicaUcDTO.class);
@@ -112,7 +102,7 @@ public class ReplicaUnderConstructionClusterj implements
   
 
   @Override
-  public List<HopReplicaUnderConstruction> findReplicaUnderConstructionByINodeIds(int[] inodeIds) throws StorageException {
+  public List<ReplicaUnderConstruction> findReplicaUnderConstructionByINodeIds(int[] inodeIds) throws StorageException {
     HopsSession session = connector.obtainSession();
     HopsQueryBuilder qb = session.getQueryBuilder();
     HopsQueryDomainType<ReplicaUcDTO> dobj = qb.createQueryDefinition(ReplicaUcDTO.class);
@@ -123,15 +113,15 @@ public class ReplicaUnderConstructionClusterj implements
     return createReplicaList(query.getResultList());
   }
 
-  private List<HopReplicaUnderConstruction> createReplicaList(List<ReplicaUcDTO> replicaUc) throws StorageException {
-    List<HopReplicaUnderConstruction> replicas = new ArrayList<HopReplicaUnderConstruction>(replicaUc.size());
+  private List<ReplicaUnderConstruction> createReplicaList(List<ReplicaUcDTO> replicaUc) throws StorageException {
+    List<ReplicaUnderConstruction> replicas = new ArrayList<ReplicaUnderConstruction>(replicaUc.size());
     for (ReplicaUcDTO t : replicaUc) {
-      replicas.add(new HopReplicaUnderConstruction(t.getState(), t.getStorageId(), t.getBlockId(), t.getINodeId(), t.getIndex()));
+      replicas.add(new ReplicaUnderConstruction(t.getState(), t.getStorageId(), t.getBlockId(), t.getINodeId(), t.getIndex()));
     }
     return replicas;
   }
 
-  private void createPersistable(HopReplicaUnderConstruction replica, ReplicaUcDTO newInstance) {
+  private void createPersistable(ReplicaUnderConstruction replica, ReplicaUcDTO newInstance) {
     newInstance.setBlockId(replica.getBlockId());
     newInstance.setIndex(replica.getIndex());
     newInstance.setStorageId(replica.getStorageId());

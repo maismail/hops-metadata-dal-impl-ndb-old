@@ -12,7 +12,7 @@ import io.hops.exception.StorageException;
 import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
 import io.hops.metadata.ndb.wrapper.HopsQueryDomainType;
 import io.hops.metadata.ndb.wrapper.HopsSession;
-import io.hops.metadata.hdfs.entity.yarn.appmasterrpc.HopRPC;
+import io.hops.metadata.yarn.entity.appmasterrpc.HopRPC;
 import io.hops.metadata.ndb.ClusterjConnector;
 import io.hops.metadata.ndb.wrapper.HopsPredicate;
 import io.hops.metadata.ndb.wrapper.HopsQuery;

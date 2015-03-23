@@ -7,7 +7,7 @@ import io.hops.exception.StorageException;
 import io.hops.metadata.ndb.wrapper.HopsSession;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import io.hops.metadata.hdfs.entity.yarn.HopsYarnVariables;
+import io.hops.metadata.yarn.entity.HopsYarnVariables;
 import io.hops.metadata.ndb.ClusterjConnector;
 import io.hops.metadata.yarn.dal.YarnVariablesDataAccess;
 import io.hops.metadata.yarn.tabledef.YarnVariablesTableDef;

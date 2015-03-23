@@ -8,7 +8,7 @@ import com.mysql.clusterj.annotation.PrimaryKey;
 import java.util.Collection;
 
 import io.hops.exception.StorageException;
-import io.hops.metadata.hdfs.entity.yarn.capacity.HopFiCaSchedulerAppReservations;
+import io.hops.metadata.yarn.entity.capacity.HopFiCaSchedulerAppReservations;
 import io.hops.metadata.ndb.wrapper.HopsSession;
 import io.hops.metadata.yarn.tabledef.capacity.FiCaSchedulerAppReservationsTableDef;
 import io.hops.metadata.ndb.ClusterjConnector;

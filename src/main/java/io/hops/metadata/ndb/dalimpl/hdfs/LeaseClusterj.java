@@ -18,13 +18,13 @@ import io.hops.metadata.ndb.wrapper.HopsSession;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import io.hops.metadata.hdfs.dal.LeaseDataAccess;
-import io.hops.metadata.hdfs.entity.hdfs.HopLease;
+import io.hops.metadata.hdfs.entity.Lease;
 import io.hops.metadata.ndb.ClusterjConnector;
 import io.hops.metadata.ndb.wrapper.HopsPredicate;
 import io.hops.metadata.ndb.wrapper.HopsPredicateOperand;
 import io.hops.metadata.ndb.wrapper.HopsQuery;
 
-public class LeaseClusterj implements LeaseTableDef, LeaseDataAccess<HopLease> {
+public class LeaseClusterj implements LeaseTableDef, LeaseDataAccess<Lease> {
 
   @PersistenceCapable(table = TABLE_NAME)
   @PartitionKey(column=PART_KEY)
@@ -60,21 +60,21 @@ public class LeaseClusterj implements LeaseTableDef, LeaseDataAccess<HopLease> {
   }
 
   @Override
-  public HopLease findByPKey(String holder) throws StorageException {
+  public Lease findByPKey(String holder) throws StorageException {
     HopsSession session = connector.obtainSession();
     Object[] key = new Object[2];
     key[0] = holder;
     key[1] = PART_KEY_VAL;
     LeaseDTO lTable = session.find(LeaseDTO.class, key);
     if (lTable != null) {
-      HopLease lease = createLease(lTable);
+      Lease lease = createLease(lTable);
       return lease;
     }
     return null;
   }
 
   @Override
-  public HopLease findByHolderId(int holderId) throws StorageException {
+  public Lease findByHolderId(int holderId) throws StorageException {
     HopsSession session = connector.obtainSession();
     HopsQueryBuilder qb = session.getQueryBuilder();
     HopsQueryDomainType<LeaseDTO> dobj = qb.createQueryDefinition(LeaseDTO.class);
@@ -93,7 +93,7 @@ public class LeaseClusterj implements LeaseTableDef, LeaseDataAccess<HopLease> {
       log.error("Error in selectLeaseTableInternal: Multiple rows with same holderID");
       return null;
     } else if (leaseTables.size() == 1) {
-      HopLease lease = createLease(leaseTables.get(0));
+      Lease lease = createLease(leaseTables.get(0));
       return lease;
     } else {
       log.info("No rows found for holderID:" + holderId + " in Lease table");
@@ -102,7 +102,7 @@ public class LeaseClusterj implements LeaseTableDef, LeaseDataAccess<HopLease> {
   }
 
   @Override
-  public Collection<HopLease> findAll() throws StorageException {
+  public Collection<Lease> findAll() throws StorageException {
     HopsSession session = connector.obtainSession();
     HopsQueryBuilder qb = session.getQueryBuilder();
     HopsQueryDomainType<LeaseDTO> dobj = qb.createQueryDefinition(LeaseDTO.class);
@@ -114,7 +114,7 @@ public class LeaseClusterj implements LeaseTableDef, LeaseDataAccess<HopLease> {
   }
 
   @Override
-  public Collection<HopLease> findByTimeLimit(long timeLimit) throws StorageException {
+  public Collection<Lease> findByTimeLimit(long timeLimit) throws StorageException {
     HopsSession session = connector.obtainSession();
     HopsQueryBuilder qb = session.getQueryBuilder();
     HopsQueryDomainType dobj = qb.createQueryDefinition(LeaseDTO.class);
@@ -130,23 +130,23 @@ public class LeaseClusterj implements LeaseTableDef, LeaseDataAccess<HopLease> {
   }
 
   @Override
-  public void prepare(Collection<HopLease> removed, Collection<HopLease> newed, Collection<HopLease> modified) throws StorageException {
+  public void prepare(Collection<Lease> removed, Collection<Lease> newed, Collection<Lease> modified) throws StorageException {
     HopsSession session = connector.obtainSession();
     List<LeaseDTO> changes = new ArrayList<LeaseDTO>();
     List<LeaseDTO> deletions = new ArrayList<LeaseDTO>();
-    for (HopLease l : newed) {
+    for (Lease l : newed) {
       LeaseDTO lTable = session.newInstance(LeaseDTO.class);
       createPersistableLeaseInstance(l, lTable);
       changes.add(lTable);
     }
 
-    for (HopLease l : modified) {
+    for (Lease l : modified) {
       LeaseDTO lTable = session.newInstance(LeaseDTO.class);
       createPersistableLeaseInstance(l, lTable);
       changes.add(lTable);
     }
 
-    for (HopLease l : removed) {
+    for (Lease l : removed) {
       Object[] key = new Object[2];
       key[0] = l.getHolder();
       key[1] = PART_KEY_VAL;
@@ -157,8 +157,8 @@ public class LeaseClusterj implements LeaseTableDef, LeaseDataAccess<HopLease> {
     session.savePersistentAll(changes);
   }
 
-  private Collection<HopLease> createList(List<LeaseDTO> list) {
-    Collection<HopLease> finalSet = new ArrayList<HopLease>();
+  private Collection<Lease> createList(List<LeaseDTO> list) {
+    Collection<Lease> finalSet = new ArrayList<Lease>();
     for (LeaseDTO dto : list) {
       finalSet.add(createLease(dto));
     }
@@ -172,11 +172,11 @@ public class LeaseClusterj implements LeaseTableDef, LeaseDataAccess<HopLease> {
     session.deletePersistentAll(LeaseDTO.class);
   }
 
-  private HopLease createLease(LeaseDTO lTable) {
-    return new HopLease(lTable.getHolder(), lTable.getHolderId(), lTable.getLastUpdate());
+  private Lease createLease(LeaseDTO lTable) {
+    return new Lease(lTable.getHolder(), lTable.getHolderId(), lTable.getLastUpdate());
   }
 
-  private void createPersistableLeaseInstance(HopLease lease, LeaseDTO lTable) {
+  private void createPersistableLeaseInstance(Lease lease, LeaseDTO lTable) {
     lTable.setHolder(lease.getHolder());
     lTable.setHolderId(lease.getHolderId());
     lTable.setLastUpdate(lease.getLastUpdate());

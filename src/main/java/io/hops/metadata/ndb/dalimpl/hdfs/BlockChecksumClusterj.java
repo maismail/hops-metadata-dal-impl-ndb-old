@@ -4,7 +4,7 @@ import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
 import io.hops.exception.StorageException;
-import io.hops.metadata.hdfs.entity.hop.BlockChecksum;
+import io.hops.metadata.hdfs.entity.BlockChecksum;
 import io.hops.metadata.hdfs.tabledef.BlockChecksumTableDef;
 import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
 import io.hops.metadata.ndb.wrapper.HopsQueryDomainType;

@@ -1,25 +1,16 @@
 package io.hops.metadata.ndb.dalimpl.hdfs;
 
-import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PartitionKey;
-import com.mysql.clusterj.annotation.PersistenceCapable;
-import com.mysql.clusterj.annotation.PrimaryKey;
-import java.security.InvalidParameterException;
 
 import io.hops.exception.StorageException;
-import io.hops.metadata.hdfs.tabledef.LeDescriptorTableDef;
+import io.hops.metadata.election.tabledef.LeDescriptorTableDef;
 import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
 import io.hops.metadata.ndb.wrapper.HopsQueryDomainType;
 import io.hops.metadata.ndb.wrapper.HopsSession;
-import io.hops.exception.StorageException;
-import io.hops.metadata.hdfs.dal.LeDescriptorDataAccess;
-import io.hops.metadata.hdfs.entity.hop.election.LeDescriptor;
-import io.hops.metadata.hdfs.tabledef.LeDescriptorTableDef;
+import io.hops.metadata.election.dal.LeDescriptorDataAccess;
+import io.hops.metadata.election.entity.LeDescriptor;
 import io.hops.metadata.ndb.ClusterjConnector;
 import io.hops.metadata.ndb.wrapper.HopsQuery;
-import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
-import io.hops.metadata.ndb.wrapper.HopsQueryDomainType;
-import io.hops.metadata.ndb.wrapper.HopsSession;
 
 import java.util.ArrayList;
 import java.util.Collection;

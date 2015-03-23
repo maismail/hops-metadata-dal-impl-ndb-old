@@ -19,7 +19,7 @@ import io.hops.metadata.ndb.wrapper.HopsSession;
 import io.hops.metadata.yarn.dal.rmstatestore.ApplicationStateDataAccess;
 import io.hops.metadata.yarn.tabledef.rmstatestore.ApplicationStateTableDef;
 import io.hops.util.CompressionUtils;
-import io.hops.metadata.hdfs.entity.yarn.rmstatestore.HopApplicationState;
+import io.hops.metadata.yarn.entity.rmstatestore.HopApplicationState;
 
 public class ApplicationStateClusterJ implements ApplicationStateTableDef,
     ApplicationStateDataAccess<HopApplicationState> {

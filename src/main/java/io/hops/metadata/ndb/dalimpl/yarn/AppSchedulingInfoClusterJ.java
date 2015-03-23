@@ -11,7 +11,7 @@ import java.util.List;
 import io.hops.exception.StorageException;
 import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
 import io.hops.metadata.ndb.wrapper.HopsSession;
-import io.hops.metadata.hdfs.entity.yarn.HopAppSchedulingInfo;
+import io.hops.metadata.yarn.entity.HopAppSchedulingInfo;
 import io.hops.metadata.ndb.ClusterjConnector;
 import io.hops.metadata.ndb.NdbBoolean;
 import io.hops.metadata.ndb.wrapper.HopsQuery;
