@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 import io.hops.exception.StorageException;
-import io.hops.metadata.yarn.entity.HopNode;
+import io.hops.metadata.yarn.entity.Node;
 import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
 import io.hops.metadata.ndb.wrapper.HopsQueryDomainType;
 import io.hops.metadata.ndb.wrapper.HopsSession;
@@ -21,7 +21,7 @@ import io.hops.metadata.ndb.ClusterjConnector;
 import io.hops.metadata.ndb.wrapper.HopsQuery;
 import io.hops.metadata.yarn.tabledef.NodeTableDef;
 
-public class NodeClusterJ implements NodeTableDef, NodeDataAccess<HopNode> {
+public class NodeClusterJ implements NodeTableDef, NodeDataAccess<Node> {
 
   private static final Log LOG = LogFactory.getLog(NodeClusterJ.class);
 
@@ -57,7 +57,7 @@ public class NodeClusterJ implements NodeTableDef, NodeDataAccess<HopNode> {
   private final ClusterjConnector connector = ClusterjConnector.getInstance();
 
   @Override
-  public HopNode findById(String id) throws StorageException {
+  public Node findById(String id) throws StorageException {
     LOG.debug("HOP :: ClusterJ Node.findById - START:" + id);
     HopsSession session = connector.obtainSession();
     NodeDTO nodeDTO;
@@ -72,7 +72,7 @@ public class NodeClusterJ implements NodeTableDef, NodeDataAccess<HopNode> {
   }
 
   @Override
-  public Map<String, HopNode> getAll() throws StorageException {
+  public Map<String, Node> getAll() throws StorageException {
     LOG.debug("HOP :: ClusterJ Node.getAll - START");
     HopsSession session = connector.obtainSession();
     HopsQueryBuilder qb = session.getQueryBuilder();
@@ -86,10 +86,10 @@ public class NodeClusterJ implements NodeTableDef, NodeDataAccess<HopNode> {
   }
 
   @Override
-  public void addAll(Collection<HopNode> toAdd) throws StorageException {
+  public void addAll(Collection<Node> toAdd) throws StorageException {
     HopsSession session = connector.obtainSession();
     List<NodeDTO> toPersist = new ArrayList<NodeDTO>();
-    for (HopNode node : toAdd) {
+    for (Node node : toAdd) {
       toPersist.add(createPersistable(node, session));
     }
     session.savePersistentAll(toPersist);
@@ -97,12 +97,12 @@ public class NodeClusterJ implements NodeTableDef, NodeDataAccess<HopNode> {
   }
 
   @Override
-  public void createNode(HopNode node) throws StorageException {
+  public void createNode(Node node) throws StorageException {
     HopsSession session = connector.obtainSession();
     session.savePersistent(createPersistable(node, session));
   }
 
-  private NodeDTO createPersistable(HopNode hopNode, HopsSession session) throws
+  private NodeDTO createPersistable(Node hopNode, HopsSession session) throws
           StorageException {
     NodeDTO nodeDTO = session.newInstance(NodeDTO.class);
     //Set values to persist new rmnode
@@ -121,15 +121,15 @@ public class NodeClusterJ implements NodeTableDef, NodeDataAccess<HopNode> {
    * @param nodeDTO
    * @return HopRMNode
    */
-  public static HopNode createHopNode(NodeDTO nodeDTO) {
-    return new HopNode(nodeDTO.getnodeid(), nodeDTO.getName(), nodeDTO.
+  public static Node createHopNode(NodeDTO nodeDTO) {
+    return new Node(nodeDTO.getnodeid(), nodeDTO.getName(), nodeDTO.
             getLocation(), nodeDTO.getLevel(), nodeDTO.getParent());
   }
 
-  private Map<String, HopNode> createMap(List<NodeDTO> results) {
-    Map<String, HopNode> map = new HashMap<String, HopNode>();
+  private Map<String, Node> createMap(List<NodeDTO> results) {
+    Map<String, Node> map = new HashMap<String, Node>();
     for (NodeDTO persistable : results) {
-      HopNode hop = createHopNode(persistable);
+      Node hop = createHopNode(persistable);
       map.put(hop.getId(), hop);
     }
     return map;

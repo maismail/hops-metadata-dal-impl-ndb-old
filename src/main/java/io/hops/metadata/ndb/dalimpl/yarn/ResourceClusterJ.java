@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 import io.hops.exception.StorageException;
-import io.hops.metadata.yarn.entity.HopResource;
+import io.hops.metadata.yarn.entity.Resource;
 import io.hops.metadata.ndb.wrapper.HopsQuery;
 import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
 import io.hops.metadata.ndb.wrapper.HopsQueryDomainType;
@@ -22,7 +22,7 @@ import io.hops.metadata.ndb.ClusterjConnector;
 import io.hops.metadata.yarn.tabledef.ResourceTableDef;
 
 public class ResourceClusterJ implements ResourceTableDef,
-    ResourceDataAccess<HopResource> {
+    ResourceDataAccess<Resource> {
 
   private static final Log LOG = LogFactory.getLog(ResourceClusterJ.class);
 
@@ -58,7 +58,7 @@ public class ResourceClusterJ implements ResourceTableDef,
   private final ClusterjConnector connector = ClusterjConnector.getInstance();
 
   @Override
-  public HopResource findEntry(String id, int type, int parent) throws
+  public Resource findEntry(String id, int type, int parent) throws
       StorageException {
     LOG.debug("HOP :: ClusterJ Resource.findEntry - START:" + id);
     HopsSession session = connector.obtainSession();
@@ -78,7 +78,7 @@ public class ResourceClusterJ implements ResourceTableDef,
   }
 
   @Override
-  public Map<String, Map<Integer, Map<Integer, HopResource>>> getAll() throws
+  public Map<String, Map<Integer, Map<Integer, Resource>>> getAll() throws
           StorageException {
     LOG.debug("HOP :: ClusterJ Resource.getAll - START");
     HopsSession session = connector.obtainSession();
@@ -95,11 +95,11 @@ public class ResourceClusterJ implements ResourceTableDef,
   }
 
   @Override
-  public void addAll(Collection<HopResource> toAdd) throws
+  public void addAll(Collection<Resource> toAdd) throws
           StorageException {
     HopsSession session = connector.obtainSession();
     List<ResourceDTO> toPersist = new ArrayList<ResourceDTO>();
-    for (HopResource req : toAdd) {
+    for (Resource req : toAdd) {
       toPersist.add(createPersistable(req, session));
     }
 
@@ -108,11 +108,11 @@ public class ResourceClusterJ implements ResourceTableDef,
   }
 
   @Override
-  public void removeAll(Collection<HopResource> toRemove) throws
+  public void removeAll(Collection<Resource> toRemove) throws
           StorageException {
     HopsSession session = connector.obtainSession();
     List<ResourceDTO> toPersist = new ArrayList<ResourceDTO>();
-    for (HopResource req : toRemove) {
+    for (Resource req : toRemove) {
       Object[] pk = new Object[3];
       pk[0] = req.getId();
       pk[1] = req.getType();
@@ -124,22 +124,22 @@ public class ResourceClusterJ implements ResourceTableDef,
   }
 
   @Override
-  public void add(HopResource resourceNode) throws StorageException {
+  public void add(Resource resourceNode) throws StorageException {
     HopsSession session = connector.obtainSession();
     session.savePersistent(createPersistable(resourceNode, session));
   }
 
-  private HopResource createHopResource(ResourceDTO resourceDTO) {
+  private Resource createHopResource(ResourceDTO resourceDTO) {
     if (resourceDTO == null) {
       return null;
 
     }
-    return new HopResource(resourceDTO.getId(), resourceDTO.getType(),
+    return new Resource(resourceDTO.getId(), resourceDTO.getType(),
             resourceDTO.getParent(), resourceDTO.getMemory(), resourceDTO.
             getVirtualcores());
   }
 
-  private ResourceDTO createPersistable(HopResource resource,
+  private ResourceDTO createPersistable(Resource resource,
           HopsSession session) throws StorageException {
     ResourceDTO resourceDTO = session.newInstance(ResourceDTO.class);
     resourceDTO.setId(resource.getId());
@@ -150,20 +150,20 @@ public class ResourceClusterJ implements ResourceTableDef,
     return resourceDTO;
   }
 
-  private Map<String, Map<Integer, Map<Integer, HopResource>>> createMap(
+  private Map<String, Map<Integer, Map<Integer, Resource>>> createMap(
           List<ResourceDTO> results) {
-    Map<String, Map<Integer, Map<Integer, HopResource>>> map
-            = new HashMap<String, Map<Integer, Map<Integer, HopResource>>>();
+    Map<String, Map<Integer, Map<Integer, Resource>>> map
+            = new HashMap<String, Map<Integer, Map<Integer, Resource>>>();
     for (ResourceDTO dto : results) {
-      HopResource hop
+      Resource hop
               = createHopResource(dto);
       if (map.get(hop.getId()) == null) {
         map.put(hop.getId(),
-                new HashMap<Integer, Map<Integer, HopResource>>());
+                new HashMap<Integer, Map<Integer, Resource>>());
       }
-      Map<Integer, Map<Integer, HopResource>> inerMap = map.get(hop.getId());
+      Map<Integer, Map<Integer, Resource>> inerMap = map.get(hop.getId());
       if (inerMap.get(hop.getType()) == null) {
-        inerMap.put(hop.getType(), new HashMap<Integer, HopResource>());
+        inerMap.put(hop.getType(), new HashMap<Integer, Resource>());
       }
       inerMap.get(hop.getType()).put(hop.getParent(), hop);
     }

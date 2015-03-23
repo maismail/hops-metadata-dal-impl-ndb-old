@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import io.hops.metadata.yarn.entity.HopFinishedApplications;
+import io.hops.metadata.yarn.entity.FinishedApplications;
 import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
 import io.hops.metadata.ndb.wrapper.HopsSession;
 import org.apache.commons.logging.Log;
@@ -22,7 +22,7 @@ import io.hops.metadata.ndb.wrapper.HopsQueryDomainType;
 import io.hops.metadata.yarn.dal.FinishedApplicationsDataAccess;
 import io.hops.metadata.yarn.tabledef.FinishedApplicationsTableDef;
 
-public class FinishedApplicationsClusterJ implements FinishedApplicationsTableDef, FinishedApplicationsDataAccess<HopFinishedApplications> {
+public class FinishedApplicationsClusterJ implements FinishedApplicationsTableDef, FinishedApplicationsDataAccess<FinishedApplications> {
 
   private static final Log LOG = LogFactory.getLog(
           FinishedApplicationsClusterJ.class);
@@ -45,7 +45,7 @@ public class FinishedApplicationsClusterJ implements FinishedApplicationsTableDe
   private final ClusterjConnector connector = ClusterjConnector.getInstance();
 
   @Override
-  public List<HopFinishedApplications> findByRMNode(String rmnodeid) throws
+  public List<FinishedApplications> findByRMNode(String rmnodeid) throws
           StorageException {
     LOG.debug("HOP :: ClusterJ FinishedApplications.findByRMNode - START:"
             + rmnodeid);
@@ -70,7 +70,7 @@ public class FinishedApplicationsClusterJ implements FinishedApplicationsTableDe
   }
 
   @Override
-  public Map<String, List<HopFinishedApplications>> getAll() throws
+  public Map<String, List<FinishedApplications>> getAll() throws
           StorageException {
     LOG.debug("HOP :: ClusterJ FinishedApplications.getAll - START");
     HopsSession session = connector.obtainSession();
@@ -87,12 +87,12 @@ public class FinishedApplicationsClusterJ implements FinishedApplicationsTableDe
   }
 
   @Override
-  public void addAll(Collection<HopFinishedApplications> applications) throws
+  public void addAll(Collection<FinishedApplications> applications) throws
           StorageException {
     HopsSession session = connector.obtainSession();
     List<FinishedApplicationsDTO> toModify
             = new ArrayList<FinishedApplicationsDTO>();
-    for (HopFinishedApplications entry : applications) {
+    for (FinishedApplications entry : applications) {
       toModify.add(createPersistable(entry, session));
     }
     session.savePersistentAll(toModify);
@@ -100,24 +100,24 @@ public class FinishedApplicationsClusterJ implements FinishedApplicationsTableDe
   }
 
   @Override
-  public void removeAll(Collection<HopFinishedApplications> applications) throws
+  public void removeAll(Collection<FinishedApplications> applications) throws
           StorageException {
     HopsSession session = connector.obtainSession();
     List<FinishedApplicationsDTO> toRemove
             = new ArrayList<FinishedApplicationsDTO>();
-    for (HopFinishedApplications entry : applications) {
+    for (FinishedApplications entry : applications) {
       toRemove.add(createPersistable(entry, session));
     }
     session.deletePersistentAll(toRemove);
     session.flush();
   }
 
-  private HopFinishedApplications createHopFinishedApplications(
+  private FinishedApplications createHopFinishedApplications(
           FinishedApplicationsDTO dto) {
-    return new HopFinishedApplications(dto.getrmnodeid(), dto.getapplicationid());
+    return new FinishedApplications(dto.getrmnodeid(), dto.getapplicationid());
   }
 
-  private FinishedApplicationsDTO createPersistable(HopFinishedApplications hop,
+  private FinishedApplicationsDTO createPersistable(FinishedApplications hop,
           HopsSession session) throws StorageException {
     FinishedApplicationsDTO dto = session.newInstance(
             FinishedApplicationsDTO.class);
@@ -126,26 +126,26 @@ public class FinishedApplicationsClusterJ implements FinishedApplicationsTableDe
     return dto;
   }
 
-  private List<HopFinishedApplications> createUpdatedContainerInfoList(
+  private List<FinishedApplications> createUpdatedContainerInfoList(
           List<FinishedApplicationsDTO> list) {
-    List<HopFinishedApplications> finishedApps
-            = new ArrayList<HopFinishedApplications>();
+    List<FinishedApplications> finishedApps
+            = new ArrayList<FinishedApplications>();
     for (FinishedApplicationsDTO persistable : list) {
       finishedApps.add(createHopFinishedApplications(persistable));
     }
     return finishedApps;
   }
 
-  private Map<String, List<HopFinishedApplications>> createMap(
+  private Map<String, List<FinishedApplications>> createMap(
           List<FinishedApplicationsDTO> results) {
-    Map<String, List<HopFinishedApplications>> map
-            = new HashMap<String, List<HopFinishedApplications>>();
+    Map<String, List<FinishedApplications>> map
+            = new HashMap<String, List<FinishedApplications>>();
     for (FinishedApplicationsDTO dto : results) {
-      HopFinishedApplications hop
+      FinishedApplications hop
               = createHopFinishedApplications(dto);
       if (map.get(hop.getRMNodeID()) == null) {
         map.put(hop.getRMNodeID(),
-                new ArrayList<HopFinishedApplications>());
+                new ArrayList<FinishedApplications>());
       }
       map.get(hop.getRMNodeID()).add(hop);
     }

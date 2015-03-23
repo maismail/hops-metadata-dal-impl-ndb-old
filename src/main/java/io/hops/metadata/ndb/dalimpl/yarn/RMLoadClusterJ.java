@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 import io.hops.exception.StorageException;
-import io.hops.metadata.yarn.entity.HopLoad;
+import io.hops.metadata.yarn.entity.Load;
 import io.hops.metadata.ndb.ClusterjConnector;
 import io.hops.metadata.ndb.wrapper.HopsQuery;
 import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
@@ -19,7 +19,7 @@ import io.hops.metadata.yarn.dal.RMLoadDataAccess;
 import io.hops.metadata.yarn.tabledef.RMLoadTableDef;
 
 public class RMLoadClusterJ implements RMLoadTableDef,
-    RMLoadDataAccess<HopLoad> {
+    RMLoadDataAccess<Load> {
 
   @PersistenceCapable(table = TABLE_NAME)
   public interface RMLoadDTO {
@@ -38,13 +38,13 @@ public class RMLoadClusterJ implements RMLoadTableDef,
   private final ClusterjConnector connector = ClusterjConnector.getInstance();
 
   @Override
-  public void update(HopLoad entry) throws StorageException {
+  public void update(Load entry) throws StorageException {
     HopsSession session = connector.obtainSession();
     session.savePersistent(createPersistable(entry, session));
   }
 
   @Override
-  public Map<String, HopLoad> getAll() throws StorageException {
+  public Map<String, Load> getAll() throws StorageException {
     HopsSession session = connector.obtainSession();
     HopsQueryBuilder qb = session.getQueryBuilder();
     HopsQueryDomainType<RMLoadDTO> dobj
@@ -57,7 +57,7 @@ public class RMLoadClusterJ implements RMLoadTableDef,
     return createMap(results);
   }
 
-  private RMLoadDTO createPersistable(HopLoad entry, HopsSession session) throws
+  private RMLoadDTO createPersistable(Load entry, HopsSession session) throws
           StorageException {
     RMLoadDTO persistable = session.newInstance(RMLoadDTO.class);
     persistable.setrmhostname(entry.getRmHostName());
@@ -65,20 +65,20 @@ public class RMLoadClusterJ implements RMLoadTableDef,
     return persistable;
   }
 
-  private Map<String, HopLoad> createMap(List<RMLoadDTO> results) {
-    Map<String, HopLoad> map
-            = new HashMap<String, HopLoad>();
+  private Map<String, Load> createMap(List<RMLoadDTO> results) {
+    Map<String, Load> map
+            = new HashMap<String, Load>();
     for (RMLoadDTO dto : results) {
-      HopLoad hop = createHopLoad(dto);
+      Load hop = createHopLoad(dto);
       map.put(hop.getRmHostName(), hop);
     }
     return map;
   }
 
-  private HopLoad createHopLoad(RMLoadDTO loadDTO) {
+  private Load createHopLoad(RMLoadDTO loadDTO) {
     if (loadDTO == null) {
       return null;
     }
-    return new HopLoad(loadDTO.getrmhostname(), loadDTO.getload());
+    return new Load(loadDTO.getrmhostname(), loadDTO.getload());
   }
 }

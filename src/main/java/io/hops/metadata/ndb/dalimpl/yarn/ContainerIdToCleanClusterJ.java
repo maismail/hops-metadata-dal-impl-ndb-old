@@ -12,7 +12,7 @@ import java.util.Map;
 import java.util.Set;
 
 import io.hops.exception.StorageException;
-import io.hops.metadata.yarn.entity.HopContainerId;
+import io.hops.metadata.yarn.entity.ContainerId;
 import io.hops.metadata.ndb.wrapper.HopsQuery;
 import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
 import io.hops.metadata.ndb.wrapper.HopsQueryDomainType;
@@ -24,7 +24,7 @@ import io.hops.metadata.ndb.ClusterjConnector;
 import io.hops.metadata.ndb.wrapper.HopsPredicate;
 import io.hops.metadata.yarn.dal.ContainerIdToCleanDataAccess;
 
-public class ContainerIdToCleanClusterJ implements ContainerIdToCleanTableDef, ContainerIdToCleanDataAccess<HopContainerId> {
+public class ContainerIdToCleanClusterJ implements ContainerIdToCleanTableDef, ContainerIdToCleanDataAccess<ContainerId> {
 
   private static final Log LOG = LogFactory.getLog(
           ContainerIdToCleanClusterJ.class);
@@ -47,7 +47,7 @@ public class ContainerIdToCleanClusterJ implements ContainerIdToCleanTableDef, C
   private final ClusterjConnector connector = ClusterjConnector.getInstance();
 
   @Override
-  public List<HopContainerId> findByRMNode(String rmnodeId) throws
+  public List<ContainerId> findByRMNode(String rmnodeId) throws
       StorageException {
     LOG.debug("HOP :: ClusterJ ContainerIdToClean.findByRMNode - START:"
             + rmnodeId);
@@ -70,7 +70,7 @@ public class ContainerIdToCleanClusterJ implements ContainerIdToCleanTableDef, C
   }
 
   @Override
-  public Map<String, Set<HopContainerId>> getAll() throws StorageException {
+  public Map<String, Set<ContainerId>> getAll() throws StorageException {
     LOG.debug("HOP :: ClusterJ ContainerIdToClean.getAll - START");
 
     HopsSession session = connector.obtainSession();
@@ -88,12 +88,12 @@ public class ContainerIdToCleanClusterJ implements ContainerIdToCleanTableDef, C
   }
 
   @Override
-  public void addAll(Collection<HopContainerId> containers) throws
+  public void addAll(Collection<ContainerId> containers) throws
           StorageException {
     HopsSession session = connector.obtainSession();
     List<ContainerIdToCleanDTO> toModify
             = new ArrayList<ContainerIdToCleanDTO>();
-    for (HopContainerId hop : containers) {
+    for (ContainerId hop : containers) {
       toModify.add(createPersistable(hop, session));
     }
     session.savePersistentAll(toModify);
@@ -102,19 +102,19 @@ public class ContainerIdToCleanClusterJ implements ContainerIdToCleanTableDef, C
 
   @Override
 
-  public void removeAll(Collection<HopContainerId> containers) throws
+  public void removeAll(Collection<ContainerId> containers) throws
           StorageException {
     HopsSession session = connector.obtainSession();
     List<ContainerIdToCleanDTO> toRemove
             = new ArrayList<ContainerIdToCleanDTO>();
-    for (HopContainerId hop : containers) {
+    for (ContainerId hop : containers) {
       toRemove.add(createPersistable(hop, session));
     }
     session.deletePersistentAll(toRemove);
     session.flush();
   }
 
-  private ContainerIdToCleanDTO createPersistable(HopContainerId hop,
+  private ContainerIdToCleanDTO createPersistable(ContainerId hop,
           HopsSession session) throws StorageException {
     ContainerIdToCleanDTO dto = session.newInstance(ContainerIdToCleanDTO.class);
     //Set values to persist new ContainerStatus
@@ -123,31 +123,31 @@ public class ContainerIdToCleanClusterJ implements ContainerIdToCleanTableDef, C
     return dto;
   }
 
-  private HopContainerId createHopContainerIdToClean(ContainerIdToCleanDTO dto) {
-    HopContainerId hop = new HopContainerId(dto.getrmnodeid(), dto.
+  private ContainerId createHopContainerIdToClean(ContainerIdToCleanDTO dto) {
+    ContainerId hop = new ContainerId(dto.getrmnodeid(), dto.
             getcontainerid());
     return hop;
   }
 
-  private List<HopContainerId> createContainersToCleanList(
+  private List<ContainerId> createContainersToCleanList(
           List<ContainerIdToCleanDTO> results) {
-    List<HopContainerId> containersToClean = new ArrayList<HopContainerId>();
+    List<ContainerId> containersToClean = new ArrayList<ContainerId>();
     for (ContainerIdToCleanDTO persistable : results) {
       containersToClean.add(createHopContainerIdToClean(persistable));
     }
     return containersToClean;
   }
 
-  private Map<String, Set<HopContainerId>> createMap(
+  private Map<String, Set<ContainerId>> createMap(
           List<ContainerIdToCleanDTO> results) {
-    Map<String, Set<HopContainerId>> map
-            = new HashMap<String, Set<HopContainerId>>();
+    Map<String, Set<ContainerId>> map
+            = new HashMap<String, Set<ContainerId>>();
     for (ContainerIdToCleanDTO dto : results) {
-      HopContainerId hop
+      ContainerId hop
               = createHopContainerIdToClean(dto);
       if (map.get(hop.getRmnodeid()) == null) {
         map.put(hop.getRmnodeid(),
-                new HashSet<HopContainerId>());
+                new HashSet<ContainerId>());
       }
       map.get(hop.getRmnodeid()).add(hop);
     }

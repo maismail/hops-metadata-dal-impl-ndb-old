@@ -14,12 +14,12 @@ import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
 import io.hops.metadata.ndb.wrapper.HopsQueryDomainType;
 import io.hops.metadata.ndb.wrapper.HopsSession;
 import io.hops.metadata.yarn.tabledef.LaunchedContainersTableDef;
-import io.hops.metadata.yarn.entity.HopLaunchedContainers;
+import io.hops.metadata.yarn.entity.LaunchedContainers;
 import io.hops.metadata.ndb.ClusterjConnector;
 import io.hops.metadata.ndb.wrapper.HopsQuery;
 import io.hops.metadata.yarn.dal.LaunchedContainersDataAccess;
 
-public class LaunchedContainersClusterJ implements LaunchedContainersTableDef, LaunchedContainersDataAccess<HopLaunchedContainers> {
+public class LaunchedContainersClusterJ implements LaunchedContainersTableDef, LaunchedContainersDataAccess<LaunchedContainers> {
 
   @PersistenceCapable(table = TABLE_NAME)
   public interface LaunchedContainersDTO {
@@ -44,7 +44,7 @@ public class LaunchedContainersClusterJ implements LaunchedContainersTableDef, L
   private final ClusterjConnector connector = ClusterjConnector.getInstance();
 
   @Override
-  public Map<String, List<HopLaunchedContainers>> getAll() throws
+  public Map<String, List<LaunchedContainers>> getAll() throws
       StorageException {
     HopsSession session = connector.obtainSession();
     HopsQueryBuilder qb = session.getQueryBuilder();
@@ -60,24 +60,24 @@ public class LaunchedContainersClusterJ implements LaunchedContainersTableDef, L
 
 
   @Override
-  public void addAll(Collection<HopLaunchedContainers> toAdd) throws
+  public void addAll(Collection<LaunchedContainers> toAdd) throws
           StorageException {
     HopsSession session = connector.obtainSession();
     List<LaunchedContainersDTO> toPersist
             = new ArrayList<LaunchedContainersDTO>();
-    for (HopLaunchedContainers id : toAdd) {
+    for (LaunchedContainers id : toAdd) {
       toPersist.add(createPersistable(id, session));
     }
     session.savePersistentAll(toPersist);
   }
 
   @Override
-  public void removeAll(Collection<HopLaunchedContainers> toRemove) throws
+  public void removeAll(Collection<LaunchedContainers> toRemove) throws
           StorageException {
     HopsSession session = connector.obtainSession();
     List<LaunchedContainersDTO> toPersist
             = new ArrayList<LaunchedContainersDTO>();
-    for (HopLaunchedContainers hopContainerId : toRemove) {
+    for (LaunchedContainers hopContainerId : toRemove) {
       Object[] objarr = new Object[2];
       objarr[0] = hopContainerId.getSchedulerNodeID();
       objarr[1] = hopContainerId.getContainerIdID();
@@ -86,32 +86,32 @@ public class LaunchedContainersClusterJ implements LaunchedContainersTableDef, L
     session.deletePersistentAll(toPersist);
   }
 
-  private HopLaunchedContainers createLaunchedContainersEntry(
+  private LaunchedContainers createLaunchedContainersEntry(
           LaunchedContainersDTO dto) {
-    HopLaunchedContainers hop = new HopLaunchedContainers(
+    LaunchedContainers hop = new LaunchedContainers(
             dto.getschedulernode_id(),
             dto.getcontaineridid(),
             dto.getrmcontainerid());
     return hop;
   }
 
-  private Map<String, List<HopLaunchedContainers>> createMap(
+  private Map<String, List<LaunchedContainers>> createMap(
           List<LaunchedContainersDTO> dtos) {
-    Map<String, List<HopLaunchedContainers>> map
-            = new HashMap<String, List<HopLaunchedContainers>>();
+    Map<String, List<LaunchedContainers>> map
+            = new HashMap<String, List<LaunchedContainers>>();
     for (LaunchedContainersDTO dto : dtos) {
-      HopLaunchedContainers hop = createLaunchedContainersEntry(dto);
+      LaunchedContainers hop = createLaunchedContainersEntry(dto);
       if (map.get(hop.getSchedulerNodeID()) == null) {
         map.
                 put(hop.getSchedulerNodeID(),
-                        new ArrayList<HopLaunchedContainers>());
+                        new ArrayList<LaunchedContainers>());
       }
       map.get(hop.getSchedulerNodeID()).add(hop);
     }
     return map;
   }
 
-  private LaunchedContainersDTO createPersistable(HopLaunchedContainers entry,
+  private LaunchedContainersDTO createPersistable(LaunchedContainers entry,
           HopsSession session) throws StorageException {
     Object[] objarr = new Object[2];
     objarr[0] = entry.getSchedulerNodeID();
@@ -124,10 +124,10 @@ public class LaunchedContainersClusterJ implements LaunchedContainersTableDef, L
     return persistable;
   }
 
-  private List<HopLaunchedContainers> createLaunchedContainersList(
+  private List<LaunchedContainers> createLaunchedContainersList(
           List<LaunchedContainersDTO> results) {
-    List<HopLaunchedContainers> launchedContainers
-            = new ArrayList<HopLaunchedContainers>();
+    List<LaunchedContainers> launchedContainers
+            = new ArrayList<LaunchedContainers>();
     for (LaunchedContainersDTO persistable : results) {
       launchedContainers.add(createLaunchedContainersEntry(persistable));
     }

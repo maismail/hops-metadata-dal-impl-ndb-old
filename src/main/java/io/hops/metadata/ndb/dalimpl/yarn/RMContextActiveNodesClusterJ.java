@@ -8,7 +8,7 @@ import java.util.Collection;
 import java.util.List;
 
 import io.hops.exception.StorageException;
-import io.hops.metadata.yarn.entity.HopRMContextActiveNodes;
+import io.hops.metadata.yarn.entity.RMContextActiveNodes;
 import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
 import io.hops.metadata.ndb.wrapper.HopsQueryDomainType;
 import io.hops.metadata.ndb.wrapper.HopsSession;
@@ -19,7 +19,7 @@ import io.hops.metadata.ndb.wrapper.HopsQuery;
 
 public class RMContextActiveNodesClusterJ implements
     RMContextActiveNodesTableDef,
-    RMContextActiveNodesDataAccess<HopRMContextActiveNodes> {
+    RMContextActiveNodesDataAccess<RMContextActiveNodes> {
 
   @PersistenceCapable(table = TABLE_NAME)
   public interface RMContextNodesDTO {
@@ -33,7 +33,7 @@ public class RMContextActiveNodesClusterJ implements
   }
   private final ClusterjConnector connector = ClusterjConnector.getInstance();
  @Override
-  public HopRMContextActiveNodes findEntry(String nodeidId) throws
+  public RMContextActiveNodes findEntry(String nodeidId) throws
      StorageException {
     HopsSession session = connector.obtainSession();
     if (session != null) {
@@ -45,7 +45,7 @@ public class RMContextActiveNodesClusterJ implements
     return null;
   }
   @Override
-  public List<HopRMContextActiveNodes> findAll() throws StorageException {
+  public List<RMContextActiveNodes> findAll() throws StorageException {
     HopsSession session = connector.obtainSession();
     HopsQueryBuilder qb = session.getQueryBuilder();
 
@@ -61,11 +61,11 @@ public class RMContextActiveNodesClusterJ implements
   }
 
   @Override
-  public void addAll(Collection<HopRMContextActiveNodes> toAdd) throws
+  public void addAll(Collection<RMContextActiveNodes> toAdd) throws
           StorageException {
     HopsSession session = connector.obtainSession();
     List<RMContextNodesDTO> toPersist = new ArrayList<RMContextNodesDTO>();
-    for (HopRMContextActiveNodes req : toAdd) {
+    for (RMContextActiveNodes req : toAdd) {
       toPersist.add(createPersistable(req, session));
     }
     session.savePersistentAll(toPersist);
@@ -73,11 +73,11 @@ public class RMContextActiveNodesClusterJ implements
   }
 
   @Override
-  public void removeAll(Collection<HopRMContextActiveNodes> toRemove) throws
+  public void removeAll(Collection<RMContextActiveNodes> toRemove) throws
           StorageException {
     HopsSession session = connector.obtainSession();
     List<RMContextNodesDTO> toPersist = new ArrayList<RMContextNodesDTO>();
-    for (HopRMContextActiveNodes entry : toRemove) {
+    for (RMContextActiveNodes entry : toRemove) {
       toPersist.add(session.newInstance(RMContextNodesDTO.class, entry.
               getNodeId()));
     }
@@ -85,7 +85,7 @@ public class RMContextActiveNodesClusterJ implements
     session.flush();
   }
 
-  private RMContextNodesDTO createPersistable(HopRMContextActiveNodes entry,
+  private RMContextNodesDTO createPersistable(RMContextActiveNodes entry,
           HopsSession session) throws StorageException {
     RMContextNodesDTO persistable = session.newInstance(RMContextNodesDTO.class,
             entry.getNodeId());
@@ -94,15 +94,15 @@ public class RMContextActiveNodesClusterJ implements
     return persistable;
   }
 
-  private HopRMContextActiveNodes createRMContextNodesEntry(
+  private RMContextActiveNodes createRMContextNodesEntry(
           RMContextNodesDTO entry) {
-    return new HopRMContextActiveNodes(entry.getnodeidid());
+    return new RMContextActiveNodes(entry.getnodeidid());
   }
 
-  private List<HopRMContextActiveNodes> createRMContextNodesList(
+  private List<RMContextActiveNodes> createRMContextNodesList(
           List<RMContextNodesDTO> results) {
-    List<HopRMContextActiveNodes> rmcontextNodes
-            = new ArrayList<HopRMContextActiveNodes>();
+    List<RMContextActiveNodes> rmcontextNodes
+            = new ArrayList<RMContextActiveNodes>();
     for (RMContextNodesDTO persistable : results) {
       rmcontextNodes.add(createRMContextNodesEntry(persistable));
     }

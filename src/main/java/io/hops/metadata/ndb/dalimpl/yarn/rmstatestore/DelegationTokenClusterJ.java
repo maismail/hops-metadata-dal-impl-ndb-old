@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.zip.DataFormatException;
 
 import io.hops.exception.StorageException;
-import io.hops.metadata.yarn.entity.rmstatestore.HopDelegationToken;
+import io.hops.metadata.yarn.entity.rmstatestore.DelegationToken;
 import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
 import io.hops.metadata.ndb.wrapper.HopsQueryDomainType;
 import io.hops.metadata.ndb.wrapper.HopsSession;
@@ -20,7 +20,7 @@ import io.hops.metadata.ndb.wrapper.HopsQuery;
 import io.hops.metadata.yarn.tabledef.rmstatestore.DelegationTokenTableDef;
 
 public class DelegationTokenClusterJ implements DelegationTokenTableDef,
-    DelegationTokenDataAccess<HopDelegationToken> {
+    DelegationTokenDataAccess<DelegationToken> {
 
     @PersistenceCapable(table = TABLE_NAME)
     public interface DelegationTokenDTO {
@@ -39,14 +39,14 @@ public class DelegationTokenClusterJ implements DelegationTokenTableDef,
     private final ClusterjConnector connector = ClusterjConnector.getInstance();
 
     @Override
-    public void createDelegationTokenEntry(HopDelegationToken hopDelegationToken) throws
+    public void createDelegationTokenEntry(DelegationToken hopDelegationToken) throws
         StorageException {
         HopsSession session = connector.obtainSession();
         session.savePersistent(createPersistable(hopDelegationToken, session));
     }
 
     @Override
-  public List<HopDelegationToken> getAll() throws StorageException {
+  public List<DelegationToken> getAll() throws StorageException {
       HopsSession session = connector.obtainSession();
       HopsQueryBuilder qb = session.getQueryBuilder();
       HopsQueryDomainType<DelegationTokenDTO> dobj = qb.createQueryDefinition(
@@ -58,18 +58,18 @@ public class DelegationTokenClusterJ implements DelegationTokenTableDef,
   }
 
     @Override
-  public void remove(HopDelegationToken removed) throws StorageException {
+  public void remove(DelegationToken removed) throws StorageException {
     HopsSession session = connector.obtainSession();
     session.deletePersistent(session.newInstance(
             DelegationTokenClusterJ.DelegationTokenDTO.class, removed.
             getSeqnumber()));
   }
 
-  private HopDelegationToken createHopDelegationToken(
+  private DelegationToken createHopDelegationToken(
           DelegationTokenDTO delegationTokenDTO)
           throws StorageException {
     try {
-      return new HopDelegationToken(delegationTokenDTO.getseqnumber(),
+      return new DelegationToken(delegationTokenDTO.getseqnumber(),
               CompressionUtils
                   .decompress(delegationTokenDTO.getrmdtidentifier()));
     } catch (IOException e) {
@@ -79,15 +79,15 @@ public class DelegationTokenClusterJ implements DelegationTokenTableDef,
     }
   }
 
-    private List<HopDelegationToken> createHopDelegationTokenList(List<DelegationTokenClusterJ.DelegationTokenDTO> list) throws StorageException {
-        List<HopDelegationToken> hopList = new ArrayList<HopDelegationToken>();
+    private List<DelegationToken> createHopDelegationTokenList(List<DelegationTokenClusterJ.DelegationTokenDTO> list) throws StorageException {
+        List<DelegationToken> hopList = new ArrayList<DelegationToken>();
         for (DelegationTokenClusterJ.DelegationTokenDTO dto : list) {
             hopList.add(createHopDelegationToken(dto));
         }
         return hopList;
     }
 
-  private DelegationTokenDTO createPersistable(HopDelegationToken hop,
+  private DelegationTokenDTO createPersistable(DelegationToken hop,
           HopsSession session) throws StorageException {
     DelegationTokenClusterJ.DelegationTokenDTO delegationTokenDTO = session.
             newInstance(DelegationTokenClusterJ.DelegationTokenDTO.class);

@@ -11,12 +11,12 @@ import java.util.List;
 
 import io.hops.metadata.ndb.wrapper.HopsSession;
 import io.hops.exception.StorageException;
-import io.hops.metadata.yarn.entity.fair.HopFSSchedulerNode;
+import io.hops.metadata.yarn.entity.fair.FSSchedulerNode;
 import io.hops.metadata.ndb.ClusterjConnector;
 import io.hops.metadata.yarn.dal.fair.FSSchedulerNodeDataAccess;
 import io.hops.metadata.yarn.tabledef.fair.FSSchedulerNodeTableDef;
 
-public class FSSchedulerNodeClusterJ implements FSSchedulerNodeTableDef, FSSchedulerNodeDataAccess<HopFSSchedulerNode>{
+public class FSSchedulerNodeClusterJ implements FSSchedulerNodeTableDef, FSSchedulerNodeDataAccess<FSSchedulerNode>{
 
     @PersistenceCapable(table = TABLE_NAME)
     public interface FSSchedulerNodeDTO {
@@ -42,7 +42,7 @@ public class FSSchedulerNodeClusterJ implements FSSchedulerNodeTableDef, FSSched
     private ClusterjConnector connector = ClusterjConnector.getInstance();
     
     @Override
-    public HopFSSchedulerNode findById(String id) throws StorageException {
+    public FSSchedulerNode findById(String id) throws StorageException {
         HopsSession session = connector.obtainSession();
 
         FSSchedulerNodeClusterJ.FSSchedulerNodeDTO fsschedulernodeDTO = null;
@@ -57,12 +57,12 @@ public class FSSchedulerNodeClusterJ implements FSSchedulerNodeTableDef, FSSched
     }
 
     @Override
-    public void prepare(Collection<HopFSSchedulerNode> modified, Collection<HopFSSchedulerNode> removed) throws StorageException {
+    public void prepare(Collection<FSSchedulerNode> modified, Collection<FSSchedulerNode> removed) throws StorageException {
         HopsSession session = connector.obtainSession();
         try {
             if (removed != null) {
                 List<FSSchedulerNodeClusterJ.FSSchedulerNodeDTO> toRemove = new ArrayList<FSSchedulerNodeClusterJ.FSSchedulerNodeDTO>();
-                for (HopFSSchedulerNode hop : removed) {
+                for (FSSchedulerNode hop : removed) {
                     FSSchedulerNodeClusterJ.FSSchedulerNodeDTO persistable = session.newInstance(FSSchedulerNodeClusterJ.FSSchedulerNodeDTO.class, hop.getRmnodeid());
                     toRemove.add(persistable);
                 }
@@ -70,7 +70,7 @@ public class FSSchedulerNodeClusterJ implements FSSchedulerNodeTableDef, FSSched
             }
             if (modified != null) {
                 List<FSSchedulerNodeClusterJ.FSSchedulerNodeDTO> toModify = new ArrayList<FSSchedulerNodeClusterJ.FSSchedulerNodeDTO>();
-                for (HopFSSchedulerNode hop : modified) {
+                for (FSSchedulerNode hop : modified) {
                     FSSchedulerNodeClusterJ.FSSchedulerNodeDTO persistable = createPersistable(hop, session);
                     toModify.add(persistable);
                 }
@@ -82,19 +82,19 @@ public class FSSchedulerNodeClusterJ implements FSSchedulerNodeTableDef, FSSched
     }
 
     @Override
-    public void createFSSchedulerNode(HopFSSchedulerNode node) throws StorageException {
+    public void createFSSchedulerNode(FSSchedulerNode node) throws StorageException {
         HopsSession session = connector.obtainSession();
         session.savePersistent(createPersistable(node, session));
     }
     
-    private HopFSSchedulerNode createHopFSSchedulerNode(FSSchedulerNodeDTO fsschedulernodeDTO) {
-        HopFSSchedulerNode hop = new HopFSSchedulerNode(fsschedulernodeDTO.getrmnodeid(), fsschedulernodeDTO.getnumcontainers(),
+    private FSSchedulerNode createHopFSSchedulerNode(FSSchedulerNodeDTO fsschedulernodeDTO) {
+        FSSchedulerNode hop = new FSSchedulerNode(fsschedulernodeDTO.getrmnodeid(), fsschedulernodeDTO.getnumcontainers(),
                                                         fsschedulernodeDTO.getreservedcontainerid(), fsschedulernodeDTO.getreservedappschedulableid());
         
         return hop;
     }
     
-    private FSSchedulerNodeDTO createPersistable(HopFSSchedulerNode hop, HopsSession session) throws StorageException {
+    private FSSchedulerNodeDTO createPersistable(FSSchedulerNode hop, HopsSession session) throws StorageException {
         FSSchedulerNodeDTO fssDTO = session.newInstance(FSSchedulerNodeDTO.class);
         fssDTO.setrmnodeid(hop.getRmnodeid());
         fssDTO.setnumcontainers(hop.getNumcontainers());

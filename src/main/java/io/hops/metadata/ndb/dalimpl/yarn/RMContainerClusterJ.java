@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 import io.hops.exception.StorageException;
-import io.hops.metadata.yarn.entity.HopRMContainer;
+import io.hops.metadata.yarn.entity.RMContainer;
 import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
 import io.hops.metadata.ndb.wrapper.HopsQueryDomainType;
 import io.hops.metadata.ndb.wrapper.HopsSession;
@@ -19,7 +19,7 @@ import io.hops.metadata.ndb.wrapper.HopsQuery;
 import io.hops.metadata.yarn.dal.RMContainerDataAccess;
 import io.hops.metadata.yarn.tabledef.RMContainerTableDef;
 
-public class RMContainerClusterJ implements RMContainerTableDef, RMContainerDataAccess<HopRMContainer> {
+public class RMContainerClusterJ implements RMContainerTableDef, RMContainerDataAccess<RMContainer> {
 
   @PersistenceCapable(table = TABLE_NAME)
   public interface RMContainerDTO {
@@ -74,7 +74,7 @@ public class RMContainerClusterJ implements RMContainerTableDef, RMContainerData
   private final ClusterjConnector connector = ClusterjConnector.getInstance();
 
   @Override
-  public Map<String, HopRMContainer> getAll() throws StorageException {
+  public Map<String, RMContainer> getAll() throws StorageException {
     HopsSession session = connector.obtainSession();
     HopsQueryBuilder qb = session.getQueryBuilder();
     HopsQueryDomainType<RMContainerDTO> dobj
@@ -89,11 +89,11 @@ public class RMContainerClusterJ implements RMContainerTableDef, RMContainerData
 
   @Override
 
-  public void addAll(Collection<HopRMContainer> toAdd) throws StorageException {
+  public void addAll(Collection<RMContainer> toAdd) throws StorageException {
     HopsSession session = connector.obtainSession();
 
     List<RMContainerDTO> toPersist = new ArrayList<RMContainerDTO>(toAdd.size());
-    for (HopRMContainer hop : toAdd) {
+    for (RMContainer hop : toAdd) {
       toPersist.add(createPersistable(hop, session));
     }
 
@@ -101,12 +101,12 @@ public class RMContainerClusterJ implements RMContainerTableDef, RMContainerData
   }
 
   @Override
-  public void removeAll(Collection<HopRMContainer> toRemove) throws
+  public void removeAll(Collection<RMContainer> toRemove) throws
           StorageException {
     HopsSession session = connector.obtainSession();
     List<RMContainerDTO> toPersist = new ArrayList<RMContainerDTO>(toRemove.
             size());
-    for (HopRMContainer hop : toRemove) {
+    for (RMContainer hop : toRemove) {
       toPersist.add(session.
               newInstance(RMContainerClusterJ.RMContainerDTO.class, hop.
                       getContainerIdID()));
@@ -115,14 +115,14 @@ public class RMContainerClusterJ implements RMContainerTableDef, RMContainerData
   }
 
   @Override
-  public void add(HopRMContainer rmcontainer) throws StorageException {
+  public void add(RMContainer rmcontainer) throws StorageException {
     HopsSession session = connector.obtainSession();
     session.savePersistent(createPersistable(rmcontainer, session));
   }
 
-  private HopRMContainer createHopRMContainer(RMContainerDTO rMContainerDTO) {
+  private RMContainer createHopRMContainer(RMContainerDTO rMContainerDTO) {
 
-    return new HopRMContainer(
+    return new RMContainer(
             rMContainerDTO.getcontaineridid(),
             rMContainerDTO.getappattemptidid(),
             rMContainerDTO.getnodeidid(),
@@ -135,7 +135,7 @@ public class RMContainerClusterJ implements RMContainerTableDef, RMContainerData
 
   }
 
-  private RMContainerDTO createPersistable(HopRMContainer hop,
+  private RMContainerDTO createPersistable(RMContainer hop,
           HopsSession session) throws StorageException {
     RMContainerClusterJ.RMContainerDTO rMContainerDTO = session.newInstance(
             RMContainerClusterJ.RMContainerDTO.class);
@@ -153,12 +153,12 @@ public class RMContainerClusterJ implements RMContainerTableDef, RMContainerData
     return rMContainerDTO;
   }
 
-  private Map<String, HopRMContainer> createMap(
+  private Map<String, RMContainer> createMap(
           List<RMContainerDTO> results) {
-    Map<String, HopRMContainer> map
-            = new HashMap<String, HopRMContainer>();
+    Map<String, RMContainer> map
+            = new HashMap<String, RMContainer>();
     for (RMContainerDTO dto : results) {
-      HopRMContainer hop
+      RMContainer hop
               = createHopRMContainer(dto);
       map.put(hop.getContainerIdID(), hop);
     }

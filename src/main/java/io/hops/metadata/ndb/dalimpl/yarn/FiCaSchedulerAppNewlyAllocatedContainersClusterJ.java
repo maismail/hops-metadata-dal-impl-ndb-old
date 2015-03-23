@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 import io.hops.exception.StorageException;
-import io.hops.metadata.yarn.entity.HopFiCaSchedulerAppNewlyAllocatedContainers;
+import io.hops.metadata.yarn.entity.FiCaSchedulerAppNewlyAllocatedContainers;
 import io.hops.metadata.ndb.ClusterjConnector;
 import io.hops.metadata.ndb.wrapper.HopsPredicate;
 import io.hops.metadata.ndb.wrapper.HopsQuery;
@@ -25,7 +25,7 @@ import io.hops.metadata.yarn.tabledef.FiCaSchedulerAppNewlyAllocatedContainersTa
 
 public class FiCaSchedulerAppNewlyAllocatedContainersClusterJ implements
     FiCaSchedulerAppNewlyAllocatedContainersTableDef,
-    FiCaSchedulerAppNewlyAllocatedContainersDataAccess<HopFiCaSchedulerAppNewlyAllocatedContainers> {
+    FiCaSchedulerAppNewlyAllocatedContainersDataAccess<FiCaSchedulerAppNewlyAllocatedContainers> {
 
   @PersistenceCapable(table = TABLE_NAME)
   public interface FiCaSchedulerAppNewlyAllocatedContainersDTO {
@@ -45,7 +45,7 @@ public class FiCaSchedulerAppNewlyAllocatedContainersClusterJ implements
   private final ClusterjConnector connector = ClusterjConnector.getInstance();
 
   @Override
-  public List<HopFiCaSchedulerAppNewlyAllocatedContainers> findById(
+  public List<FiCaSchedulerAppNewlyAllocatedContainers> findById(
           String ficaId) throws StorageException {
 
     HopsSession session = connector.obtainSession();
@@ -68,7 +68,7 @@ public class FiCaSchedulerAppNewlyAllocatedContainersClusterJ implements
   }
 
   @Override
-  public Map<String, List<HopFiCaSchedulerAppNewlyAllocatedContainers>> getAll()
+  public Map<String, List<FiCaSchedulerAppNewlyAllocatedContainers>> getAll()
           throws IOException {
     HopsSession session = connector.obtainSession();
     HopsQueryBuilder qb = session.getQueryBuilder();
@@ -84,12 +84,12 @@ public class FiCaSchedulerAppNewlyAllocatedContainersClusterJ implements
 
   @Override
   public void addAll(
-          Collection<HopFiCaSchedulerAppNewlyAllocatedContainers> toAdd) throws
+          Collection<FiCaSchedulerAppNewlyAllocatedContainers> toAdd) throws
           StorageException {
     HopsSession session = connector.obtainSession();
     List<FiCaSchedulerAppNewlyAllocatedContainersDTO> toPersist
             = new ArrayList<FiCaSchedulerAppNewlyAllocatedContainersDTO>();
-    for (HopFiCaSchedulerAppNewlyAllocatedContainers hop : toAdd) {
+    for (FiCaSchedulerAppNewlyAllocatedContainers hop : toAdd) {
       FiCaSchedulerAppNewlyAllocatedContainersClusterJ.FiCaSchedulerAppNewlyAllocatedContainersDTO persistable
               = createPersistable(hop, session);
       toPersist.add(persistable);
@@ -99,12 +99,12 @@ public class FiCaSchedulerAppNewlyAllocatedContainersClusterJ implements
 
   @Override
   public void removeAll(
-          Collection<HopFiCaSchedulerAppNewlyAllocatedContainers> toRemove)
+          Collection<FiCaSchedulerAppNewlyAllocatedContainers> toRemove)
           throws StorageException {
     HopsSession session = connector.obtainSession();
     List<FiCaSchedulerAppNewlyAllocatedContainersDTO> toPersist
             = new ArrayList<FiCaSchedulerAppNewlyAllocatedContainersDTO>();
-    for (HopFiCaSchedulerAppNewlyAllocatedContainers hop : toRemove) {
+    for (FiCaSchedulerAppNewlyAllocatedContainers hop : toRemove) {
 
       Object[] objarr = new Object[2];
       objarr[0] = hop.getSchedulerapp_id();
@@ -115,15 +115,15 @@ public class FiCaSchedulerAppNewlyAllocatedContainersClusterJ implements
     session.deletePersistentAll(toPersist);
   }
 
-  private HopFiCaSchedulerAppNewlyAllocatedContainers createHopFiCaSchedulerAppNewlyAllocatedContainers(
+  private FiCaSchedulerAppNewlyAllocatedContainers createHopFiCaSchedulerAppNewlyAllocatedContainers(
           FiCaSchedulerAppNewlyAllocatedContainersDTO fiCaSchedulerAppNewlyAllocatedContainersDTO) {
-    return new HopFiCaSchedulerAppNewlyAllocatedContainers(
+    return new FiCaSchedulerAppNewlyAllocatedContainers(
             fiCaSchedulerAppNewlyAllocatedContainersDTO.getschedulerapp_id(),
             fiCaSchedulerAppNewlyAllocatedContainersDTO.getrmcontainerid());
   }
 
   private FiCaSchedulerAppNewlyAllocatedContainersDTO createPersistable(
-          HopFiCaSchedulerAppNewlyAllocatedContainers hop, HopsSession session)
+          FiCaSchedulerAppNewlyAllocatedContainers hop, HopsSession session)
           throws StorageException {
     FiCaSchedulerAppNewlyAllocatedContainersDTO fiCaSchedulerAppNewlyAllocatedContainersDTO
             = session.newInstance(
@@ -137,10 +137,10 @@ public class FiCaSchedulerAppNewlyAllocatedContainersClusterJ implements
     return fiCaSchedulerAppNewlyAllocatedContainersDTO;
   }
 
-  private List<HopFiCaSchedulerAppNewlyAllocatedContainers> createFiCaSchedulerAppNewlyAllocatedContainersList(
+  private List<FiCaSchedulerAppNewlyAllocatedContainers> createFiCaSchedulerAppNewlyAllocatedContainersList(
           List<FiCaSchedulerAppNewlyAllocatedContainersDTO> results) {
-    List<HopFiCaSchedulerAppNewlyAllocatedContainers> ficaSchedulerAppNewlyAllocatedContainers
-            = new ArrayList<HopFiCaSchedulerAppNewlyAllocatedContainers>();
+    List<FiCaSchedulerAppNewlyAllocatedContainers> ficaSchedulerAppNewlyAllocatedContainers
+            = new ArrayList<FiCaSchedulerAppNewlyAllocatedContainers>();
     for (FiCaSchedulerAppNewlyAllocatedContainersDTO persistable
             : results) {
       ficaSchedulerAppNewlyAllocatedContainers.add(
@@ -149,16 +149,16 @@ public class FiCaSchedulerAppNewlyAllocatedContainersClusterJ implements
     return ficaSchedulerAppNewlyAllocatedContainers;
   }
 
-  private Map<String, List<HopFiCaSchedulerAppNewlyAllocatedContainers>>
+  private Map<String, List<FiCaSchedulerAppNewlyAllocatedContainers>>
           createMap(List<FiCaSchedulerAppNewlyAllocatedContainersDTO> results) {
-    Map<String, List<HopFiCaSchedulerAppNewlyAllocatedContainers>> map
-            = new HashMap<String, List<HopFiCaSchedulerAppNewlyAllocatedContainers>>();
+    Map<String, List<FiCaSchedulerAppNewlyAllocatedContainers>> map
+            = new HashMap<String, List<FiCaSchedulerAppNewlyAllocatedContainers>>();
     for (FiCaSchedulerAppNewlyAllocatedContainersDTO persistable : results) {
-      HopFiCaSchedulerAppNewlyAllocatedContainers hop
+      FiCaSchedulerAppNewlyAllocatedContainers hop
               = createHopFiCaSchedulerAppNewlyAllocatedContainers(persistable);
       if (map.get(hop.getSchedulerapp_id()) == null) {
         map.put(hop.getSchedulerapp_id(),
-                new ArrayList<HopFiCaSchedulerAppNewlyAllocatedContainers>());
+                new ArrayList<FiCaSchedulerAppNewlyAllocatedContainers>());
       }
       map.get(hop.getSchedulerapp_id()).add(hop);
     }

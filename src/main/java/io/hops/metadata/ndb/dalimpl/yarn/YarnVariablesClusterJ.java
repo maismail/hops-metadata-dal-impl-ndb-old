@@ -7,7 +7,7 @@ import io.hops.exception.StorageException;
 import io.hops.metadata.ndb.wrapper.HopsSession;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import io.hops.metadata.yarn.entity.HopsYarnVariables;
+import io.hops.metadata.yarn.entity.YarnVariables;
 import io.hops.metadata.ndb.ClusterjConnector;
 import io.hops.metadata.yarn.dal.YarnVariablesDataAccess;
 import io.hops.metadata.yarn.tabledef.YarnVariablesTableDef;
@@ -17,7 +17,7 @@ import io.hops.metadata.yarn.tabledef.YarnVariablesTableDef;
  * solution can be dropped once ClusterJ implements auto-increment.
  */
 public class YarnVariablesClusterJ implements YarnVariablesTableDef,
-        YarnVariablesDataAccess<HopsYarnVariables> {
+        YarnVariablesDataAccess<YarnVariables> {
 
   private static final Log LOG = LogFactory.getLog(YarnVariablesClusterJ.class);
 
@@ -38,7 +38,7 @@ public class YarnVariablesClusterJ implements YarnVariablesTableDef,
   private final ClusterjConnector connector = ClusterjConnector.getInstance();
 
   @Override
-  public HopsYarnVariables findById(int id) throws StorageException {
+  public YarnVariables findById(int id) throws StorageException {
     LOG.debug("HOP :: ClusterJ YarnVariables.findById - START:" + id);
     HopsSession session = connector.obtainSession();
     YarnVariablesDTO yarnDTO;
@@ -49,19 +49,19 @@ public class YarnVariablesClusterJ implements YarnVariablesTableDef,
       yarnDTO = session.find(YarnVariablesDTO.class, id);
       LOG.debug("HOP :: ClusterJ YarnVariables.findById - FINISH:" + id);
       if (yarnDTO != null) {
-        return new HopsYarnVariables(yarnDTO.getid(), yarnDTO.getvalue());
+        return new YarnVariables(yarnDTO.getid(), yarnDTO.getvalue());
       }
     }
     return null;
   }
 
   @Override
-  public void add(HopsYarnVariables toAdd) throws StorageException {
+  public void add(YarnVariables toAdd) throws StorageException {
     HopsSession session = connector.obtainSession();
     session.savePersistent(createPersistable(toAdd, session));
   }
 
-  private YarnVariablesDTO createPersistable(HopsYarnVariables yarnVariables,
+  private YarnVariablesDTO createPersistable(YarnVariables yarnVariables,
           HopsSession session) throws StorageException {
     YarnVariablesDTO yarnDTO = session.newInstance(YarnVariablesDTO.class);
     yarnDTO.setid(yarnVariables.getId());

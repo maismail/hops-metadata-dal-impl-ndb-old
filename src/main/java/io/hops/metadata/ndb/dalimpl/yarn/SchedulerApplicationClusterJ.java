@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 import io.hops.exception.StorageException;
-import io.hops.metadata.yarn.entity.HopSchedulerApplication;
+import io.hops.metadata.yarn.entity.SchedulerApplication;
 import io.hops.metadata.ndb.ClusterjConnector;
 import io.hops.metadata.ndb.wrapper.HopsQuery;
 import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
@@ -22,7 +22,7 @@ import io.hops.metadata.yarn.tabledef.SchedulerApplicationTableDef;
 import io.hops.metadata.yarn.dal.SchedulerApplicationDataAccess;
 
 public class SchedulerApplicationClusterJ implements
-    SchedulerApplicationTableDef, SchedulerApplicationDataAccess<HopSchedulerApplication> {
+    SchedulerApplicationTableDef, SchedulerApplicationDataAccess<SchedulerApplication> {
 
   @PersistenceCapable(table = TABLE_NAME)
   public interface SchedulerApplicationDTO {
@@ -47,7 +47,7 @@ public class SchedulerApplicationClusterJ implements
   private final ClusterjConnector connector = ClusterjConnector.getInstance();
 
   @Override
-  public Map<String, HopSchedulerApplication> getAll() throws StorageException {
+  public Map<String, SchedulerApplication> getAll() throws StorageException {
     HopsSession session = connector.obtainSession();
     HopsQueryBuilder qb = session.getQueryBuilder();
     HopsQueryDomainType<SchedulerApplicationDTO> dobj
@@ -62,49 +62,49 @@ public class SchedulerApplicationClusterJ implements
   }
 
   @Override
-  public void addAll(Collection<HopSchedulerApplication> toAdd) throws
+  public void addAll(Collection<SchedulerApplication> toAdd) throws
           StorageException {
     HopsSession session = connector.obtainSession();
     List<SchedulerApplicationDTO> toPersist
             = new ArrayList<SchedulerApplicationDTO>();
-    for (HopSchedulerApplication req : toAdd) {
+    for (SchedulerApplication req : toAdd) {
       toPersist.add(createPersistable(req, session));
     }
     session.savePersistentAll(toPersist);
   }
 
   @Override
-  public void removeAll(Collection<HopSchedulerApplication> toRemove) throws
+  public void removeAll(Collection<SchedulerApplication> toRemove) throws
           StorageException {
     HopsSession session = connector.obtainSession();
     List<SchedulerApplicationDTO> toPersist
             = new ArrayList<SchedulerApplicationDTO>();
-    for (HopSchedulerApplication entry : toRemove) {
+    for (SchedulerApplication entry : toRemove) {
       toPersist.add(session.newInstance(SchedulerApplicationDTO.class, entry.
               getAppid()));
     }
     session.deletePersistentAll(toPersist);
   }
 
-  private Map<String, HopSchedulerApplication> createApplicationIdMap(
+  private Map<String, SchedulerApplication> createApplicationIdMap(
           List<SchedulerApplicationClusterJ.SchedulerApplicationDTO> list) {
-    Map<String, HopSchedulerApplication> schedulerApplications
-            = new HashMap<String, HopSchedulerApplication>();
+    Map<String, SchedulerApplication> schedulerApplications
+            = new HashMap<String, SchedulerApplication>();
     for (SchedulerApplicationClusterJ.SchedulerApplicationDTO persistable : list) {
-      HopSchedulerApplication app = createHopSchedulerApplication(persistable);
+      SchedulerApplication app = createHopSchedulerApplication(persistable);
       schedulerApplications.put(app.getAppid(), app);
     }
     return schedulerApplications;
   }
 
-  private HopSchedulerApplication createHopSchedulerApplication(
+  private SchedulerApplication createHopSchedulerApplication(
           SchedulerApplicationDTO schedulerApplicationDTO) {
-    return new HopSchedulerApplication(schedulerApplicationDTO.getappid(),
+    return new SchedulerApplication(schedulerApplicationDTO.getappid(),
             schedulerApplicationDTO.getuser(), schedulerApplicationDTO.
             getqueuename());
   }
 
-  private SchedulerApplicationDTO createPersistable(HopSchedulerApplication hop,
+  private SchedulerApplicationDTO createPersistable(SchedulerApplication hop,
           HopsSession session) throws StorageException {
     SchedulerApplicationClusterJ.SchedulerApplicationDTO schedulerApplicationDTO
             = session.newInstance(

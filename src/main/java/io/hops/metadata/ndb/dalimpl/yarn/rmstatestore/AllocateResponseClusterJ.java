@@ -19,10 +19,10 @@ import io.hops.metadata.ndb.wrapper.HopsSession;
 import io.hops.metadata.yarn.dal.rmstatestore.AllocateResponseDataAccess;
 import io.hops.metadata.yarn.tabledef.rmstatestore.AllocateResponseTableDef;
 import io.hops.util.CompressionUtils;
-import io.hops.metadata.yarn.entity.rmstatestore.HopAllocateResponse;
+import io.hops.metadata.yarn.entity.rmstatestore.AllocateResponse;
 
 public class AllocateResponseClusterJ implements AllocateResponseTableDef,
-    AllocateResponseDataAccess<HopAllocateResponse> {
+    AllocateResponseDataAccess<AllocateResponse> {
 
   @PersistenceCapable(table = TABLE_NAME)
   public interface AllocateResponseDTO {
@@ -41,22 +41,22 @@ public class AllocateResponseClusterJ implements AllocateResponseTableDef,
   private final ClusterjConnector connector = ClusterjConnector.getInstance();
 
   @Override
-  public void addAll(Collection<HopAllocateResponse> toAdd) throws
+  public void addAll(Collection<AllocateResponse> toAdd) throws
       StorageException {
     HopsSession session = connector.obtainSession();
     List<AllocateResponseDTO> toPersist = new ArrayList<AllocateResponseDTO>();
-    for (HopAllocateResponse req : toAdd) {
+    for (AllocateResponse req : toAdd) {
       toPersist.add(createPersistable(req, session));
     }
     session.savePersistentAll(toPersist);
   }
 
   @Override
-  public void removeAll(Collection<HopAllocateResponse> toAdd) throws
+  public void removeAll(Collection<AllocateResponse> toAdd) throws
           StorageException {
     HopsSession session = connector.obtainSession();
     List<AllocateResponseDTO> toPersist = new ArrayList<AllocateResponseDTO>();
-    for (HopAllocateResponse req : toAdd) {
+    for (AllocateResponse req : toAdd) {
       AllocateResponseDTO persistable = session.newInstance(AllocateResponseDTO.class,
               req.getApplicationattemptid());
       toPersist.add(persistable);
@@ -65,7 +65,7 @@ public class AllocateResponseClusterJ implements AllocateResponseTableDef,
   }
   
   @Override
-  public List<HopAllocateResponse> getAll() throws StorageException {
+  public List<AllocateResponse> getAll() throws StorageException {
      HopsSession session = connector.obtainSession();
       HopsQueryBuilder qb = session.getQueryBuilder();
       HopsQueryDomainType<AllocateResponseDTO> dobj = qb.createQueryDefinition(AllocateResponseDTO.class);
@@ -74,7 +74,7 @@ public class AllocateResponseClusterJ implements AllocateResponseTableDef,
       return createHopAllocateResponseList(results);
   }
 
-  private AllocateResponseDTO createPersistable(HopAllocateResponse hop,
+  private AllocateResponseDTO createPersistable(AllocateResponse hop,
           HopsSession session) throws StorageException {
     AllocateResponseDTO allocateResponseDTO = session.newInstance(
             AllocateResponseDTO.class);
@@ -90,19 +90,19 @@ public class AllocateResponseClusterJ implements AllocateResponseTableDef,
     return allocateResponseDTO;
   }
   
-  private List<HopAllocateResponse> createHopAllocateResponseList(List<AllocateResponseDTO> list) throws StorageException {
-        List<HopAllocateResponse> hopList = new ArrayList<HopAllocateResponse>();
+  private List<AllocateResponse> createHopAllocateResponseList(List<AllocateResponseDTO> list) throws StorageException {
+        List<AllocateResponse> hopList = new ArrayList<AllocateResponse>();
         for (AllocateResponseDTO dto : list) {
             hopList.add(createHopAllocateResponse(dto));
         }
         return hopList;
     }
 
-  private HopAllocateResponse createHopAllocateResponse(
+  private AllocateResponse createHopAllocateResponse(
           AllocateResponseDTO allocateResponseDTO) throws StorageException {
     if (allocateResponseDTO != null) {
       try {
-        return new HopAllocateResponse(allocateResponseDTO.
+        return new AllocateResponse(allocateResponseDTO.
                 getapplicationattemptid(),
                 CompressionUtils.
                 decompress(allocateResponseDTO.getallocateresponse()));

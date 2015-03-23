@@ -11,7 +11,7 @@ import java.util.List;
 import io.hops.exception.StorageException;
 import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
 import io.hops.metadata.ndb.wrapper.HopsSession;
-import io.hops.metadata.yarn.entity.HopAppSchedulingInfo;
+import io.hops.metadata.yarn.entity.AppSchedulingInfo;
 import io.hops.metadata.ndb.ClusterjConnector;
 import io.hops.metadata.ndb.NdbBoolean;
 import io.hops.metadata.ndb.wrapper.HopsQuery;
@@ -19,7 +19,7 @@ import io.hops.metadata.ndb.wrapper.HopsQueryDomainType;
 import io.hops.metadata.yarn.dal.AppSchedulingInfoDataAccess;
 import io.hops.metadata.yarn.tabledef.AppSchedulingInfoTableDef;
 
-public class AppSchedulingInfoClusterJ implements AppSchedulingInfoTableDef, AppSchedulingInfoDataAccess<HopAppSchedulingInfo> {
+public class AppSchedulingInfoClusterJ implements AppSchedulingInfoTableDef, AppSchedulingInfoDataAccess<AppSchedulingInfo> {
 
   @PersistenceCapable(table = TABLE_NAME)
   public interface AppSchedulingInfoDTO {
@@ -62,7 +62,7 @@ public class AppSchedulingInfoClusterJ implements AppSchedulingInfoTableDef, App
   private final ClusterjConnector connector = ClusterjConnector.getInstance();
 
   @Override
-  public List<HopAppSchedulingInfo> findAll() throws StorageException, IOException {
+  public List<AppSchedulingInfo> findAll() throws StorageException, IOException {
     HopsSession session = connector.obtainSession();
     HopsQueryBuilder qb = session.getQueryBuilder();
     HopsQueryDomainType<AppSchedulingInfoClusterJ.AppSchedulingInfoDTO> dobj = qb.createQueryDefinition(AppSchedulingInfoClusterJ.AppSchedulingInfoDTO.class);
@@ -75,30 +75,30 @@ public class AppSchedulingInfoClusterJ implements AppSchedulingInfoTableDef, App
 
   
   @Override
-  public void add(HopAppSchedulingInfo toAdd) throws StorageException {
+  public void add(AppSchedulingInfo toAdd) throws StorageException {
     HopsSession session = connector.obtainSession();
     AppSchedulingInfoClusterJ.AppSchedulingInfoDTO persistable
             = createPersistable(toAdd, session);
     session.savePersistent(persistable);
   }
   
-  public void remove(HopAppSchedulingInfo toRemove) throws StorageException{
+  public void remove(AppSchedulingInfo toRemove) throws StorageException{
     HopsSession session = connector.obtainSession();
     session.deletePersistent(session.newInstance(AppSchedulingInfoDTO.class,
             toRemove.getSchedulerAppId()));
   }
   
   
-    private List<HopAppSchedulingInfo> createHopAppSchedulingInfoList(List<AppSchedulingInfoClusterJ.AppSchedulingInfoDTO> list) throws IOException {
-    List<HopAppSchedulingInfo> queueMetricsList = new ArrayList<HopAppSchedulingInfo>();
+    private List<AppSchedulingInfo> createHopAppSchedulingInfoList(List<AppSchedulingInfoClusterJ.AppSchedulingInfoDTO> list) throws IOException {
+    List<AppSchedulingInfo> queueMetricsList = new ArrayList<AppSchedulingInfo>();
     for (AppSchedulingInfoClusterJ.AppSchedulingInfoDTO persistable : list) {
       queueMetricsList.add(createHopAppSchedulingInfo(persistable));
     }
     return queueMetricsList;
   }
     
-  private HopAppSchedulingInfo createHopAppSchedulingInfo(AppSchedulingInfoDTO appSchedulingInfoDTO) {
-    return new HopAppSchedulingInfo(appSchedulingInfoDTO.getschedulerapp_id(), appSchedulingInfoDTO.getappid(),
+  private AppSchedulingInfo createHopAppSchedulingInfo(AppSchedulingInfoDTO appSchedulingInfoDTO) {
+    return new AppSchedulingInfo(appSchedulingInfoDTO.getschedulerapp_id(), appSchedulingInfoDTO.getappid(),
             appSchedulingInfoDTO.getqueuename(),
             appSchedulingInfoDTO.getuser(),
             appSchedulingInfoDTO.getcontaineridcounter(),
@@ -106,7 +106,7 @@ public class AppSchedulingInfoClusterJ implements AppSchedulingInfoTableDef, App
             NdbBoolean.convert(appSchedulingInfoDTO.getStoped()));
   }
 
-  private AppSchedulingInfoDTO createPersistable(HopAppSchedulingInfo hop, HopsSession session) throws StorageException {
+  private AppSchedulingInfoDTO createPersistable(AppSchedulingInfo hop, HopsSession session) throws StorageException {
     AppSchedulingInfoClusterJ.AppSchedulingInfoDTO appSchedulingInfoDTO = 
             session.newInstance(AppSchedulingInfoClusterJ.AppSchedulingInfoDTO.class);
 

@@ -8,11 +8,11 @@ import io.hops.exception.StorageException;
 import io.hops.metadata.ndb.wrapper.HopsSession;
 import io.hops.metadata.yarn.dal.rmstatestore.SequenceNumberDataAccess;
 import io.hops.metadata.yarn.tabledef.rmstatestore.SequenceNumberTableDef;
-import io.hops.metadata.yarn.entity.rmstatestore.HopSequenceNumber;
+import io.hops.metadata.yarn.entity.rmstatestore.SequenceNumber;
 import io.hops.metadata.ndb.ClusterjConnector;
 
 public class SequenceNumberClusterJ implements SequenceNumberTableDef,
-    SequenceNumberDataAccess<HopSequenceNumber> {
+    SequenceNumberDataAccess<SequenceNumber> {
 
     @PersistenceCapable(table = TABLE_NAME)
     public interface SequenceNumberDTO {
@@ -31,7 +31,7 @@ public class SequenceNumberClusterJ implements SequenceNumberTableDef,
     private final ClusterjConnector connector = ClusterjConnector.getInstance();
 
     @Override
-    public HopSequenceNumber findById(int id) throws StorageException {
+    public SequenceNumber findById(int id) throws StorageException {
         HopsSession session = connector.obtainSession();
 
         SequenceNumberDTO sequenceNumberDTO = null;
@@ -44,20 +44,20 @@ public class SequenceNumberClusterJ implements SequenceNumberTableDef,
     }
 
   @Override
-  public void add(HopSequenceNumber toAdd) throws StorageException {
+  public void add(SequenceNumber toAdd) throws StorageException {
     HopsSession session = connector.obtainSession();
     session.savePersistent(createPersistable(toAdd, session));
   }
 
-    private HopSequenceNumber createHopSequenceNumber(SequenceNumberDTO sequenceNumberDTO) {
+    private SequenceNumber createHopSequenceNumber(SequenceNumberDTO sequenceNumberDTO) {
       if(sequenceNumberDTO !=null){
-        return new HopSequenceNumber(sequenceNumberDTO.getid(), sequenceNumberDTO.getsequencenumber());
+        return new SequenceNumber(sequenceNumberDTO.getid(), sequenceNumberDTO.getsequencenumber());
       } else{
         return null;
       }
     }
 
-    private SequenceNumberDTO createPersistable(HopSequenceNumber hop, HopsSession session) throws StorageException {
+    private SequenceNumberDTO createPersistable(SequenceNumber hop, HopsSession session) throws StorageException {
         SequenceNumberDTO sequenceNumberDTO = session.newInstance(SequenceNumberDTO.class);
         sequenceNumberDTO.setid(hop.getId());
         sequenceNumberDTO.setsequencenumber(hop.getSequencenumber());

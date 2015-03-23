@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.zip.DataFormatException;
 
 import io.hops.exception.StorageException;
-import io.hops.metadata.yarn.entity.rmstatestore.HopSecretMamagerKey;
+import io.hops.metadata.yarn.entity.rmstatestore.SecretMamagerKey;
 import io.hops.metadata.ndb.wrapper.HopsQuery;
 import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
 import io.hops.metadata.ndb.wrapper.HopsQueryDomainType;
@@ -21,7 +21,7 @@ import io.hops.util.CompressionUtils;
 import io.hops.metadata.ndb.ClusterjConnector;
 
 public class SecretMamagerKeysClusterJ implements SecretMamagerKeysTableDef,
-    SecretMamagerKeysDataAccess<HopSecretMamagerKey> {
+    SecretMamagerKeysDataAccess<SecretMamagerKey> {
 
   @PersistenceCapable(table = TABLE_NAME)
   public interface SecretMamagerKeysDTO {
@@ -40,7 +40,7 @@ public class SecretMamagerKeysClusterJ implements SecretMamagerKeysTableDef,
   private final ClusterjConnector connector = ClusterjConnector.getInstance();
 
   @Override
-  public List<HopSecretMamagerKey> getAll() throws StorageException {
+  public List<SecretMamagerKey> getAll() throws StorageException {
  
       HopsSession session = connector.obtainSession();
       HopsQueryBuilder qb = session.getQueryBuilder();
@@ -52,19 +52,19 @@ public class SecretMamagerKeysClusterJ implements SecretMamagerKeysTableDef,
   }
 
   @Override
-  public void add(HopSecretMamagerKey toAdd) throws StorageException {
+  public void add(SecretMamagerKey toAdd) throws StorageException {
     HopsSession session = connector.obtainSession();
     session.savePersistent(createPersistable(toAdd, session));
   }
 
   @Override
-  public void remove(HopSecretMamagerKey toRemove) throws StorageException {
+  public void remove(SecretMamagerKey toRemove) throws StorageException {
     HopsSession session = connector.obtainSession();
     session.deletePersistent(session.newInstance(SecretMamagerKeysDTO.class,
             toRemove.getKeyType()));
   }
   
-  private SecretMamagerKeysDTO createPersistable(HopSecretMamagerKey hop,
+  private SecretMamagerKeysDTO createPersistable(SecretMamagerKey hop,
           HopsSession session) throws StorageException {
     SecretMamagerKeysDTO keyDTO = session.
             newInstance(SecretMamagerKeysDTO.class);
@@ -78,11 +78,11 @@ public class SecretMamagerKeysClusterJ implements SecretMamagerKeysTableDef,
     return keyDTO;
   }
 
-  private HopSecretMamagerKey createHopSecretMamagerKey(
+  private SecretMamagerKey createHopSecretMamagerKey(
           SecretMamagerKeysDTO keyDTO) throws StorageException {
     if (keyDTO != null) {
       try {
-        return new HopSecretMamagerKey(keyDTO.getkeyid(),
+        return new SecretMamagerKey(keyDTO.getkeyid(),
                 CompressionUtils.decompress(keyDTO.getkey()));
       } catch (IOException e) {
         throw new StorageException(e);
@@ -94,8 +94,8 @@ public class SecretMamagerKeysClusterJ implements SecretMamagerKeysTableDef,
     }
   }
   
-   private List<HopSecretMamagerKey> createHopSecretMamagerKeyList(List<SecretMamagerKeysDTO> list) throws StorageException {
-        List<HopSecretMamagerKey> hopList = new ArrayList<HopSecretMamagerKey>();
+   private List<SecretMamagerKey> createHopSecretMamagerKeyList(List<SecretMamagerKeysDTO> list) throws StorageException {
+        List<SecretMamagerKey> hopList = new ArrayList<SecretMamagerKey>();
         for (SecretMamagerKeysDTO dto : list) {
             hopList.add(createHopSecretMamagerKey(dto));
         }

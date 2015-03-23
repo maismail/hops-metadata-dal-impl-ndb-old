@@ -12,7 +12,7 @@ import io.hops.exception.StorageException;
 import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
 import io.hops.metadata.ndb.wrapper.HopsQueryDomainType;
 import io.hops.metadata.ndb.wrapper.HopsSession;
-import io.hops.metadata.yarn.entity.appmasterrpc.HopRPC;
+import io.hops.metadata.yarn.entity.appmasterrpc.RPC;
 import io.hops.metadata.ndb.ClusterjConnector;
 import io.hops.metadata.ndb.wrapper.HopsPredicate;
 import io.hops.metadata.ndb.wrapper.HopsQuery;
@@ -21,7 +21,7 @@ import io.hops.metadata.yarn.tabledef.appmasterrpc.RPCTableDef;
 import io.hops.util.CompressionUtils;
 
 public class RPCClusterJ implements RPCTableDef,
-        RPCDataAccess<HopRPC> {
+        RPCDataAccess<RPC> {
 
   @PersistenceCapable(table = TABLE_NAME)
   public interface RPCDTO {
@@ -82,20 +82,20 @@ public class RPCClusterJ implements RPCTableDef,
   }
 
   @Override
-  public void add(HopRPC toAdd) throws StorageException {
+  public void add(io.hops.metadata.yarn.entity.appmasterrpc.RPC toAdd) throws StorageException {
     HopsSession session = connector.obtainSession();
     session.savePersistent(createPersistable(toAdd, session));
   }
 
   @Override
-  public void remove(HopRPC toRemove) throws StorageException {
+  public void remove(io.hops.metadata.yarn.entity.appmasterrpc.RPC toRemove) throws StorageException {
     HopsSession session = connector.obtainSession();
     session.deletePersistent(session.newInstance(RPCDTO.class,
             toRemove.getId()));
   }
 
   @Override
-  public List<HopRPC> getAll() throws StorageException {
+  public List<io.hops.metadata.yarn.entity.appmasterrpc.RPC> getAll() throws StorageException {
     try {
       HopsSession session = connector.obtainSession();
       HopsQueryBuilder qb = session.getQueryBuilder();
@@ -117,12 +117,12 @@ public class RPCClusterJ implements RPCTableDef,
     }
   }
 
-  private HopRPC createHopRPC(RPCDTO appMasterRPCDTO)
+  private io.hops.metadata.yarn.entity.appmasterrpc.RPC createHopRPC(RPCDTO appMasterRPCDTO)
           throws StorageException {
     try {
-      return new HopRPC(
+      return new RPC(
               appMasterRPCDTO.getid(),
-              HopRPC.Type.valueOf(appMasterRPCDTO.gettype()),
+              io.hops.metadata.yarn.entity.appmasterrpc.RPC.Type.valueOf(appMasterRPCDTO.gettype()),
               CompressionUtils.decompress(appMasterRPCDTO.getrpc()),
               appMasterRPCDTO.getuserid());
     } catch (IOException e) {
@@ -132,9 +132,9 @@ public class RPCClusterJ implements RPCTableDef,
     }
   }
 
-  private List<HopRPC> createHopRPCList(
+  private List<io.hops.metadata.yarn.entity.appmasterrpc.RPC> createHopRPCList(
           List<RPCClusterJ.RPCDTO> list) throws StorageException {
-    List<HopRPC> hopList = new ArrayList<HopRPC>();
+    List<io.hops.metadata.yarn.entity.appmasterrpc.RPC> hopList = new ArrayList<io.hops.metadata.yarn.entity.appmasterrpc.RPC>();
     for (RPCClusterJ.RPCDTO dto : list) {
       hopList.add(createHopRPC(dto));
     }
@@ -142,7 +142,8 @@ public class RPCClusterJ implements RPCTableDef,
 
   }
 
-  private RPCDTO createPersistable(HopRPC hop,
+  private RPCDTO createPersistable(
+      io.hops.metadata.yarn.entity.appmasterrpc.RPC hop,
           HopsSession session) throws StorageException {
     RPCClusterJ.RPCDTO appMasterRPCDTO = session.newInstance(
             RPCClusterJ.RPCDTO.class);

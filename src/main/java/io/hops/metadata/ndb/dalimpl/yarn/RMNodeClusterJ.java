@@ -16,7 +16,7 @@ import io.hops.metadata.ndb.wrapper.HopsSession;
 import io.hops.metadata.yarn.dal.RMNodeDataAccess;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import io.hops.metadata.yarn.entity.HopRMNode;
+import io.hops.metadata.yarn.entity.RMNode;
 import io.hops.metadata.ndb.ClusterjConnector;
 import io.hops.metadata.ndb.wrapper.HopsQuery;
 import io.hops.metadata.yarn.tabledef.RMNodeTableDef;
@@ -25,7 +25,7 @@ import io.hops.metadata.yarn.tabledef.RMNodeTableDef;
  * Implements connection of RMNodeImpl to NDB.
  */
 public class RMNodeClusterJ implements RMNodeTableDef,
-    RMNodeDataAccess<HopRMNode> {
+    RMNodeDataAccess<RMNode> {
 
   private static final Log LOG = LogFactory.getLog(RMNodeClusterJ.class);
 
@@ -97,7 +97,7 @@ public class RMNodeClusterJ implements RMNodeTableDef,
   private final ClusterjConnector connector = ClusterjConnector.getInstance();
 
   @Override
-  public HopRMNode findByNodeId(String nodeid) throws StorageException {
+  public RMNode findByNodeId(String nodeid) throws StorageException {
     LOG.debug("HOP :: ClusterJ RMNode.findByNodeId - START:" + nodeid);
     HopsSession session = connector.obtainSession();
     RMNodeDTO rmnodeDTO = session.find(RMNodeDTO.class, nodeid);
@@ -110,7 +110,7 @@ public class RMNodeClusterJ implements RMNodeTableDef,
   }
 
   @Override
-  public Map<String, HopRMNode> getAll() throws StorageException {
+  public Map<String, RMNode> getAll() throws StorageException {
     LOG.debug("HOP :: ClusterJ RMNode.getAll - START");
     HopsSession session = connector.obtainSession();
     HopsQueryBuilder qb = session.getQueryBuilder();
@@ -123,11 +123,11 @@ public class RMNodeClusterJ implements RMNodeTableDef,
   }
 
   @Override
-  public void addAll(Collection<HopRMNode> toAdd) throws
+  public void addAll(Collection<RMNode> toAdd) throws
           StorageException {
     HopsSession session = connector.obtainSession();
     List<RMNodeDTO> toPersist = new ArrayList<RMNodeDTO>();
-    for (HopRMNode req : toAdd) {
+    for (RMNode req : toAdd) {
       toPersist.add(createPersistable(req, session));
     }
     session.savePersistentAll(toPersist);
@@ -135,11 +135,11 @@ public class RMNodeClusterJ implements RMNodeTableDef,
   }
 
   @Override
-  public void removeAll(Collection<HopRMNode> toRemove) throws
+  public void removeAll(Collection<RMNode> toRemove) throws
           StorageException {
     HopsSession session = connector.obtainSession();
     List<RMNodeDTO> toPersist = new ArrayList<RMNodeDTO>();
-    for (HopRMNode entry : toRemove) {
+    for (RMNode entry : toRemove) {
       toPersist.add(session.newInstance(RMNodeDTO.class, entry.
               getNodeId()));
     }
@@ -148,22 +148,22 @@ public class RMNodeClusterJ implements RMNodeTableDef,
   }
 
   @Override
-  public void add(HopRMNode rmNode) throws StorageException {
+  public void add(RMNode rmNode) throws StorageException {
     HopsSession session = connector.obtainSession();
     session.savePersistent(createPersistable(rmNode, session));
   }
 
-  private Map<String, HopRMNode> createMap(List<RMNodeDTO> results) {
-    Map<String, HopRMNode> map = new HashMap<String, HopRMNode>();
+  private Map<String, RMNode> createMap(List<RMNodeDTO> results) {
+    Map<String, RMNode> map = new HashMap<String, RMNode>();
     for (RMNodeDTO persistable : results) {
-      HopRMNode hop = createHopRMNode(persistable);
+      RMNode hop = createHopRMNode(persistable);
       map.put(hop.getNodeId(), hop);
     }
     return map;
   }
 
 
-  private RMNodeDTO createPersistable(HopRMNode hopRMNode, HopsSession session)
+  private RMNodeDTO createPersistable(RMNode hopRMNode, HopsSession session)
           throws StorageException {
     RMNodeDTO rmDTO = session.newInstance(RMNodeDTO.class);
     //Set values to persist new rmnode
@@ -188,8 +188,8 @@ public class RMNodeClusterJ implements RMNodeTableDef,
    * @param rmDTO
    * @return HopRMNode
    */
-  public static HopRMNode createHopRMNode(RMNodeDTO rmDTO) {
-    return new HopRMNode(rmDTO.getNodeid(),
+  public static RMNode createHopRMNode(RMNodeDTO rmDTO) {
+    return new RMNode(rmDTO.getNodeid(),
             rmDTO.getHostname(),
             rmDTO.getCommandport(),
             rmDTO.getHttpport(),

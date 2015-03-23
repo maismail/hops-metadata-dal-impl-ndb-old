@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import io.hops.metadata.yarn.entity.HopNextHeartbeat;
+import io.hops.metadata.yarn.entity.NextHeartbeat;
 import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
 import io.hops.metadata.ndb.wrapper.HopsSession;
 import io.hops.exception.StorageException;
@@ -18,7 +18,7 @@ import io.hops.metadata.yarn.dal.NextHeartbeatDataAccess;
 import io.hops.metadata.yarn.tabledef.NextHeartbeatTableDef;
 
 public class NextHeartbeatClusterJ implements NextHeartbeatTableDef,
-        NextHeartbeatDataAccess<HopNextHeartbeat> {
+        NextHeartbeatDataAccess<NextHeartbeat> {
 
   @PersistenceCapable(table = TABLE_NAME)
   public interface NextHeartbeatDTO extends RMNodeComponentDTO {
@@ -65,13 +65,13 @@ public class NextHeartbeatClusterJ implements NextHeartbeatTableDef,
   public void updateNextHeartbeat(String rmnodeid, boolean nextHeartbeat)
           throws StorageException {
     HopsSession session = connector.obtainSession();
-    session.savePersistent(createPersistable(new HopNextHeartbeat(rmnodeid,
+    session.savePersistent(createPersistable(new NextHeartbeat(rmnodeid,
             nextHeartbeat), session));
     session.flush();
   }
 
   private NextHeartbeatDTO createPersistable(
-          HopNextHeartbeat hopNextHeartbeat, HopsSession session) throws
+          NextHeartbeat hopNextHeartbeat, HopsSession session) throws
           StorageException {
     NextHeartbeatDTO DTO = session.newInstance(NextHeartbeatDTO.class);
     //Set values to persist new persistedEvent
@@ -80,9 +80,9 @@ public class NextHeartbeatClusterJ implements NextHeartbeatTableDef,
     return DTO;
   }
 
-  public static HopNextHeartbeat createHopNextHeartbeat(
+  public static NextHeartbeat createHopNextHeartbeat(
           NextHeartbeatDTO nextHBDTO) {
-    return new HopNextHeartbeat(nextHBDTO.getrmnodeid(), intToBoolean(nextHBDTO.
+    return new NextHeartbeat(nextHBDTO.getrmnodeid(), intToBoolean(nextHBDTO.
             getNextheartbeat()));
   }
 

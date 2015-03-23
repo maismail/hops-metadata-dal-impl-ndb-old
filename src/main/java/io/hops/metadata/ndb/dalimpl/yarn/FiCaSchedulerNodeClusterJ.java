@@ -12,12 +12,12 @@ import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
 import io.hops.metadata.ndb.wrapper.HopsQueryDomainType;
 import io.hops.metadata.ndb.wrapper.HopsSession;
 import io.hops.metadata.yarn.tabledef.FiCaSchedulerNodeTableDef;
-import io.hops.metadata.yarn.entity.HopFiCaSchedulerNode;
+import io.hops.metadata.yarn.entity.FiCaSchedulerNode;
 import io.hops.metadata.ndb.ClusterjConnector;
 import io.hops.metadata.ndb.wrapper.HopsQuery;
 import io.hops.metadata.yarn.dal.FiCaSchedulerNodeDataAccess;
 
-public class FiCaSchedulerNodeClusterJ implements FiCaSchedulerNodeTableDef, FiCaSchedulerNodeDataAccess<HopFiCaSchedulerNode> {
+public class FiCaSchedulerNodeClusterJ implements FiCaSchedulerNodeTableDef, FiCaSchedulerNodeDataAccess<FiCaSchedulerNode> {
 
   @PersistenceCapable(table = TABLE_NAME)
   public interface FiCaSchedulerNodeDTO {
@@ -43,7 +43,7 @@ public class FiCaSchedulerNodeClusterJ implements FiCaSchedulerNodeTableDef, FiC
 
   @Override
 
-  public void add(HopFiCaSchedulerNode toAdd) throws
+  public void add(FiCaSchedulerNode toAdd) throws
       StorageException {
     HopsSession session = connector.obtainSession();
     FiCaSchedulerNodeDTO persistable = createPersistable(toAdd, session);
@@ -51,11 +51,11 @@ public class FiCaSchedulerNodeClusterJ implements FiCaSchedulerNodeTableDef, FiC
   }
 
   @Override
-  public void addAll(Collection<HopFiCaSchedulerNode> toAdd) throws
+  public void addAll(Collection<FiCaSchedulerNode> toAdd) throws
           StorageException {
     HopsSession session = connector.obtainSession();
     List<FiCaSchedulerNodeDTO> toPersist = new ArrayList<FiCaSchedulerNodeDTO>();
-    for (HopFiCaSchedulerNode hop : toAdd) {
+    for (FiCaSchedulerNode hop : toAdd) {
       FiCaSchedulerNodeDTO persistable = createPersistable(hop, session);
       toPersist.add(persistable);
 
@@ -64,11 +64,11 @@ public class FiCaSchedulerNodeClusterJ implements FiCaSchedulerNodeTableDef, FiC
   }
 
   @Override
-  public void removeAll(Collection<HopFiCaSchedulerNode> toRemove) throws
+  public void removeAll(Collection<FiCaSchedulerNode> toRemove) throws
           StorageException {
     HopsSession session = connector.obtainSession();
     List<FiCaSchedulerNodeDTO> toPersist = new ArrayList<FiCaSchedulerNodeDTO>();
-    for (HopFiCaSchedulerNode hop : toRemove) {
+    for (FiCaSchedulerNode hop : toRemove) {
       FiCaSchedulerNodeDTO persistable = session.newInstance(
               FiCaSchedulerNodeDTO.class, hop.getRmnodeId());
       toPersist.add(persistable);
@@ -77,7 +77,7 @@ public class FiCaSchedulerNodeClusterJ implements FiCaSchedulerNodeTableDef, FiC
   }
 
       @Override
-    public List<HopFiCaSchedulerNode> getAll() throws StorageException {
+    public List<FiCaSchedulerNode> getAll() throws StorageException {
         try {
             HopsSession session = connector.obtainSession();
             HopsQueryBuilder qb = session.getQueryBuilder();
@@ -93,7 +93,7 @@ public class FiCaSchedulerNodeClusterJ implements FiCaSchedulerNodeTableDef, FiC
     }
     
     
-    private FiCaSchedulerNodeDTO createPersistable(HopFiCaSchedulerNode hop, HopsSession session) throws StorageException {
+    private FiCaSchedulerNodeDTO createPersistable(FiCaSchedulerNode hop, HopsSession session) throws StorageException {
         FiCaSchedulerNodeDTO ficaDTO = session.newInstance(FiCaSchedulerNodeDTO.class);
         ficaDTO.setrmnodeid(hop.getRmnodeId());
         ficaDTO.setnodename(hop.getNodeName());
@@ -101,19 +101,19 @@ public class FiCaSchedulerNodeClusterJ implements FiCaSchedulerNodeTableDef, FiC
         return ficaDTO;
     }
 
-  private List<HopFiCaSchedulerNode> createFiCaSchedulerNodeList(
+  private List<FiCaSchedulerNode> createFiCaSchedulerNodeList(
           List<FiCaSchedulerNodeClusterJ.FiCaSchedulerNodeDTO> results) {
-    List<HopFiCaSchedulerNode> fifoSchedulerNodes
-            = new ArrayList<HopFiCaSchedulerNode>();
+    List<FiCaSchedulerNode> fifoSchedulerNodes
+            = new ArrayList<FiCaSchedulerNode>();
     for (FiCaSchedulerNodeClusterJ.FiCaSchedulerNodeDTO persistable : results) {
       fifoSchedulerNodes.add(createHopFiCaSchedulerNode(persistable));
     }
     return fifoSchedulerNodes;
   }
 
-  private HopFiCaSchedulerNode createHopFiCaSchedulerNode(
+  private FiCaSchedulerNode createHopFiCaSchedulerNode(
           FiCaSchedulerNodeDTO entry) {
-    HopFiCaSchedulerNode hop = new HopFiCaSchedulerNode(entry.getrmnodeid(),
+    FiCaSchedulerNode hop = new FiCaSchedulerNode(entry.getrmnodeid(),
             entry.getnodename(), entry.getnumcontainers());
     return hop;
   }

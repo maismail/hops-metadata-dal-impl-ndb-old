@@ -13,14 +13,14 @@ import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
 import io.hops.metadata.ndb.wrapper.HopsSession;
 import io.hops.metadata.yarn.dal.QueueMetricsDataAccess;
 import io.hops.exception.StorageException;
-import io.hops.metadata.yarn.entity.HopQueueMetrics;
+import io.hops.metadata.yarn.entity.QueueMetrics;
 import io.hops.metadata.ndb.ClusterjConnector;
 import io.hops.metadata.ndb.wrapper.HopsQuery;
 import io.hops.metadata.ndb.wrapper.HopsQueryDomainType;
 import io.hops.metadata.yarn.tabledef.QueueMetricsTableDef;
 
 public class QueueMetricsClusterJ implements QueueMetricsTableDef,
-    QueueMetricsDataAccess<HopQueueMetrics> {
+    QueueMetricsDataAccess<QueueMetrics> {
 
   @PersistenceCapable(table = TABLE_NAME)
   public interface QueueMetricsDTO {
@@ -150,7 +150,7 @@ public class QueueMetricsClusterJ implements QueueMetricsTableDef,
   private final ClusterjConnector connector = ClusterjConnector.getInstance();
 
   @Override
-  public List<HopQueueMetrics> findAll() throws StorageException, IOException {
+  public List<QueueMetrics> findAll() throws StorageException, IOException {
     HopsSession session = connector.obtainSession();
     HopsQueryBuilder qb = session.getQueryBuilder();
     HopsQueryDomainType<QueueMetricsClusterJ.QueueMetricsDTO> dobj = qb.
@@ -164,10 +164,10 @@ public class QueueMetricsClusterJ implements QueueMetricsTableDef,
   }
   
   @Override
-  public void addAll(Collection<HopQueueMetrics> toAdd) throws StorageException {
+  public void addAll(Collection<QueueMetrics> toAdd) throws StorageException {
     HopsSession session = connector.obtainSession();
     List<QueueMetricsDTO> toPersist = new ArrayList<QueueMetricsDTO>();
-    for (HopQueueMetrics hop : toAdd) {
+    for (QueueMetrics hop : toAdd) {
       QueueMetricsClusterJ.QueueMetricsDTO persistable = createPersistable(hop,
               session);
       toPersist.add(persistable);
@@ -175,9 +175,9 @@ public class QueueMetricsClusterJ implements QueueMetricsTableDef,
     session.savePersistentAll(toPersist);
   }
 
-  private List<HopQueueMetrics> createHopQueueMetricsList(
+  private List<QueueMetrics> createHopQueueMetricsList(
           List<QueueMetricsClusterJ.QueueMetricsDTO> list) throws IOException {
-    List<HopQueueMetrics> queueMetricsList = new ArrayList<HopQueueMetrics>();
+    List<QueueMetrics> queueMetricsList = new ArrayList<QueueMetrics>();
     for (QueueMetricsClusterJ.QueueMetricsDTO persistable : list) {
       queueMetricsList.add(createHopQueueMetrics(persistable));
     }
@@ -185,8 +185,8 @@ public class QueueMetricsClusterJ implements QueueMetricsTableDef,
   }
     
     
-  private HopQueueMetrics createHopQueueMetrics(QueueMetricsDTO queueMetricsDTO) {
-    return new HopQueueMetrics(queueMetricsDTO.getid(),
+  private QueueMetrics createHopQueueMetrics(QueueMetricsDTO queueMetricsDTO) {
+    return new QueueMetrics(queueMetricsDTO.getid(),
             queueMetricsDTO.getappssubmitted(),
             queueMetricsDTO.getappsrunning(),
             queueMetricsDTO.getappspending(),
@@ -212,7 +212,7 @@ public class QueueMetricsClusterJ implements QueueMetricsTableDef,
             queueMetricsDTO.getqueuename());
   }
 
-  private QueueMetricsDTO createPersistable(HopQueueMetrics hop,
+  private QueueMetricsDTO createPersistable(QueueMetrics hop,
           HopsSession session) throws StorageException {
     QueueMetricsClusterJ.QueueMetricsDTO queueMetricsDTO = session.newInstance(
             QueueMetricsClusterJ.QueueMetricsDTO.class);

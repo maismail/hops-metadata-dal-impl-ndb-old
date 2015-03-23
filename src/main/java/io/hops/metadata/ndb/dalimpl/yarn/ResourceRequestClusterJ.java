@@ -12,7 +12,7 @@ import java.util.Map;
 import java.util.zip.DataFormatException;
 
 import io.hops.exception.StorageException;
-import io.hops.metadata.yarn.entity.HopResourceRequest;
+import io.hops.metadata.yarn.entity.ResourceRequest;
 import io.hops.metadata.ndb.ClusterjConnector;
 import io.hops.metadata.ndb.wrapper.HopsQuery;
 import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
@@ -23,7 +23,7 @@ import io.hops.metadata.yarn.tabledef.ResourceRequestTableDef;
 import io.hops.util.CompressionUtils;
 
 public class ResourceRequestClusterJ implements ResourceRequestTableDef,
-    ResourceRequestDataAccess<HopResourceRequest> {
+    ResourceRequestDataAccess<ResourceRequest> {
 
   @PersistenceCapable(table = TABLE_NAME)
   public interface ResourceRequestDTO {
@@ -53,7 +53,7 @@ public class ResourceRequestClusterJ implements ResourceRequestTableDef,
 
 
   @Override
-  public Map<String, List<HopResourceRequest>> getAll() throws
+  public Map<String, List<ResourceRequest>> getAll() throws
       StorageException {
     HopsSession session = connector.obtainSession();
     HopsQueryBuilder qb = session.getQueryBuilder();
@@ -68,22 +68,22 @@ public class ResourceRequestClusterJ implements ResourceRequestTableDef,
   }
 
   @Override
-  public void addAll(Collection<HopResourceRequest> toAdd) throws
+  public void addAll(Collection<ResourceRequest> toAdd) throws
           StorageException {
     HopsSession session = connector.obtainSession();
     List<ResourceRequestDTO> toPersist = new ArrayList<ResourceRequestDTO>();
-    for (HopResourceRequest req : toAdd) {
+    for (ResourceRequest req : toAdd) {
       toPersist.add(createPersistable(req, session));
     }
     session.savePersistentAll(toPersist);
   }
 
   @Override
-  public void removeAll(Collection<HopResourceRequest> toRemove) throws
+  public void removeAll(Collection<ResourceRequest> toRemove) throws
           StorageException {
     HopsSession session = connector.obtainSession();
     List<ResourceRequestDTO> toPersist = new ArrayList<ResourceRequestDTO>();
-    for (HopResourceRequest hop : toRemove) {
+    for (ResourceRequest hop : toRemove) {
       Object[] pk = new Object[3];
       pk[0] = hop.getId();
       pk[1] = hop.getPriority();
@@ -93,10 +93,10 @@ public class ResourceRequestClusterJ implements ResourceRequestTableDef,
     session.deletePersistentAll(toPersist);
   }
 
-  private HopResourceRequest createHopResourceRequest(
+  private ResourceRequest createHopResourceRequest(
           ResourceRequestDTO resourceRequestDTO) throws StorageException {
     try {
-      return new HopResourceRequest(resourceRequestDTO.getappschedulinginfo_id(),
+      return new ResourceRequest(resourceRequestDTO.getappschedulinginfo_id(),
               resourceRequestDTO.getpriority(),
               resourceRequestDTO.getname(),
               CompressionUtils.decompress(resourceRequestDTO.
@@ -108,7 +108,7 @@ public class ResourceRequestClusterJ implements ResourceRequestTableDef,
     }
   }
 
-  private ResourceRequestDTO createPersistable(HopResourceRequest hop,
+  private ResourceRequestDTO createPersistable(ResourceRequest hop,
           HopsSession session) throws StorageException {
     ResourceRequestClusterJ.ResourceRequestDTO resourceRequestDTO = session.
             newInstance(ResourceRequestClusterJ.ResourceRequestDTO.class);
@@ -125,25 +125,25 @@ public class ResourceRequestClusterJ implements ResourceRequestTableDef,
     return resourceRequestDTO;
   }
 
-  private List<HopResourceRequest> createResourceRequestList(
+  private List<ResourceRequest> createResourceRequestList(
           List<ResourceRequestClusterJ.ResourceRequestDTO> results) throws
           StorageException {
-    List<HopResourceRequest> resourceRequests
-            = new ArrayList<HopResourceRequest>();
+    List<ResourceRequest> resourceRequests
+            = new ArrayList<ResourceRequest>();
     for (ResourceRequestClusterJ.ResourceRequestDTO persistable : results) {
       resourceRequests.add(createHopResourceRequest(persistable));
     }
     return resourceRequests;
   }
 
-  private Map<String, List<HopResourceRequest>> createMap(
+  private Map<String, List<ResourceRequest>> createMap(
           List<ResourceRequestDTO> results) throws StorageException {
-    Map<String, List<HopResourceRequest>> map
-            = new HashMap<String, List<HopResourceRequest>>();
+    Map<String, List<ResourceRequest>> map
+            = new HashMap<String, List<ResourceRequest>>();
     for (ResourceRequestDTO dto : results) {
-      HopResourceRequest hop = createHopResourceRequest(dto);
+      ResourceRequest hop = createHopResourceRequest(dto);
       if (map.get(hop.getId()) == null) {
-        map.put(hop.getId(), new ArrayList<HopResourceRequest>());
+        map.put(hop.getId(), new ArrayList<ResourceRequest>());
       }
       map.get(hop.getId()).add(hop);
     }

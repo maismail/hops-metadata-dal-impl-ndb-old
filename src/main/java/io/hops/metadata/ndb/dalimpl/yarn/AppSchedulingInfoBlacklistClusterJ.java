@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 import io.hops.exception.StorageException;
-import io.hops.metadata.yarn.entity.HopAppSchedulingInfoBlacklist;
+import io.hops.metadata.yarn.entity.AppSchedulingInfoBlacklist;
 import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
 import io.hops.metadata.ndb.wrapper.HopsQueryDomainType;
 import io.hops.metadata.ndb.wrapper.HopsSession;
@@ -21,7 +21,7 @@ import io.hops.metadata.ndb.wrapper.HopsQuery;
 import io.hops.metadata.yarn.dal.AppSchedulingInfoBlacklistDataAccess;
 import io.hops.metadata.yarn.tabledef.AppSchedulingInfoBlacklistTableDef;
 
-public class AppSchedulingInfoBlacklistClusterJ implements AppSchedulingInfoBlacklistTableDef, AppSchedulingInfoBlacklistDataAccess<HopAppSchedulingInfoBlacklist>{
+public class AppSchedulingInfoBlacklistClusterJ implements AppSchedulingInfoBlacklistTableDef, AppSchedulingInfoBlacklistDataAccess<AppSchedulingInfoBlacklist>{
 
     
     @PersistenceCapable(table = TABLE_NAME)
@@ -40,7 +40,7 @@ public class AppSchedulingInfoBlacklistClusterJ implements AppSchedulingInfoBlac
     private final ClusterjConnector connector = ClusterjConnector.getInstance();
     
     @Override
-  public Map<String, List<HopAppSchedulingInfoBlacklist>> getAll() throws
+  public Map<String, List<AppSchedulingInfoBlacklist>> getAll() throws
         StorageException {
     HopsSession session = connector.obtainSession();
     HopsQueryBuilder qb = session.getQueryBuilder();
@@ -55,12 +55,12 @@ public class AppSchedulingInfoBlacklistClusterJ implements AppSchedulingInfoBlac
   }
     
   @Override
-  public void addAll(Collection<HopAppSchedulingInfoBlacklist> toAdd) throws
+  public void addAll(Collection<AppSchedulingInfoBlacklist> toAdd) throws
           StorageException {
     HopsSession session = connector.obtainSession();
     List<AppSchedulingInfoBlacklistClusterJ.AppSchedulingInfoBlacklistDTO> toPersist
             = new ArrayList<AppSchedulingInfoBlacklistDTO>();
-    for (HopAppSchedulingInfoBlacklist hop : toAdd) {
+    for (AppSchedulingInfoBlacklist hop : toAdd) {
       AppSchedulingInfoBlacklistClusterJ.AppSchedulingInfoBlacklistDTO persistable
               = createPersistable(hop, session);
       toPersist.add(persistable);
@@ -69,13 +69,13 @@ public class AppSchedulingInfoBlacklistClusterJ implements AppSchedulingInfoBlac
   }
   
   @Override
-  public void removeAll(Collection<HopAppSchedulingInfoBlacklist> toRemove)
+  public void removeAll(Collection<AppSchedulingInfoBlacklist> toRemove)
           throws
           StorageException {
     HopsSession session = connector.obtainSession();
     List<AppSchedulingInfoBlacklistClusterJ.AppSchedulingInfoBlacklistDTO> toPersist
             = new ArrayList<AppSchedulingInfoBlacklistDTO>();
-    for (HopAppSchedulingInfoBlacklist hop : toRemove) {
+    for (AppSchedulingInfoBlacklist hop : toRemove) {
       Object[] objarr = new Object[2];
       objarr[0] = hop.getAppschedulinginfo_id();
       objarr[1] = hop.getBlacklisted();
@@ -86,12 +86,12 @@ public class AppSchedulingInfoBlacklistClusterJ implements AppSchedulingInfoBlac
     session.deletePersistentAll(toPersist);
   }
     
-    private HopAppSchedulingInfoBlacklist createHopAppSchedulingInfoBlacklist(AppSchedulingInfoBlacklistDTO appSchedulingInfoBlacklistDTO) {
-        return new HopAppSchedulingInfoBlacklist(appSchedulingInfoBlacklistDTO.getappschedulinginfo_id(),
+    private AppSchedulingInfoBlacklist createHopAppSchedulingInfoBlacklist(AppSchedulingInfoBlacklistDTO appSchedulingInfoBlacklistDTO) {
+        return new AppSchedulingInfoBlacklist(appSchedulingInfoBlacklistDTO.getappschedulinginfo_id(),
                                                 appSchedulingInfoBlacklistDTO.getblacklisted());
     }
 
-    private AppSchedulingInfoBlacklistDTO createPersistable(HopAppSchedulingInfoBlacklist hop, HopsSession session) throws StorageException {
+    private AppSchedulingInfoBlacklistDTO createPersistable(AppSchedulingInfoBlacklist hop, HopsSession session) throws StorageException {
         AppSchedulingInfoBlacklistClusterJ.AppSchedulingInfoBlacklistDTO appSchedulingInfoBlacklistDTO = session.newInstance(AppSchedulingInfoBlacklistClusterJ.AppSchedulingInfoBlacklistDTO.class);
         
         appSchedulingInfoBlacklistDTO.setappschedulinginfo_id(hop.getAppschedulinginfo_id());
@@ -100,24 +100,24 @@ public class AppSchedulingInfoBlacklistClusterJ implements AppSchedulingInfoBlac
         return appSchedulingInfoBlacklistDTO;
     }
     
-    private List<HopAppSchedulingInfoBlacklist> createAppSchedulingInfoBlackList(List<AppSchedulingInfoBlacklistClusterJ.AppSchedulingInfoBlacklistDTO> results) {
-        List<HopAppSchedulingInfoBlacklist> blackList = new ArrayList<HopAppSchedulingInfoBlacklist>();
+    private List<AppSchedulingInfoBlacklist> createAppSchedulingInfoBlackList(List<AppSchedulingInfoBlacklistClusterJ.AppSchedulingInfoBlacklistDTO> results) {
+        List<AppSchedulingInfoBlacklist> blackList = new ArrayList<AppSchedulingInfoBlacklist>();
         for (AppSchedulingInfoBlacklistClusterJ.AppSchedulingInfoBlacklistDTO persistable : results) {
             blackList.add(createHopAppSchedulingInfoBlacklist(persistable));
         }
         return blackList;
     }
  
-   private Map<String, List<HopAppSchedulingInfoBlacklist>> createMap(
+   private Map<String, List<AppSchedulingInfoBlacklist>> createMap(
           List<AppSchedulingInfoBlacklistDTO> results) {
-    Map<String, List<HopAppSchedulingInfoBlacklist>> map
-            = new HashMap<String, List<HopAppSchedulingInfoBlacklist>>();
+    Map<String, List<AppSchedulingInfoBlacklist>> map
+            = new HashMap<String, List<AppSchedulingInfoBlacklist>>();
     for (AppSchedulingInfoBlacklistDTO dto : results) {
-      HopAppSchedulingInfoBlacklist hop = createHopAppSchedulingInfoBlacklist(
+      AppSchedulingInfoBlacklist hop = createHopAppSchedulingInfoBlacklist(
               dto);
       if (map.get(hop.getAppschedulinginfo_id()) == null) {
         map.put(hop.getAppschedulinginfo_id(),
-                new ArrayList<HopAppSchedulingInfoBlacklist>());
+                new ArrayList<AppSchedulingInfoBlacklist>());
       }
       map.get(hop.getAppschedulinginfo_id()).add(hop);
     }

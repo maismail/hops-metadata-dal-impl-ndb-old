@@ -14,14 +14,14 @@ import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
 import io.hops.metadata.ndb.wrapper.HopsSession;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import io.hops.metadata.yarn.entity.HopContainerStatus;
+import io.hops.metadata.yarn.entity.ContainerStatus;
 import io.hops.metadata.ndb.ClusterjConnector;
 import io.hops.metadata.ndb.wrapper.HopsQuery;
 import io.hops.metadata.ndb.wrapper.HopsQueryDomainType;
 import io.hops.metadata.yarn.dal.ContainerStatusDataAccess;
 import io.hops.metadata.yarn.tabledef.ContainerStatusTableDef;
 
-public class ContainerStatusClusterJ implements ContainerStatusTableDef, ContainerStatusDataAccess<HopContainerStatus> {
+public class ContainerStatusClusterJ implements ContainerStatusTableDef, ContainerStatusDataAccess<ContainerStatus> {
 
   private static final Log LOG = LogFactory.
           getLog(ContainerStatusClusterJ.class);
@@ -60,7 +60,7 @@ public class ContainerStatusClusterJ implements ContainerStatusTableDef, Contain
   private final ClusterjConnector connector = ClusterjConnector.getInstance();
 
   @Override
-  public HopContainerStatus findEntry(String containerId, String rmNodeId) throws
+  public ContainerStatus findEntry(String containerId, String rmNodeId) throws
       StorageException {
     LOG.debug("HOP :: ClusterJ ContainerStatus.findById - START");
     HopsSession session = connector.obtainSession();
@@ -77,7 +77,7 @@ public class ContainerStatusClusterJ implements ContainerStatusTableDef, Contain
   }
 
   @Override
-  public Map<String, HopContainerStatus> getAll() throws StorageException {
+  public Map<String, ContainerStatus> getAll() throws StorageException {
     LOG.debug("HOP :: ClusterJ ContainerStatus.getAll - START");
     HopsSession session = connector.obtainSession();
     HopsQueryBuilder qb = session.getQueryBuilder();
@@ -92,18 +92,18 @@ public class ContainerStatusClusterJ implements ContainerStatusTableDef, Contain
   }
 
   @Override
-  public void addAll(Collection<HopContainerStatus> containersStatus) throws
+  public void addAll(Collection<ContainerStatus> containersStatus) throws
           StorageException {
     HopsSession session = connector.obtainSession();
     List<ContainerStatusDTO> toAdd = new ArrayList<ContainerStatusDTO>();
-    for (HopContainerStatus containerStatus : containersStatus) {
+    for (ContainerStatus containerStatus : containersStatus) {
       toAdd.add(createPersistable(containerStatus, session));
     }
     session.savePersistentAll(toAdd);
     session.flush();
   }
 
-  private ContainerStatusDTO createPersistable(HopContainerStatus hopCS,
+  private ContainerStatusDTO createPersistable(ContainerStatus hopCS,
           HopsSession session) throws StorageException {
     ContainerStatusDTO csDTO = session.newInstance(ContainerStatusDTO.class);
     //Set values to persist new ContainerStatus
@@ -115,19 +115,19 @@ public class ContainerStatusClusterJ implements ContainerStatusTableDef, Contain
     return csDTO;
   }
 
-  private static HopContainerStatus createHopContainerStatus(ContainerStatusDTO csDTO) {
-    HopContainerStatus hop = new HopContainerStatus(csDTO.getcontainerid(),
+  private static ContainerStatus createHopContainerStatus(ContainerStatusDTO csDTO) {
+    ContainerStatus hop = new ContainerStatus(csDTO.getcontainerid(),
             csDTO.getstate(), csDTO.getdiagnostics(), csDTO.getexitstatus(),
             csDTO.getrmnodeid());
     return hop;
   }
 
-  public static Map<String, HopContainerStatus> createMap(
+  public static Map<String, ContainerStatus> createMap(
           List<ContainerStatusDTO> results) {
-    Map<String, HopContainerStatus> map
-            = new HashMap<String, HopContainerStatus>();
+    Map<String, ContainerStatus> map
+            = new HashMap<String, ContainerStatus>();
     for (ContainerStatusDTO persistable : results) {
-      HopContainerStatus hop = createHopContainerStatus(persistable);
+      ContainerStatus hop = createHopContainerStatus(persistable);
       map.put(hop.getContainerid(), hop);
     }
     return map;

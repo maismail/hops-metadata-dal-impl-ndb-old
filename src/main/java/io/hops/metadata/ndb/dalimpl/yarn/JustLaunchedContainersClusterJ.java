@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 import io.hops.exception.StorageException;
-import io.hops.metadata.yarn.entity.HopJustLaunchedContainers;
+import io.hops.metadata.yarn.entity.JustLaunchedContainers;
 import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
 import io.hops.metadata.ndb.wrapper.HopsQueryDomainType;
 import io.hops.metadata.ndb.wrapper.HopsSession;
@@ -22,7 +22,7 @@ import io.hops.metadata.ndb.wrapper.HopsQuery;
 import io.hops.metadata.yarn.dal.JustLaunchedContainersDataAccess;
 import io.hops.metadata.yarn.tabledef.JustLaunchedContainersTableDef;
 
-public class JustLaunchedContainersClusterJ implements JustLaunchedContainersTableDef, JustLaunchedContainersDataAccess<HopJustLaunchedContainers> {
+public class JustLaunchedContainersClusterJ implements JustLaunchedContainersTableDef, JustLaunchedContainersDataAccess<JustLaunchedContainers> {
 
   private static final Log LOG = LogFactory.getLog(
           JustLaunchedContainersClusterJ.class);
@@ -46,12 +46,12 @@ public class JustLaunchedContainersClusterJ implements JustLaunchedContainersTab
   private final ClusterjConnector connector = ClusterjConnector.getInstance();
 
   @Override
-  public void addAll(Collection<HopJustLaunchedContainers> containers) throws
+  public void addAll(Collection<JustLaunchedContainers> containers) throws
       StorageException {
     HopsSession session = connector.obtainSession();
     List<JustLaunchedContainersDTO> toModify
             = new ArrayList<JustLaunchedContainersDTO>(containers.size());
-    for (HopJustLaunchedContainers hop : containers) {
+    for (JustLaunchedContainers hop : containers) {
       toModify.add(createPersistable(hop, session));
     }
     session.savePersistentAll(toModify);
@@ -59,12 +59,12 @@ public class JustLaunchedContainersClusterJ implements JustLaunchedContainersTab
   }
 
   @Override
-  public void removeAll(Collection<HopJustLaunchedContainers> containers) throws
+  public void removeAll(Collection<JustLaunchedContainers> containers) throws
           StorageException {
     HopsSession session = connector.obtainSession();
     List<JustLaunchedContainersDTO> toRemove
             = new ArrayList<JustLaunchedContainersDTO>(containers.size());
-    for (HopJustLaunchedContainers hopContainerId : containers) {
+    for (JustLaunchedContainers hopContainerId : containers) {
       Object[] objarr = new Object[2];
       objarr[0] = hopContainerId.getRmnodeid();
       objarr[1] = hopContainerId.getContainerId();
@@ -75,7 +75,7 @@ public class JustLaunchedContainersClusterJ implements JustLaunchedContainersTab
   }
 
   @Override
-  public List<HopJustLaunchedContainers> findByRMNode(String rmnodeId) throws
+  public List<JustLaunchedContainers> findByRMNode(String rmnodeId) throws
           StorageException {
     LOG.debug("HOP :: ClusterJ JustLaunchedContainers.findByRMNode - START:"
             + rmnodeId);
@@ -98,7 +98,7 @@ public class JustLaunchedContainersClusterJ implements JustLaunchedContainersTab
   }
 
   @Override
-  public Map<String, List<HopJustLaunchedContainers>> getAll() throws
+  public Map<String, List<JustLaunchedContainers>> getAll() throws
           StorageException {
     LOG.debug("HOP :: ClusterJ JustLaunchedContainers.getAll - START");
     HopsSession session = connector.obtainSession();
@@ -116,9 +116,9 @@ public class JustLaunchedContainersClusterJ implements JustLaunchedContainersTab
     }
   }
 
-  private HopJustLaunchedContainers createJustLaunchedContainers(
+  private JustLaunchedContainers createJustLaunchedContainers(
           JustLaunchedContainersDTO dto) {
-    HopJustLaunchedContainers hop = new HopJustLaunchedContainers(dto.
+    JustLaunchedContainers hop = new JustLaunchedContainers(dto.
             getrmnodeid(), dto.getcontainerid());
     return hop;
   }
@@ -131,7 +131,7 @@ public class JustLaunchedContainersClusterJ implements JustLaunchedContainersTab
    * @return
    */
   private JustLaunchedContainersDTO createPersistable(
-          HopJustLaunchedContainers entry, HopsSession session) throws
+          JustLaunchedContainers entry, HopsSession session) throws
           StorageException {
     JustLaunchedContainersDTO dto = session.newInstance(
             JustLaunchedContainersDTO.class);
@@ -140,24 +140,24 @@ public class JustLaunchedContainersClusterJ implements JustLaunchedContainersTab
     return dto;
   }
 
-  private List<HopJustLaunchedContainers> createJustLaunchedContainersList(
+  private List<JustLaunchedContainers> createJustLaunchedContainersList(
           List<JustLaunchedContainersDTO> results) {
-    List<HopJustLaunchedContainers> justLaunchedContainers
-            = new ArrayList<HopJustLaunchedContainers>();
+    List<JustLaunchedContainers> justLaunchedContainers
+            = new ArrayList<JustLaunchedContainers>();
     for (JustLaunchedContainersDTO persistable : results) {
       justLaunchedContainers.add(createJustLaunchedContainers(persistable));
     }
     return justLaunchedContainers;
   }
 
-  private Map<String, List<HopJustLaunchedContainers>> createMap(
+  private Map<String, List<JustLaunchedContainers>> createMap(
           List<JustLaunchedContainersDTO> results) {
-    Map<String, List<HopJustLaunchedContainers>> map
-            = new HashMap<String, List<HopJustLaunchedContainers>>();
+    Map<String, List<JustLaunchedContainers>> map
+            = new HashMap<String, List<JustLaunchedContainers>>();
     for (JustLaunchedContainersDTO persistable : results) {
-      HopJustLaunchedContainers hop = createJustLaunchedContainers(persistable);
+      JustLaunchedContainers hop = createJustLaunchedContainers(persistable);
       if (map.get(hop.getRmnodeid()) == null) {
-        map.put(hop.getRmnodeid(), new ArrayList<HopJustLaunchedContainers>());
+        map.put(hop.getRmnodeid(), new ArrayList<JustLaunchedContainers>());
       }
       map.get(hop.getRmnodeid()).add(hop);
     }

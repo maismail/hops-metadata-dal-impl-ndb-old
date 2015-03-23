@@ -18,12 +18,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import java.util.zip.DataFormatException;
 
-import io.hops.metadata.yarn.entity.HopNodeHBResponse;
+import io.hops.metadata.yarn.entity.NodeHBResponse;
 import io.hops.metadata.ndb.ClusterjConnector;
 import io.hops.metadata.ndb.wrapper.HopsQuery;
 import io.hops.metadata.yarn.dal.NodeHBResponseDataAccess;
 
-public class NodeHBResponseClusterJ implements NodeHBResponseTableDef, NodeHBResponseDataAccess<HopNodeHBResponse> {
+public class NodeHBResponseClusterJ implements NodeHBResponseTableDef, NodeHBResponseDataAccess<NodeHBResponse> {
 
   private static final Log LOG = LogFactory.getLog(NodeHBResponseClusterJ.class);
 
@@ -44,7 +44,7 @@ public class NodeHBResponseClusterJ implements NodeHBResponseTableDef, NodeHBRes
   private final ClusterjConnector connector = ClusterjConnector.getInstance();
 
   @Override
-  public HopNodeHBResponse findById(String rmnodeId) throws StorageException {
+  public NodeHBResponse findById(String rmnodeId) throws StorageException {
     LOG.debug("HOP :: ClusterJ NodeHBResponse.findById - START:" + rmnodeId);
     HopsSession session = connector.obtainSession();
     NodeHBResponseDTO nodeHBresponseDTO;
@@ -62,7 +62,7 @@ public class NodeHBResponseClusterJ implements NodeHBResponseTableDef, NodeHBRes
   }
 
   @Override
-  public Map<String, HopNodeHBResponse> getAll() throws StorageException {
+  public Map<String, NodeHBResponse> getAll() throws StorageException {
     LOG.debug("HOP :: ClusterJ NodeHBResponse.getAll - START");
     HopsSession session = connector.obtainSession();
     HopsQueryBuilder qb = session.getQueryBuilder();
@@ -78,17 +78,17 @@ public class NodeHBResponseClusterJ implements NodeHBResponseTableDef, NodeHBRes
   }
 
   @Override
-  public void add(HopNodeHBResponse toAdd) throws
+  public void add(NodeHBResponse toAdd) throws
           StorageException {
     HopsSession session = connector.obtainSession();
     session.savePersistent(createPersistable(toAdd, session));
   }
 
-  public static HopNodeHBResponse createHopNodeHBResponse(
+  public static NodeHBResponse createHopNodeHBResponse(
           NodeHBResponseDTO nodeHBresponseDTO)
           throws StorageException {
     try {
-      return new HopNodeHBResponse(nodeHBresponseDTO.getrmnodeid(), CompressionUtils
+      return new NodeHBResponse(nodeHBresponseDTO.getrmnodeid(), CompressionUtils
           .
               decompress(nodeHBresponseDTO.getresponse()));
     } catch (IOException e) {
@@ -99,7 +99,7 @@ public class NodeHBResponseClusterJ implements NodeHBResponseTableDef, NodeHBRes
     }
   }
 
-  private NodeHBResponseDTO createPersistable(HopNodeHBResponse nodehbresponse,
+  private NodeHBResponseDTO createPersistable(NodeHBResponse nodehbresponse,
           HopsSession session) throws StorageException {
     NodeHBResponseDTO nodeHBResponseDT0 = session.newInstance(
             NodeHBResponseDTO.class);
@@ -113,12 +113,12 @@ public class NodeHBResponseClusterJ implements NodeHBResponseTableDef, NodeHBRes
     return nodeHBResponseDT0;
   }
 
-  private Map<String, HopNodeHBResponse> createMap(
+  private Map<String, NodeHBResponse> createMap(
           List<NodeHBResponseDTO> results) throws StorageException {
-    Map<String, HopNodeHBResponse> map
-            = new HashMap<String, HopNodeHBResponse>();
+    Map<String, NodeHBResponse> map
+            = new HashMap<String, NodeHBResponse>();
     for (NodeHBResponseDTO dto : results) {
-      HopNodeHBResponse hop = createHopNodeHBResponse(dto);
+      NodeHBResponse hop = createHopNodeHBResponse(dto);
       map.put(hop.getRMNodeId(), hop);
     }
     return map;

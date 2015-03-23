@@ -19,10 +19,10 @@ import io.hops.metadata.ndb.wrapper.HopsSession;
 import io.hops.metadata.yarn.dal.rmstatestore.ApplicationStateDataAccess;
 import io.hops.metadata.yarn.tabledef.rmstatestore.ApplicationStateTableDef;
 import io.hops.util.CompressionUtils;
-import io.hops.metadata.yarn.entity.rmstatestore.HopApplicationState;
+import io.hops.metadata.yarn.entity.rmstatestore.ApplicationState;
 
 public class ApplicationStateClusterJ implements ApplicationStateTableDef,
-    ApplicationStateDataAccess<HopApplicationState> {
+    ApplicationStateDataAccess<ApplicationState> {
 
     @PersistenceCapable(table = TABLE_NAME)
     public interface ApplicationStateDTO {
@@ -56,7 +56,7 @@ public class ApplicationStateClusterJ implements ApplicationStateTableDef,
     private final ClusterjConnector connector = ClusterjConnector.getInstance();
 
     @Override
-    public HopApplicationState findByApplicationId(String id) throws
+    public ApplicationState findByApplicationId(String id) throws
         StorageException {
         HopsSession session = connector.obtainSession();
 
@@ -69,7 +69,7 @@ public class ApplicationStateClusterJ implements ApplicationStateTableDef,
     }
 
     @Override
-    public List<HopApplicationState> getAll() throws StorageException {
+    public List<ApplicationState> getAll() throws StorageException {
         try {
             HopsSession session = connector.obtainSession();
             HopsQueryBuilder qb = session.getQueryBuilder();
@@ -87,22 +87,22 @@ public class ApplicationStateClusterJ implements ApplicationStateTableDef,
     }
 
   @Override
-  public void addAll(Collection<HopApplicationState> toAdd) throws
+  public void addAll(Collection<ApplicationState> toAdd) throws
           StorageException {
     HopsSession session = connector.obtainSession();
     List<ApplicationStateDTO> toPersist = new ArrayList<ApplicationStateDTO>();
-    for (HopApplicationState req : toAdd) {
+    for (ApplicationState req : toAdd) {
       toPersist.add(createPersistable(req, session));
     }
     session.savePersistentAll(toPersist);
   }
 
   @Override
-  public void removeAll(Collection<HopApplicationState> toRemove) throws
+  public void removeAll(Collection<ApplicationState> toRemove) throws
           StorageException {
     HopsSession session = connector.obtainSession();
     List<ApplicationStateDTO> toPersist = new ArrayList<ApplicationStateDTO>();
-    for (HopApplicationState entry : toRemove) {
+    for (ApplicationState entry : toRemove) {
       toPersist.add(session.newInstance(ApplicationStateDTO.class, entry.
               getApplicationId()));
     }
@@ -110,14 +110,14 @@ public class ApplicationStateClusterJ implements ApplicationStateTableDef,
   }
 
   @Override
-  public void add(HopApplicationState toAdd) throws
+  public void add(ApplicationState toAdd) throws
           StorageException {
     HopsSession session = connector.obtainSession();
     session.savePersistent(createPersistable(toAdd, session));
   }
 
   @Override
-  public void remove(HopApplicationState toRemove) throws
+  public void remove(ApplicationState toRemove) throws
           StorageException {
     HopsSession session = connector.obtainSession();
     session.deletePersistent(session.newInstance(ApplicationStateDTO.class,
@@ -125,12 +125,12 @@ public class ApplicationStateClusterJ implements ApplicationStateTableDef,
             getApplicationId()));
   }
   
-  private HopApplicationState createHopApplicationState(
+  private ApplicationState createHopApplicationState(
           ApplicationStateDTO appStateDTO) throws StorageException {
     if (appStateDTO != null) {
-      HopApplicationState state = null;
+      ApplicationState state = null;
       try {
-        state = new HopApplicationState(appStateDTO.getapplicationid(),
+        state = new ApplicationState(appStateDTO.getapplicationid(),
                 CompressionUtils.decompress(appStateDTO.getappstate()), appStateDTO.
                 getappuser(),
                 appStateDTO.getappname(), appStateDTO.getappsmstate());
@@ -145,8 +145,8 @@ public class ApplicationStateClusterJ implements ApplicationStateTableDef,
     }
   }
 
-    private List<HopApplicationState> createHopApplicationStateList(List<ApplicationStateDTO> list) throws StorageException {
-        List<HopApplicationState> hopList = new ArrayList<HopApplicationState>();
+    private List<ApplicationState> createHopApplicationStateList(List<ApplicationStateDTO> list) throws StorageException {
+        List<ApplicationState> hopList = new ArrayList<ApplicationState>();
         for (ApplicationStateDTO dto : list) {
             hopList.add(createHopApplicationState(dto));
         }
@@ -154,7 +154,7 @@ public class ApplicationStateClusterJ implements ApplicationStateTableDef,
 
     }
 
-  private ApplicationStateDTO createPersistable(HopApplicationState hop,
+  private ApplicationStateDTO createPersistable(ApplicationState hop,
           HopsSession session) throws StorageException {
     ApplicationStateDTO appStateDTO = session.newInstance(
             ApplicationStateClusterJ.ApplicationStateDTO.class);

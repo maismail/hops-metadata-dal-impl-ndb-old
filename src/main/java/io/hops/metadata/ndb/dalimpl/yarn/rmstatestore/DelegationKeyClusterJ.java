@@ -13,13 +13,13 @@ import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
 import io.hops.metadata.ndb.wrapper.HopsQueryDomainType;
 import io.hops.metadata.ndb.wrapper.HopsSession;
 import io.hops.util.CompressionUtils;
-import io.hops.metadata.yarn.entity.rmstatestore.HopDelegationKey;
+import io.hops.metadata.yarn.entity.rmstatestore.DelegationKey;
 import io.hops.metadata.ndb.ClusterjConnector;
 import io.hops.metadata.ndb.wrapper.HopsQuery;
 import io.hops.metadata.yarn.dal.rmstatestore.DelegationKeyDataAccess;
 import io.hops.metadata.yarn.tabledef.rmstatestore.DelegationKeyTableDef;
 
-public class DelegationKeyClusterJ implements DelegationKeyTableDef, DelegationKeyDataAccess<HopDelegationKey> {
+public class DelegationKeyClusterJ implements DelegationKeyTableDef, DelegationKeyDataAccess<DelegationKey> {
 
     @PersistenceCapable(table = TABLE_NAME)
     public interface DelegationKeyDTO {
@@ -38,20 +38,20 @@ public class DelegationKeyClusterJ implements DelegationKeyTableDef, DelegationK
     private final ClusterjConnector connector = ClusterjConnector.getInstance();
 
     @Override
-  public void remove(HopDelegationKey removed) throws StorageException {
+  public void remove(DelegationKey removed) throws StorageException {
     HopsSession session = connector.obtainSession();
     session.deletePersistent(session.newInstance(
             DelegationKeyClusterJ.DelegationKeyDTO.class, removed.getKey()));
   }
 
     @Override
-    public void createDTMasterKeyEntry(HopDelegationKey hopDelegationKey) throws StorageException{
+    public void createDTMasterKeyEntry(DelegationKey hopDelegationKey) throws StorageException{
         HopsSession session = connector.obtainSession();
         session.savePersistent(createPersistable(hopDelegationKey, session));
     }
 
     @Override
-    public List<HopDelegationKey> getAll() throws StorageException {
+    public List<DelegationKey> getAll() throws StorageException {
         try {
             HopsSession session = connector.obtainSession();
             HopsQueryBuilder qb = session.getQueryBuilder();
@@ -67,11 +67,11 @@ public class DelegationKeyClusterJ implements DelegationKeyTableDef, DelegationK
 
     }
 
-  private HopDelegationKey createHopDelegationKey(
+  private DelegationKey createHopDelegationKey(
           DelegationKeyDTO delegationKeyDTO)
           throws StorageException {
     try {
-      return new HopDelegationKey(delegationKeyDTO.getkey(), CompressionUtils.
+      return new DelegationKey(delegationKeyDTO.getkey(), CompressionUtils.
               decompress(delegationKeyDTO.getdelegationkey()));
     } catch (IOException e) {
       throw new StorageException(e);
@@ -80,15 +80,15 @@ public class DelegationKeyClusterJ implements DelegationKeyTableDef, DelegationK
     }
   }
 
-    private List<HopDelegationKey> createHopDelegationKeyList(List<DelegationKeyClusterJ.DelegationKeyDTO> list) throws StorageException {
-        List<HopDelegationKey> hopList = new ArrayList<HopDelegationKey>();
+    private List<DelegationKey> createHopDelegationKeyList(List<DelegationKeyClusterJ.DelegationKeyDTO> list) throws StorageException {
+        List<DelegationKey> hopList = new ArrayList<DelegationKey>();
         for (DelegationKeyClusterJ.DelegationKeyDTO dto : list) {
             hopList.add(createHopDelegationKey(dto));
         }
         return hopList;
     }
 
-  private DelegationKeyDTO createPersistable(HopDelegationKey hop,
+  private DelegationKeyDTO createPersistable(DelegationKey hop,
           HopsSession session) throws StorageException {
     DelegationKeyClusterJ.DelegationKeyDTO delegationKeyDTO = session.
             newInstance(DelegationKeyClusterJ.DelegationKeyDTO.class);

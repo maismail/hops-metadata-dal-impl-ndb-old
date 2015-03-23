@@ -1,4 +1,4 @@
-package io.hops.metadata.ndb.dalimpl.hdfs;
+package io.hops.metadata.ndb.dalimpl.election;
 
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
