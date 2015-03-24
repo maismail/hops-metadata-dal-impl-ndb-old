@@ -1,22 +1,22 @@
 package io.hops.metadata.ndb.dalimpl.election;
 
 import com.mysql.clusterj.annotation.PartitionKey;
-
 import io.hops.exception.StorageException;
+import io.hops.metadata.election.dal.LeDescriptorDataAccess;
+import io.hops.metadata.election.entity.LeDescriptor;
 import io.hops.metadata.election.tabledef.LeDescriptorTableDef;
+import io.hops.metadata.ndb.ClusterjConnector;
+import io.hops.metadata.ndb.wrapper.HopsQuery;
 import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
 import io.hops.metadata.ndb.wrapper.HopsQueryDomainType;
 import io.hops.metadata.ndb.wrapper.HopsSession;
-import io.hops.metadata.election.dal.LeDescriptorDataAccess;
-import io.hops.metadata.election.entity.LeDescriptor;
-import io.hops.metadata.ndb.ClusterjConnector;
-import io.hops.metadata.ndb.wrapper.HopsQuery;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public abstract class LeDescriptorClusterj implements LeDescriptorTableDef, LeDescriptorDataAccess<LeDescriptor> {
+public abstract class LeDescriptorClusterj
+    implements LeDescriptorTableDef, LeDescriptorDataAccess<LeDescriptor> {
 
   private ClusterjConnector connector = ClusterjConnector.getInstance();
   @PartitionKey(column = PARTITION_VAL)
@@ -50,11 +50,11 @@ public abstract class LeDescriptorClusterj implements LeDescriptorTableDef, LeDe
   }
 
   @Override
-  public LeDescriptor findByPkey(long id, int partitionKey) throws
-      StorageException {
+  public LeDescriptor findByPkey(long id, int partitionKey)
+      throws StorageException {
     HopsSession dbSession = connector.obtainSession();
     Object[] keys = new Object[]{partitionKey, id};
-    LeaderDTO lTable =  (LeaderDTO)dbSession.find(dto, keys);
+    LeaderDTO lTable = (LeaderDTO) dbSession.find(dto, keys);
     if (lTable != null) {
       LeDescriptor leader = createDescriptor(lTable);
       return leader;
@@ -64,14 +64,14 @@ public abstract class LeDescriptorClusterj implements LeDescriptorTableDef, LeDe
 
   @Override
   public Collection<LeDescriptor> findAll() throws StorageException {
-//    HopsSession dbSession = connector.obtainSession();
-//    HopsQueryBuilder qb = dbSession.getQueryBuilder();
-//    HopsQueryDomainType<LeaderDTO> dobj = qb.createQueryDefinition(LeaderDTO.class);
-//    HopsPredicate pred1 = dobj.get("partitionVal").equal(dobj.param("partitionValParam"));
-//    dobj.where(pred1);
-//    HopsQuery<LeaderDTO> query = dbSession.createQuery(dobj);
-//    query.setParameter("partitionValParam", 0);
-//    return createList(query.getResultList());
+    //    HopsSession dbSession = connector.obtainSession();
+    //    HopsQueryBuilder qb = dbSession.getQueryBuilder();
+    //    HopsQueryDomainType<LeaderDTO> dobj = qb.createQueryDefinition(LeaderDTO.class);
+    //    HopsPredicate pred1 = dobj.get("partitionVal").equal(dobj.param("partitionValParam"));
+    //    dobj.where(pred1);
+    //    HopsQuery<LeaderDTO> query = dbSession.createQuery(dobj);
+    //    query.setParameter("partitionValParam", 0);
+    //    return createList(query.getResultList());
 
     HopsSession dbSession = connector.obtainSession();
     HopsQueryBuilder qb = dbSession.getQueryBuilder();
@@ -82,25 +82,27 @@ public abstract class LeDescriptorClusterj implements LeDescriptorTableDef, LeDe
   }
 
   @Override
-  public void prepare(Collection<LeDescriptor> removed, Collection<LeDescriptor> newed, Collection<LeDescriptor> modified) throws StorageException {
+  public void prepare(Collection<LeDescriptor> removed,
+      Collection<LeDescriptor> newed, Collection<LeDescriptor> modified)
+      throws StorageException {
     HopsSession dbSession = connector.obtainSession();
     List<LeaderDTO> changes = new ArrayList<LeaderDTO>();
     List<LeaderDTO> deletions = new ArrayList<LeaderDTO>();
     for (LeDescriptor l : newed) {
 
-      LeaderDTO lTable = (LeaderDTO)dbSession.newInstance(dto);
+      LeaderDTO lTable = (LeaderDTO) dbSession.newInstance(dto);
       createPersistableLeaderInstance(l, lTable);
       changes.add(lTable);
     }
 
     for (LeDescriptor l : modified) {
-      LeaderDTO lTable = (LeaderDTO)dbSession.newInstance(dto);
+      LeaderDTO lTable = (LeaderDTO) dbSession.newInstance(dto);
       createPersistableLeaderInstance(l, lTable);
       changes.add(lTable);
     }
 
     for (LeDescriptor l : removed) {
-      LeaderDTO lTable = (LeaderDTO)dbSession.newInstance(dto);
+      LeaderDTO lTable = (LeaderDTO) dbSession.newInstance(dto);
       createPersistableLeaderInstance(l, lTable);
       deletions.add(lTable);
     }
@@ -119,7 +121,8 @@ public abstract class LeDescriptorClusterj implements LeDescriptorTableDef, LeDe
 
   protected abstract LeDescriptor createDescriptor(LeaderDTO lTable);
 
-  private void createPersistableLeaderInstance(LeDescriptor leader, LeaderDTO lTable) {
+  private void createPersistableLeaderInstance(LeDescriptor leader,
+      LeaderDTO lTable) {
     lTable.setId(leader.getId());
     lTable.setCounter(leader.getCounter());
     lTable.setHostname(leader.getHostName());

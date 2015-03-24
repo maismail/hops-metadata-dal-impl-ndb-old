@@ -1,26 +1,25 @@
-
 package io.hops.metadata.ndb.dalimpl.yarn;
 
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
+import io.hops.exception.StorageException;
+import io.hops.metadata.ndb.ClusterjConnector;
+import io.hops.metadata.ndb.wrapper.HopsQuery;
+import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
+import io.hops.metadata.ndb.wrapper.HopsQueryDomainType;
+import io.hops.metadata.ndb.wrapper.HopsSession;
+import io.hops.metadata.yarn.dal.QueueMetricsDataAccess;
+import io.hops.metadata.yarn.entity.QueueMetrics;
+import io.hops.metadata.yarn.tabledef.QueueMetricsTableDef;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
-import io.hops.metadata.ndb.wrapper.HopsSession;
-import io.hops.metadata.yarn.dal.QueueMetricsDataAccess;
-import io.hops.exception.StorageException;
-import io.hops.metadata.yarn.entity.QueueMetrics;
-import io.hops.metadata.ndb.ClusterjConnector;
-import io.hops.metadata.ndb.wrapper.HopsQuery;
-import io.hops.metadata.ndb.wrapper.HopsQueryDomainType;
-import io.hops.metadata.yarn.tabledef.QueueMetricsTableDef;
-
-public class QueueMetricsClusterJ implements QueueMetricsTableDef,
-    QueueMetricsDataAccess<QueueMetrics> {
+public class QueueMetricsClusterJ
+    implements QueueMetricsTableDef, QueueMetricsDataAccess<QueueMetrics> {
 
   @PersistenceCapable(table = TABLE_NAME)
   public interface QueueMetricsDTO {
@@ -147,6 +146,7 @@ public class QueueMetricsClusterJ implements QueueMetricsTableDef,
     void setqueuename(String queuename);
 
   }
+
   private final ClusterjConnector connector = ClusterjConnector.getInstance();
 
   @Override
@@ -154,9 +154,9 @@ public class QueueMetricsClusterJ implements QueueMetricsTableDef,
     HopsSession session = connector.obtainSession();
     HopsQueryBuilder qb = session.getQueryBuilder();
     HopsQueryDomainType<QueueMetricsClusterJ.QueueMetricsDTO> dobj = qb.
-            createQueryDefinition(QueueMetricsClusterJ.QueueMetricsDTO.class);
-    HopsQuery<QueueMetricsClusterJ.QueueMetricsDTO> query = session.createQuery(
-            dobj);
+        createQueryDefinition(QueueMetricsClusterJ.QueueMetricsDTO.class);
+    HopsQuery<QueueMetricsClusterJ.QueueMetricsDTO> query =
+        session.createQuery(dobj);
     List<QueueMetricsClusterJ.QueueMetricsDTO> results = query.getResultList();
     session.flush();
     return createHopQueueMetricsList(results);
@@ -168,61 +168,53 @@ public class QueueMetricsClusterJ implements QueueMetricsTableDef,
     HopsSession session = connector.obtainSession();
     List<QueueMetricsDTO> toPersist = new ArrayList<QueueMetricsDTO>();
     for (QueueMetrics hop : toAdd) {
-      QueueMetricsClusterJ.QueueMetricsDTO persistable = createPersistable(hop,
-              session);
+      QueueMetricsClusterJ.QueueMetricsDTO persistable =
+          createPersistable(hop, session);
       toPersist.add(persistable);
     }
     session.savePersistentAll(toPersist);
   }
 
   private List<QueueMetrics> createHopQueueMetricsList(
-          List<QueueMetricsClusterJ.QueueMetricsDTO> list) throws IOException {
+      List<QueueMetricsClusterJ.QueueMetricsDTO> list) throws IOException {
     List<QueueMetrics> queueMetricsList = new ArrayList<QueueMetrics>();
     for (QueueMetricsClusterJ.QueueMetricsDTO persistable : list) {
       queueMetricsList.add(createHopQueueMetrics(persistable));
     }
     return queueMetricsList;
   }
-    
-    
+
+
   private QueueMetrics createHopQueueMetrics(QueueMetricsDTO queueMetricsDTO) {
     return new QueueMetrics(queueMetricsDTO.getid(),
-            queueMetricsDTO.getappssubmitted(),
-            queueMetricsDTO.getappsrunning(),
-            queueMetricsDTO.getappspending(),
-            queueMetricsDTO.getappscompleted(),
-            queueMetricsDTO.getappskilled(),
-            queueMetricsDTO.getappsfailed(),
-            queueMetricsDTO.getallocatedmb(),
-            queueMetricsDTO.getallocatedvcores(),
-            queueMetricsDTO.getallocatedcontainers(),
-            queueMetricsDTO.getaggregatecontainersallocated(),
-            queueMetricsDTO.getaggregatecontainersreleased(),
-            queueMetricsDTO.getavailablemb(),
-            queueMetricsDTO.getavailablevcores(),
-            queueMetricsDTO.getpendingmb(),
-            queueMetricsDTO.getpendingvcores(),
-            queueMetricsDTO.getpendingContainers(),
-            queueMetricsDTO.getreservedmb(),
-            queueMetricsDTO.getreservedvcores(),
-            queueMetricsDTO.getreservedcontainers(),
-            queueMetricsDTO.getactiveusers(),
-            queueMetricsDTO.getactiveapplications(),
-            queueMetricsDTO.getparentid(),
-            queueMetricsDTO.getqueuename());
+        queueMetricsDTO.getappssubmitted(), queueMetricsDTO.getappsrunning(),
+        queueMetricsDTO.getappspending(), queueMetricsDTO.getappscompleted(),
+        queueMetricsDTO.getappskilled(), queueMetricsDTO.getappsfailed(),
+        queueMetricsDTO.getallocatedmb(), queueMetricsDTO.getallocatedvcores(),
+        queueMetricsDTO.getallocatedcontainers(),
+        queueMetricsDTO.getaggregatecontainersallocated(),
+        queueMetricsDTO.getaggregatecontainersreleased(),
+        queueMetricsDTO.getavailablemb(), queueMetricsDTO.getavailablevcores(),
+        queueMetricsDTO.getpendingmb(), queueMetricsDTO.getpendingvcores(),
+        queueMetricsDTO.getpendingContainers(), queueMetricsDTO.getreservedmb(),
+        queueMetricsDTO.getreservedvcores(),
+        queueMetricsDTO.getreservedcontainers(),
+        queueMetricsDTO.getactiveusers(),
+        queueMetricsDTO.getactiveapplications(), queueMetricsDTO.getparentid(),
+        queueMetricsDTO.getqueuename());
   }
 
   private QueueMetricsDTO createPersistable(QueueMetrics hop,
-          HopsSession session) throws StorageException {
-    QueueMetricsClusterJ.QueueMetricsDTO queueMetricsDTO = session.newInstance(
-            QueueMetricsClusterJ.QueueMetricsDTO.class);
+      HopsSession session) throws StorageException {
+    QueueMetricsClusterJ.QueueMetricsDTO queueMetricsDTO =
+        session.newInstance(QueueMetricsClusterJ.QueueMetricsDTO.class);
 
     queueMetricsDTO.setactiveapplications(hop.getActiveapplications());
     queueMetricsDTO.setactiveusers(hop.getActiveusers());
     queueMetricsDTO.setaggregatecontainersallocated(hop.
-            getAggregatecontainersallocated());
+        getAggregatecontainersallocated());
     queueMetricsDTO.setaggregatecontainersreleased(hop.
-            getAggregatecontainersreleased());
+        getAggregatecontainersreleased());
     queueMetricsDTO.setallocatedcontainers(hop.getAllocatedcontainers());
     queueMetricsDTO.setallocatedmb(hop.getAllocatedmb());
     queueMetricsDTO.setallocatedvcores(hop.getAllocatedvcores());

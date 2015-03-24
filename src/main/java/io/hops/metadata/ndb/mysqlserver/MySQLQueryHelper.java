@@ -1,11 +1,11 @@
 package io.hops.metadata.ndb.mysqlserver;
 
+import io.hops.exception.StorageException;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-
-import io.hops.exception.StorageException;
 
 /**
  * This class is to do count operations using Mysql Server.
@@ -13,17 +13,19 @@ import io.hops.exception.StorageException;
 public class MySQLQueryHelper {
 
   public static final String COUNT_QUERY = "select count(*) from %s";
-  public static final String COUNT_QUERY_UNIQUE = "select count(distinct %s) from %s";
-  public static final String SELECT_EXISTS= "select exists(%s)";
+  public static final String COUNT_QUERY_UNIQUE =
+      "select count(distinct %s) from %s";
+  public static final String SELECT_EXISTS = "select exists(%s)";
   public static final String SELECT_EXISTS_QUERY = "select * from %s";
   public static final String MIN = "select min(%s) from %s";
   public static final String MAX = "select min(%s) from %s";
   
-  private static MysqlServerConnector connector = MysqlServerConnector.getInstance();
+  private static MysqlServerConnector connector =
+      MysqlServerConnector.getInstance();
 
   /**
    * Counts the number of rows in a given table.
-   *
+   * <p/>
    * This creates and closes connection in every request.
    *
    * @param tableName
@@ -36,46 +38,57 @@ public class MySQLQueryHelper {
     return executeIntAggrQuery(query);
   }
   
-  public static int countAllUnique(String tableName, String columnName) throws StorageException{
+  public static int countAllUnique(String tableName, String columnName)
+      throws StorageException {
     String query = String.format(COUNT_QUERY_UNIQUE, columnName, tableName);
     return executeIntAggrQuery(query);
   }
- 
+
   /**
    * Counts the number of rows in a table specified by the table name where
    * satisfies the given criterion. The criterion should be a valid SLQ
    * statement.
    *
    * @param tableName
-   * @param criterion E.g. criterion="id > 100".
+   * @param criterion
+   *     E.g. criterion="id > 100".
    * @return
    */
-  public static int countWithCriterion(String tableName, String criterion) throws StorageException {
-    StringBuilder queryBuilder = new StringBuilder(String.format(COUNT_QUERY, tableName)).
+  public static int countWithCriterion(String tableName, String criterion)
+      throws StorageException {
+    StringBuilder queryBuilder =
+        new StringBuilder(String.format(COUNT_QUERY, tableName)).
             append(" where ").
             append(criterion);
     return executeIntAggrQuery(queryBuilder.toString());
   }
   
-  public static boolean exists(String tableName, String criterion) throws StorageException {
-    StringBuilder query = new StringBuilder(String.format(SELECT_EXISTS_QUERY, tableName));
+  public static boolean exists(String tableName, String criterion)
+      throws StorageException {
+    StringBuilder query =
+        new StringBuilder(String.format(SELECT_EXISTS_QUERY, tableName));
     query.append(" where ").append(criterion);
     return executeBooleanQuery(String.format(SELECT_EXISTS, query.toString()));
   }
 
-  public static int minInt(String tableName, String column, String criterion) throws StorageException{
-    StringBuilder query = new StringBuilder(String.format(MIN, column, tableName));
+  public static int minInt(String tableName, String column, String criterion)
+      throws StorageException {
+    StringBuilder query =
+        new StringBuilder(String.format(MIN, column, tableName));
     query.append(" where ").append(criterion);
     return executeIntAggrQuery(query.toString());
   }
   
-  public static int maxInt(String tableName, String column, String criterion) throws StorageException {
-    StringBuilder query = new StringBuilder(String.format(MAX, column, tableName));
+  public static int maxInt(String tableName, String column, String criterion)
+      throws StorageException {
+    StringBuilder query =
+        new StringBuilder(String.format(MAX, column, tableName));
     query.append(" where ").append(criterion);
     return executeIntAggrQuery(query.toString());
   }
-    
-  private static int executeIntAggrQuery(final String query) throws StorageException {
+
+  private static int executeIntAggrQuery(final String query)
+      throws StorageException {
     return (Integer) execute(query, new ResultSetHandler() {
       @Override
       public Object checkResults(ResultSet result) throws SQLException {
@@ -84,7 +97,8 @@ public class MySQLQueryHelper {
     });
   }
   
-  private static boolean executeBooleanQuery(final String query) throws StorageException {
+  private static boolean executeBooleanQuery(final String query)
+      throws StorageException {
     return (Boolean) execute(query, new ResultSetHandler() {
       @Override
       public Object checkResults(ResultSet result) throws SQLException {
@@ -93,17 +107,20 @@ public class MySQLQueryHelper {
     });
   }
   
-  private static interface ResultSetHandler{
+  private static interface ResultSetHandler {
     Object checkResults(ResultSet result) throws SQLException;
   }
   
-  private static Object execute(String query, ResultSetHandler handler) throws StorageException{
-     try {
+  private static Object execute(String query, ResultSetHandler handler)
+      throws StorageException {
+    try {
       Connection conn = connector.obtainSession();
       PreparedStatement s = conn.prepareStatement(query);
       ResultSet result = s.executeQuery();
-      if(!result.next())
-         throw new StorageException(String.format("result set is empty. Query: %s", query));
+      if (!result.next()) {
+        throw new StorageException(
+            String.format("result set is empty. Query: %s", query));
+      }
       return handler.checkResults(result);
     } catch (SQLException ex) {
       throw new StorageException(ex);

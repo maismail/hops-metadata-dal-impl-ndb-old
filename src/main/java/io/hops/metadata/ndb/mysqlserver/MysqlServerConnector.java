@@ -18,12 +18,14 @@ import java.util.Properties;
  */
 public class MysqlServerConnector implements StorageConnector<Connection> {
 
-  private final static MysqlServerConnector instance = new MysqlServerConnector();
+  private final static MysqlServerConnector instance =
+      new MysqlServerConnector();
   private Properties conf;
   /**
    * Never access this variable directly. Use getConnectionPool
+   *
    * @see MysqlServerConnector#getConnectionPool()
-   **/
+   */
   private static volatile HikariDataSource connectionPool;
   private ThreadLocal<Connection> connection = new ThreadLocal<Connection>();
 
@@ -38,20 +40,20 @@ public class MysqlServerConnector implements StorageConnector<Connection> {
 
   private void initializeConnectionPool(Properties conf) {
     HikariConfig config = new HikariConfig();
-    config.setMaximumPoolSize(Integer.valueOf(
-        conf.getProperty(io.hops.metadata.ndb.mysqlserver.Constants.PROPERTY_MYSQL_CONNECTION_POOL_SIZE)));
-    config.setDataSourceClassName(
-        conf.getProperty(io.hops.metadata.ndb.mysqlserver.Constants.PROPERTY_MYSQL_DATA_SOURCE_CLASS_NAME));
-    config.addDataSourceProperty("serverName",
-        conf.getProperty(io.hops.metadata.ndb.mysqlserver.Constants.PROPERTY_MYSQL_HOST));
-    config.addDataSourceProperty("port",
-        conf.getProperty(io.hops.metadata.ndb.mysqlserver.Constants.PROPERTY_MYSQL_PORT));
+    config.setMaximumPoolSize(Integer.valueOf(conf.getProperty(
+        io.hops.metadata.ndb.mysqlserver.Constants.PROPERTY_MYSQL_CONNECTION_POOL_SIZE)));
+    config.setDataSourceClassName(conf.getProperty(
+        io.hops.metadata.ndb.mysqlserver.Constants.PROPERTY_MYSQL_DATA_SOURCE_CLASS_NAME));
+    config.addDataSourceProperty("serverName", conf.getProperty(
+        io.hops.metadata.ndb.mysqlserver.Constants.PROPERTY_MYSQL_HOST));
+    config.addDataSourceProperty("port", conf.getProperty(
+        io.hops.metadata.ndb.mysqlserver.Constants.PROPERTY_MYSQL_PORT));
     config.addDataSourceProperty("databaseName",
         conf.getProperty(Constants.PROPERTY_CLUSTER_DATABASE));
-    config.addDataSourceProperty("user",
-        conf.getProperty(io.hops.metadata.ndb.mysqlserver.Constants.PROPERTY_MYSQL_USERNAME));
-    config.addDataSourceProperty("password",
-        conf.getProperty(io.hops.metadata.ndb.mysqlserver.Constants.PROPERTY_MYSQL_PASSWORD));
+    config.addDataSourceProperty("user", conf.getProperty(
+        io.hops.metadata.ndb.mysqlserver.Constants.PROPERTY_MYSQL_USERNAME));
+    config.addDataSourceProperty("password", conf.getProperty(
+        io.hops.metadata.ndb.mysqlserver.Constants.PROPERTY_MYSQL_PASSWORD));
 
     connectionPool = new HikariDataSource(config);
   }
@@ -75,13 +77,15 @@ public class MysqlServerConnector implements StorageConnector<Connection> {
    * This method uses the dupple-checked locking method to safely implement
    * a multithreaded lazy init.
    * http://www.cs.umd.edu/~pugh/java/memoryModel/DoubleCheckedLocking.html
+   *
    * @return
    */
   private HikariDataSource getConnectionPool() {
     if (connectionPool == null) {
-      synchronized(this) {
-        if (connectionPool == null)
+      synchronized (this) {
+        if (connectionPool == null) {
           initializeConnectionPool(conf);
+        }
       }
     }
     return connectionPool;
@@ -99,31 +103,37 @@ public class MysqlServerConnector implements StorageConnector<Connection> {
     }
   }
   
-  public static void truncateTable(boolean transactional, String tableName) throws StorageException, SQLException {
+  public static void truncateTable(boolean transactional, String tableName)
+      throws StorageException, SQLException {
     truncateTable(transactional, tableName, -1);
   }
 
-  public static void truncateTable(String tableName, int limit) throws StorageException, SQLException {
+  public static void truncateTable(String tableName, int limit)
+      throws StorageException, SQLException {
     truncateTable(true, tableName, -1);
   }
 
- public static void truncateTable(boolean transactional, String tableName, int limit) throws StorageException, SQLException{
+  public static void truncateTable(boolean transactional, String tableName,
+      int limit) throws StorageException, SQLException {
     MysqlServerConnector connector = MysqlServerConnector.getInstance();
     try {
       Connection conn = connector.obtainSession();
-      if(transactional){
-        if(limit > 0 ){
-          PreparedStatement s = conn.prepareStatement("delete from "+tableName + " limit " + limit);
+      if (transactional) {
+        if (limit > 0) {
+          PreparedStatement s = conn.prepareStatement(
+              "delete from " + tableName + " limit " + limit);
           s.executeUpdate();
-        }else{
+        } else {
           int nbrows = 0;
-          do{
-            PreparedStatement s = conn.prepareStatement("delete from "+tableName + " limit 1000");
+          do {
+            PreparedStatement s = conn.prepareStatement(
+                "delete from " + tableName + " limit 1000");
             nbrows = s.executeUpdate();
-          }while(nbrows > 0);
+          } while (nbrows > 0);
         }
-      }else{
-        PreparedStatement s = conn.prepareStatement("truncate table "+tableName);
+      } else {
+        PreparedStatement s =
+            conn.prepareStatement("truncate table " + tableName);
         s.executeUpdate();
       }
     } finally {
@@ -152,12 +162,13 @@ public class MysqlServerConnector implements StorageConnector<Connection> {
     throw new UnsupportedOperationException("Not supported yet.");
   }
 
-  public boolean formatStorage(Class<? extends EntityDataAccess>... das) throws StorageException {
+  public boolean formatStorage(Class<? extends EntityDataAccess>... das)
+      throws StorageException {
     throw new UnsupportedOperationException("Not supported yet.");
   }
   
   @Override
-  public boolean isTransactionActive()  {
+  public boolean isTransactionActive() {
     throw new UnsupportedOperationException("Not supported yet.");
   }
 

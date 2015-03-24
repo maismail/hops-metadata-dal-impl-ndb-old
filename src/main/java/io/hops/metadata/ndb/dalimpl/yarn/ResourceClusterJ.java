@@ -3,26 +3,26 @@ package io.hops.metadata.ndb.dalimpl.yarn;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
+import io.hops.exception.StorageException;
+import io.hops.metadata.ndb.ClusterjConnector;
+import io.hops.metadata.ndb.wrapper.HopsQuery;
+import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
+import io.hops.metadata.ndb.wrapper.HopsQueryDomainType;
+import io.hops.metadata.ndb.wrapper.HopsSession;
+import io.hops.metadata.yarn.dal.ResourceDataAccess;
+import io.hops.metadata.yarn.entity.Resource;
+import io.hops.metadata.yarn.tabledef.ResourceTableDef;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import io.hops.exception.StorageException;
-import io.hops.metadata.yarn.entity.Resource;
-import io.hops.metadata.ndb.wrapper.HopsQuery;
-import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
-import io.hops.metadata.ndb.wrapper.HopsQueryDomainType;
-import io.hops.metadata.ndb.wrapper.HopsSession;
-import io.hops.metadata.yarn.dal.ResourceDataAccess;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import io.hops.metadata.ndb.ClusterjConnector;
-import io.hops.metadata.yarn.tabledef.ResourceTableDef;
-
-public class ResourceClusterJ implements ResourceTableDef,
-    ResourceDataAccess<Resource> {
+public class ResourceClusterJ
+    implements ResourceTableDef, ResourceDataAccess<Resource> {
 
   private static final Log LOG = LogFactory.getLog(ResourceClusterJ.class);
 
@@ -55,11 +55,12 @@ public class ResourceClusterJ implements ResourceTableDef,
 
     void setVirtualcores(int virtualcores);
   }
+
   private final ClusterjConnector connector = ClusterjConnector.getInstance();
 
   @Override
-  public Resource findEntry(String id, int type, int parent) throws
-      StorageException {
+  public Resource findEntry(String id, int type, int parent)
+      throws StorageException {
     LOG.debug("HOP :: ClusterJ Resource.findEntry - START:" + id);
     HopsSession session = connector.obtainSession();
     if (session != null) {
@@ -78,25 +79,23 @@ public class ResourceClusterJ implements ResourceTableDef,
   }
 
   @Override
-  public Map<String, Map<Integer, Map<Integer, Resource>>> getAll() throws
-          StorageException {
+  public Map<String, Map<Integer, Map<Integer, Resource>>> getAll()
+      throws StorageException {
     LOG.debug("HOP :: ClusterJ Resource.getAll - START");
     HopsSession session = connector.obtainSession();
     HopsQueryBuilder qb = session.getQueryBuilder();
-    HopsQueryDomainType<ResourceDTO> dobj
-            = qb.createQueryDefinition(
-                    ResourceDTO.class);
+    HopsQueryDomainType<ResourceDTO> dobj =
+        qb.createQueryDefinition(ResourceDTO.class);
     HopsQuery<ResourceDTO> query = session.
-            createQuery(dobj);
+        createQuery(dobj);
     List<ResourceDTO> results = query.
-            getResultList();
+        getResultList();
     LOG.debug("HOP :: ClusterJ Resource.getAll - FINISH");
     return createMap(results);
   }
 
   @Override
-  public void addAll(Collection<Resource> toAdd) throws
-          StorageException {
+  public void addAll(Collection<Resource> toAdd) throws StorageException {
     HopsSession session = connector.obtainSession();
     List<ResourceDTO> toPersist = new ArrayList<ResourceDTO>();
     for (Resource req : toAdd) {
@@ -108,8 +107,7 @@ public class ResourceClusterJ implements ResourceTableDef,
   }
 
   @Override
-  public void removeAll(Collection<Resource> toRemove) throws
-          StorageException {
+  public void removeAll(Collection<Resource> toRemove) throws StorageException {
     HopsSession session = connector.obtainSession();
     List<ResourceDTO> toPersist = new ArrayList<ResourceDTO>();
     for (Resource req : toRemove) {
@@ -135,12 +133,12 @@ public class ResourceClusterJ implements ResourceTableDef,
 
     }
     return new Resource(resourceDTO.getId(), resourceDTO.getType(),
-            resourceDTO.getParent(), resourceDTO.getMemory(), resourceDTO.
-            getVirtualcores());
+        resourceDTO.getParent(), resourceDTO.getMemory(), resourceDTO.
+        getVirtualcores());
   }
 
-  private ResourceDTO createPersistable(Resource resource,
-          HopsSession session) throws StorageException {
+  private ResourceDTO createPersistable(Resource resource, HopsSession session)
+      throws StorageException {
     ResourceDTO resourceDTO = session.newInstance(ResourceDTO.class);
     resourceDTO.setId(resource.getId());
     resourceDTO.setType(resource.getType());
@@ -151,15 +149,13 @@ public class ResourceClusterJ implements ResourceTableDef,
   }
 
   private Map<String, Map<Integer, Map<Integer, Resource>>> createMap(
-          List<ResourceDTO> results) {
-    Map<String, Map<Integer, Map<Integer, Resource>>> map
-            = new HashMap<String, Map<Integer, Map<Integer, Resource>>>();
+      List<ResourceDTO> results) {
+    Map<String, Map<Integer, Map<Integer, Resource>>> map =
+        new HashMap<String, Map<Integer, Map<Integer, Resource>>>();
     for (ResourceDTO dto : results) {
-      Resource hop
-              = createHopResource(dto);
+      Resource hop = createHopResource(dto);
       if (map.get(hop.getId()) == null) {
-        map.put(hop.getId(),
-                new HashMap<Integer, Map<Integer, Resource>>());
+        map.put(hop.getId(), new HashMap<Integer, Map<Integer, Resource>>());
       }
       Map<Integer, Map<Integer, Resource>> inerMap = map.get(hop.getId());
       if (inerMap.get(hop.getType()) == null) {

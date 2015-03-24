@@ -4,19 +4,19 @@ import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
 import io.hops.exception.StorageException;
+import io.hops.metadata.hdfs.dal.BlockChecksumDataAccess;
 import io.hops.metadata.hdfs.entity.BlockChecksum;
 import io.hops.metadata.hdfs.tabledef.BlockChecksumTableDef;
-import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
-import io.hops.metadata.ndb.wrapper.HopsQueryDomainType;
-import io.hops.metadata.ndb.wrapper.HopsSession;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import io.hops.metadata.hdfs.dal.BlockChecksumDataAccess;
 import io.hops.metadata.ndb.ClusterjConnector;
 import io.hops.metadata.ndb.mysqlserver.HopsSQLExceptionHelper;
 import io.hops.metadata.ndb.mysqlserver.MysqlServerConnector;
 import io.hops.metadata.ndb.wrapper.HopsPredicate;
 import io.hops.metadata.ndb.wrapper.HopsQuery;
+import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
+import io.hops.metadata.ndb.wrapper.HopsQueryDomainType;
+import io.hops.metadata.ndb.wrapper.HopsSession;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -25,12 +25,14 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public class BlockChecksumClusterj implements BlockChecksumTableDef, BlockChecksumDataAccess<BlockChecksum> {
+public class BlockChecksumClusterj
+    implements BlockChecksumTableDef, BlockChecksumDataAccess<BlockChecksum> {
 
   static final Log LOG = LogFactory.getLog(BlockChecksumClusterj.class);
 
   private ClusterjConnector clusterjConnector = ClusterjConnector.getInstance();
-  private MysqlServerConnector mysqlConnector = MysqlServerConnector.getInstance();
+  private MysqlServerConnector mysqlConnector =
+      MysqlServerConnector.getInstance();
 
   @PersistenceCapable(table = TABLE_NAME)
   public interface BlockChecksumDto {
@@ -81,7 +83,8 @@ public class BlockChecksumClusterj implements BlockChecksumTableDef, BlockChecks
   }
 
   @Override
-  public BlockChecksum find(int inodeId, int blockIndex) throws StorageException {
+  public BlockChecksum find(int inodeId, int blockIndex)
+      throws StorageException {
     HopsSession session = clusterjConnector.obtainSession();
     BlockChecksumDto dto =
         session.find(BlockChecksumDto.class, new Object[]{inodeId, blockIndex});
@@ -92,7 +95,8 @@ public class BlockChecksumClusterj implements BlockChecksumTableDef, BlockChecks
   }
 
   @Override
-  public Collection<BlockChecksum> findAll(int inodeId) throws StorageException {
+  public Collection<BlockChecksum> findAll(int inodeId)
+      throws StorageException {
     HopsSession session = clusterjConnector.obtainSession();
     HopsQueryBuilder qb = session.getQueryBuilder();
     HopsQueryDomainType<BlockChecksumDto> dobj =
@@ -106,7 +110,8 @@ public class BlockChecksumClusterj implements BlockChecksumTableDef, BlockChecks
 
   @Override
   public void deleteAll(int inodeId) throws StorageException {
-    final String query = String.format("DELETE FROM block_checksum WHERE %s=%d");
+    final String query =
+        String.format("DELETE FROM block_checksum WHERE %s=%d");
     try {
       Connection conn = mysqlConnector.obtainSession();
       PreparedStatement s = conn.prepareStatement(query);
@@ -124,7 +129,8 @@ public class BlockChecksumClusterj implements BlockChecksumTableDef, BlockChecks
     dto.setChecksum(blockChecksum.getChecksum());
   }
 
-  private List<BlockChecksum> createBlockChecksumList(List<BlockChecksumDto> dtoList) {
+  private List<BlockChecksum> createBlockChecksumList(
+      List<BlockChecksumDto> dtoList) {
     List<BlockChecksum> list = new ArrayList<BlockChecksum>();
     for (BlockChecksumDto dto : dtoList) {
       list.add(createBlockChecksum(dto));
@@ -137,6 +143,7 @@ public class BlockChecksumClusterj implements BlockChecksumTableDef, BlockChecks
       return null;
     }
 
-    return new BlockChecksum(dto.getInodeId(), dto.getBlockIndex(), dto.getChecksum());
+    return new BlockChecksum(dto.getInodeId(), dto.getBlockIndex(),
+        dto.getChecksum());
   }
 }

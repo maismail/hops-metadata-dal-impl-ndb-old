@@ -3,54 +3,54 @@ package io.hops.metadata.ndb.dalimpl.election;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
-import java.security.InvalidParameterException;
-
 import io.hops.metadata.election.entity.LeDescriptor;
 import io.hops.metadata.election.tabledef.HdfsLeaderTableDef;
 
-public class HdfsLeaderClusterj extends LeDescriptorClusterj implements
-    HdfsLeaderTableDef {
+import java.security.InvalidParameterException;
 
-    @PersistenceCapable(table = TABLE_NAME)
-    public interface HdfsLeaderDTO extends LeaderDTO{
+public class HdfsLeaderClusterj extends LeDescriptorClusterj
+    implements HdfsLeaderTableDef {
 
-        @PrimaryKey
-        @Column(name = ID)
-        @Override
-        long getId();
+  @PersistenceCapable(table = TABLE_NAME)
+  public interface HdfsLeaderDTO extends LeaderDTO {
 
-        @Override
-        void setId(long id);
+    @PrimaryKey
+    @Column(name = ID)
+    @Override
+    long getId();
 
-        @PrimaryKey
-        @Column(name = PARTITION_VAL)
-        @Override
-        int getPartitionVal();
+    @Override
+    void setId(long id);
 
-        @Override
-        void setPartitionVal(int partitionVal);
+    @PrimaryKey
+    @Column(name = PARTITION_VAL)
+    @Override
+    int getPartitionVal();
 
-        @Column(name = COUNTER)
-        @Override
-        long getCounter();
+    @Override
+    void setPartitionVal(int partitionVal);
 
-        @Override
-        void setCounter(long counter);
+    @Column(name = COUNTER)
+    @Override
+    long getCounter();
 
-        @Column(name = HOSTNAME)
-        @Override
-        String getHostname();
+    @Override
+    void setCounter(long counter);
 
-        @Override
-        void setHostname(String hostname);
+    @Column(name = HOSTNAME)
+    @Override
+    String getHostname();
 
-        @Column(name = HTTP_ADDRESS)
-        @Override
-        String getHttpAddress();
+    @Override
+    void setHostname(String hostname);
 
-        @Override
-        void setHttpAddress(String httpAddress);  
-    }
+    @Column(name = HTTP_ADDRESS)
+    @Override
+    String getHttpAddress();
+
+    @Override
+    void setHttpAddress(String httpAddress);
+  }
 
   @Override
   protected LeDescriptor createDescriptor(LeaderDTO lTable) {
@@ -58,12 +58,10 @@ public class HdfsLeaderClusterj extends LeDescriptorClusterj implements
       throw new InvalidParameterException("Psrtition key should be zero");
     }
     return new LeDescriptor.HdfsLeDescriptor(lTable.getId(),
-            lTable.getCounter(),
-            lTable.getHostname(),
-            lTable.getHttpAddress());
+        lTable.getCounter(), lTable.getHostname(), lTable.getHttpAddress());
   }
- 
-    public HdfsLeaderClusterj(){
-        super(HdfsLeaderDTO.class);
-    }
+
+  public HdfsLeaderClusterj() {
+    super(HdfsLeaderDTO.class);
+  }
 }

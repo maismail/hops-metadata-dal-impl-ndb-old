@@ -5,54 +5,59 @@ import com.mysql.clusterj.annotation.Index;
 import com.mysql.clusterj.annotation.PartitionKey;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
 import io.hops.exception.StorageException;
+import io.hops.metadata.hdfs.dal.LeaseDataAccess;
+import io.hops.metadata.hdfs.entity.Lease;
 import io.hops.metadata.hdfs.tabledef.LeaseTableDef;
+import io.hops.metadata.ndb.ClusterjConnector;
 import io.hops.metadata.ndb.mysqlserver.MySQLQueryHelper;
+import io.hops.metadata.ndb.wrapper.HopsPredicate;
+import io.hops.metadata.ndb.wrapper.HopsPredicateOperand;
+import io.hops.metadata.ndb.wrapper.HopsQuery;
 import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
 import io.hops.metadata.ndb.wrapper.HopsQueryDomainType;
 import io.hops.metadata.ndb.wrapper.HopsSession;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import io.hops.metadata.hdfs.dal.LeaseDataAccess;
-import io.hops.metadata.hdfs.entity.Lease;
-import io.hops.metadata.ndb.ClusterjConnector;
-import io.hops.metadata.ndb.wrapper.HopsPredicate;
-import io.hops.metadata.ndb.wrapper.HopsPredicateOperand;
-import io.hops.metadata.ndb.wrapper.HopsQuery;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 public class LeaseClusterj implements LeaseTableDef, LeaseDataAccess<Lease> {
 
   @PersistenceCapable(table = TABLE_NAME)
-  @PartitionKey(column=PART_KEY)
+  @PartitionKey(column = PART_KEY)
   
   public interface LeaseDTO {
 
     @PrimaryKey
     @Column(name = HOLDER)
     String getHolder();
+
     void setHolder(String holder);
     
     @PrimaryKey
     @Column(name = PART_KEY)
     int getPartKey();
+
     void setPartKey(int partKey);
 
     @Column(name = LAST_UPDATE)
-    @Index(name="update_idx")
+    @Index(name = "update_idx")
     long getLastUpdate();
+
     void setLastUpdate(long last_upd);
 
     @Column(name = HOLDER_ID)
-    @Index(name="holderid_idx")
+    @Index(name = "holderid_idx")
     int getHolderId();
+
     void setHolderId(int holder_id);
   }
+
   private ClusterjConnector connector = ClusterjConnector.getInstance();
-   private static Log log = LogFactory.getLog(LeaseDataAccess.class);
+  private static Log log = LogFactory.getLog(LeaseDataAccess.class);
 
   @Override
   public int countAll() throws StorageException {
@@ -77,7 +82,8 @@ public class LeaseClusterj implements LeaseTableDef, LeaseDataAccess<Lease> {
   public Lease findByHolderId(int holderId) throws StorageException {
     HopsSession session = connector.obtainSession();
     HopsQueryBuilder qb = session.getQueryBuilder();
-    HopsQueryDomainType<LeaseDTO> dobj = qb.createQueryDefinition(LeaseDTO.class);
+    HopsQueryDomainType<LeaseDTO> dobj =
+        qb.createQueryDefinition(LeaseDTO.class);
 
     HopsPredicate pred1 = dobj.get("holderId").equal(dobj.param("param1"));
     HopsPredicate pred2 = dobj.get("partKey").equal(dobj.param("param2"));
@@ -90,7 +96,8 @@ public class LeaseClusterj implements LeaseTableDef, LeaseDataAccess<Lease> {
     List<LeaseDTO> leaseTables = query.getResultList();
 
     if (leaseTables.size() > 1) {
-      log.error("Error in selectLeaseTableInternal: Multiple rows with same holderID");
+      log.error(
+          "Error in selectLeaseTableInternal: Multiple rows with same holderID");
       return null;
     } else if (leaseTables.size() == 1) {
       Lease lease = createLease(leaseTables.get(0));
@@ -105,7 +112,8 @@ public class LeaseClusterj implements LeaseTableDef, LeaseDataAccess<Lease> {
   public Collection<Lease> findAll() throws StorageException {
     HopsSession session = connector.obtainSession();
     HopsQueryBuilder qb = session.getQueryBuilder();
-    HopsQueryDomainType<LeaseDTO> dobj = qb.createQueryDefinition(LeaseDTO.class);
+    HopsQueryDomainType<LeaseDTO> dobj =
+        qb.createQueryDefinition(LeaseDTO.class);
     HopsPredicate pred = dobj.get("partKey").equal(dobj.param("param"));
     dobj.where(pred);
     HopsQuery<LeaseDTO> query = session.createQuery(dobj);
@@ -114,7 +122,8 @@ public class LeaseClusterj implements LeaseTableDef, LeaseDataAccess<Lease> {
   }
 
   @Override
-  public Collection<Lease> findByTimeLimit(long timeLimit) throws StorageException {
+  public Collection<Lease> findByTimeLimit(long timeLimit)
+      throws StorageException {
     HopsSession session = connector.obtainSession();
     HopsQueryBuilder qb = session.getQueryBuilder();
     HopsQueryDomainType dobj = qb.createQueryDefinition(LeaseDTO.class);
@@ -122,7 +131,8 @@ public class LeaseClusterj implements LeaseTableDef, LeaseDataAccess<Lease> {
     String param = "timelimit";
     HopsPredicateOperand propertyLimit = dobj.param(param);
     HopsPredicate lessThan = propertyPredicate.lessThan(propertyLimit);
-    dobj.where(lessThan.and(dobj.get("partKey").equal(dobj.param("partKeyParam"))));
+    dobj.where(
+        lessThan.and(dobj.get("partKey").equal(dobj.param("partKeyParam"))));
     HopsQuery query = session.createQuery(dobj);
     query.setParameter(param, new Long(timeLimit));
     query.setParameter("partKeyParam", PART_KEY_VAL);
@@ -130,7 +140,8 @@ public class LeaseClusterj implements LeaseTableDef, LeaseDataAccess<Lease> {
   }
 
   @Override
-  public void prepare(Collection<Lease> removed, Collection<Lease> newed, Collection<Lease> modified) throws StorageException {
+  public void prepare(Collection<Lease> removed, Collection<Lease> newed,
+      Collection<Lease> modified) throws StorageException {
     HopsSession session = connector.obtainSession();
     List<LeaseDTO> changes = new ArrayList<LeaseDTO>();
     List<LeaseDTO> deletions = new ArrayList<LeaseDTO>();
@@ -173,7 +184,8 @@ public class LeaseClusterj implements LeaseTableDef, LeaseDataAccess<Lease> {
   }
 
   private Lease createLease(LeaseDTO lTable) {
-    return new Lease(lTable.getHolder(), lTable.getHolderId(), lTable.getLastUpdate());
+    return new Lease(lTable.getHolder(), lTable.getHolderId(),
+        lTable.getLastUpdate());
   }
 
   private void createPersistableLeaseInstance(Lease lease, LeaseDTO lTable) {

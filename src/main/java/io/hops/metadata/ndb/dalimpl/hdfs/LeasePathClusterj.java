@@ -5,22 +5,21 @@ import com.mysql.clusterj.annotation.Index;
 import com.mysql.clusterj.annotation.PartitionKey;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
+import io.hops.exception.StorageException;
+import io.hops.metadata.hdfs.dal.LeasePathDataAccess;
+import io.hops.metadata.hdfs.entity.LeasePath;
+import io.hops.metadata.hdfs.tabledef.LeasePathTableDef;
+import io.hops.metadata.ndb.ClusterjConnector;
+import io.hops.metadata.ndb.wrapper.HopsPredicate;
+import io.hops.metadata.ndb.wrapper.HopsPredicateOperand;
+import io.hops.metadata.ndb.wrapper.HopsQuery;
+import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
+import io.hops.metadata.ndb.wrapper.HopsQueryDomainType;
+import io.hops.metadata.ndb.wrapper.HopsSession;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-
-import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
-import io.hops.metadata.hdfs.entity.LeasePath;
-import io.hops.metadata.hdfs.dal.LeasePathDataAccess;
-import io.hops.exception.StorageException;
-import io.hops.metadata.ndb.ClusterjConnector;
-import io.hops.metadata.hdfs.tabledef.LeasePathTableDef;
-import io.hops.metadata.ndb.wrapper.HopsPredicate;
-import io.hops.metadata.ndb.wrapper.HopsPredicateOperand;
-import io.hops.metadata.ndb.wrapper.HopsQuery;
-import io.hops.metadata.ndb.wrapper.HopsQueryDomainType;
-import io.hops.metadata.ndb.wrapper.HopsSession;
 
 public class LeasePathClusterj
     implements LeasePathTableDef, LeasePathDataAccess<LeasePath> {

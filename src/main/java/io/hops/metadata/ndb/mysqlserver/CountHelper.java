@@ -1,11 +1,11 @@
 package io.hops.metadata.ndb.mysqlserver;
 
+import io.hops.exception.StorageException;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-
-import io.hops.exception.StorageException;
 
 /**
  * This class is to do count operations using Mysql Server.
@@ -13,20 +13,22 @@ import io.hops.exception.StorageException;
 public class CountHelper {
 
   public static final String COUNT_QUERY = "select count(*) from %s";
-  public static final String COUNT_QUERY_UNIQUE = "select count(distinct %s) from %s";
+  public static final String COUNT_QUERY_UNIQUE =
+      "select count(distinct %s) from %s";
   public static final String COUNT_WHERE = "select count(*) from %s where %s";
   
-  private static MysqlServerConnector connector = MysqlServerConnector.getInstance();
+  private static MysqlServerConnector connector =
+      MysqlServerConnector.getInstance();
 
-  public static int countWhere(String tableName, String condition) throws
-      StorageException {
+  public static int countWhere(String tableName, String condition)
+      throws StorageException {
     String query = String.format(COUNT_WHERE, tableName, condition);
     return count(query);
   }
 
   /**
    * Counts the number of rows in a given table.
-   *
+   * <p/>
    * This creates and closes connection in every request.
    *
    * @param tableName
@@ -39,7 +41,8 @@ public class CountHelper {
     return count(query);
   }
   
-  public static int countAllUnique(String tableName, String columnName) throws StorageException{
+  public static int countAllUnique(String tableName, String columnName)
+      throws StorageException {
     String query = String.format(COUNT_QUERY_UNIQUE, columnName, tableName);
     return count(query);
   }
@@ -53,7 +56,7 @@ public class CountHelper {
         return result.getInt(1);
       } else {
         throw new StorageException(
-                String.format("Count result set is empty. Query: %s", query));
+            String.format("Count result set is empty. Query: %s", query));
       }
     } catch (SQLException ex) {
       throw new StorageException(ex);
@@ -68,11 +71,14 @@ public class CountHelper {
    * statement.
    *
    * @param tableName
-   * @param criterion E.g. criterion="id > 100".
+   * @param criterion
+   *     E.g. criterion="id > 100".
    * @return
    */
-  public static int countWithCriterion(String tableName, String criterion) throws StorageException {
-    StringBuilder queryBuilder = new StringBuilder(String.format(COUNT_QUERY, tableName)).
+  public static int countWithCriterion(String tableName, String criterion)
+      throws StorageException {
+    StringBuilder queryBuilder =
+        new StringBuilder(String.format(COUNT_QUERY, tableName)).
             append(" where ").
             append(criterion);
     return count(queryBuilder.toString());

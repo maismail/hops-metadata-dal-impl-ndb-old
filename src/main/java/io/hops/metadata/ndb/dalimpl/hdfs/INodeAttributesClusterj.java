@@ -15,7 +15,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public class INodeAttributesClusterj implements INodeAttributesTableDef, INodeAttributesDataAccess<INodeAttributes> {
+public class INodeAttributesClusterj implements INodeAttributesTableDef,
+    INodeAttributesDataAccess<INodeAttributes> {
 
   @PersistenceCapable(table = TABLE_NAME)
   public interface INodeAttributesDTO {
@@ -23,6 +24,7 @@ public class INodeAttributesClusterj implements INodeAttributesTableDef, INodeAt
     @PrimaryKey
     @Column(name = ID)
     int getId();
+
     void setId(int id);
 
     @Column(name = NSQUOTA)
@@ -45,10 +47,12 @@ public class INodeAttributesClusterj implements INodeAttributesTableDef, INodeAt
 
     void setDiskspace(long diskspace);
   }
+
   private ClusterjConnector connector = ClusterjConnector.getInstance();
 
   @Override
-  public INodeAttributes findAttributesByPk(Integer inodeId) throws StorageException {
+  public INodeAttributes findAttributesByPk(Integer inodeId)
+      throws StorageException {
     HopsSession session = connector.obtainSession();
     INodeAttributesDTO dto = session.find(INodeAttributesDTO.class, inodeId);
     INodeAttributes iNodeAttributes = makeINodeAttributes(dto);
@@ -56,11 +60,14 @@ public class INodeAttributesClusterj implements INodeAttributesTableDef, INodeAt
   }
   
   @Override
-  public Collection<INodeAttributes> findAttributesByPkList(List<INodeCandidatePrimaryKey> inodePks) throws StorageException {
+  public Collection<INodeAttributes> findAttributesByPkList(
+      List<INodeCandidatePrimaryKey> inodePks) throws StorageException {
     HopsSession session = connector.obtainSession();
-    List<INodeAttributes> inodeAttributesBatchResponse = new ArrayList<INodeAttributes>();
-    List<INodeAttributesDTO> inodeAttributesBatchRequest = new ArrayList<INodeAttributesDTO>();
-    for(INodeCandidatePrimaryKey pk : inodePks){
+    List<INodeAttributes> inodeAttributesBatchResponse =
+        new ArrayList<INodeAttributes>();
+    List<INodeAttributesDTO> inodeAttributesBatchRequest =
+        new ArrayList<INodeAttributesDTO>();
+    for (INodeCandidatePrimaryKey pk : inodePks) {
       INodeAttributesDTO dto = session.newInstance(INodeAttributesDTO.class);
       dto.setId(pk.getInodeId());
       inodeAttributesBatchRequest.add(dto);
@@ -69,21 +76,23 @@ public class INodeAttributesClusterj implements INodeAttributesTableDef, INodeAt
 
     session.flush();
 
-    for(int i = 0; i < inodeAttributesBatchRequest.size();i++){
-      inodeAttributesBatchResponse.add(makeINodeAttributes(inodeAttributesBatchRequest.get(i)));
+    for (int i = 0; i < inodeAttributesBatchRequest.size(); i++) {
+      inodeAttributesBatchResponse
+          .add(makeINodeAttributes(inodeAttributesBatchRequest.get(i)));
     }
     return inodeAttributesBatchResponse;
   }
 
   @Override
-  public void prepare(Collection<INodeAttributes> modified, Collection<INodeAttributes> removed) throws StorageException {
+  public void prepare(Collection<INodeAttributes> modified,
+      Collection<INodeAttributes> removed) throws StorageException {
     HopsSession session = connector.obtainSession();
     List<INodeAttributesDTO> changes = new ArrayList<INodeAttributesDTO>();
     List<INodeAttributesDTO> deletions = new ArrayList<INodeAttributesDTO>();
     if (removed != null) {
       for (INodeAttributes attr : removed) {
-        INodeAttributesDTO persistable = session.newInstance(
-            INodeAttributesDTO.class, attr.getInodeId());
+        INodeAttributesDTO persistable =
+            session.newInstance(INodeAttributesDTO.class, attr.getInodeId());
         deletions.add(persistable);
       }
     }
@@ -97,8 +106,8 @@ public class INodeAttributesClusterj implements INodeAttributesTableDef, INodeAt
     session.savePersistentAll(changes);
   }
 
-  private INodeAttributesDTO createPersistable(INodeAttributes attribute, HopsSession session)
-      throws StorageException {
+  private INodeAttributesDTO createPersistable(INodeAttributes attribute,
+      HopsSession session) throws StorageException {
     INodeAttributesDTO dto = session.newInstance(INodeAttributesDTO.class);
     dto.setId(attribute.getInodeId());
     dto.setNSQuota(attribute.getNsQuota());
@@ -112,12 +121,9 @@ public class INodeAttributesClusterj implements INodeAttributesTableDef, INodeAt
     if (dto == null) {
       return null;
     }
-    INodeAttributes iNodeAttributes = new INodeAttributes(
-            dto.getId(),
-            dto.getNSQuota(),
-            dto.getNSCount(),
-            dto.getDSQuota(),
-            dto.getDiskspace());
+    INodeAttributes iNodeAttributes =
+        new INodeAttributes(dto.getId(), dto.getNSQuota(), dto.getNSCount(),
+            dto.getDSQuota(), dto.getDiskspace());
     return iNodeAttributes;
   }
 }

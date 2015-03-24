@@ -27,7 +27,8 @@ public class HopsSession {
   public <T> HopsQuery<T> createQuery(HopsQueryDomainType<T> queryDefinition)
       throws StorageException {
     try {
-      Query<T> query = session.createQuery(queryDefinition.getQueryDomainType());
+      Query<T> query =
+          session.createQuery(queryDefinition.getQueryDomainType());
       return new HopsQuery<T>(query);
     } catch (ClusterJException e) {
       throw HopsExceptionHelper.wrap(e);

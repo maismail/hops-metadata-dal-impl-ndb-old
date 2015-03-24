@@ -3,23 +3,24 @@ package io.hops.metadata.ndb.dalimpl.yarn;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
+import io.hops.exception.StorageException;
+import io.hops.metadata.ndb.ClusterjConnector;
+import io.hops.metadata.ndb.wrapper.HopsQuery;
+import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
+import io.hops.metadata.ndb.wrapper.HopsQueryDomainType;
+import io.hops.metadata.ndb.wrapper.HopsSession;
+import io.hops.metadata.yarn.dal.LaunchedContainersDataAccess;
+import io.hops.metadata.yarn.entity.LaunchedContainers;
+import io.hops.metadata.yarn.tabledef.LaunchedContainersTableDef;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import io.hops.exception.StorageException;
-import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
-import io.hops.metadata.ndb.wrapper.HopsQueryDomainType;
-import io.hops.metadata.ndb.wrapper.HopsSession;
-import io.hops.metadata.yarn.tabledef.LaunchedContainersTableDef;
-import io.hops.metadata.yarn.entity.LaunchedContainers;
-import io.hops.metadata.ndb.ClusterjConnector;
-import io.hops.metadata.ndb.wrapper.HopsQuery;
-import io.hops.metadata.yarn.dal.LaunchedContainersDataAccess;
-
-public class LaunchedContainersClusterJ implements LaunchedContainersTableDef, LaunchedContainersDataAccess<LaunchedContainers> {
+public class LaunchedContainersClusterJ implements LaunchedContainersTableDef,
+    LaunchedContainersDataAccess<LaunchedContainers> {
 
   @PersistenceCapable(table = TABLE_NAME)
   public interface LaunchedContainersDTO {
@@ -41,30 +42,30 @@ public class LaunchedContainersClusterJ implements LaunchedContainersTableDef, L
 
     void setrmcontainerid(String rmcontainerid);
   }
+
   private final ClusterjConnector connector = ClusterjConnector.getInstance();
 
   @Override
-  public Map<String, List<LaunchedContainers>> getAll() throws
-      StorageException {
+  public Map<String, List<LaunchedContainers>> getAll()
+      throws StorageException {
     HopsSession session = connector.obtainSession();
     HopsQueryBuilder qb = session.getQueryBuilder();
-    HopsQueryDomainType<LaunchedContainersDTO> dobj
-            = qb.createQueryDefinition(
-                    LaunchedContainersDTO.class);
+    HopsQueryDomainType<LaunchedContainersDTO> dobj =
+        qb.createQueryDefinition(LaunchedContainersDTO.class);
     HopsQuery<LaunchedContainersDTO> query = session.
-            createQuery(dobj);
+        createQuery(dobj);
     List<LaunchedContainersDTO> results = query.
-            getResultList();
+        getResultList();
     return createMap(results);
   }
 
 
   @Override
-  public void addAll(Collection<LaunchedContainers> toAdd) throws
-          StorageException {
+  public void addAll(Collection<LaunchedContainers> toAdd)
+      throws StorageException {
     HopsSession session = connector.obtainSession();
-    List<LaunchedContainersDTO> toPersist
-            = new ArrayList<LaunchedContainersDTO>();
+    List<LaunchedContainersDTO> toPersist =
+        new ArrayList<LaunchedContainersDTO>();
     for (LaunchedContainers id : toAdd) {
       toPersist.add(createPersistable(id, session));
     }
@@ -72,11 +73,11 @@ public class LaunchedContainersClusterJ implements LaunchedContainersTableDef, L
   }
 
   @Override
-  public void removeAll(Collection<LaunchedContainers> toRemove) throws
-          StorageException {
+  public void removeAll(Collection<LaunchedContainers> toRemove)
+      throws StorageException {
     HopsSession session = connector.obtainSession();
-    List<LaunchedContainersDTO> toPersist
-            = new ArrayList<LaunchedContainersDTO>();
+    List<LaunchedContainersDTO> toPersist =
+        new ArrayList<LaunchedContainersDTO>();
     for (LaunchedContainers hopContainerId : toRemove) {
       Object[] objarr = new Object[2];
       objarr[0] = hopContainerId.getSchedulerNodeID();
@@ -87,24 +88,21 @@ public class LaunchedContainersClusterJ implements LaunchedContainersTableDef, L
   }
 
   private LaunchedContainers createLaunchedContainersEntry(
-          LaunchedContainersDTO dto) {
-    LaunchedContainers hop = new LaunchedContainers(
-            dto.getschedulernode_id(),
-            dto.getcontaineridid(),
-            dto.getrmcontainerid());
+      LaunchedContainersDTO dto) {
+    LaunchedContainers hop = new LaunchedContainers(dto.getschedulernode_id(),
+        dto.getcontaineridid(), dto.getrmcontainerid());
     return hop;
   }
 
   private Map<String, List<LaunchedContainers>> createMap(
-          List<LaunchedContainersDTO> dtos) {
-    Map<String, List<LaunchedContainers>> map
-            = new HashMap<String, List<LaunchedContainers>>();
+      List<LaunchedContainersDTO> dtos) {
+    Map<String, List<LaunchedContainers>> map =
+        new HashMap<String, List<LaunchedContainers>>();
     for (LaunchedContainersDTO dto : dtos) {
       LaunchedContainers hop = createLaunchedContainersEntry(dto);
       if (map.get(hop.getSchedulerNodeID()) == null) {
         map.
-                put(hop.getSchedulerNodeID(),
-                        new ArrayList<LaunchedContainers>());
+            put(hop.getSchedulerNodeID(), new ArrayList<LaunchedContainers>());
       }
       map.get(hop.getSchedulerNodeID()).add(hop);
     }
@@ -112,12 +110,12 @@ public class LaunchedContainersClusterJ implements LaunchedContainersTableDef, L
   }
 
   private LaunchedContainersDTO createPersistable(LaunchedContainers entry,
-          HopsSession session) throws StorageException {
+      HopsSession session) throws StorageException {
     Object[] objarr = new Object[2];
     objarr[0] = entry.getSchedulerNodeID();
     objarr[1] = entry.getContainerIdID();
-    LaunchedContainersDTO persistable = session.newInstance(
-            LaunchedContainersDTO.class, objarr);
+    LaunchedContainersDTO persistable =
+        session.newInstance(LaunchedContainersDTO.class, objarr);
     persistable.setschedulernode_id(entry.getSchedulerNodeID());
     persistable.setcontaineridid(entry.getContainerIdID());
     persistable.setrmcontainerid(entry.getRmContainerID());
@@ -125,9 +123,9 @@ public class LaunchedContainersClusterJ implements LaunchedContainersTableDef, L
   }
 
   private List<LaunchedContainers> createLaunchedContainersList(
-          List<LaunchedContainersDTO> results) {
-    List<LaunchedContainers> launchedContainers
-            = new ArrayList<LaunchedContainers>();
+      List<LaunchedContainersDTO> results) {
+    List<LaunchedContainers> launchedContainers =
+        new ArrayList<LaunchedContainers>();
     for (LaunchedContainersDTO persistable : results) {
       launchedContainers.add(createLaunchedContainersEntry(persistable));
     }

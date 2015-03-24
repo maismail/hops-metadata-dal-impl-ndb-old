@@ -5,9 +5,6 @@ import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
 import io.hops.exception.StorageException;
 import io.hops.metadata.hdfs.dal.QuotaUpdateDataAccess;
-import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
-import io.hops.metadata.ndb.wrapper.HopsQueryDomainType;
-import io.hops.metadata.ndb.wrapper.HopsSession;
 import io.hops.metadata.hdfs.entity.QuotaUpdate;
 import io.hops.metadata.hdfs.tabledef.QuotaUpdateTableDef;
 import io.hops.metadata.ndb.ClusterjConnector;
@@ -15,6 +12,9 @@ import io.hops.metadata.ndb.mysqlserver.HopsSQLExceptionHelper;
 import io.hops.metadata.ndb.mysqlserver.MysqlServerConnector;
 import io.hops.metadata.ndb.wrapper.HopsPredicate;
 import io.hops.metadata.ndb.wrapper.HopsQuery;
+import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
+import io.hops.metadata.ndb.wrapper.HopsQueryDomainType;
+import io.hops.metadata.ndb.wrapper.HopsSession;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -24,8 +24,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public class QuotaUpdateClusterj implements QuotaUpdateTableDef,
-    QuotaUpdateDataAccess<QuotaUpdate> {
+public class QuotaUpdateClusterj
+    implements QuotaUpdateTableDef, QuotaUpdateDataAccess<QuotaUpdate> {
 
   @PersistenceCapable(table = TABLE_NAME)
   public interface QuotaUpdateDTO {
@@ -54,11 +54,12 @@ public class QuotaUpdateClusterj implements QuotaUpdateTableDef,
   }
 
   private ClusterjConnector connector = ClusterjConnector.getInstance();
-  private MysqlServerConnector mysqlConnector = MysqlServerConnector.getInstance();
+  private MysqlServerConnector mysqlConnector =
+      MysqlServerConnector.getInstance();
 
   @Override
-  public void prepare(Collection<QuotaUpdate> added, Collection<QuotaUpdate> removed) throws
-      StorageException {
+  public void prepare(Collection<QuotaUpdate> added,
+      Collection<QuotaUpdate> removed) throws StorageException {
     HopsSession session = connector.obtainSession();
     List<QuotaUpdateDTO> changes = new ArrayList<QuotaUpdateDTO>();
     List<QuotaUpdateDTO> deletions = new ArrayList<QuotaUpdateDTO>();
@@ -78,7 +79,8 @@ public class QuotaUpdateClusterj implements QuotaUpdateTableDef,
     session.savePersistentAll(changes);
   }
 
-  private static final String FIND_QUERY = "SELECT * FROM " + TABLE_NAME + " ORDER BY " + ID + " LIMIT ";
+  private static final String FIND_QUERY =
+      "SELECT * FROM " + TABLE_NAME + " ORDER BY " + ID + " LIMIT ";
 
   @Override
   public List<QuotaUpdate> findLimited(int limit) throws StorageException {
@@ -94,7 +96,8 @@ public class QuotaUpdateClusterj implements QuotaUpdateTableDef,
         int inodeId = result.getInt(INODE_ID);
         int namespaceDelta = result.getInt(NAMESPACE_DELTA);
         long diskspaceDelta = result.getLong(DISKSPACE_DELTA);
-        resultList.add(new QuotaUpdate(id, inodeId, namespaceDelta, diskspaceDelta));
+        resultList
+            .add(new QuotaUpdate(id, inodeId, namespaceDelta, diskspaceDelta));
       }
     } catch (SQLException ex) {
       throw HopsSQLExceptionHelper.wrap(ex);
@@ -104,8 +107,8 @@ public class QuotaUpdateClusterj implements QuotaUpdateTableDef,
     return resultList;
   }
 
-  private QuotaUpdateDTO createPersistable(QuotaUpdate update, HopsSession session)
-      throws StorageException {
+  private QuotaUpdateDTO createPersistable(QuotaUpdate update,
+      HopsSession session) throws StorageException {
     QuotaUpdateDTO dto = session.newInstance(QuotaUpdateDTO.class);
     dto.setId(update.getId());
     dto.setInodeId(update.getInodeId());
@@ -117,17 +120,20 @@ public class QuotaUpdateClusterj implements QuotaUpdateTableDef,
   private List<QuotaUpdate> createResultList(List<QuotaUpdateDTO> list) {
     List<QuotaUpdate> result = new ArrayList<QuotaUpdate>();
     for (QuotaUpdateDTO dto : list) {
-      result.add(new QuotaUpdate(dto.getId(), dto.getInodeId(), dto.getNamespaceDelta(), dto.getDiskspaceDelta()));
+      result.add(new QuotaUpdate(dto.getId(), dto.getInodeId(),
+          dto.getNamespaceDelta(), dto.getDiskspaceDelta()));
     }
-    return  result;
+    return result;
   }
 
   private static final String INODE_ID_PARAM = "inodeId";
+
   @Override
   public List<QuotaUpdate> findByInodeId(int inodeId) throws StorageException {
     HopsSession session = connector.obtainSession();
     HopsQueryBuilder qb = session.getQueryBuilder();
-    HopsQueryDomainType<QuotaUpdateDTO> dobj = qb.createQueryDefinition(QuotaUpdateDTO.class);
+    HopsQueryDomainType<QuotaUpdateDTO> dobj =
+        qb.createQueryDefinition(QuotaUpdateDTO.class);
     HopsPredicate pred1 = dobj.get("inodeId").equal(dobj.param(INODE_ID_PARAM));
     dobj.where(pred1);
     HopsQuery<QuotaUpdateDTO> query = session.createQuery(dobj);

@@ -3,23 +3,24 @@ package io.hops.metadata.ndb.dalimpl.yarn;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
+import io.hops.exception.StorageException;
+import io.hops.metadata.ndb.ClusterjConnector;
+import io.hops.metadata.ndb.wrapper.HopsQuery;
+import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
+import io.hops.metadata.ndb.wrapper.HopsQueryDomainType;
+import io.hops.metadata.ndb.wrapper.HopsSession;
+import io.hops.metadata.yarn.dal.RMContainerDataAccess;
+import io.hops.metadata.yarn.entity.RMContainer;
+import io.hops.metadata.yarn.tabledef.RMContainerTableDef;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import io.hops.exception.StorageException;
-import io.hops.metadata.yarn.entity.RMContainer;
-import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
-import io.hops.metadata.ndb.wrapper.HopsQueryDomainType;
-import io.hops.metadata.ndb.wrapper.HopsSession;
-import io.hops.metadata.ndb.ClusterjConnector;
-import io.hops.metadata.ndb.wrapper.HopsQuery;
-import io.hops.metadata.yarn.dal.RMContainerDataAccess;
-import io.hops.metadata.yarn.tabledef.RMContainerTableDef;
-
-public class RMContainerClusterJ implements RMContainerTableDef, RMContainerDataAccess<RMContainer> {
+public class RMContainerClusterJ
+    implements RMContainerTableDef, RMContainerDataAccess<RMContainer> {
 
   @PersistenceCapable(table = TABLE_NAME)
   public interface RMContainerDTO {
@@ -71,19 +72,19 @@ public class RMContainerClusterJ implements RMContainerTableDef, RMContainerData
     void setexitstatus(int exitstatus);
 
   }
+
   private final ClusterjConnector connector = ClusterjConnector.getInstance();
 
   @Override
   public Map<String, RMContainer> getAll() throws StorageException {
     HopsSession session = connector.obtainSession();
     HopsQueryBuilder qb = session.getQueryBuilder();
-    HopsQueryDomainType<RMContainerDTO> dobj
-            = qb.createQueryDefinition(
-                    RMContainerDTO.class);
+    HopsQueryDomainType<RMContainerDTO> dobj =
+        qb.createQueryDefinition(RMContainerDTO.class);
     HopsQuery<RMContainerDTO> query = session.
-            createQuery(dobj);
+        createQuery(dobj);
     List<RMContainerDTO> results = query.
-            getResultList();
+        getResultList();
     return createMap(results);
   }
 
@@ -92,7 +93,8 @@ public class RMContainerClusterJ implements RMContainerTableDef, RMContainerData
   public void addAll(Collection<RMContainer> toAdd) throws StorageException {
     HopsSession session = connector.obtainSession();
 
-    List<RMContainerDTO> toPersist = new ArrayList<RMContainerDTO>(toAdd.size());
+    List<RMContainerDTO> toPersist =
+        new ArrayList<RMContainerDTO>(toAdd.size());
     for (RMContainer hop : toAdd) {
       toPersist.add(createPersistable(hop, session));
     }
@@ -101,15 +103,15 @@ public class RMContainerClusterJ implements RMContainerTableDef, RMContainerData
   }
 
   @Override
-  public void removeAll(Collection<RMContainer> toRemove) throws
-          StorageException {
+  public void removeAll(Collection<RMContainer> toRemove)
+      throws StorageException {
     HopsSession session = connector.obtainSession();
     List<RMContainerDTO> toPersist = new ArrayList<RMContainerDTO>(toRemove.
-            size());
+        size());
     for (RMContainer hop : toRemove) {
       toPersist.add(session.
-              newInstance(RMContainerClusterJ.RMContainerDTO.class, hop.
-                      getContainerIdID()));
+          newInstance(RMContainerClusterJ.RMContainerDTO.class, hop.
+              getContainerIdID()));
     }
     session.deletePersistentAll(toPersist);
   }
@@ -122,23 +124,19 @@ public class RMContainerClusterJ implements RMContainerTableDef, RMContainerData
 
   private RMContainer createHopRMContainer(RMContainerDTO rMContainerDTO) {
 
-    return new RMContainer(
-            rMContainerDTO.getcontaineridid(),
-            rMContainerDTO.getappattemptidid(),
-            rMContainerDTO.getnodeidid(),
-            rMContainerDTO.getuser(),
-            rMContainerDTO.getstarttime(),
-            rMContainerDTO.getfinishtime(),
-            rMContainerDTO.getstate(),
-            rMContainerDTO.getfinishedstatusstate(),
-            rMContainerDTO.getexitstatus());
+    return new RMContainer(rMContainerDTO.getcontaineridid(),
+        rMContainerDTO.getappattemptidid(), rMContainerDTO.getnodeidid(),
+        rMContainerDTO.getuser(), rMContainerDTO.getstarttime(),
+        rMContainerDTO.getfinishtime(), rMContainerDTO.getstate(),
+        rMContainerDTO.getfinishedstatusstate(),
+        rMContainerDTO.getexitstatus());
 
   }
 
-  private RMContainerDTO createPersistable(RMContainer hop,
-          HopsSession session) throws StorageException {
-    RMContainerClusterJ.RMContainerDTO rMContainerDTO = session.newInstance(
-            RMContainerClusterJ.RMContainerDTO.class);
+  private RMContainerDTO createPersistable(RMContainer hop, HopsSession session)
+      throws StorageException {
+    RMContainerClusterJ.RMContainerDTO rMContainerDTO =
+        session.newInstance(RMContainerClusterJ.RMContainerDTO.class);
 
     rMContainerDTO.setcontaineridid(hop.getContainerIdID());
     rMContainerDTO.setappattemptidid(hop.getApplicationAttemptIdID());
@@ -153,13 +151,10 @@ public class RMContainerClusterJ implements RMContainerTableDef, RMContainerData
     return rMContainerDTO;
   }
 
-  private Map<String, RMContainer> createMap(
-          List<RMContainerDTO> results) {
-    Map<String, RMContainer> map
-            = new HashMap<String, RMContainer>();
+  private Map<String, RMContainer> createMap(List<RMContainerDTO> results) {
+    Map<String, RMContainer> map = new HashMap<String, RMContainer>();
     for (RMContainerDTO dto : results) {
-      RMContainer hop
-              = createHopRMContainer(dto);
+      RMContainer hop = createHopRMContainer(dto);
       map.put(hop.getContainerIdID(), hop);
     }
     return map;

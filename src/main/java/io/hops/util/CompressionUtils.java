@@ -23,8 +23,8 @@ public class CompressionUtils {
     return outputStream.toByteArray();
   }
 
-  public static byte[] decompress(byte[] data) throws IOException,
-      DataFormatException {
+  public static byte[] decompress(byte[] data)
+      throws IOException, DataFormatException {
     Inflater decompresser = new Inflater();
     decompresser.setInput(data);
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream(data.length);

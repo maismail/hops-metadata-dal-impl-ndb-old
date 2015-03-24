@@ -4,92 +4,121 @@ import com.mysql.clusterj.Constants;
 import com.mysql.clusterj.LockMode;
 import io.hops.StorageConnector;
 import io.hops.exception.StorageException;
+import io.hops.metadata.common.EntityDataAccess;
+import io.hops.metadata.common.entity.Variable;
+import io.hops.metadata.election.dal.HdfsLeDescriptorDataAccess;
+import io.hops.metadata.election.dal.YarnLeDescriptorDataAccess;
+import io.hops.metadata.election.tabledef.HdfsLeaderTableDef;
+import io.hops.metadata.election.tabledef.YarnLeaderTableDef;
+import io.hops.metadata.hdfs.dal.BlockChecksumDataAccess;
 import io.hops.metadata.hdfs.dal.BlockInfoDataAccess;
+import io.hops.metadata.hdfs.dal.BlockLookUpDataAccess;
 import io.hops.metadata.hdfs.dal.CorruptReplicaDataAccess;
 import io.hops.metadata.hdfs.dal.EncodingStatusDataAccess;
 import io.hops.metadata.hdfs.dal.ExcessReplicaDataAccess;
-import io.hops.metadata.election.dal.HdfsLeDescriptorDataAccess;
 import io.hops.metadata.hdfs.dal.INodeAttributesDataAccess;
+import io.hops.metadata.hdfs.dal.INodeDataAccess;
 import io.hops.metadata.hdfs.dal.InvalidateBlockDataAccess;
+import io.hops.metadata.hdfs.dal.LeaseDataAccess;
 import io.hops.metadata.hdfs.dal.LeasePathDataAccess;
 import io.hops.metadata.hdfs.dal.MisReplicatedRangeQueueDataAccess;
 import io.hops.metadata.hdfs.dal.PendingBlockDataAccess;
 import io.hops.metadata.hdfs.dal.QuotaUpdateDataAccess;
 import io.hops.metadata.hdfs.dal.ReplicaDataAccess;
+import io.hops.metadata.hdfs.dal.ReplicaUnderConstructionDataAccess;
 import io.hops.metadata.hdfs.dal.SafeBlocksDataAccess;
 import io.hops.metadata.hdfs.dal.StorageIdMapDataAccess;
 import io.hops.metadata.hdfs.dal.UnderReplicatedBlockDataAccess;
 import io.hops.metadata.hdfs.dal.VariableDataAccess;
-import io.hops.metadata.common.entity.Variable;
 import io.hops.metadata.hdfs.tabledef.BlockChecksumTableDef;
 import io.hops.metadata.hdfs.tabledef.BlockInfoTableDef;
 import io.hops.metadata.hdfs.tabledef.BlockLookUpTableDef;
+import io.hops.metadata.hdfs.tabledef.CorruptReplicaTableDef;
+import io.hops.metadata.hdfs.tabledef.EncodingStatusTableDef;
 import io.hops.metadata.hdfs.tabledef.ExcessReplicaTableDef;
-import io.hops.metadata.election.tabledef.HdfsLeaderTableDef;
 import io.hops.metadata.hdfs.tabledef.INodeAttributesTableDef;
+import io.hops.metadata.hdfs.tabledef.INodeTableDef;
 import io.hops.metadata.hdfs.tabledef.InvalidatedBlockTableDef;
 import io.hops.metadata.hdfs.tabledef.LeasePathTableDef;
 import io.hops.metadata.hdfs.tabledef.LeaseTableDef;
 import io.hops.metadata.hdfs.tabledef.MisReplicatedRangeQueueTableDef;
 import io.hops.metadata.hdfs.tabledef.PendingBlockTableDef;
+import io.hops.metadata.hdfs.tabledef.QuotaUpdateTableDef;
 import io.hops.metadata.hdfs.tabledef.ReplicaTableDef;
 import io.hops.metadata.hdfs.tabledef.ReplicaUnderConstructionTableDef;
 import io.hops.metadata.hdfs.tabledef.SafeBlocksTableDef;
 import io.hops.metadata.hdfs.tabledef.StorageIdMapTableDef;
 import io.hops.metadata.hdfs.tabledef.UnderReplicatedBlockTableDef;
-import io.hops.metadata.election.tabledef.YarnLeaderTableDef;
+import io.hops.metadata.ndb.dalimpl.election.HdfsLeaderClusterj;
+import io.hops.metadata.ndb.dalimpl.election.YarnLeaderClusterj;
 import io.hops.metadata.ndb.dalimpl.hdfs.BlockChecksumClusterj;
 import io.hops.metadata.ndb.dalimpl.hdfs.BlockInfoClusterj;
 import io.hops.metadata.ndb.dalimpl.hdfs.CorruptReplicaClusterj;
 import io.hops.metadata.ndb.dalimpl.hdfs.EncodingStatusClusterj;
 import io.hops.metadata.ndb.dalimpl.hdfs.ExcessReplicaClusterj;
-import io.hops.metadata.ndb.dalimpl.election.HdfsLeaderClusterj;
 import io.hops.metadata.ndb.dalimpl.hdfs.INodeAttributesClusterj;
 import io.hops.metadata.ndb.dalimpl.hdfs.INodeClusterj;
+import io.hops.metadata.ndb.dalimpl.hdfs.InvalidatedBlockClusterj;
 import io.hops.metadata.ndb.dalimpl.hdfs.LeaseClusterj;
 import io.hops.metadata.ndb.dalimpl.hdfs.LeasePathClusterj;
 import io.hops.metadata.ndb.dalimpl.hdfs.PendingBlockClusterj;
 import io.hops.metadata.ndb.dalimpl.hdfs.QuotaUpdateClusterj;
 import io.hops.metadata.ndb.dalimpl.hdfs.ReplicaClusterj;
+import io.hops.metadata.ndb.dalimpl.hdfs.ReplicaUnderConstructionClusterj;
 import io.hops.metadata.ndb.dalimpl.hdfs.UnderReplicatedBlockClusterj;
 import io.hops.metadata.ndb.dalimpl.hdfs.VariableClusterj;
-import io.hops.metadata.ndb.dalimpl.election.YarnLeaderClusterj;
 import io.hops.metadata.ndb.dalimpl.yarn.YarnVariablesClusterJ;
+import io.hops.metadata.ndb.mysqlserver.MysqlServerConnector;
 import io.hops.metadata.ndb.wrapper.HopsSession;
 import io.hops.metadata.ndb.wrapper.HopsTransaction;
 import io.hops.metadata.yarn.dal.AppSchedulingInfoBlacklistDataAccess;
+import io.hops.metadata.yarn.dal.AppSchedulingInfoDataAccess;
 import io.hops.metadata.yarn.dal.ContainerDataAccess;
 import io.hops.metadata.yarn.dal.ContainerIdToCleanDataAccess;
 import io.hops.metadata.yarn.dal.ContainerStatusDataAccess;
 import io.hops.metadata.yarn.dal.FiCaSchedulerAppLiveContainersDataAccess;
 import io.hops.metadata.yarn.dal.FiCaSchedulerAppNewlyAllocatedContainersDataAccess;
+import io.hops.metadata.yarn.dal.FiCaSchedulerNodeDataAccess;
+import io.hops.metadata.yarn.dal.FinishedApplicationsDataAccess;
 import io.hops.metadata.yarn.dal.JustLaunchedContainersDataAccess;
 import io.hops.metadata.yarn.dal.LaunchedContainersDataAccess;
 import io.hops.metadata.yarn.dal.NextHeartbeatDataAccess;
 import io.hops.metadata.yarn.dal.NodeDataAccess;
+import io.hops.metadata.yarn.dal.PendingEventDataAccess;
 import io.hops.metadata.yarn.dal.QueueMetricsDataAccess;
+import io.hops.metadata.yarn.dal.RMContainerDataAccess;
 import io.hops.metadata.yarn.dal.RMContextActiveNodesDataAccess;
 import io.hops.metadata.yarn.dal.RMContextInactiveNodesDataAccess;
 import io.hops.metadata.yarn.dal.RMLoadDataAccess;
 import io.hops.metadata.yarn.dal.RMNodeDataAccess;
 import io.hops.metadata.yarn.dal.ResourceDataAccess;
+import io.hops.metadata.yarn.dal.ResourceRequestDataAccess;
+import io.hops.metadata.yarn.dal.SchedulerApplicationDataAccess;
+import io.hops.metadata.yarn.dal.UpdatedContainerInfoDataAccess;
+import io.hops.metadata.yarn.dal.YarnVariablesDataAccess;
 import io.hops.metadata.yarn.dal.capacity.FiCaSchedulerAppLastScheduledContainerDataAccess;
+import io.hops.metadata.yarn.dal.capacity.FiCaSchedulerAppReservationsDataAccess;
 import io.hops.metadata.yarn.dal.capacity.FiCaSchedulerAppReservedContainersDataAccess;
 import io.hops.metadata.yarn.dal.capacity.FiCaSchedulerAppSchedulingOpportunitiesDataAccess;
 import io.hops.metadata.yarn.dal.rmstatestore.AllocateResponseDataAccess;
 import io.hops.metadata.yarn.dal.rmstatestore.ApplicationAttemptStateDataAccess;
 import io.hops.metadata.yarn.dal.rmstatestore.ApplicationStateDataAccess;
+import io.hops.metadata.yarn.dal.rmstatestore.DelegationKeyDataAccess;
 import io.hops.metadata.yarn.dal.rmstatestore.DelegationTokenDataAccess;
 import io.hops.metadata.yarn.dal.rmstatestore.RMStateVersionDataAccess;
+import io.hops.metadata.yarn.dal.rmstatestore.RPCDataAccess;
 import io.hops.metadata.yarn.dal.rmstatestore.SecretMamagerKeysDataAccess;
 import io.hops.metadata.yarn.dal.rmstatestore.SequenceNumberDataAccess;
 import io.hops.metadata.yarn.tabledef.AppSchedulingInfoBlacklistTableDef;
 import io.hops.metadata.yarn.tabledef.AppSchedulingInfoTableDef;
 import io.hops.metadata.yarn.tabledef.ContainerIdToCleanTableDef;
+import io.hops.metadata.yarn.tabledef.ContainerStatusTableDef;
 import io.hops.metadata.yarn.tabledef.ContainerTableDef;
 import io.hops.metadata.yarn.tabledef.FiCaSchedulerAppLiveContainersTableDef;
+import io.hops.metadata.yarn.tabledef.FiCaSchedulerAppNewlyAllocatedContainersTableDef;
 import io.hops.metadata.yarn.tabledef.FiCaSchedulerNodeTableDef;
 import io.hops.metadata.yarn.tabledef.FinishedApplicationsTableDef;
+import io.hops.metadata.yarn.tabledef.JustLaunchedContainersTableDef;
 import io.hops.metadata.yarn.tabledef.LaunchedContainersTableDef;
 import io.hops.metadata.yarn.tabledef.NextHeartbeatTableDef;
 import io.hops.metadata.yarn.tabledef.NodeTableDef;
@@ -101,6 +130,7 @@ import io.hops.metadata.yarn.tabledef.RMContextInactiveNodesTableDef;
 import io.hops.metadata.yarn.tabledef.RMLoadTableDef;
 import io.hops.metadata.yarn.tabledef.RMNodeTableDef;
 import io.hops.metadata.yarn.tabledef.ResourceRequestTableDef;
+import io.hops.metadata.yarn.tabledef.ResourceTableDef;
 import io.hops.metadata.yarn.tabledef.SchedulerApplicationTableDef;
 import io.hops.metadata.yarn.tabledef.UpdatedContainerInfoTableDef;
 import io.hops.metadata.yarn.tabledef.appmasterrpc.RPCTableDef;
@@ -110,48 +140,17 @@ import io.hops.metadata.yarn.tabledef.capacity.FiCaSchedulerAppReservedContainer
 import io.hops.metadata.yarn.tabledef.capacity.FiCaSchedulerAppSchedulingOpportunitiesTableDef;
 import io.hops.metadata.yarn.tabledef.rmstatestore.AllocateResponseTableDef;
 import io.hops.metadata.yarn.tabledef.rmstatestore.ApplicationAttemptStateTableDef;
+import io.hops.metadata.yarn.tabledef.rmstatestore.ApplicationStateTableDef;
 import io.hops.metadata.yarn.tabledef.rmstatestore.DelegationKeyTableDef;
+import io.hops.metadata.yarn.tabledef.rmstatestore.DelegationTokenTableDef;
+import io.hops.metadata.yarn.tabledef.rmstatestore.RMStateVersionTableDef;
 import io.hops.metadata.yarn.tabledef.rmstatestore.SecretMamagerKeysTableDef;
 import io.hops.metadata.yarn.tabledef.rmstatestore.SequenceNumberTableDef;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import io.hops.metadata.hdfs.dal.BlockChecksumDataAccess;
-import io.hops.metadata.hdfs.dal.BlockLookUpDataAccess;
-import io.hops.metadata.common.EntityDataAccess;
-import io.hops.metadata.hdfs.dal.INodeDataAccess;
-import io.hops.metadata.hdfs.dal.LeaseDataAccess;
-import io.hops.metadata.hdfs.dal.ReplicaUnderConstructionDataAccess;
-import io.hops.metadata.hdfs.tabledef.CorruptReplicaTableDef;
-import io.hops.metadata.hdfs.tabledef.EncodingStatusTableDef;
-import io.hops.metadata.hdfs.tabledef.INodeTableDef;
-import io.hops.metadata.hdfs.tabledef.QuotaUpdateTableDef;
-import io.hops.metadata.ndb.dalimpl.hdfs.InvalidatedBlockClusterj;
-import io.hops.metadata.ndb.dalimpl.hdfs.ReplicaUnderConstructionClusterj;
-import io.hops.metadata.yarn.dal.AppSchedulingInfoDataAccess;
-import io.hops.metadata.yarn.dal.rmstatestore.RPCDataAccess;
-import io.hops.metadata.yarn.dal.capacity.FiCaSchedulerAppReservationsDataAccess;
-import io.hops.metadata.yarn.dal.FiCaSchedulerNodeDataAccess;
-import io.hops.metadata.yarn.dal.FinishedApplicationsDataAccess;
-import io.hops.metadata.yarn.dal.RMContainerDataAccess;
-import io.hops.metadata.yarn.dal.ResourceRequestDataAccess;
-import io.hops.metadata.yarn.dal.SchedulerApplicationDataAccess;
-import io.hops.metadata.yarn.dal.UpdatedContainerInfoDataAccess;
-import io.hops.metadata.yarn.dal.YarnVariablesDataAccess;
-import io.hops.metadata.yarn.dal.rmstatestore.DelegationKeyDataAccess;
-import io.hops.metadata.yarn.tabledef.ContainerStatusTableDef;
-import io.hops.metadata.yarn.tabledef.FiCaSchedulerAppNewlyAllocatedContainersTableDef;
-import io.hops.metadata.yarn.tabledef.JustLaunchedContainersTableDef;
-import io.hops.metadata.yarn.tabledef.ResourceTableDef;
-import io.hops.metadata.ndb.mysqlserver.MysqlServerConnector;
-import io.hops.metadata.yarn.dal.PendingEventDataAccess;
 
 import java.sql.SQLException;
 import java.util.Properties;
-
-import io.hops.metadata.election.dal.YarnLeDescriptorDataAccess;
-import io.hops.metadata.yarn.tabledef.rmstatestore.ApplicationStateTableDef;
-import io.hops.metadata.yarn.tabledef.rmstatestore.DelegationTokenTableDef;
-import io.hops.metadata.yarn.tabledef.rmstatestore.RMStateVersionTableDef;
 
 public class ClusterjConnector implements StorageConnector<DBSession> {
 
@@ -174,9 +173,11 @@ public class ClusterjConnector implements StorageConnector<DBSession> {
       LOG.warn("SessionFactory is already initialized");
       return;
     }
-    LOG.info("Database connect string: " + conf.get(Constants.PROPERTY_CLUSTER_CONNECTSTRING));
+    LOG.info("Database connect string: " +
+        conf.get(Constants.PROPERTY_CLUSTER_CONNECTSTRING));
     LOG.info("Database name: " + conf.get(Constants.PROPERTY_CLUSTER_DATABASE));
-    LOG.info("Max Transactions: " + conf.get(Constants.PROPERTY_CLUSTER_MAX_TRANSACTIONS));
+    LOG.info("Max Transactions: " +
+        conf.get(Constants.PROPERTY_CLUSTER_MAX_TRANSACTIONS));
 
     int initialPoolSize =
         Integer.parseInt((String) conf.get("io.hops.session.pool.size"));
@@ -206,11 +207,13 @@ public class ClusterjConnector implements StorageConnector<DBSession> {
   private void returnSession(boolean error) throws StorageException {
     DBSession dbSession = sessions.get();
     sessions.remove(); // remove, and return to the pool
-    dbSessionProvider.returnSession(dbSession, error); // if there was an error then close the session
+    dbSessionProvider.returnSession(dbSession,
+        error); // if there was an error then close the session
   }
 
   /**
    * begin a transaction.
+   *
    * @param name
    * @throws io.hops.exception.StorageException
    */
@@ -226,6 +229,7 @@ public class ClusterjConnector implements StorageConnector<DBSession> {
 
   /**
    * Commit a transaction.
+   *
    * @throws io.hops.exception.StorageException
    */
   @Override
@@ -277,11 +281,11 @@ public class ClusterjConnector implements StorageConnector<DBSession> {
   }
 
   @Override
-  public boolean formatStorage(Class<? extends EntityDataAccess>... das) throws StorageException {
+  public boolean formatStorage(Class<? extends EntityDataAccess>... das)
+      throws StorageException {
     return format(true, das);
   }
 
- 
 
   @Override
   public boolean isTransactionActive() throws StorageException {
@@ -312,7 +316,8 @@ public class ClusterjConnector implements StorageConnector<DBSession> {
   }
 
   @Override
-  public void setPartitionKey(Class className, Object key) throws StorageException {
+  public void setPartitionKey(Class className, Object key)
+      throws StorageException {
     Class cls = null;
     if (className == BlockInfoDataAccess.class) {
       cls = BlockInfoClusterj.BlockInfoDTO.class;
@@ -367,122 +372,161 @@ public class ClusterjConnector implements StorageConnector<DBSession> {
         // shared
         VariableDataAccess.class,
         // HDFS
-        INodeDataAccess.class, BlockInfoDataAccess.class,
-        LeaseDataAccess.class, LeasePathDataAccess.class, ReplicaDataAccess.class,
-        ReplicaUnderConstructionDataAccess.class, InvalidateBlockDataAccess.class,
-        ExcessReplicaDataAccess.class, PendingBlockDataAccess.class, CorruptReplicaDataAccess.class,
+        INodeDataAccess.class, BlockInfoDataAccess.class, LeaseDataAccess.class,
+        LeasePathDataAccess.class, ReplicaDataAccess.class,
+        ReplicaUnderConstructionDataAccess.class,
+        InvalidateBlockDataAccess.class, ExcessReplicaDataAccess.class,
+        PendingBlockDataAccess.class, CorruptReplicaDataAccess.class,
         UnderReplicatedBlockDataAccess.class, HdfsLeDescriptorDataAccess.class,
         INodeAttributesDataAccess.class, StorageIdMapDataAccess.class,
-        BlockLookUpDataAccess.class, SafeBlocksDataAccess.class, MisReplicatedRangeQueueDataAccess.class,
-        QuotaUpdateDataAccess.class, EncodingStatusDataAccess.class, BlockChecksumDataAccess.class,
+        BlockLookUpDataAccess.class, SafeBlocksDataAccess.class,
+        MisReplicatedRangeQueueDataAccess.class, QuotaUpdateDataAccess.class,
+        EncodingStatusDataAccess.class, BlockChecksumDataAccess.class,
         // YARN
-        RPCDataAccess.class,
-        ApplicationStateDataAccess.class, ApplicationAttemptStateDataAccess.class, DelegationKeyDataAccess.class,
+        RPCDataAccess.class, ApplicationStateDataAccess.class,
+        ApplicationAttemptStateDataAccess.class, DelegationKeyDataAccess.class,
         DelegationTokenDataAccess.class, SequenceNumberDataAccess.class,
         RMStateVersionDataAccess.class, YarnVariablesDataAccess.class,
-        AppSchedulingInfoDataAccess.class, AppSchedulingInfoBlacklistDataAccess.class,
-        ContainerDataAccess.class,  ContainerIdToCleanDataAccess.class,
-        ContainerStatusDataAccess.class, FiCaSchedulerAppLastScheduledContainerDataAccess.class,
-        FiCaSchedulerAppLiveContainersDataAccess.class, FiCaSchedulerAppNewlyAllocatedContainersDataAccess.class,
-        FiCaSchedulerAppReservationsDataAccess.class, FiCaSchedulerAppReservedContainersDataAccess.class,
-        FiCaSchedulerAppSchedulingOpportunitiesDataAccess.class, FiCaSchedulerNodeDataAccess.class,
-        JustLaunchedContainersDataAccess.class, LaunchedContainersDataAccess.class,
-        NodeDataAccess.class, QueueMetricsDataAccess.class,
-        ResourceDataAccess.class, ResourceRequestDataAccess.class, RMContainerDataAccess.class,
-        RMNodeDataAccess.class, SchedulerApplicationDataAccess.class, SequenceNumberDataAccess.class,
-         FinishedApplicationsDataAccess.class, RMContextInactiveNodesDataAccess.class, RMContextActiveNodesDataAccess.class,
+        AppSchedulingInfoDataAccess.class,
+        AppSchedulingInfoBlacklistDataAccess.class, ContainerDataAccess.class,
+        ContainerIdToCleanDataAccess.class, ContainerStatusDataAccess.class,
+        FiCaSchedulerAppLastScheduledContainerDataAccess.class,
+        FiCaSchedulerAppLiveContainersDataAccess.class,
+        FiCaSchedulerAppNewlyAllocatedContainersDataAccess.class,
+        FiCaSchedulerAppReservationsDataAccess.class,
+        FiCaSchedulerAppReservedContainersDataAccess.class,
+        FiCaSchedulerAppSchedulingOpportunitiesDataAccess.class,
+        FiCaSchedulerNodeDataAccess.class,
+        JustLaunchedContainersDataAccess.class,
+        LaunchedContainersDataAccess.class, NodeDataAccess.class,
+        QueueMetricsDataAccess.class, ResourceDataAccess.class,
+        ResourceRequestDataAccess.class, RMContainerDataAccess.class,
+        RMNodeDataAccess.class, SchedulerApplicationDataAccess.class,
+        SequenceNumberDataAccess.class, FinishedApplicationsDataAccess.class,
+        RMContextInactiveNodesDataAccess.class,
+        RMContextActiveNodesDataAccess.class,
         UpdatedContainerInfoDataAccess.class, YarnLeDescriptorDataAccess.class,
-        SecretMamagerKeysDataAccess.class, AllocateResponseDataAccess.class, RMLoadDataAccess.class);
+        SecretMamagerKeysDataAccess.class, AllocateResponseDataAccess.class,
+        RMLoadDataAccess.class);
   }
 
-  private boolean format(boolean transactional, Class<? extends EntityDataAccess>... das) throws StorageException {
+  private boolean format(boolean transactional,
+      Class<? extends EntityDataAccess>... das) throws StorageException {
     final int RETRIES = 5; // in test
     for (int i = 0; i < RETRIES; i++) {
       try {
         for (Class e : das) {
           if (e == INodeDataAccess.class) {
-            MysqlServerConnector.truncateTable(transactional, INodeTableDef.TABLE_NAME);
+            MysqlServerConnector
+                .truncateTable(transactional, INodeTableDef.TABLE_NAME);
           } else if (e == BlockInfoDataAccess.class) {
-            MysqlServerConnector.truncateTable(transactional, BlockInfoTableDef.TABLE_NAME);
+            MysqlServerConnector
+                .truncateTable(transactional, BlockInfoTableDef.TABLE_NAME);
           } else if (e == LeaseDataAccess.class) {
-            MysqlServerConnector.truncateTable(transactional, LeaseTableDef.TABLE_NAME);
+            MysqlServerConnector
+                .truncateTable(transactional, LeaseTableDef.TABLE_NAME);
           } else if (e == LeasePathDataAccess.class) {
-            MysqlServerConnector.truncateTable(transactional, LeasePathTableDef.TABLE_NAME);
+            MysqlServerConnector
+                .truncateTable(transactional, LeasePathTableDef.TABLE_NAME);
           } else if (e == ReplicaDataAccess.class) {
-            MysqlServerConnector.truncateTable(transactional, ReplicaTableDef.TABLE_NAME);
+            MysqlServerConnector
+                .truncateTable(transactional, ReplicaTableDef.TABLE_NAME);
           } else if (e == ReplicaUnderConstructionDataAccess.class) {
-            MysqlServerConnector.truncateTable(transactional, ReplicaUnderConstructionTableDef.TABLE_NAME);
+            MysqlServerConnector.truncateTable(transactional,
+                ReplicaUnderConstructionTableDef.TABLE_NAME);
           } else if (e == InvalidateBlockDataAccess.class) {
-            MysqlServerConnector.truncateTable(transactional, InvalidatedBlockTableDef.TABLE_NAME);
+            MysqlServerConnector.truncateTable(transactional,
+                InvalidatedBlockTableDef.TABLE_NAME);
           } else if (e == ExcessReplicaDataAccess.class) {
-            MysqlServerConnector.truncateTable(transactional, ExcessReplicaTableDef.TABLE_NAME);
+            MysqlServerConnector
+                .truncateTable(transactional, ExcessReplicaTableDef.TABLE_NAME);
           } else if (e == PendingBlockDataAccess.class) {
-            MysqlServerConnector.truncateTable(transactional, PendingBlockTableDef.TABLE_NAME);
+            MysqlServerConnector
+                .truncateTable(transactional, PendingBlockTableDef.TABLE_NAME);
           } else if (e == CorruptReplicaDataAccess.class) {
-            MysqlServerConnector.truncateTable(transactional, CorruptReplicaTableDef.TABLE_NAME);
+            MysqlServerConnector.truncateTable(transactional,
+                CorruptReplicaTableDef.TABLE_NAME);
           } else if (e == UnderReplicatedBlockDataAccess.class) {
-            MysqlServerConnector.truncateTable(transactional, UnderReplicatedBlockTableDef.TABLE_NAME);
+            MysqlServerConnector.truncateTable(transactional,
+                UnderReplicatedBlockTableDef.TABLE_NAME);
           } else if (e == HdfsLeDescriptorDataAccess.class) {
-            MysqlServerConnector.truncateTable(transactional, HdfsLeaderTableDef.TABLE_NAME);
+            MysqlServerConnector
+                .truncateTable(transactional, HdfsLeaderTableDef.TABLE_NAME);
           } else if (e == INodeAttributesDataAccess.class) {
-            MysqlServerConnector.truncateTable(transactional, INodeAttributesTableDef.TABLE_NAME);
+            MysqlServerConnector.truncateTable(transactional,
+                INodeAttributesTableDef.TABLE_NAME);
           } else if (e == VariableDataAccess.class) {
             HopsSession session = obtainSession();
             session.currentTransaction().begin();
             session.deletePersistentAll(VariableClusterj.VariableDTO.class);
             for (Variable.Finder varType : Variable.Finder.values()) {
-              VariableClusterj.VariableDTO vd = session.newInstance(
-                  VariableClusterj.VariableDTO.class);
+              VariableClusterj.VariableDTO vd =
+                  session.newInstance(VariableClusterj.VariableDTO.class);
               vd.setId(varType.getId());
               vd.setValue(varType.getDefaultValue());
               session.savePersistent(vd);
             }
             session.currentTransaction().commit();
           } else if (e == StorageIdMapDataAccess.class) {
-            MysqlServerConnector.truncateTable(transactional,
-                StorageIdMapTableDef.TABLE_NAME);
+            MysqlServerConnector
+                .truncateTable(transactional, StorageIdMapTableDef.TABLE_NAME);
           } else if (e == BlockLookUpDataAccess.class) {
-            MysqlServerConnector.truncateTable(transactional, BlockLookUpTableDef.TABLE_NAME);
+            MysqlServerConnector
+                .truncateTable(transactional, BlockLookUpTableDef.TABLE_NAME);
           } else if (e == SafeBlocksDataAccess.class) {
-            MysqlServerConnector.truncateTable(transactional, SafeBlocksTableDef.TABLE_NAME);
+            MysqlServerConnector
+                .truncateTable(transactional, SafeBlocksTableDef.TABLE_NAME);
           } else if (e == MisReplicatedRangeQueueDataAccess.class) {
-            MysqlServerConnector.truncateTable(transactional, MisReplicatedRangeQueueTableDef.TABLE_NAME);
+            MysqlServerConnector.truncateTable(transactional,
+                MisReplicatedRangeQueueTableDef.TABLE_NAME);
           } else if (e == QuotaUpdateDataAccess.class) {
-            MysqlServerConnector.truncateTable(transactional, QuotaUpdateTableDef.TABLE_NAME);
+            MysqlServerConnector
+                .truncateTable(transactional, QuotaUpdateTableDef.TABLE_NAME);
           } else if (e == EncodingStatusDataAccess.class) {
-            MysqlServerConnector.truncateTable(transactional, EncodingStatusTableDef.TABLE_NAME);
+            MysqlServerConnector.truncateTable(transactional,
+                EncodingStatusTableDef.TABLE_NAME);
           } else if (e == BlockChecksumDataAccess.class) {
-            MysqlServerConnector.truncateTable(transactional, BlockChecksumTableDef.TABLE_NAME);
+            MysqlServerConnector
+                .truncateTable(transactional, BlockChecksumTableDef.TABLE_NAME);
           } else if (e == YarnLeDescriptorDataAccess.class) {
-            MysqlServerConnector.truncateTable(transactional, YarnLeaderTableDef.TABLE_NAME);
+            MysqlServerConnector
+                .truncateTable(transactional, YarnLeaderTableDef.TABLE_NAME);
           } else if (e == AppSchedulingInfoDataAccess.class) {
             truncate(transactional, AppSchedulingInfoTableDef.TABLE_NAME);
           } else if (e == AppSchedulingInfoBlacklistDataAccess.class) {
-            truncate(transactional, AppSchedulingInfoBlacklistTableDef.TABLE_NAME);
+            truncate(transactional,
+                AppSchedulingInfoBlacklistTableDef.TABLE_NAME);
           } else if (e == ContainerDataAccess.class) {
             truncate(transactional, ContainerTableDef.TABLE_NAME);
           } else if (e == ContainerIdToCleanDataAccess.class) {
             truncate(transactional, ContainerIdToCleanTableDef.TABLE_NAME);
           } else if (e == ContainerStatusDataAccess.class) {
-            truncate(transactional,ContainerStatusTableDef.TABLE_NAME);
-          } else if (e == FiCaSchedulerAppLastScheduledContainerDataAccess.class) {
+            truncate(transactional, ContainerStatusTableDef.TABLE_NAME);
+          } else if (e ==
+              FiCaSchedulerAppLastScheduledContainerDataAccess.class) {
             truncate(transactional,
                 FiCaSchedulerAppLastScheduledContainerTableDef.TABLE_NAME);
           } else if (e == FiCaSchedulerAppLiveContainersDataAccess.class) {
-            truncate(transactional, FiCaSchedulerAppLiveContainersTableDef.TABLE_NAME);
-          } else if (e == FiCaSchedulerAppNewlyAllocatedContainersDataAccess.class) {
-            truncate(transactional,FiCaSchedulerAppNewlyAllocatedContainersTableDef.TABLE_NAME);
+            truncate(transactional,
+                FiCaSchedulerAppLiveContainersTableDef.TABLE_NAME);
+          } else if (e ==
+              FiCaSchedulerAppNewlyAllocatedContainersDataAccess.class) {
+            truncate(transactional,
+                FiCaSchedulerAppNewlyAllocatedContainersTableDef.TABLE_NAME);
           } else if (e == FiCaSchedulerAppReservationsDataAccess.class) {
-            truncate(transactional, FiCaSchedulerAppReservationsTableDef.TABLE_NAME);
+            truncate(transactional,
+                FiCaSchedulerAppReservationsTableDef.TABLE_NAME);
           } else if (e == FiCaSchedulerAppReservedContainersDataAccess.class) {
-            truncate(transactional, FiCaSchedulerAppReservedContainersTableDef.TABLE_NAME);
-          } else if (e == FiCaSchedulerAppSchedulingOpportunitiesDataAccess.class) {
+            truncate(transactional,
+                FiCaSchedulerAppReservedContainersTableDef.TABLE_NAME);
+          } else if (e ==
+              FiCaSchedulerAppSchedulingOpportunitiesDataAccess.class) {
             truncate(transactional,
                 FiCaSchedulerAppSchedulingOpportunitiesTableDef.TABLE_NAME);
           } else if (e == FiCaSchedulerNodeDataAccess.class) {
             truncate(transactional, FiCaSchedulerNodeTableDef.TABLE_NAME);
           } else if (e == JustLaunchedContainersDataAccess.class) {
-            truncate(transactional,JustLaunchedContainersTableDef.TABLE_NAME);
+            truncate(transactional, JustLaunchedContainersTableDef.TABLE_NAME);
           } else if (e == LaunchedContainersDataAccess.class) {
             truncate(transactional, LaunchedContainersTableDef.TABLE_NAME);
           } else if (e == NodeDataAccess.class) {
@@ -490,7 +534,7 @@ public class ClusterjConnector implements StorageConnector<DBSession> {
           } else if (e == QueueMetricsDataAccess.class) {
             truncate(transactional, QueueMetricsTableDef.TABLE_NAME);
           } else if (e == ResourceDataAccess.class) {
-            truncate(transactional,ResourceTableDef.TABLE_NAME);
+            truncate(transactional, ResourceTableDef.TABLE_NAME);
           } else if (e == ResourceRequestDataAccess.class) {
             truncate(transactional, ResourceRequestTableDef.TABLE_NAME);
           } else if (e == RMContainerDataAccess.class) {
@@ -510,39 +554,40 @@ public class ClusterjConnector implements StorageConnector<DBSession> {
             truncate(transactional, RMContextActiveNodesTableDef.TABLE_NAME);
           } else if (e == UpdatedContainerInfoDataAccess.class) {
             truncate(transactional, UpdatedContainerInfoTableDef.TABLE_NAME);
-          } else if (e == SecretMamagerKeysDataAccess.class){
+          } else if (e == SecretMamagerKeysDataAccess.class) {
             truncate(transactional, SecretMamagerKeysTableDef.TABLE_NAME);
-          } else if (e == AllocateResponseDataAccess.class){
+          } else if (e == AllocateResponseDataAccess.class) {
             truncate(transactional, AllocateResponseTableDef.TABLE_NAME);
-          } else if (e == DelegationKeyDataAccess.class){
+          } else if (e == DelegationKeyDataAccess.class) {
             truncate(transactional, DelegationKeyTableDef.TABLE_NAME);
-          } else if (e== DelegationTokenDataAccess.class){
+          } else if (e == DelegationTokenDataAccess.class) {
             truncate(transactional, DelegationTokenTableDef.TABLE_NAME);
-          } else if (e == RMStateVersionDataAccess.class){
+          } else if (e == RMStateVersionDataAccess.class) {
             truncate(transactional, RMStateVersionTableDef.TABLE_NAME);
-          } else if (e == ApplicationAttemptStateDataAccess.class){
+          } else if (e == ApplicationAttemptStateDataAccess.class) {
             truncate(transactional, ApplicationAttemptStateTableDef.TABLE_NAME);
-          } else if (e == ApplicationStateDataAccess.class){
+          } else if (e == ApplicationStateDataAccess.class) {
             truncate(transactional, ApplicationStateTableDef.TABLE_NAME);
-          } else if (e == RPCDataAccess.class){
+          } else if (e == RPCDataAccess.class) {
             truncate(transactional, RPCTableDef.TABLE_NAME);
-          } else if (e == RMLoadDataAccess.class){
+          } else if (e == RMLoadDataAccess.class) {
             truncate(transactional, RMLoadTableDef.TABLE_NAME);
           } else if (e == YarnVariablesDataAccess.class) {
             HopsSession session = obtainSession();
             session.currentTransaction().begin();
-            session.deletePersistentAll(YarnVariablesClusterJ.YarnVariablesDTO.class);
+            session.deletePersistentAll(
+                YarnVariablesClusterJ.YarnVariablesDTO.class);
             for (int j = 0; j <= 18; j++) {
-              YarnVariablesClusterJ.YarnVariablesDTO vd = session.newInstance(YarnVariablesClusterJ.YarnVariablesDTO.class);
+              YarnVariablesClusterJ.YarnVariablesDTO vd = session
+                  .newInstance(YarnVariablesClusterJ.YarnVariablesDTO.class);
               vd.setid(j);
               vd.setvalue(0);
               session.savePersistent(vd);
             }
             session.currentTransaction().commit();
-          }
-          else if (e == PendingEventDataAccess.class){
+          } else if (e == PendingEventDataAccess.class) {
             truncate(transactional, PendingEventTableDef.TABLE_NAME);
-          } else if (e == NextHeartbeatDataAccess.class){
+          } else if (e == NextHeartbeatDataAccess.class) {
             truncate(transactional, NextHeartbeatTableDef.TABLE_NAME);
           }
         }
@@ -556,7 +601,8 @@ public class ClusterjConnector implements StorageConnector<DBSession> {
     return false;
   }
   
-   private void truncate(boolean transactional, String tableName) throws StorageException, SQLException {
-    MysqlServerConnector.truncateTable(transactional,tableName);
+  private void truncate(boolean transactional, String tableName)
+      throws StorageException, SQLException {
+    MysqlServerConnector.truncateTable(transactional, tableName);
   }
 }

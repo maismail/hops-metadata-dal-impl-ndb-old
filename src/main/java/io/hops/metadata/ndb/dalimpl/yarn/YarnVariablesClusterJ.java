@@ -4,20 +4,20 @@ import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
 import io.hops.exception.StorageException;
+import io.hops.metadata.ndb.ClusterjConnector;
 import io.hops.metadata.ndb.wrapper.HopsSession;
+import io.hops.metadata.yarn.dal.YarnVariablesDataAccess;
+import io.hops.metadata.yarn.entity.YarnVariables;
+import io.hops.metadata.yarn.tabledef.YarnVariablesTableDef;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import io.hops.metadata.yarn.entity.YarnVariables;
-import io.hops.metadata.ndb.ClusterjConnector;
-import io.hops.metadata.yarn.dal.YarnVariablesDataAccess;
-import io.hops.metadata.yarn.tabledef.YarnVariablesTableDef;
 
 /**
  * Table with one row that is used to obtain unique ids for tables. This
  * solution can be dropped once ClusterJ implements auto-increment.
  */
-public class YarnVariablesClusterJ implements YarnVariablesTableDef,
-        YarnVariablesDataAccess<YarnVariables> {
+public class YarnVariablesClusterJ
+    implements YarnVariablesTableDef, YarnVariablesDataAccess<YarnVariables> {
 
   private static final Log LOG = LogFactory.getLog(YarnVariablesClusterJ.class);
 
@@ -35,6 +35,7 @@ public class YarnVariablesClusterJ implements YarnVariablesTableDef,
 
     void setvalue(int value);
   }
+
   private final ClusterjConnector connector = ClusterjConnector.getInstance();
 
   @Override
@@ -62,7 +63,7 @@ public class YarnVariablesClusterJ implements YarnVariablesTableDef,
   }
 
   private YarnVariablesDTO createPersistable(YarnVariables yarnVariables,
-          HopsSession session) throws StorageException {
+      HopsSession session) throws StorageException {
     YarnVariablesDTO yarnDTO = session.newInstance(YarnVariablesDTO.class);
     yarnDTO.setid(yarnVariables.getId());
     yarnDTO.setvalue(yarnVariables.getValue());

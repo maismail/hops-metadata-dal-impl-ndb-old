@@ -3,23 +3,23 @@ package io.hops.metadata.ndb.dalimpl.yarn;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
+import io.hops.exception.StorageException;
+import io.hops.metadata.ndb.ClusterjConnector;
+import io.hops.metadata.ndb.wrapper.HopsQuery;
+import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
+import io.hops.metadata.ndb.wrapper.HopsQueryDomainType;
+import io.hops.metadata.ndb.wrapper.HopsSession;
+import io.hops.metadata.yarn.dal.NodeDataAccess;
+import io.hops.metadata.yarn.entity.Node;
+import io.hops.metadata.yarn.tabledef.NodeTableDef;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import io.hops.exception.StorageException;
-import io.hops.metadata.yarn.entity.Node;
-import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
-import io.hops.metadata.ndb.wrapper.HopsQueryDomainType;
-import io.hops.metadata.ndb.wrapper.HopsSession;
-import io.hops.metadata.yarn.dal.NodeDataAccess;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import io.hops.metadata.ndb.ClusterjConnector;
-import io.hops.metadata.ndb.wrapper.HopsQuery;
-import io.hops.metadata.yarn.tabledef.NodeTableDef;
 
 public class NodeClusterJ implements NodeTableDef, NodeDataAccess<Node> {
 
@@ -54,6 +54,7 @@ public class NodeClusterJ implements NodeTableDef, NodeDataAccess<Node> {
 
     void setParent(String parent);
   }
+
   private final ClusterjConnector connector = ClusterjConnector.getInstance();
 
   @Override
@@ -102,8 +103,8 @@ public class NodeClusterJ implements NodeTableDef, NodeDataAccess<Node> {
     session.savePersistent(createPersistable(node, session));
   }
 
-  private NodeDTO createPersistable(Node hopNode, HopsSession session) throws
-          StorageException {
+  private NodeDTO createPersistable(Node hopNode, HopsSession session)
+      throws StorageException {
     NodeDTO nodeDTO = session.newInstance(NodeDTO.class);
     //Set values to persist new rmnode
     nodeDTO.setnodeid(hopNode.getId());
@@ -116,14 +117,15 @@ public class NodeClusterJ implements NodeTableDef, NodeDataAccess<Node> {
 
   /**
    * Transforms a DTO to Hop object.
+   * <p/>
+   * <p/>
    *
-   * <p>
    * @param nodeDTO
    * @return HopRMNode
    */
   public static Node createHopNode(NodeDTO nodeDTO) {
     return new Node(nodeDTO.getnodeid(), nodeDTO.getName(), nodeDTO.
-            getLocation(), nodeDTO.getLevel(), nodeDTO.getParent());
+        getLocation(), nodeDTO.getLevel(), nodeDTO.getParent());
   }
 
   private Map<String, Node> createMap(List<NodeDTO> results) {

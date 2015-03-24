@@ -6,11 +6,9 @@ import com.mysql.clusterj.annotation.PartitionKey;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
 import io.hops.exception.StorageException;
-import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
-import io.hops.metadata.ndb.wrapper.HopsSession;
-import io.hops.metadata.hdfs.entity.INodeIdentifier;
 import io.hops.metadata.hdfs.dal.INodeDataAccess;
 import io.hops.metadata.hdfs.entity.INode;
+import io.hops.metadata.hdfs.entity.INodeIdentifier;
 import io.hops.metadata.hdfs.entity.ProjectedINode;
 import io.hops.metadata.hdfs.tabledef.INodeTableDef;
 import io.hops.metadata.ndb.ClusterjConnector;
@@ -20,7 +18,9 @@ import io.hops.metadata.ndb.mysqlserver.MySQLQueryHelper;
 import io.hops.metadata.ndb.mysqlserver.MysqlServerConnector;
 import io.hops.metadata.ndb.wrapper.HopsPredicate;
 import io.hops.metadata.ndb.wrapper.HopsQuery;
+import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
 import io.hops.metadata.ndb.wrapper.HopsQueryDomainType;
+import io.hops.metadata.ndb.wrapper.HopsSession;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -38,22 +38,25 @@ public class INodeClusterj implements INodeTableDef, INodeDataAccess<INode> {
   }
 
   @PersistenceCapable(table = TABLE_NAME)
-  @PartitionKey(column=PARENT_ID)
+  @PartitionKey(column = PARENT_ID)
   @Index(name = "inode_idx")
   public interface InodeDTO {
     @Column(name = ID)
     int getId();     // id of the inode
+
     void setId(int id);
 
     @PrimaryKey
     @Column(name = NAME)
     String getName();     //name of the inode
+
     void setName(String name);
 
     //id of the parent inode 
     @PrimaryKey
     @Column(name = PARENT_ID)
     int getParentId();     // id of the inode
+
     void setParentId(int parentid);
 
     // Inode
@@ -131,11 +134,13 @@ public class INodeClusterj implements INodeTableDef, INodeDataAccess<INode> {
   }
 
   private ClusterjConnector connector = ClusterjConnector.getInstance();
-  private MysqlServerConnector mysqlConnector = MysqlServerConnector.getInstance();
+  private MysqlServerConnector mysqlConnector =
+      MysqlServerConnector.getInstance();
   private final static int NOT_FOUND_ROW = -1000;
   
   @Override
-  public void prepare(Collection<INode> removed, Collection<INode> newEntries, Collection<INode> modified) throws StorageException {
+  public void prepare(Collection<INode> removed, Collection<INode> newEntries,
+      Collection<INode> modified) throws StorageException {
     HopsSession session = connector.obtainSession();
     List<InodeDTO> changes = new ArrayList<InodeDTO>();
     List<InodeDTO> deletions = new ArrayList<InodeDTO>();
@@ -168,7 +173,8 @@ public class INodeClusterj implements INodeTableDef, INodeDataAccess<INode> {
     HopsSession session = connector.obtainSession();
 
     HopsQueryBuilder qb = session.getQueryBuilder();
-    HopsQueryDomainType<InodeDTO> dobj = qb.createQueryDefinition(InodeDTO.class);
+    HopsQueryDomainType<InodeDTO> dobj =
+        qb.createQueryDefinition(InodeDTO.class);
     HopsPredicate pred1 = dobj.get("id").equal(dobj.param("idParam"));
     dobj.where(pred1);
 
@@ -177,24 +183,27 @@ public class INodeClusterj implements INodeTableDef, INodeDataAccess<INode> {
 
     List<InodeDTO> results = query.getResultList();
     explain(query);
-    if (results.size() > 1){
+    if (results.size() > 1) {
       throw new StorageException("Only one record was expected");
     }
-    if (results.size() == 1){
+    if (results.size() == 1) {
       return createInode(results.get(0));
-    } else{
+    } else {
       return null;
     }
   }
 
   @Override
-  public List<INode> indexScanFindInodesByParentId(int parentId) throws StorageException {
+  public List<INode> indexScanFindInodesByParentId(int parentId)
+      throws StorageException {
     //System.out.println("*** indexScanFindInodesByParentId ");
     HopsSession session = connector.obtainSession();
 
     HopsQueryBuilder qb = session.getQueryBuilder();
-    HopsQueryDomainType<InodeDTO> dobj = qb.createQueryDefinition(InodeDTO.class);
-    HopsPredicate pred1 = dobj.get("parentId").equal(dobj.param("parentIDParam"));
+    HopsQueryDomainType<InodeDTO> dobj =
+        qb.createQueryDefinition(InodeDTO.class);
+    HopsPredicate pred1 =
+        dobj.get("parentId").equal(dobj.param("parentIDParam"));
     dobj.where(pred1);
     HopsQuery<InodeDTO> query = session.createQuery(dobj);
     query.setParameter("parentIDParam", parentId);
@@ -205,10 +214,13 @@ public class INodeClusterj implements INodeTableDef, INodeDataAccess<INode> {
   }
 
   @Override
-  public List<ProjectedINode> findInodesForSubtreeOperationsWithReadLock(int parentId) throws StorageException {
-    final String query = String.format("SELECT %s, %s, %s, %s, %s, %s, %s, %s, %s, %s FROM %s WHERE %s=%d LOCK IN SHARE MODE",
-        ID, NAME, PARENT_ID, PERMISSION, HEADER, SYMLINK, QUOTA_ENABLED, UNDER_CONSTRUCTION,
-        SUBTREE_LOCKED, SUBTREE_LOCK_OWNER, TABLE_NAME, PARENT_ID, parentId);
+  public List<ProjectedINode> findInodesForSubtreeOperationsWithReadLock(
+      int parentId) throws StorageException {
+    final String query = String.format(
+        "SELECT %s, %s, %s, %s, %s, %s, %s, %s, %s, %s FROM %s WHERE %s=%d LOCK IN SHARE MODE",
+        ID, NAME, PARENT_ID, PERMISSION, HEADER, SYMLINK, QUOTA_ENABLED,
+        UNDER_CONSTRUCTION, SUBTREE_LOCKED, SUBTREE_LOCK_OWNER, TABLE_NAME,
+        PARENT_ID, parentId);
     ArrayList<ProjectedINode> resultList;
     try {
       Connection conn = mysqlConnector.obtainSession();
@@ -217,17 +229,15 @@ public class INodeClusterj implements INodeTableDef, INodeDataAccess<INode> {
       resultList = new ArrayList<ProjectedINode>();
 
       while (result.next()) {
-        resultList.add(new ProjectedINode(
-            result.getInt(ID),
-            result.getInt(PARENT_ID),
-            result.getString(NAME),
-            result.getBytes(PERMISSION),
-            result.getLong(HEADER),
-            result.getString(SYMLINK) == null ? false : true,
-            result.getBoolean(QUOTA_ENABLED),
-            result.getBoolean(UNDER_CONSTRUCTION),
-            result.getBoolean(SUBTREE_LOCKED),
-            result.getLong(SUBTREE_LOCK_OWNER)));
+        resultList.add(
+            new ProjectedINode(result.getInt(ID), result.getInt(PARENT_ID),
+                result.getString(NAME), result.getBytes(PERMISSION),
+                result.getLong(HEADER),
+                result.getString(SYMLINK) == null ? false : true,
+                result.getBoolean(QUOTA_ENABLED),
+                result.getBoolean(UNDER_CONSTRUCTION),
+                result.getBoolean(SUBTREE_LOCKED),
+                result.getLong(SUBTREE_LOCK_OWNER)));
       }
     } catch (SQLException ex) {
       throw HopsSQLExceptionHelper.wrap(ex);
@@ -238,7 +248,8 @@ public class INodeClusterj implements INodeTableDef, INodeDataAccess<INode> {
   }
 
   @Override
-  public INode pkLookUpFindInodeByNameAndParentId(String name, int parentId) throws StorageException {
+  public INode pkLookUpFindInodeByNameAndParentId(String name, int parentId)
+      throws StorageException {
     HopsSession session = connector.obtainSession();
 
     Object[] pk = new Object[2];
@@ -246,20 +257,21 @@ public class INodeClusterj implements INodeTableDef, INodeDataAccess<INode> {
     pk[1] = name;
 
     InodeDTO result = session.find(InodeDTO.class, pk);
-    if(result != null){
+    if (result != null) {
       return createInode(result);
-    }else{
+    } else {
       return null;
     }
   }
 
   @Override
-  public List<INode> getINodesPkBatched(String[] names, int[] parentIds) throws StorageException {
+  public List<INode> getINodesPkBatched(String[] names, int[] parentIds)
+      throws StorageException {
     HopsSession session = connector.obtainSession();
     List<InodeDTO> dtos = new ArrayList<InodeDTO>();
     for (int i = 0; i < names.length; i++) {
-      InodeDTO dto = session.newInstance(InodeDTO.class,
-          new Object[]{parentIds[i], names[i]});
+      InodeDTO dto = session
+          .newInstance(InodeDTO.class, new Object[]{parentIds[i], names[i]});
       dto.setId(NOT_FOUND_ROW);
       dto = session.load(dto);
       dtos.add(dto);
@@ -269,62 +281,68 @@ public class INodeClusterj implements INodeTableDef, INodeDataAccess<INode> {
   }
   
   @Override
-  public List<INodeIdentifier> getAllINodeFiles(long startId, long endId) throws StorageException {
+  public List<INodeIdentifier> getAllINodeFiles(long startId, long endId)
+      throws StorageException {
     HopsSession session = connector.obtainSession();
     HopsQueryBuilder qb = session.getQueryBuilder();
-    HopsQueryDomainType<InodeDTO> dobj = qb.createQueryDefinition(InodeDTO.class);
+    HopsQueryDomainType<InodeDTO> dobj =
+        qb.createQueryDefinition(InodeDTO.class);
     HopsPredicate pred = dobj.get("header").equal(dobj.param("isDirParam"));
-    HopsPredicate pred2 = dobj.get("id").between(dobj.param("startId"), dobj.param("endId"));
+    HopsPredicate pred2 =
+        dobj.get("id").between(dobj.param("startId"), dobj.param("endId"));
     dobj.where(pred.not().and(pred2));
     HopsQuery<InodeDTO> query = session.createQuery(dobj);
     query.setParameter("isDirParam", 0L);
     //FIXME: InodeId is integer
     //startId is inclusive and endId exclusive
-    query.setParameter("startId", (int)startId);
-    query.setParameter("endId", (int)(endId-1));
+    query.setParameter("startId", (int) startId);
+    query.setParameter("endId", (int) (endId - 1));
     List<InodeDTO> dtos = query.getResultList();
     List<INodeIdentifier> res = new ArrayList<INodeIdentifier>();
-    for(InodeDTO dto : dtos){
-      res.add(new INodeIdentifier(dto.getId(), dto.getParentId(), dto.getName()));
+    for (InodeDTO dto : dtos) {
+      res.add(
+          new INodeIdentifier(dto.getId(), dto.getParentId(), dto.getName()));
     }
     return res;
   }
   
   
   @Override
-  public boolean haveFilesWithIdsBetween(long startId, long endId) throws StorageException {
-    return MySQLQueryHelper.exists(TABLE_NAME, String.format("%s<>0 and %s " +
-        "between %d and %d", HEADER, ID, startId, (endId - 1)));
+  public boolean haveFilesWithIdsBetween(long startId, long endId)
+      throws StorageException {
+    return MySQLQueryHelper.exists(TABLE_NAME, String
+        .format("%s<>0 and %s " + "between %d and %d", HEADER, ID, startId,
+            (endId - 1)));
   }
   
   @Override
   public boolean haveFilesWithIdsGreaterThan(long id) throws StorageException {
-     return MySQLQueryHelper.exists(TABLE_NAME, String.format("%s<>0 and " +
-         "%s>%d", HEADER, ID, id));
+    return MySQLQueryHelper.exists(TABLE_NAME,
+        String.format("%s<>0 and " + "%s>%d", HEADER, ID, id));
   }
   
   @Override
   public long getMinFileId() throws StorageException {
-    return MySQLQueryHelper.minInt(TABLE_NAME, ID, String.format("%s<>0",
-        HEADER));
+    return MySQLQueryHelper
+        .minInt(TABLE_NAME, ID, String.format("%s<>0", HEADER));
   }
 
   @Override
   public long getMaxFileId() throws StorageException {
-    return MySQLQueryHelper.maxInt(TABLE_NAME, ID, String.format("%s<>0",
-        HEADER));
+    return MySQLQueryHelper
+        .maxInt(TABLE_NAME, ID, String.format("%s<>0", HEADER));
   }
 
   @Override
   public int countAllFiles() throws StorageException {
-    return MySQLQueryHelper.countWithCriterion(TABLE_NAME, String.format
-        ("%s<>0", HEADER));
+    return MySQLQueryHelper
+        .countWithCriterion(TABLE_NAME, String.format("%s<>0", HEADER));
   }
   
   private List<INode> createInodeList(List<InodeDTO> list) {
     List<INode> inodes = new ArrayList<INode>();
     for (InodeDTO persistable : list) {
-      if(persistable.getId() != NOT_FOUND_ROW){
+      if (persistable.getId() != NOT_FOUND_ROW) {
         inodes.add(createInode(persistable));
       }
     }
@@ -332,21 +350,14 @@ public class INodeClusterj implements INodeTableDef, INodeDataAccess<INode> {
   }
 
   private INode createInode(InodeDTO persistable) {
-    return new INode(
-        persistable.getId(),
-        persistable.getName(),
+    return new INode(persistable.getId(), persistable.getName(),
         persistable.getParentId(),
         NdbBoolean.convert(persistable.getQuotaEnabled()),
-        persistable.getModificationTime(),
-        persistable.getATime(),
-        persistable.getPermission(),
-        persistable.getUnderConstruction(),
-        persistable.getClientName(),
-        persistable.getClientMachine(),
-        persistable.getClientNode(),
-        persistable.getGenerationStamp(),
-        persistable.getHeader(),
-        persistable.getSymlink(),
+        persistable.getModificationTime(), persistable.getATime(),
+        persistable.getPermission(), persistable.getUnderConstruction(),
+        persistable.getClientName(), persistable.getClientMachine(),
+        persistable.getClientNode(), persistable.getGenerationStamp(),
+        persistable.getHeader(), persistable.getSymlink(),
         NdbBoolean.convert(persistable.getSubtreeLocked()),
         persistable.getSubtreeLockOwner());
   }
@@ -370,11 +381,11 @@ public class INodeClusterj implements INodeTableDef, INodeDataAccess<INode> {
     persistable.setSubtreeLockOwner(inode.getSubtreeLockOwner());
   }
 
-  private void explain(HopsQuery<InodeDTO> query){
-//      Map<String,Object> map = query.explain();
-//      System.out.println("Explain");
-//      System.out.println("keys " +Arrays.toString(map.keySet().toArray()));
-//      System.out.println("values "+ Arrays.toString(map.values().toArray()));
+  private void explain(HopsQuery<InodeDTO> query) {
+    //      Map<String,Object> map = query.explain();
+    //      System.out.println("Explain");
+    //      System.out.println("keys " +Arrays.toString(map.keySet().toArray()));
+    //      System.out.println("values "+ Arrays.toString(map.values().toArray()));
   }
 
 }

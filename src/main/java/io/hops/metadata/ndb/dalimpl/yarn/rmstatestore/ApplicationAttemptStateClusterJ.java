@@ -3,6 +3,17 @@ package io.hops.metadata.ndb.dalimpl.yarn.rmstatestore;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
+import io.hops.exception.StorageException;
+import io.hops.metadata.ndb.ClusterjConnector;
+import io.hops.metadata.ndb.wrapper.HopsQuery;
+import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
+import io.hops.metadata.ndb.wrapper.HopsQueryDomainType;
+import io.hops.metadata.ndb.wrapper.HopsSession;
+import io.hops.metadata.yarn.dal.rmstatestore.ApplicationAttemptStateDataAccess;
+import io.hops.metadata.yarn.entity.rmstatestore.ApplicationAttemptState;
+import io.hops.metadata.yarn.tabledef.rmstatestore.ApplicationAttemptStateTableDef;
+import io.hops.util.CompressionUtils;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -12,19 +23,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.zip.DataFormatException;
 
-import io.hops.exception.StorageException;
-import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
-import io.hops.metadata.ndb.wrapper.HopsQueryDomainType;
-import io.hops.metadata.ndb.wrapper.HopsSession;
-import io.hops.metadata.yarn.tabledef.rmstatestore.ApplicationAttemptStateTableDef;
-import io.hops.util.CompressionUtils;
-import io.hops.metadata.yarn.entity.rmstatestore.ApplicationAttemptState;
-import io.hops.metadata.ndb.ClusterjConnector;
-import io.hops.metadata.ndb.wrapper.HopsQuery;
-import io.hops.metadata.yarn.dal.rmstatestore.ApplicationAttemptStateDataAccess;
-
-public class ApplicationAttemptStateClusterJ implements
-    ApplicationAttemptStateTableDef, ApplicationAttemptStateDataAccess<ApplicationAttemptState> {
+public class ApplicationAttemptStateClusterJ
+    implements ApplicationAttemptStateTableDef,
+    ApplicationAttemptStateDataAccess<ApplicationAttemptState> {
 
   @PersistenceCapable(table = TABLE_NAME)
   public interface ApplicationAttemptStateDTO {
@@ -65,32 +66,35 @@ public class ApplicationAttemptStateClusterJ implements
 
     void setapplicationattempttrakingurl(String trakingUrl);
   }
+
   private final ClusterjConnector connector = ClusterjConnector.getInstance();
- @Override
-    public ApplicationAttemptState findEntry(String applicationid, String applicationattemptid) throws
-     StorageException {
-        HopsSession session = connector.obtainSession();
-        Object[] objarr = new Object[2];
-        objarr[0] = applicationid;
-        objarr[1] = applicationattemptid;
-        ApplicationAttemptStateClusterJ.ApplicationAttemptStateDTO entry;
-        if (session != null) {
-            entry = session.find(ApplicationAttemptStateClusterJ.ApplicationAttemptStateDTO.class, objarr);
-            if (entry != null) {
-              return createHopApplicationAttemptState(entry);         
-            }
-        }
-        return null;        
-    }
 
   @Override
-  public Map<String, List<ApplicationAttemptState>> getAll() throws
-          StorageException {
+  public ApplicationAttemptState findEntry(String applicationid,
+      String applicationattemptid) throws StorageException {
+    HopsSession session = connector.obtainSession();
+    Object[] objarr = new Object[2];
+    objarr[0] = applicationid;
+    objarr[1] = applicationattemptid;
+    ApplicationAttemptStateClusterJ.ApplicationAttemptStateDTO entry;
+    if (session != null) {
+      entry = session.find(
+          ApplicationAttemptStateClusterJ.ApplicationAttemptStateDTO.class,
+          objarr);
+      if (entry != null) {
+        return createHopApplicationAttemptState(entry);
+      }
+    }
+    return null;
+  }
+
+  @Override
+  public Map<String, List<ApplicationAttemptState>> getAll()
+      throws StorageException {
     HopsSession session = connector.obtainSession();
     HopsQueryBuilder qb = session.getQueryBuilder();
     HopsQueryDomainType<ApplicationAttemptStateDTO> dobj = qb.
-            createQueryDefinition(
-                    ApplicationAttemptStateDTO.class);
+        createQueryDefinition(ApplicationAttemptStateDTO.class);
     HopsQuery<ApplicationAttemptStateDTO> query = session.createQuery(dobj);
     List<ApplicationAttemptStateDTO> results = query.getResultList();
 
@@ -98,18 +102,18 @@ public class ApplicationAttemptStateClusterJ implements
   }
 
   @Override
-  public void createApplicationAttemptStateEntry(
-          ApplicationAttemptState entry) throws StorageException {
+  public void createApplicationAttemptStateEntry(ApplicationAttemptState entry)
+      throws StorageException {
     HopsSession session = connector.obtainSession();
     session.savePersistent(createPersistable(entry, session));
   }
 
   @Override
-  public void addAll(Collection<ApplicationAttemptState> toAdd) throws
-          StorageException {
+  public void addAll(Collection<ApplicationAttemptState> toAdd)
+      throws StorageException {
     HopsSession session = connector.obtainSession();
-    List<ApplicationAttemptStateDTO> toPersist
-            = new ArrayList<ApplicationAttemptStateDTO>();
+    List<ApplicationAttemptStateDTO> toPersist =
+        new ArrayList<ApplicationAttemptStateDTO>();
     for (ApplicationAttemptState req : toAdd) {
       toPersist.add(createPersistable(req, session));
     }
@@ -117,24 +121,24 @@ public class ApplicationAttemptStateClusterJ implements
   }
 
   @Override
-  public void removeAll(Collection<ApplicationAttemptState> removed) throws
-          StorageException {
+  public void removeAll(Collection<ApplicationAttemptState> removed)
+      throws StorageException {
     HopsSession session = connector.obtainSession();
-    List<ApplicationAttemptStateDTO> toRemove
-            = new ArrayList<ApplicationAttemptStateDTO>();
+    List<ApplicationAttemptStateDTO> toRemove =
+        new ArrayList<ApplicationAttemptStateDTO>();
     for (ApplicationAttemptState hop : removed) {
       Object[] objarr = new Object[2];
       objarr[0] = hop.getApplicationId();
       objarr[1] = hop.getApplicationattemptid();
       toRemove.add(session.newInstance(
-              ApplicationAttemptStateClusterJ.ApplicationAttemptStateDTO.class,
-              objarr));
+          ApplicationAttemptStateClusterJ.ApplicationAttemptStateDTO.class,
+          objarr));
     }
     session.deletePersistentAll(toRemove);
   }
 
   private ApplicationAttemptState createHopApplicationAttemptState(
-          ApplicationAttemptStateDTO entry) throws StorageException {
+      ApplicationAttemptStateDTO entry) throws StorageException {
     ByteBuffer buffer;
     if (entry.getapplicationattempttokens() != null) {
       buffer = ByteBuffer.wrap(entry.getapplicationattempttokens());
@@ -143,12 +147,11 @@ public class ApplicationAttemptStateClusterJ implements
     }
     try {
       return new ApplicationAttemptState(entry.getapplicationid(),
-              entry.getapplicationattemptid(),
-              CompressionUtils.decompress(entry.getapplicationattemptstate()),
-              entry.getapplicationattempthost(),
-              entry.getapplicationattemptrpcport(),
-              buffer,
-              entry.getapplicationattempttrakingurl());
+          entry.getapplicationattemptid(),
+          CompressionUtils.decompress(entry.getapplicationattemptstate()),
+          entry.getapplicationattempthost(),
+          entry.getapplicationattemptrpcport(), buffer,
+          entry.getapplicationattempttrakingurl());
     } catch (IOException e) {
       throw new StorageException(e);
     } catch (DataFormatException e) {
@@ -157,19 +160,19 @@ public class ApplicationAttemptStateClusterJ implements
   }
 
   private ApplicationAttemptStateDTO createPersistable(
-          ApplicationAttemptState hop, HopsSession session) throws
-          StorageException {
-    ApplicationAttemptStateClusterJ.ApplicationAttemptStateDTO applicationAttemptStateDTO
-            = session.newInstance(
-                    ApplicationAttemptStateClusterJ.ApplicationAttemptStateDTO.class);
+      ApplicationAttemptState hop, HopsSession session)
+      throws StorageException {
+    ApplicationAttemptStateClusterJ.ApplicationAttemptStateDTO
+        applicationAttemptStateDTO = session.newInstance(
+        ApplicationAttemptStateClusterJ.ApplicationAttemptStateDTO.class);
 
     applicationAttemptStateDTO.setapplicationid(hop.getApplicationId());
     applicationAttemptStateDTO.setapplicationattemptid(hop.
-            getApplicationattemptid());
+        getApplicationattemptid());
     try {
       applicationAttemptStateDTO.setapplicationattemptstate(CompressionUtils.
-              compress(hop.
-                      getApplicationattemptstate()));
+          compress(hop.
+              getApplicationattemptstate()));
     } catch (IOException e) {
       throw new StorageException(e);
     }
@@ -177,23 +180,22 @@ public class ApplicationAttemptStateClusterJ implements
     applicationAttemptStateDTO.setapplicationattemptrpcport(hop.getRpcPort());
     if (hop.getAppAttemptTokens() != null) {
       applicationAttemptStateDTO.setapplicationattempttokens(hop.
-              getAppAttemptTokens().array());
+          getAppAttemptTokens().array());
     }
     applicationAttemptStateDTO.setapplicationattempttrakingurl(hop.getUrl());
     return applicationAttemptStateDTO;
   }
 
-  private Map<String, List<ApplicationAttemptState>>
-          createMap(List<ApplicationAttemptStateDTO> results) throws
-          StorageException {
-    Map<String, List<ApplicationAttemptState>> map
-            = new HashMap<String, List<ApplicationAttemptState>>();
+  private Map<String, List<ApplicationAttemptState>> createMap(
+      List<ApplicationAttemptStateDTO> results) throws StorageException {
+    Map<String, List<ApplicationAttemptState>> map =
+        new HashMap<String, List<ApplicationAttemptState>>();
     for (ApplicationAttemptStateDTO persistable : results) {
-      ApplicationAttemptState hop
-              = createHopApplicationAttemptState(persistable);
+      ApplicationAttemptState hop =
+          createHopApplicationAttemptState(persistable);
       if (map.get(hop.getApplicationId()) == null) {
         map.put(hop.getApplicationId(),
-                new ArrayList<ApplicationAttemptState>());
+            new ArrayList<ApplicationAttemptState>());
       }
       map.get(hop.getApplicationId()).add(hop);
     }

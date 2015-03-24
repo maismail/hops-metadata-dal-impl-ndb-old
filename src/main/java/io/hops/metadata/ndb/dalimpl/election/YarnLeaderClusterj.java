@@ -3,16 +3,17 @@ package io.hops.metadata.ndb.dalimpl.election;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
-import java.security.InvalidParameterException;
-
 import io.hops.metadata.election.entity.LeDescriptor;
 import io.hops.metadata.election.tabledef.LeDescriptorTableDef;
 import io.hops.metadata.election.tabledef.YarnLeaderTableDef;
 
-public class YarnLeaderClusterj extends LeDescriptorClusterj implements YarnLeaderTableDef {
+import java.security.InvalidParameterException;
+
+public class YarnLeaderClusterj extends LeDescriptorClusterj
+    implements YarnLeaderTableDef {
 
   @PersistenceCapable(table = TABLE_NAME)
-  public interface YarnLeaderDTO extends LeaderDTO{
+  public interface YarnLeaderDTO extends LeaderDTO {
 
     @PrimaryKey
     @Column(name = LeDescriptorTableDef.ID)
@@ -49,12 +50,10 @@ public class YarnLeaderClusterj extends LeDescriptorClusterj implements YarnLead
       throw new InvalidParameterException("Psrtition key should be zero");
     }
     return new LeDescriptor.YarnLeDescriptor(lTable.getId(),
-            lTable.getCounter(),
-            lTable.getHostname(),
-            lTable.getHttpAddress());
+        lTable.getCounter(), lTable.getHostname(), lTable.getHttpAddress());
   }
-   
-    public YarnLeaderClusterj(){
-        super(YarnLeaderDTO.class);
-    }
+
+  public YarnLeaderClusterj() {
+    super(YarnLeaderDTO.class);
+  }
 }

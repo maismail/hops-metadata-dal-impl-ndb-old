@@ -14,8 +14,8 @@ public class HopsQueryDefinition<E> {
   public HopsQueryDefinition<E> where(HopsPredicate predicate)
       throws StorageException {
     try {
-      return new HopsQueryDefinition<E>(queryDefinition.where(predicate
-          .getPredicate()));
+      return new HopsQueryDefinition<E>(
+          queryDefinition.where(predicate.getPredicate()));
     } catch (ClusterJException e) {
       throw HopsExceptionHelper.wrap(e);
     }

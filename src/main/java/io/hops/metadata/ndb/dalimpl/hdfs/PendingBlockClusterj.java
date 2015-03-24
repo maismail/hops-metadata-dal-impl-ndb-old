@@ -9,21 +9,21 @@ import io.hops.exception.StorageException;
 import io.hops.metadata.hdfs.dal.PendingBlockDataAccess;
 import io.hops.metadata.hdfs.entity.PendingBlockInfo;
 import io.hops.metadata.hdfs.tabledef.PendingBlockTableDef;
-import io.hops.metadata.ndb.mysqlserver.MySQLQueryHelper;
-import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
-import io.hops.metadata.ndb.wrapper.HopsQueryDomainType;
-import io.hops.metadata.ndb.wrapper.HopsSession;
 import io.hops.metadata.ndb.ClusterjConnector;
+import io.hops.metadata.ndb.mysqlserver.MySQLQueryHelper;
 import io.hops.metadata.ndb.wrapper.HopsPredicate;
 import io.hops.metadata.ndb.wrapper.HopsPredicateOperand;
 import io.hops.metadata.ndb.wrapper.HopsQuery;
+import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
+import io.hops.metadata.ndb.wrapper.HopsQueryDomainType;
+import io.hops.metadata.ndb.wrapper.HopsSession;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public class PendingBlockClusterj implements PendingBlockTableDef,
-    PendingBlockDataAccess<PendingBlockInfo> {
+public class PendingBlockClusterj
+    implements PendingBlockTableDef, PendingBlockDataAccess<PendingBlockInfo> {
 
   @Override
   public int countValidPendingBlocks(long timeLimit) throws StorageException {
@@ -32,11 +32,13 @@ public class PendingBlockClusterj implements PendingBlockTableDef,
   }
 
   @Override
-  public List<PendingBlockInfo> findByINodeId(int inodeId) throws StorageException {
+  public List<PendingBlockInfo> findByINodeId(int inodeId)
+      throws StorageException {
     HopsSession session = connector.obtainSession();
 
     HopsQueryBuilder qb = session.getQueryBuilder();
-    HopsQueryDomainType<PendingBlockDTO> qdt = qb.createQueryDefinition(PendingBlockDTO.class);
+    HopsQueryDomainType<PendingBlockDTO> qdt =
+        qb.createQueryDefinition(PendingBlockDTO.class);
 
     HopsPredicate pred1 = qdt.get("iNodeId").equal(qdt.param("idParam"));
     qdt.where(pred1);
@@ -48,11 +50,13 @@ public class PendingBlockClusterj implements PendingBlockTableDef,
   }
 
   @Override
-  public List<PendingBlockInfo> findByINodeIds(int[] inodeIds) throws StorageException {
+  public List<PendingBlockInfo> findByINodeIds(int[] inodeIds)
+      throws StorageException {
     HopsSession session = connector.obtainSession();
 
     HopsQueryBuilder qb = session.getQueryBuilder();
-    HopsQueryDomainType<PendingBlockDTO> qdt = qb.createQueryDefinition(PendingBlockDTO.class);
+    HopsQueryDomainType<PendingBlockDTO> qdt =
+        qb.createQueryDefinition(PendingBlockDTO.class);
 
     HopsPredicate pred1 = qdt.get("iNodeId").in(qdt.param("idParam"));
     qdt.where(pred1);
@@ -64,31 +68,38 @@ public class PendingBlockClusterj implements PendingBlockTableDef,
   }
 
   @PersistenceCapable(table = TABLE_NAME)
-  @PartitionKey(column=INODE_ID)
+  @PartitionKey(column = INODE_ID)
   public interface PendingBlockDTO {
 
     @PrimaryKey
     @Column(name = INODE_ID)
     int getINodeId();
+
     void setINodeId(int inodeId);
     
     @PrimaryKey
     @Column(name = BLOCK_ID)
     long getBlockId();
+
     void setBlockId(long blockId);
 
     @Column(name = TIME_STAMP)
     long getTimestamp();
+
     void setTimestamp(long timestamp);
 
     @Column(name = NUM_REPLICAS_IN_PROGRESS)
     int getNumReplicasInProgress();
+
     void setNumReplicasInProgress(int numReplicasInProgress);
   }
+
   private ClusterjConnector connector = ClusterjConnector.getInstance();
 
   @Override
-  public void prepare(Collection<PendingBlockInfo> removed, Collection<PendingBlockInfo> newed, Collection<PendingBlockInfo> modified) throws StorageException {
+  public void prepare(Collection<PendingBlockInfo> removed,
+      Collection<PendingBlockInfo> newed, Collection<PendingBlockInfo> modified)
+      throws StorageException {
     HopsSession session = connector.obtainSession();
     List<PendingBlockDTO> changes = new ArrayList<PendingBlockDTO>();
     List<PendingBlockDTO> deletions = new ArrayList<PendingBlockDTO>();
@@ -113,7 +124,8 @@ public class PendingBlockClusterj implements PendingBlockTableDef,
   }
 
   @Override
-  public PendingBlockInfo findByPKey(long blockId, int inodeId) throws StorageException {
+  public PendingBlockInfo findByPKey(long blockId, int inodeId)
+      throws StorageException {
     HopsSession session = connector.obtainSession();
     Object[] pk = new Object[2];
     pk[0] = inodeId;
@@ -133,16 +145,17 @@ public class PendingBlockClusterj implements PendingBlockTableDef,
     HopsSession session = connector.obtainSession();
     HopsQueryBuilder qb = session.getQueryBuilder();
     HopsQuery<PendingBlockDTO> query =
-        session.createQuery(
-            qb.createQueryDefinition(PendingBlockDTO.class));
+        session.createQuery(qb.createQueryDefinition(PendingBlockDTO.class));
     return createList(query.getResultList());
   }
 
   @Override
-  public List<PendingBlockInfo> findByTimeLimitLessThan(long timeLimit) throws StorageException {
+  public List<PendingBlockInfo> findByTimeLimitLessThan(long timeLimit)
+      throws StorageException {
     HopsSession session = connector.obtainSession();
     HopsQueryBuilder qb = session.getQueryBuilder();
-    HopsQueryDomainType<PendingBlockDTO> qdt = qb.createQueryDefinition(PendingBlockDTO.class);
+    HopsQueryDomainType<PendingBlockDTO> qdt =
+        qb.createQueryDefinition(PendingBlockDTO.class);
     HopsPredicateOperand predicateOp = qdt.get("timestamp");
     String paramName = "timelimit";
     HopsPredicateOperand param = qdt.param(paramName);
@@ -167,12 +180,15 @@ public class PendingBlockClusterj implements PendingBlockTableDef,
     return list;
   }
 
-  private PendingBlockInfo createHopPendingBlockInfo(PendingBlockDTO pendingTable) {
-    return new PendingBlockInfo(pendingTable.getBlockId(),pendingTable.getINodeId(),
-        pendingTable.getTimestamp(), pendingTable.getNumReplicasInProgress());
+  private PendingBlockInfo createHopPendingBlockInfo(
+      PendingBlockDTO pendingTable) {
+    return new PendingBlockInfo(pendingTable.getBlockId(),
+        pendingTable.getINodeId(), pendingTable.getTimestamp(),
+        pendingTable.getNumReplicasInProgress());
   }
 
-  private void createPersistableHopPendingBlockInfo(PendingBlockInfo pendingBlock, PendingBlockDTO pendingTable) {
+  private void createPersistableHopPendingBlockInfo(
+      PendingBlockInfo pendingBlock, PendingBlockDTO pendingTable) {
     pendingTable.setBlockId(pendingBlock.getBlockId());
     pendingTable.setNumReplicasInProgress(pendingBlock.getNumReplicas());
     pendingTable.setTimestamp(pendingBlock.getTimeStamp());

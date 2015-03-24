@@ -15,7 +15,8 @@ public class HopsQueryBuilder {
   public <T> HopsQueryDomainType<T> createQueryDefinition(Class<T> aClass)
       throws StorageException {
     try {
-      QueryDomainType<T> queryDomainType = queryBuilder.createQueryDefinition(aClass);
+      QueryDomainType<T> queryDomainType =
+          queryBuilder.createQueryDefinition(aClass);
       return new HopsQueryDomainType<T>(queryDomainType);
     } catch (ClusterJException e) {
       throw HopsExceptionHelper.wrap(e);

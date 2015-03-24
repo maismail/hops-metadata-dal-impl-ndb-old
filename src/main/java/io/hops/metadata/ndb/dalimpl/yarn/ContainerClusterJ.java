@@ -3,6 +3,17 @@ package io.hops.metadata.ndb.dalimpl.yarn;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
+import io.hops.exception.StorageException;
+import io.hops.metadata.ndb.ClusterjConnector;
+import io.hops.metadata.ndb.wrapper.HopsQuery;
+import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
+import io.hops.metadata.ndb.wrapper.HopsQueryDomainType;
+import io.hops.metadata.ndb.wrapper.HopsSession;
+import io.hops.metadata.yarn.dal.ContainerDataAccess;
+import io.hops.metadata.yarn.entity.Container;
+import io.hops.metadata.yarn.tabledef.ContainerTableDef;
+import io.hops.util.CompressionUtils;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -11,19 +22,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.zip.DataFormatException;
 
-import io.hops.exception.StorageException;
-import io.hops.metadata.yarn.entity.Container;
-import io.hops.metadata.ndb.ClusterjConnector;
-import io.hops.metadata.ndb.wrapper.HopsQuery;
-import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
-import io.hops.metadata.ndb.wrapper.HopsQueryDomainType;
-import io.hops.metadata.ndb.wrapper.HopsSession;
-import io.hops.metadata.yarn.dal.ContainerDataAccess;
-import io.hops.metadata.yarn.tabledef.ContainerTableDef;
-import io.hops.util.CompressionUtils;
-
-public class ContainerClusterJ implements ContainerTableDef,
-    ContainerDataAccess<Container> {
+public class ContainerClusterJ
+    implements ContainerTableDef, ContainerDataAccess<Container> {
 
   @PersistenceCapable(table = TABLE_NAME)
   public interface ContainerDTO {
@@ -39,19 +39,19 @@ public class ContainerClusterJ implements ContainerTableDef,
 
     void setcontainerstate(byte[] containerstate);
   }
+
   private final ClusterjConnector connector = ClusterjConnector.getInstance();
 
   @Override
   public Map<String, Container> getAll() throws StorageException {
     HopsSession session = connector.obtainSession();
     HopsQueryBuilder qb = session.getQueryBuilder();
-    HopsQueryDomainType<ContainerDTO> dobj
-            = qb.createQueryDefinition(
-                    ContainerDTO.class);
+    HopsQueryDomainType<ContainerDTO> dobj =
+        qb.createQueryDefinition(ContainerDTO.class);
     HopsQuery<ContainerDTO> query = session.
-            createQuery(dobj);
+        createQuery(dobj);
     List<ContainerDTO> results = query.
-            getResultList();
+        getResultList();
     return createMap(results);
   }
 
@@ -75,11 +75,11 @@ public class ContainerClusterJ implements ContainerTableDef,
   }
 
   private Container createHopContainer(ContainerDTO containerDTO)
-          throws StorageException {
+      throws StorageException {
     Container hop = null;
     try {
       hop = new Container(containerDTO.getcontainerid(),
-              CompressionUtils.decompress(containerDTO.getcontainerstate()));
+          CompressionUtils.decompress(containerDTO.getcontainerstate()));
     } catch (IOException e) {
       throw new StorageException(e);
     } catch (DataFormatException e) {
@@ -89,12 +89,12 @@ public class ContainerClusterJ implements ContainerTableDef,
   }
 
   private ContainerDTO createPersistable(Container hopContainer,
-          HopsSession session) throws StorageException {
+      HopsSession session) throws StorageException {
     ContainerDTO containerDTO = session.newInstance(ContainerDTO.class);
     containerDTO.setcontainerid(hopContainer.getContainerId());
     try {
       containerDTO.setcontainerstate(CompressionUtils.compress(hopContainer.
-              getContainerState()));
+          getContainerState()));
     } catch (IOException e) {
       throw new StorageException(e);
     }
@@ -102,14 +102,12 @@ public class ContainerClusterJ implements ContainerTableDef,
     return containerDTO;
   }
 
-  private Map<String, Container> createMap(
-          List<ContainerDTO> results) throws StorageException {
+  private Map<String, Container> createMap(List<ContainerDTO> results)
+      throws StorageException {
 
-    Map<String, Container> map
-            = new HashMap<String, Container>();
+    Map<String, Container> map = new HashMap<String, Container>();
     for (ContainerDTO dto : results) {
-      Container hop
-              = createHopContainer(dto);
+      Container hop = createHopContainer(dto);
       map.put(hop.getContainerId(), hop);
     }
     return map;

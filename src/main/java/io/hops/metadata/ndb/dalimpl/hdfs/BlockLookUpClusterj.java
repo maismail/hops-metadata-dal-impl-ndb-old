@@ -15,8 +15,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public class BlockLookUpClusterj implements BlockLookUpTableDef,
-    BlockLookUpDataAccess<BlockLookUp> {
+public class BlockLookUpClusterj
+    implements BlockLookUpTableDef, BlockLookUpDataAccess<BlockLookUp> {
 
   @PersistenceCapable(table = TABLE_NAME)
   public interface BlockLookUpDTO {
@@ -33,12 +33,13 @@ public class BlockLookUpClusterj implements BlockLookUpTableDef,
     void setINodeId(int iNodeID);
 
   }
+
   private ClusterjConnector connector = ClusterjConnector.getInstance();
   private final static int NOT_FOUND_ROW = -1000;
 
   @Override
-  public void prepare(Collection<BlockLookUp> modified, Collection<BlockLookUp> removed) throws
-      StorageException {
+  public void prepare(Collection<BlockLookUp> modified,
+      Collection<BlockLookUp> removed) throws StorageException {
     HopsSession session = connector.obtainSession();
     for (BlockLookUp block_lookup : removed) {
       BlockLookUpClusterj.BlockLookUpDTO bTable = session
@@ -67,18 +68,20 @@ public class BlockLookUpClusterj implements BlockLookUpTableDef,
   }
 
   @Override
-  public int[] findINodeIdsByBlockIds(final long[] blockIds) throws StorageException {
+  public int[] findINodeIdsByBlockIds(final long[] blockIds)
+      throws StorageException {
     final HopsSession session = connector.obtainSession();
     return readINodeIdsByBlockIds(session, blockIds);
   }
 
-  protected static int[] readINodeIdsByBlockIds(final HopsSession session, final long[] blockIds)
-      throws StorageException {
+  protected static int[] readINodeIdsByBlockIds(final HopsSession session,
+      final long[] blockIds) throws StorageException {
     final List<BlockLookUpDTO> bldtos = new ArrayList<BlockLookUpDTO>();
     final List<Integer> inodeIds = new ArrayList<Integer>();
     for (int blk = 0; blk < blockIds.length; blk++) {
 
-      BlockLookUpDTO bldto = session.newInstance(BlockLookUpDTO.class, blockIds[blk]);
+      BlockLookUpDTO bldto =
+          session.newInstance(BlockLookUpDTO.class, blockIds[blk]);
       bldto.setINodeId(NOT_FOUND_ROW);
       bldto = session.load(bldto);
       bldtos.add(bldto);
@@ -104,12 +107,14 @@ public class BlockLookUpClusterj implements BlockLookUpTableDef,
     return Ints.toArray(inodeIds);
   }
   
-  protected static BlockLookUp createBlockInfo(BlockLookUpClusterj.BlockLookUpDTO dto) {
+  protected static BlockLookUp createBlockInfo(
+      BlockLookUpClusterj.BlockLookUpDTO dto) {
     BlockLookUp lookup = new BlockLookUp(dto.getBlockId(), dto.getINodeId());
     return lookup;
   }
 
-  protected static void createPersistable(BlockLookUp lookup, BlockLookUpClusterj.BlockLookUpDTO persistable) {
+  protected static void createPersistable(BlockLookUp lookup,
+      BlockLookUpClusterj.BlockLookUpDTO persistable) {
     persistable.setBlockId(lookup.getBlockId());
     persistable.setINodeId(lookup.getInodeId());
   }

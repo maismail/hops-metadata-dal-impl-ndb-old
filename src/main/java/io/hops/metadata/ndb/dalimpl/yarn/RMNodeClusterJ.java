@@ -3,29 +3,29 @@ package io.hops.metadata.ndb.dalimpl.yarn;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
+import io.hops.exception.StorageException;
+import io.hops.metadata.ndb.ClusterjConnector;
+import io.hops.metadata.ndb.wrapper.HopsQuery;
+import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
+import io.hops.metadata.ndb.wrapper.HopsQueryDomainType;
+import io.hops.metadata.ndb.wrapper.HopsSession;
+import io.hops.metadata.yarn.dal.RMNodeDataAccess;
+import io.hops.metadata.yarn.entity.RMNode;
+import io.hops.metadata.yarn.tabledef.RMNodeTableDef;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import io.hops.exception.StorageException;
-import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
-import io.hops.metadata.ndb.wrapper.HopsQueryDomainType;
-import io.hops.metadata.ndb.wrapper.HopsSession;
-import io.hops.metadata.yarn.dal.RMNodeDataAccess;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import io.hops.metadata.yarn.entity.RMNode;
-import io.hops.metadata.ndb.ClusterjConnector;
-import io.hops.metadata.ndb.wrapper.HopsQuery;
-import io.hops.metadata.yarn.tabledef.RMNodeTableDef;
-
 /**
  * Implements connection of RMNodeImpl to NDB.
  */
-public class RMNodeClusterJ implements RMNodeTableDef,
-    RMNodeDataAccess<RMNode> {
+public class RMNodeClusterJ
+    implements RMNodeTableDef, RMNodeDataAccess<RMNode> {
 
   private static final Log LOG = LogFactory.getLog(RMNodeClusterJ.class);
 
@@ -94,6 +94,7 @@ public class RMNodeClusterJ implements RMNodeTableDef,
     void setuciId(int uciId);
 
   }
+
   private final ClusterjConnector connector = ClusterjConnector.getInstance();
 
   @Override
@@ -114,8 +115,8 @@ public class RMNodeClusterJ implements RMNodeTableDef,
     LOG.debug("HOP :: ClusterJ RMNode.getAll - START");
     HopsSession session = connector.obtainSession();
     HopsQueryBuilder qb = session.getQueryBuilder();
-    HopsQueryDomainType<RMNodeDTO> dobj = qb.createQueryDefinition(
-            RMNodeDTO.class);
+    HopsQueryDomainType<RMNodeDTO> dobj =
+        qb.createQueryDefinition(RMNodeDTO.class);
     HopsQuery<RMNodeDTO> query = session.createQuery(dobj);
     List<RMNodeDTO> results = query.getResultList();
     LOG.debug("HOP :: ClusterJ RMNode.getAll - FINISH");
@@ -123,8 +124,7 @@ public class RMNodeClusterJ implements RMNodeTableDef,
   }
 
   @Override
-  public void addAll(Collection<RMNode> toAdd) throws
-          StorageException {
+  public void addAll(Collection<RMNode> toAdd) throws StorageException {
     HopsSession session = connector.obtainSession();
     List<RMNodeDTO> toPersist = new ArrayList<RMNodeDTO>();
     for (RMNode req : toAdd) {
@@ -135,13 +135,12 @@ public class RMNodeClusterJ implements RMNodeTableDef,
   }
 
   @Override
-  public void removeAll(Collection<RMNode> toRemove) throws
-          StorageException {
+  public void removeAll(Collection<RMNode> toRemove) throws StorageException {
     HopsSession session = connector.obtainSession();
     List<RMNodeDTO> toPersist = new ArrayList<RMNodeDTO>();
     for (RMNode entry : toRemove) {
       toPersist.add(session.newInstance(RMNodeDTO.class, entry.
-              getNodeId()));
+          getNodeId()));
     }
     session.deletePersistentAll(toPersist);
     session.flush();
@@ -164,7 +163,7 @@ public class RMNodeClusterJ implements RMNodeTableDef,
 
 
   private RMNodeDTO createPersistable(RMNode hopRMNode, HopsSession session)
-          throws StorageException {
+      throws StorageException {
     RMNodeDTO rmDTO = session.newInstance(RMNodeDTO.class);
     //Set values to persist new rmnode
     rmDTO.setNodeid(hopRMNode.getNodeId());
@@ -189,17 +188,11 @@ public class RMNodeClusterJ implements RMNodeTableDef,
    * @return HopRMNode
    */
   public static RMNode createHopRMNode(RMNodeDTO rmDTO) {
-    return new RMNode(rmDTO.getNodeid(),
-            rmDTO.getHostname(),
-            rmDTO.getCommandport(),
-            rmDTO.getHttpport(),
-            rmDTO.getNodeaddress(),
-            rmDTO.getHttpaddress(),
-            rmDTO.getHealthreport(),
-            rmDTO.getLasthealthreporttime(),
-            rmDTO.getcurrentstate(),
-            rmDTO.getnodemanagerversion(),
-            rmDTO.getovercommittimeout(),
-            rmDTO.getuciId());
+    return new RMNode(rmDTO.getNodeid(), rmDTO.getHostname(),
+        rmDTO.getCommandport(), rmDTO.getHttpport(), rmDTO.getNodeaddress(),
+        rmDTO.getHttpaddress(), rmDTO.getHealthreport(),
+        rmDTO.getLasthealthreporttime(), rmDTO.getcurrentstate(),
+        rmDTO.getnodemanagerversion(), rmDTO.getovercommittimeout(),
+        rmDTO.getuciId());
   }
 }

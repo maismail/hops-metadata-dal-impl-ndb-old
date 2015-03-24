@@ -3,22 +3,22 @@ package io.hops.metadata.ndb.dalimpl.hdfs;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
 import io.hops.exception.StorageException;
 import io.hops.metadata.hdfs.dal.StorageIdMapDataAccess;
 import io.hops.metadata.hdfs.entity.StorageId;
 import io.hops.metadata.hdfs.tabledef.StorageIdMapTableDef;
+import io.hops.metadata.ndb.ClusterjConnector;
+import io.hops.metadata.ndb.wrapper.HopsQuery;
 import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
 import io.hops.metadata.ndb.wrapper.HopsQueryDomainType;
 import io.hops.metadata.ndb.wrapper.HopsSession;
-import io.hops.metadata.ndb.ClusterjConnector;
-import io.hops.metadata.ndb.wrapper.HopsQuery;
 
-public class StorageIdMapClusterj implements StorageIdMapTableDef,
-    StorageIdMapDataAccess<StorageId> {
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
+public class StorageIdMapClusterj
+    implements StorageIdMapTableDef, StorageIdMapDataAccess<StorageId> {
 
   @PersistenceCapable(table = TABLE_NAME)
   public interface StorageIdDTO {
@@ -33,6 +33,7 @@ public class StorageIdMapClusterj implements StorageIdMapTableDef,
 
     void setSId(int sId);
   }
+
   private ClusterjConnector connector = ClusterjConnector.getInstance();
 
   @Override
@@ -48,8 +49,9 @@ public class StorageIdMapClusterj implements StorageIdMapTableDef,
   public StorageId findByPk(String storageId) throws StorageException {
     HopsSession session = connector.obtainSession();
     StorageIdDTO sdto = session.find(StorageIdDTO.class, storageId);
-    if(sdto == null)
+    if (sdto == null) {
       return null;
+    }
     return convert(sdto);
   }
 
@@ -57,7 +59,8 @@ public class StorageIdMapClusterj implements StorageIdMapTableDef,
   public Collection<StorageId> findAll() throws StorageException {
     HopsSession session = connector.obtainSession();
     HopsQueryBuilder qb = session.getQueryBuilder();
-    HopsQueryDomainType<StorageIdDTO> qdt = qb.createQueryDefinition(StorageIdDTO.class);
+    HopsQueryDomainType<StorageIdDTO> qdt =
+        qb.createQueryDefinition(StorageIdDTO.class);
     HopsQuery<StorageIdDTO> q = session.createQuery(qdt);
     return convert(q.getResultList());
   }

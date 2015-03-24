@@ -1,6 +1,5 @@
 package io.hops.metadata.ndb.dalimpl.hdfs;
 
-import com.mysql.clusterj.Session;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
@@ -10,15 +9,10 @@ import io.hops.metadata.hdfs.tabledef.MisReplicatedRangeQueueTableDef;
 import io.hops.metadata.ndb.ClusterjConnector;
 import io.hops.metadata.ndb.mysqlserver.MySQLQueryHelper;
 import io.hops.metadata.ndb.wrapper.HopsSession;
-import io.hops.exception.StorageException;
-import io.hops.metadata.hdfs.dal.MisReplicatedRangeQueueDataAccess;
-import io.hops.metadata.hdfs.tabledef.MisReplicatedRangeQueueTableDef;
-import io.hops.metadata.ndb.ClusterjConnector;
-import io.hops.metadata.ndb.mysqlserver.MySQLQueryHelper;
-import io.hops.metadata.ndb.wrapper.HopsSession;
 
-public class MisReplicatedRangeQueueClusterj implements
-    MisReplicatedRangeQueueTableDef, MisReplicatedRangeQueueDataAccess {
+public class MisReplicatedRangeQueueClusterj
+    implements MisReplicatedRangeQueueTableDef,
+    MisReplicatedRangeQueueDataAccess {
 
   @PersistenceCapable(table = TABLE_NAME)
   public interface MisReplicatedRangeQueueDTO {
@@ -29,6 +23,7 @@ public class MisReplicatedRangeQueueClusterj implements
 
     void setRange(String range);
   }
+
   private ClusterjConnector connector = ClusterjConnector.getInstance();
   private final static String SEPERATOR = "-";
 
@@ -36,8 +31,8 @@ public class MisReplicatedRangeQueueClusterj implements
   public void insert(long start, long end) throws StorageException {
     try {
       HopsSession session = connector.obtainSession();
-      MisReplicatedRangeQueueDTO dto = session.newInstance(
-          MisReplicatedRangeQueueDTO.class, getRange(start, end));
+      MisReplicatedRangeQueueDTO dto = session
+          .newInstance(MisReplicatedRangeQueueDTO.class, getRange(start, end));
       session.savePersistent(dto);
     } catch (Exception e) {
       throw new StorageException(e);
@@ -49,8 +44,8 @@ public class MisReplicatedRangeQueueClusterj implements
   public void remove(long start, long end) throws StorageException {
     try {
       HopsSession session = connector.obtainSession();
-      MisReplicatedRangeQueueDTO oldR = session.newInstance(
-          MisReplicatedRangeQueueDTO.class, getRange(start, end));
+      MisReplicatedRangeQueueDTO oldR = session
+          .newInstance(MisReplicatedRangeQueueDTO.class, getRange(start, end));
       session.deletePersistent(oldR);
     } catch (Exception e) {
       throw new StorageException(e);
