@@ -152,9 +152,12 @@ public class LeasePathClusterj
 
   private List<HopLeasePath> createList(Collection<LeasePathsDTO> dtos) {
     List<HopLeasePath> list = new ArrayList<HopLeasePath>();
-    for (LeasePathsDTO leasePathsDTO : dtos) {
-      list.add(createLeasePath(leasePathsDTO));
+      if (dtos != null) {
+          for (LeasePathsDTO leasePathsDTO : dtos) {
+              list.add(createLeasePath(leasePathsDTO));
+          }
     }
+    
     return list;
   }
 
