@@ -3,41 +3,40 @@ package io.hops.metadata.ndb.dalimpl.election;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
+import io.hops.metadata.election.TablesDef;
 import io.hops.metadata.election.entity.LeDescriptor;
-import io.hops.metadata.election.tabledef.LeDescriptorTableDef;
-import io.hops.metadata.election.tabledef.YarnLeaderTableDef;
 
 import java.security.InvalidParameterException;
 
 public class YarnLeaderClusterj extends LeDescriptorClusterj
-    implements YarnLeaderTableDef {
+    implements TablesDef.YarnLeaderTableDef {
 
   @PersistenceCapable(table = TABLE_NAME)
   public interface YarnLeaderDTO extends LeaderDTO {
 
     @PrimaryKey
-    @Column(name = LeDescriptorTableDef.ID)
+    @Column(name = TablesDef.LeDescriptorTableDef.ID)
     long getId();
 
     void setId(long id);
 
     @PrimaryKey
-    @Column(name = LeDescriptorTableDef.PARTITION_VAL)
+    @Column(name = TablesDef.LeDescriptorTableDef.PARTITION_VAL)
     int getPartitionVal();
 
     void setPartitionVal(int partitionVal);
 
-    @Column(name = LeDescriptorTableDef.COUNTER)
+    @Column(name = TablesDef.LeDescriptorTableDef.COUNTER)
     long getCounter();
 
     void setCounter(long counter);
 
-    @Column(name = LeDescriptorTableDef.HOSTNAME)
+    @Column(name = TablesDef.LeDescriptorTableDef.HOSTNAME)
     String getHostname();
 
     void setHostname(String hostname);
 
-    @Column(name = LeDescriptorTableDef.HTTP_ADDRESS)
+    @Column(name = TablesDef.LeDescriptorTableDef.HTTP_ADDRESS)
     String getHttpAddress();
 
     void setHttpAddress(String httpAddress);

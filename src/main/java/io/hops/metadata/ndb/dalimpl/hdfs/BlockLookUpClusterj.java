@@ -5,9 +5,9 @@ import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
 import io.hops.exception.StorageException;
+import io.hops.metadata.hdfs.TablesDef;
 import io.hops.metadata.hdfs.dal.BlockLookUpDataAccess;
 import io.hops.metadata.hdfs.entity.BlockLookUp;
-import io.hops.metadata.hdfs.tabledef.BlockLookUpTableDef;
 import io.hops.metadata.ndb.ClusterjConnector;
 import io.hops.metadata.ndb.wrapper.HopsSession;
 
@@ -16,7 +16,7 @@ import java.util.Collection;
 import java.util.List;
 
 public class BlockLookUpClusterj
-    implements BlockLookUpTableDef, BlockLookUpDataAccess<BlockLookUp> {
+    implements TablesDef.BlockLookUpTableDef, BlockLookUpDataAccess<BlockLookUp> {
 
   @PersistenceCapable(table = TABLE_NAME)
   public interface BlockLookUpDTO {

@@ -9,9 +9,9 @@ import io.hops.metadata.ndb.wrapper.HopsQuery;
 import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
 import io.hops.metadata.ndb.wrapper.HopsQueryDomainType;
 import io.hops.metadata.ndb.wrapper.HopsSession;
+import io.hops.metadata.yarn.TablesDef;
 import io.hops.metadata.yarn.dal.rmstatestore.DelegationKeyDataAccess;
 import io.hops.metadata.yarn.entity.rmstatestore.DelegationKey;
-import io.hops.metadata.yarn.tabledef.rmstatestore.DelegationKeyTableDef;
 import io.hops.util.CompressionUtils;
 
 import java.io.IOException;
@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.zip.DataFormatException;
 
 public class DelegationKeyClusterJ
-    implements DelegationKeyTableDef, DelegationKeyDataAccess<DelegationKey> {
+    implements TablesDef.DelegationKeyTableDef, DelegationKeyDataAccess<DelegationKey> {
 
   @PersistenceCapable(table = TABLE_NAME)
   public interface DelegationKeyDTO {

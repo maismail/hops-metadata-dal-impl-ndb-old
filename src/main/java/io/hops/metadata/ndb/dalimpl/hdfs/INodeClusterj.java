@@ -6,11 +6,11 @@ import com.mysql.clusterj.annotation.PartitionKey;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
 import io.hops.exception.StorageException;
+import io.hops.metadata.hdfs.TablesDef;
 import io.hops.metadata.hdfs.dal.INodeDataAccess;
 import io.hops.metadata.hdfs.entity.INode;
 import io.hops.metadata.hdfs.entity.INodeIdentifier;
 import io.hops.metadata.hdfs.entity.ProjectedINode;
-import io.hops.metadata.hdfs.tabledef.INodeTableDef;
 import io.hops.metadata.ndb.ClusterjConnector;
 import io.hops.metadata.ndb.NdbBoolean;
 import io.hops.metadata.ndb.mysqlserver.HopsSQLExceptionHelper;
@@ -30,7 +30,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public class INodeClusterj implements INodeTableDef, INodeDataAccess<INode> {
+public class INodeClusterj implements TablesDef.INodeTableDef, INodeDataAccess<INode> {
 
   @Override
   public int countAll() throws StorageException {

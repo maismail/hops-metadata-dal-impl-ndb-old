@@ -9,9 +9,9 @@ import io.hops.metadata.ndb.wrapper.HopsQuery;
 import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
 import io.hops.metadata.ndb.wrapper.HopsQueryDomainType;
 import io.hops.metadata.ndb.wrapper.HopsSession;
+import io.hops.metadata.yarn.TablesDef;
 import io.hops.metadata.yarn.dal.RMNodeDataAccess;
 import io.hops.metadata.yarn.entity.RMNode;
-import io.hops.metadata.yarn.tabledef.RMNodeTableDef;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -25,7 +25,7 @@ import java.util.Map;
  * Implements connection of RMNodeImpl to NDB.
  */
 public class RMNodeClusterJ
-    implements RMNodeTableDef, RMNodeDataAccess<RMNode> {
+    implements TablesDef.RMNodeTableDef, RMNodeDataAccess<RMNode> {
 
   private static final Log LOG = LogFactory.getLog(RMNodeClusterJ.class);
 

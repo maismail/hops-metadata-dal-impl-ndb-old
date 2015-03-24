@@ -9,15 +9,15 @@ import io.hops.metadata.ndb.wrapper.HopsQuery;
 import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
 import io.hops.metadata.ndb.wrapper.HopsQueryDomainType;
 import io.hops.metadata.ndb.wrapper.HopsSession;
+import io.hops.metadata.yarn.TablesDef;
 import io.hops.metadata.yarn.dal.RMLoadDataAccess;
 import io.hops.metadata.yarn.entity.Load;
-import io.hops.metadata.yarn.tabledef.RMLoadTableDef;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class RMLoadClusterJ implements RMLoadTableDef, RMLoadDataAccess<Load> {
+public class RMLoadClusterJ implements TablesDef.RMLoadTableDef, RMLoadDataAccess<Load> {
 
   @PersistenceCapable(table = TABLE_NAME)
   public interface RMLoadDTO {

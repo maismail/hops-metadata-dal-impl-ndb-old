@@ -10,9 +10,9 @@ import io.hops.metadata.ndb.wrapper.HopsQuery;
 import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
 import io.hops.metadata.ndb.wrapper.HopsQueryDomainType;
 import io.hops.metadata.ndb.wrapper.HopsSession;
+import io.hops.metadata.yarn.TablesDef;
 import io.hops.metadata.yarn.dal.FiCaSchedulerAppNewlyAllocatedContainersDataAccess;
 import io.hops.metadata.yarn.entity.FiCaSchedulerAppNewlyAllocatedContainers;
-import io.hops.metadata.yarn.tabledef.FiCaSchedulerAppNewlyAllocatedContainersTableDef;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 public class FiCaSchedulerAppNewlyAllocatedContainersClusterJ
-    implements FiCaSchedulerAppNewlyAllocatedContainersTableDef,
+    implements TablesDef.FiCaSchedulerAppNewlyAllocatedContainersTableDef,
     FiCaSchedulerAppNewlyAllocatedContainersDataAccess<FiCaSchedulerAppNewlyAllocatedContainers> {
 
   @PersistenceCapable(table = TABLE_NAME)

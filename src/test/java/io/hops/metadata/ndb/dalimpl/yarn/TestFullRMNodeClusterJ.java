@@ -9,6 +9,7 @@ package io.hops.metadata.ndb.dalimpl.yarn;
 import io.hops.StorageConnector;
 import io.hops.exception.StorageException;
 import io.hops.metadata.ndb.NdbStorageFactory;
+import io.hops.metadata.yarn.TablesDef;
 import io.hops.metadata.yarn.dal.ContainerIdToCleanDataAccess;
 import io.hops.metadata.yarn.dal.ContainerStatusDataAccess;
 import io.hops.metadata.yarn.dal.FinishedApplicationsDataAccess;
@@ -30,7 +31,6 @@ import io.hops.metadata.yarn.entity.RMNode;
 import io.hops.metadata.yarn.entity.RMNodeComps;
 import io.hops.metadata.yarn.entity.Resource;
 import io.hops.metadata.yarn.entity.UpdatedContainerInfo;
-import io.hops.metadata.yarn.tabledef.ContainerStatusTableDef;
 import io.hops.transaction.handler.LightWeightRequestHandler;
 import io.hops.transaction.handler.RequestHandler;
 import junit.framework.Assert;
@@ -104,22 +104,22 @@ public class TestFullRMNodeClusterJ {
     final List<ContainerStatus> hopContainersStatus =
         new ArrayList<ContainerStatus>();
     hopContainersStatus.add(
-        new ContainerStatus("container1", ContainerStatusTableDef.STATE_RUNNING,
+        new ContainerStatus("container1", TablesDef.ContainerStatusTableDef.STATE_RUNNING,
             "every thing is good", 0, "70"));
     hopContainersStatus.add(
-        new ContainerStatus("container2", ContainerStatusTableDef.STATE_RUNNING,
+        new ContainerStatus("container2", TablesDef.ContainerStatusTableDef.STATE_RUNNING,
             "every thing is good", 0, "70"));
     hopContainersStatus.add(
-        new ContainerStatus("container3", ContainerStatusTableDef.STATE_RUNNING,
+        new ContainerStatus("container3", TablesDef.ContainerStatusTableDef.STATE_RUNNING,
             "every thing is good", 0, "70"));
     hopContainersStatus.add(
-        new ContainerStatus("container4", ContainerStatusTableDef.STATE_RUNNING,
+        new ContainerStatus("container4", TablesDef.ContainerStatusTableDef.STATE_RUNNING,
             "every thing is good", 0, "70"));
     hopContainersStatus.add(new ContainerStatus("container5",
-        ContainerStatusTableDef.STATE_COMPLETED, "every thing is good", 0,
+        TablesDef.ContainerStatusTableDef.STATE_COMPLETED, "every thing is good", 0,
         "70"));
     hopContainersStatus.add(new ContainerStatus("container6",
-        ContainerStatusTableDef.STATE_COMPLETED, "finish", 1, "70"));
+        TablesDef.ContainerStatusTableDef.STATE_COMPLETED, "finish", 1, "70"));
 
     LightWeightRequestHandler fillDB =
         new LightWeightRequestHandler(YARNOperationType.TEST) {

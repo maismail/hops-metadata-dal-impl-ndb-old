@@ -10,9 +10,9 @@ import io.hops.metadata.ndb.wrapper.HopsQuery;
 import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
 import io.hops.metadata.ndb.wrapper.HopsQueryDomainType;
 import io.hops.metadata.ndb.wrapper.HopsSession;
+import io.hops.metadata.yarn.TablesDef;
 import io.hops.metadata.yarn.dal.FinishedApplicationsDataAccess;
 import io.hops.metadata.yarn.entity.FinishedApplications;
-import io.hops.metadata.yarn.tabledef.FinishedApplicationsTableDef;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.Map;
 
 public class FinishedApplicationsClusterJ
-    implements FinishedApplicationsTableDef,
+    implements TablesDef.FinishedApplicationsTableDef,
     FinishedApplicationsDataAccess<FinishedApplications> {
 
   private static final Log LOG =

@@ -4,8 +4,8 @@ import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
 import io.hops.exception.StorageException;
+import io.hops.metadata.hdfs.TablesDef;
 import io.hops.metadata.hdfs.dal.SafeBlocksDataAccess;
-import io.hops.metadata.hdfs.tabledef.SafeBlocksTableDef;
 import io.hops.metadata.ndb.ClusterjConnector;
 import io.hops.metadata.ndb.mysqlserver.HopsSQLExceptionHelper;
 import io.hops.metadata.ndb.mysqlserver.MySQLQueryHelper;
@@ -18,7 +18,7 @@ import java.util.Collection;
 import java.util.List;
 
 public class SafeBlocksClusterj
-    implements SafeBlocksTableDef, SafeBlocksDataAccess {
+    implements TablesDef.SafeBlocksTableDef, SafeBlocksDataAccess {
   
   @PersistenceCapable(table = TABLE_NAME)
   public interface SafeBlockDTO {

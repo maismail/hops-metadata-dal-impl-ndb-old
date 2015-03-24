@@ -9,9 +9,9 @@ import io.hops.metadata.ndb.wrapper.HopsQuery;
 import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
 import io.hops.metadata.ndb.wrapper.HopsQueryDomainType;
 import io.hops.metadata.ndb.wrapper.HopsSession;
+import io.hops.metadata.yarn.TablesDef;
 import io.hops.metadata.yarn.dal.NodeHBResponseDataAccess;
 import io.hops.metadata.yarn.entity.NodeHBResponse;
-import io.hops.metadata.yarn.tabledef.NodeHBResponseTableDef;
 import io.hops.util.CompressionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.zip.DataFormatException;
 
-public class NodeHBResponseClusterJ implements NodeHBResponseTableDef,
+public class NodeHBResponseClusterJ implements TablesDef.NodeHBResponseTableDef,
     NodeHBResponseDataAccess<NodeHBResponse> {
 
   private static final Log LOG =

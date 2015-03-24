@@ -9,16 +9,16 @@ import io.hops.metadata.ndb.wrapper.HopsQuery;
 import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
 import io.hops.metadata.ndb.wrapper.HopsQueryDomainType;
 import io.hops.metadata.ndb.wrapper.HopsSession;
+import io.hops.metadata.yarn.TablesDef;
 import io.hops.metadata.yarn.dal.NextHeartbeatDataAccess;
 import io.hops.metadata.yarn.entity.NextHeartbeat;
-import io.hops.metadata.yarn.tabledef.NextHeartbeatTableDef;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class NextHeartbeatClusterJ
-    implements NextHeartbeatTableDef, NextHeartbeatDataAccess<NextHeartbeat> {
+    implements TablesDef.NextHeartbeatTableDef, NextHeartbeatDataAccess<NextHeartbeat> {
 
   @PersistenceCapable(table = TABLE_NAME)
   public interface NextHeartbeatDTO extends RMNodeComponentDTO {

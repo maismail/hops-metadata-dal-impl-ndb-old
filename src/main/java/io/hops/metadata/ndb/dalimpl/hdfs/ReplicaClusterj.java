@@ -7,9 +7,9 @@ import com.mysql.clusterj.annotation.PartitionKey;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
 import io.hops.exception.StorageException;
+import io.hops.metadata.hdfs.TablesDef;
 import io.hops.metadata.hdfs.dal.ReplicaDataAccess;
 import io.hops.metadata.hdfs.entity.IndexedReplica;
-import io.hops.metadata.hdfs.tabledef.ReplicaTableDef;
 import io.hops.metadata.ndb.ClusterjConnector;
 import io.hops.metadata.ndb.mysqlserver.MySQLQueryHelper;
 import io.hops.metadata.ndb.wrapper.HopsPredicate;
@@ -24,7 +24,7 @@ import java.util.Collection;
 import java.util.List;
 
 public class ReplicaClusterj
-    implements ReplicaTableDef, ReplicaDataAccess<IndexedReplica> {
+    implements TablesDef.ReplicaTableDef, ReplicaDataAccess<IndexedReplica> {
   //  static final Log LOG = LogFactory.getLog(ReplicaClusterj.class);
   static final Logger LOG = Logger.getLogger(ReplicaClusterj.class);
 

@@ -8,9 +8,9 @@ import com.mysql.clusterj.annotation.PartitionKey;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
 import io.hops.exception.StorageException;
+import io.hops.metadata.hdfs.TablesDef;
 import io.hops.metadata.hdfs.dal.CorruptReplicaDataAccess;
 import io.hops.metadata.hdfs.entity.CorruptReplica;
-import io.hops.metadata.hdfs.tabledef.CorruptReplicaTableDef;
 import io.hops.metadata.ndb.ClusterjConnector;
 import io.hops.metadata.ndb.mysqlserver.MySQLQueryHelper;
 import io.hops.metadata.ndb.wrapper.HopsPredicate;
@@ -23,7 +23,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public class CorruptReplicaClusterj implements CorruptReplicaTableDef,
+public class CorruptReplicaClusterj implements TablesDef.CorruptReplicaTableDef,
     CorruptReplicaDataAccess<CorruptReplica> {
 
 

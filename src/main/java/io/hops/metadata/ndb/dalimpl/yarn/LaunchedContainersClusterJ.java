@@ -9,9 +9,9 @@ import io.hops.metadata.ndb.wrapper.HopsQuery;
 import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
 import io.hops.metadata.ndb.wrapper.HopsQueryDomainType;
 import io.hops.metadata.ndb.wrapper.HopsSession;
+import io.hops.metadata.yarn.TablesDef;
 import io.hops.metadata.yarn.dal.LaunchedContainersDataAccess;
 import io.hops.metadata.yarn.entity.LaunchedContainers;
-import io.hops.metadata.yarn.tabledef.LaunchedContainersTableDef;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -19,7 +19,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class LaunchedContainersClusterJ implements LaunchedContainersTableDef,
+public class LaunchedContainersClusterJ implements
+    TablesDef.LaunchedContainersTableDef,
     LaunchedContainersDataAccess<LaunchedContainers> {
 
   @PersistenceCapable(table = TABLE_NAME)

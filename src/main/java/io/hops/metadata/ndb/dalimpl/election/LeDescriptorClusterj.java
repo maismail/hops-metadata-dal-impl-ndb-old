@@ -2,9 +2,9 @@ package io.hops.metadata.ndb.dalimpl.election;
 
 import com.mysql.clusterj.annotation.PartitionKey;
 import io.hops.exception.StorageException;
+import io.hops.metadata.election.TablesDef;
 import io.hops.metadata.election.dal.LeDescriptorDataAccess;
 import io.hops.metadata.election.entity.LeDescriptor;
-import io.hops.metadata.election.tabledef.LeDescriptorTableDef;
 import io.hops.metadata.ndb.ClusterjConnector;
 import io.hops.metadata.ndb.wrapper.HopsQuery;
 import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
@@ -16,7 +16,7 @@ import java.util.Collection;
 import java.util.List;
 
 public abstract class LeDescriptorClusterj
-    implements LeDescriptorTableDef, LeDescriptorDataAccess<LeDescriptor> {
+    implements TablesDef.LeDescriptorTableDef, LeDescriptorDataAccess<LeDescriptor> {
 
   private ClusterjConnector connector = ClusterjConnector.getInstance();
   @PartitionKey(column = PARTITION_VAL)

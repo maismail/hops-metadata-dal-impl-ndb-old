@@ -9,9 +9,9 @@ import io.hops.metadata.ndb.wrapper.HopsQuery;
 import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
 import io.hops.metadata.ndb.wrapper.HopsQueryDomainType;
 import io.hops.metadata.ndb.wrapper.HopsSession;
+import io.hops.metadata.yarn.TablesDef;
 import io.hops.metadata.yarn.dal.ResourceRequestDataAccess;
 import io.hops.metadata.yarn.entity.ResourceRequest;
-import io.hops.metadata.yarn.tabledef.ResourceRequestTableDef;
 import io.hops.util.CompressionUtils;
 
 import java.io.IOException;
@@ -22,7 +22,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.zip.DataFormatException;
 
-public class ResourceRequestClusterJ implements ResourceRequestTableDef,
+public class ResourceRequestClusterJ implements
+    TablesDef.ResourceRequestTableDef,
     ResourceRequestDataAccess<ResourceRequest> {
 
   @PersistenceCapable(table = TABLE_NAME)

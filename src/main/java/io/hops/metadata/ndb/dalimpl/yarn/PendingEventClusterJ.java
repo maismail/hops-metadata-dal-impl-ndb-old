@@ -10,9 +10,9 @@ import io.hops.metadata.ndb.wrapper.HopsQuery;
 import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
 import io.hops.metadata.ndb.wrapper.HopsQueryDomainType;
 import io.hops.metadata.ndb.wrapper.HopsSession;
+import io.hops.metadata.yarn.TablesDef;
 import io.hops.metadata.yarn.dal.PendingEventDataAccess;
 import io.hops.metadata.yarn.entity.PendingEvent;
-import io.hops.metadata.yarn.tabledef.PendingEventTableDef;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -26,7 +26,7 @@ import java.util.List;
  * <p/>
  */
 public class PendingEventClusterJ
-    implements PendingEventTableDef, PendingEventDataAccess<PendingEvent> {
+    implements TablesDef.PendingEventTableDef, PendingEventDataAccess<PendingEvent> {
 
   private static final Log LOG = LogFactory.getLog(PendingEventClusterJ.class);
 

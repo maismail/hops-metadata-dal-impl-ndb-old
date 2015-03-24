@@ -10,9 +10,9 @@ import io.hops.metadata.ndb.wrapper.HopsQuery;
 import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
 import io.hops.metadata.ndb.wrapper.HopsQueryDomainType;
 import io.hops.metadata.ndb.wrapper.HopsSession;
+import io.hops.metadata.yarn.TablesDef;
 import io.hops.metadata.yarn.dal.UpdatedContainerInfoDataAccess;
 import io.hops.metadata.yarn.entity.UpdatedContainerInfo;
-import io.hops.metadata.yarn.tabledef.UpdatedContainerInfoTableDef;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -24,7 +24,7 @@ import java.util.Map;
 
 
 public class UpdatedContainerInfoClusterJ
-    implements UpdatedContainerInfoTableDef,
+    implements TablesDef.UpdatedContainerInfoTableDef,
     UpdatedContainerInfoDataAccess<UpdatedContainerInfo> {
 
   private static final Log LOG = LogFactory.getLog(NodeClusterJ.class);

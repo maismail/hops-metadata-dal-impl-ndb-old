@@ -8,9 +8,9 @@ import com.mysql.clusterj.annotation.PartitionKey;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
 import io.hops.exception.StorageException;
+import io.hops.metadata.hdfs.TablesDef;
 import io.hops.metadata.hdfs.dal.UnderReplicatedBlockDataAccess;
 import io.hops.metadata.hdfs.entity.UnderReplicatedBlock;
-import io.hops.metadata.hdfs.tabledef.UnderReplicatedBlockTableDef;
 import io.hops.metadata.ndb.ClusterjConnector;
 import io.hops.metadata.ndb.mysqlserver.MySQLQueryHelper;
 import io.hops.metadata.ndb.wrapper.HopsPredicate;
@@ -24,7 +24,7 @@ import java.util.Collection;
 import java.util.List;
 
 public class UnderReplicatedBlockClusterj
-    implements UnderReplicatedBlockTableDef,
+    implements TablesDef.UnderReplicatedBlockTableDef,
     UnderReplicatedBlockDataAccess<UnderReplicatedBlock> {
 
   @Override

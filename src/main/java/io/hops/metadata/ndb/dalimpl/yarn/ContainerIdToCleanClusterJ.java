@@ -10,9 +10,9 @@ import io.hops.metadata.ndb.wrapper.HopsQuery;
 import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
 import io.hops.metadata.ndb.wrapper.HopsQueryDomainType;
 import io.hops.metadata.ndb.wrapper.HopsSession;
+import io.hops.metadata.yarn.TablesDef;
 import io.hops.metadata.yarn.dal.ContainerIdToCleanDataAccess;
 import io.hops.metadata.yarn.entity.ContainerId;
-import io.hops.metadata.yarn.tabledef.ContainerIdToCleanTableDef;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -24,7 +24,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class ContainerIdToCleanClusterJ implements ContainerIdToCleanTableDef,
+public class ContainerIdToCleanClusterJ implements
+    TablesDef.ContainerIdToCleanTableDef,
     ContainerIdToCleanDataAccess<ContainerId> {
 
   private static final Log LOG =

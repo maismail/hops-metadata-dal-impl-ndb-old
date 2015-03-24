@@ -4,9 +4,9 @@ import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
 import io.hops.exception.StorageException;
+import io.hops.metadata.hdfs.TablesDef;
 import io.hops.metadata.hdfs.dal.BlockChecksumDataAccess;
 import io.hops.metadata.hdfs.entity.BlockChecksum;
-import io.hops.metadata.hdfs.tabledef.BlockChecksumTableDef;
 import io.hops.metadata.ndb.ClusterjConnector;
 import io.hops.metadata.ndb.mysqlserver.HopsSQLExceptionHelper;
 import io.hops.metadata.ndb.mysqlserver.MysqlServerConnector;
@@ -26,7 +26,7 @@ import java.util.Collection;
 import java.util.List;
 
 public class BlockChecksumClusterj
-    implements BlockChecksumTableDef, BlockChecksumDataAccess<BlockChecksum> {
+    implements TablesDef.BlockChecksumTableDef, BlockChecksumDataAccess<BlockChecksum> {
 
   static final Log LOG = LogFactory.getLog(BlockChecksumClusterj.class);
 

@@ -9,9 +9,9 @@ import io.hops.metadata.ndb.wrapper.HopsQuery;
 import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
 import io.hops.metadata.ndb.wrapper.HopsQueryDomainType;
 import io.hops.metadata.ndb.wrapper.HopsSession;
+import io.hops.metadata.yarn.TablesDef;
 import io.hops.metadata.yarn.dal.rmstatestore.DelegationTokenDataAccess;
 import io.hops.metadata.yarn.entity.rmstatestore.DelegationToken;
-import io.hops.metadata.yarn.tabledef.rmstatestore.DelegationTokenTableDef;
 import io.hops.util.CompressionUtils;
 
 import java.io.IOException;
@@ -19,7 +19,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.DataFormatException;
 
-public class DelegationTokenClusterJ implements DelegationTokenTableDef,
+public class DelegationTokenClusterJ implements
+    TablesDef.DelegationTokenTableDef,
     DelegationTokenDataAccess<DelegationToken> {
 
   @PersistenceCapable(table = TABLE_NAME)

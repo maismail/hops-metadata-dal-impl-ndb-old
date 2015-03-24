@@ -6,9 +6,9 @@ import com.mysql.clusterj.annotation.PartitionKey;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
 import io.hops.exception.StorageException;
+import io.hops.metadata.hdfs.TablesDef;
 import io.hops.metadata.hdfs.dal.LeaseDataAccess;
 import io.hops.metadata.hdfs.entity.Lease;
-import io.hops.metadata.hdfs.tabledef.LeaseTableDef;
 import io.hops.metadata.ndb.ClusterjConnector;
 import io.hops.metadata.ndb.mysqlserver.MySQLQueryHelper;
 import io.hops.metadata.ndb.wrapper.HopsPredicate;
@@ -24,7 +24,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public class LeaseClusterj implements LeaseTableDef, LeaseDataAccess<Lease> {
+public class LeaseClusterj implements TablesDef.LeaseTableDef, LeaseDataAccess<Lease> {
 
   @PersistenceCapable(table = TABLE_NAME)
   @PartitionKey(column = PART_KEY)

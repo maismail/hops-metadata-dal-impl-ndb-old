@@ -7,9 +7,9 @@ import com.mysql.clusterj.annotation.PartitionKey;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
 import io.hops.exception.StorageException;
+import io.hops.metadata.hdfs.TablesDef;
 import io.hops.metadata.hdfs.dal.InvalidateBlockDataAccess;
 import io.hops.metadata.hdfs.entity.InvalidatedBlock;
-import io.hops.metadata.hdfs.tabledef.InvalidatedBlockTableDef;
 import io.hops.metadata.ndb.ClusterjConnector;
 import io.hops.metadata.ndb.mysqlserver.MySQLQueryHelper;
 import io.hops.metadata.ndb.wrapper.HopsPredicate;
@@ -22,7 +22,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public class InvalidatedBlockClusterj implements InvalidatedBlockTableDef,
+public class InvalidatedBlockClusterj implements
+    TablesDef.InvalidatedBlockTableDef,
     InvalidateBlockDataAccess<InvalidatedBlock> {
 
   @PersistenceCapable(table = TABLE_NAME)

@@ -6,15 +6,16 @@ import com.mysql.clusterj.annotation.PrimaryKey;
 import io.hops.exception.StorageException;
 import io.hops.metadata.ndb.ClusterjConnector;
 import io.hops.metadata.ndb.wrapper.HopsSession;
+import io.hops.metadata.yarn.TablesDef;
 import io.hops.metadata.yarn.dal.fair.FSSchedulerNodeDataAccess;
 import io.hops.metadata.yarn.entity.fair.FSSchedulerNode;
-import io.hops.metadata.yarn.tabledef.fair.FSSchedulerNodeTableDef;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public class FSSchedulerNodeClusterJ implements FSSchedulerNodeTableDef,
+public class FSSchedulerNodeClusterJ implements
+    TablesDef.FSSchedulerNodeTableDef,
     FSSchedulerNodeDataAccess<FSSchedulerNode> {
 
   @PersistenceCapable(table = TABLE_NAME)

@@ -9,15 +9,16 @@ import io.hops.metadata.ndb.wrapper.HopsQuery;
 import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
 import io.hops.metadata.ndb.wrapper.HopsQueryDomainType;
 import io.hops.metadata.ndb.wrapper.HopsSession;
+import io.hops.metadata.yarn.TablesDef;
 import io.hops.metadata.yarn.dal.FiCaSchedulerNodeDataAccess;
 import io.hops.metadata.yarn.entity.FiCaSchedulerNode;
-import io.hops.metadata.yarn.tabledef.FiCaSchedulerNodeTableDef;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public class FiCaSchedulerNodeClusterJ implements FiCaSchedulerNodeTableDef,
+public class FiCaSchedulerNodeClusterJ implements
+    TablesDef.FiCaSchedulerNodeTableDef,
     FiCaSchedulerNodeDataAccess<FiCaSchedulerNode> {
 
   @PersistenceCapable(table = TABLE_NAME)

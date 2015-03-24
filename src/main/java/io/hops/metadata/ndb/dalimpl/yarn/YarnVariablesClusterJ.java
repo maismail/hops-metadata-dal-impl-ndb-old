@@ -6,9 +6,9 @@ import com.mysql.clusterj.annotation.PrimaryKey;
 import io.hops.exception.StorageException;
 import io.hops.metadata.ndb.ClusterjConnector;
 import io.hops.metadata.ndb.wrapper.HopsSession;
+import io.hops.metadata.yarn.TablesDef;
 import io.hops.metadata.yarn.dal.YarnVariablesDataAccess;
 import io.hops.metadata.yarn.entity.YarnVariables;
-import io.hops.metadata.yarn.tabledef.YarnVariablesTableDef;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -17,7 +17,7 @@ import org.apache.commons.logging.LogFactory;
  * solution can be dropped once ClusterJ implements auto-increment.
  */
 public class YarnVariablesClusterJ
-    implements YarnVariablesTableDef, YarnVariablesDataAccess<YarnVariables> {
+    implements TablesDef.YarnVariablesTableDef, YarnVariablesDataAccess<YarnVariables> {
 
   private static final Log LOG = LogFactory.getLog(YarnVariablesClusterJ.class);
 

@@ -9,9 +9,9 @@ import io.hops.metadata.ndb.wrapper.HopsQuery;
 import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
 import io.hops.metadata.ndb.wrapper.HopsQueryDomainType;
 import io.hops.metadata.ndb.wrapper.HopsSession;
+import io.hops.metadata.yarn.TablesDef;
 import io.hops.metadata.yarn.dal.ContainerStatusDataAccess;
 import io.hops.metadata.yarn.entity.ContainerStatus;
-import io.hops.metadata.yarn.tabledef.ContainerStatusTableDef;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -21,7 +21,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ContainerStatusClusterJ implements ContainerStatusTableDef,
+public class ContainerStatusClusterJ implements
+    TablesDef.ContainerStatusTableDef,
     ContainerStatusDataAccess<ContainerStatus> {
 
   private static final Log LOG = LogFactory.
