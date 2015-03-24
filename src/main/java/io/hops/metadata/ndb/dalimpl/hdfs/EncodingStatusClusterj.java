@@ -6,6 +6,7 @@ import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
 import io.hops.exception.StorageException;
 import io.hops.metadata.hdfs.dal.EncodingStatusDataAccess;
+import io.hops.metadata.hdfs.entity.EncodingPolicy;
 import io.hops.metadata.ndb.mysqlserver.CountHelper;
 import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
 import io.hops.metadata.ndb.wrapper.HopsQueryDomainType;
@@ -135,15 +136,15 @@ public class EncodingStatusClusterj implements EncodingStatusTableDef,
     if (inodeId != null) {
       dto.setInodeId(inodeId);
     }
-    Integer sourceStatus = status.getStatus();
+    EncodingStatus.Status sourceStatus = status.getStatus();
     if (sourceStatus != null) {
-      dto.setStatus(sourceStatus);
+      dto.setStatus(sourceStatus.ordinal());
     }
-    String codec = status.getCodec();
+    String codec = status.getEncodingPolicy().getCodec();
     if (codec != null) {
       dto.setCodec(codec);
     }
-    Short targetReplication = status.getTargetReplication();
+    Short targetReplication = status.getEncodingPolicy().getTargetReplication();
     if (targetReplication != null) {
       dto.setTargetReplication(targetReplication);
     }
@@ -155,9 +156,9 @@ public class EncodingStatusClusterj implements EncodingStatusTableDef,
     if (parityInodeId != null) {
       dto.setParityInodeId(parityInodeId);
     }
-    Integer parityStatus = status.getParityStatus();
+    EncodingStatus.ParityStatus parityStatus = status.getParityStatus();
     if (parityStatus != null) {
-      dto.setParityStatus(parityStatus);
+      dto.setParityStatus(parityStatus.ordinal());
     }
     Long parityStatusModificationTime = status.getParityStatusModificationTime();
     if (parityStatusModificationTime != null) {
@@ -213,13 +214,13 @@ public class EncodingStatusClusterj implements EncodingStatusTableDef,
 
   @Override
   public Collection<EncodingStatus> findRequestedEncodings(long limit) throws StorageException {
-    return findWithStatus(EncodingStatus.ENCODING_REQUESTED, limit);
+    return findWithStatus(EncodingStatus.Status.ENCODING_REQUESTED.ordinal(), limit);
   }
 
   @Override
   public int countRequestedEncodings() throws StorageException {
     return CountHelper.countWhere(TABLE_NAME,
-        STATUS + "=" + EncodingStatus.ENCODING_REQUESTED);
+        STATUS + "=" + EncodingStatus.Status.ENCODING_REQUESTED.ordinal());
   }
 
   @Override
@@ -232,44 +233,44 @@ public class EncodingStatusClusterj implements EncodingStatusTableDef,
         + ", " + PARITY_STATUS + ", " + STATUS_MODIFICATION_TIME  + ", " + PARITY_STATUS_MODIFICATION_TIME
         + ", " + PARITY_INODE_ID + ", " + PARITY_FILE_NAME + ", " + LOST_BLOCKS  + ", " + LOST_PARITY_BLOCKS
         + ", " + LOST_BLOCKS  + "+" + LOST_PARITY_BLOCKS  + " AS " + LOST_BLOCK_SUM + " FROM " + TABLE_NAME
-        + " WHERE " + STATUS  + "=" + EncodingStatus.REPAIR_REQUESTED + " ORDER BY " + LOST_BLOCK_SUM
+        + " WHERE " + STATUS  + "=" + EncodingStatus.Status.REPAIR_REQUESTED.ordinal() + " ORDER BY " + LOST_BLOCK_SUM
         + " DESC, " + LOST_BLOCKS + " DESC, " + STATUS_MODIFICATION_TIME + " ASC LIMIT " + limit;
     return find(query);
   }
 
   @Override
   public int countRequestedRepairs() throws StorageException {
-    return CountHelper.countWhere(TABLE_NAME, STATUS + "=" + EncodingStatus.REPAIR_REQUESTED);
+    return CountHelper.countWhere(TABLE_NAME, STATUS + "=" + EncodingStatus.Status.REPAIR_REQUESTED.ordinal());
   }
 
   @Override
   public Collection<EncodingStatus> findActiveEncodings() throws StorageException {
-    return findAllWithStatus(EncodingStatus.ENCODING_ACTIVE);
+    return findAllWithStatus(EncodingStatus.Status.ENCODING_ACTIVE.ordinal());
   }
 
   @Override
   public int countActiveEncodings() throws StorageException {
-    return CountHelper.countWhere(TABLE_NAME, STATUS + "=" + EncodingStatus.ENCODING_ACTIVE);
+    return CountHelper.countWhere(TABLE_NAME, STATUS + "=" + EncodingStatus.Status.ENCODING_ACTIVE.ordinal());
   }
 
   @Override
   public Collection<EncodingStatus> findEncoded(long limit) throws StorageException {
-    return findWithStatus(EncodingStatus.ENCODED, limit);
+    return findWithStatus(EncodingStatus.Status.ENCODED.ordinal(), limit);
   }
 
   @Override
   public int countEncoded() throws StorageException {
-    return CountHelper.countWhere(TABLE_NAME, STATUS + "=" + EncodingStatus.ENCODED);
+    return CountHelper.countWhere(TABLE_NAME, STATUS + "=" + EncodingStatus.Status.ENCODED.ordinal());
   }
 
   @Override
   public Collection<EncodingStatus> findActiveRepairs() throws StorageException {
-    return findAllWithStatus(EncodingStatus.REPAIR_ACTIVE);
+    return findAllWithStatus(EncodingStatus.Status.REPAIR_ACTIVE.ordinal());
   }
 
   @Override
   public int countActiveRepairs() throws StorageException {
-    return CountHelper.countWhere(TABLE_NAME, STATUS + "=" + EncodingStatus.REPAIR_ACTIVE);
+    return CountHelper.countWhere(TABLE_NAME, STATUS + "=" + EncodingStatus.Status.REPAIR_ACTIVE.ordinal());
   }
 
   @Override
@@ -279,11 +280,11 @@ public class EncodingStatusClusterj implements EncodingStatusTableDef,
         STATUS_QUERY,
         TABLE_NAME,
         PARITY_STATUS,
-        EncodingStatus.PARITY_REPAIR_REQUESTED,
+        EncodingStatus.ParityStatus.REPAIR_REQUESTED.ordinal(),
         STATUS,
-        EncodingStatus.REPAIR_ACTIVE,
+        EncodingStatus.Status.REPAIR_ACTIVE.ordinal(),
         STATUS,
-        EncodingStatus.REPAIR_FAILED,
+        EncodingStatus.Status.REPAIR_FAILED.ordinal(),
         PARITY_STATUS_MODIFICATION_TIME,
         limit);
     return find(query);
@@ -291,17 +292,17 @@ public class EncodingStatusClusterj implements EncodingStatusTableDef,
 
   @Override
   public int countRequestedParityRepairs() throws StorageException {
-    return CountHelper.countWhere(TABLE_NAME, PARITY_STATUS + "=" + EncodingStatus.PARITY_REPAIR_REQUESTED);
+    return CountHelper.countWhere(TABLE_NAME, PARITY_STATUS + "=" + EncodingStatus.ParityStatus.REPAIR_REQUESTED.ordinal());
   }
 
   @Override
   public Collection<EncodingStatus> findActiveParityRepairs() throws StorageException {
-    return findAllWithParityStatus(EncodingStatus.PARITY_REPAIR_ACTIVE);
+    return findAllWithParityStatus(EncodingStatus.ParityStatus.REPAIR_ACTIVE.ordinal());
   }
 
   @Override
   public int countActiveParityRepairs() throws StorageException {
-    return CountHelper.countWhere(TABLE_NAME, PARITY_STATUS + "=" + EncodingStatus.PARITY_REPAIR_ACTIVE);
+    return CountHelper.countWhere(TABLE_NAME, PARITY_STATUS + "=" + EncodingStatus.ParityStatus.REPAIR_ACTIVE.ordinal());
   }
 
   @Override
@@ -326,7 +327,7 @@ public class EncodingStatusClusterj implements EncodingStatusTableDef,
 
   @Override
   public Collection<EncodingStatus> findDeleted(long limit) throws StorageException {
-    return findWithStatus(EncodingStatus.DELETED, limit);
+    return findWithStatus(EncodingStatus.Status.DELETED.ordinal(), limit);
   }
 
   @Override
@@ -363,8 +364,10 @@ public class EncodingStatusClusterj implements EncodingStatusTableDef,
       parityInodeId = dto.getParityInodeId();
     }
 
-    return new EncodingStatus(dto.getInodeId(), parityInodeId, dto.getStatus(), dto.getCodec(),
-        dto.getTargetReplication(), dto.getStatusModificationTime(), dto.getParityStatus(),
+    EncodingPolicy policy = new EncodingPolicy(dto.getCodec(), dto.getTargetReplication());
+    EncodingStatus.Status status = dto.getStatus() == null ? null : EncodingStatus.Status.values()[dto.getStatus()];
+    EncodingStatus.ParityStatus parityStatus = dto.getParityStatus() == null ? null : EncodingStatus.ParityStatus.values()[dto.getParityStatus()];
+    return new EncodingStatus(dto.getInodeId(), parityInodeId, status, parityStatus, policy, dto.getStatusModificationTime(),
         dto.getParityStatusModificationTime(), dto.getParityFileName(), dto.getLostBlockCount(),
         dto.getLostParityBlockCount(), NdbBoolean.convert(dto.getRevoked()));
   }
@@ -411,12 +414,12 @@ public class EncodingStatusClusterj implements EncodingStatusTableDef,
         String parityFileName = result.getString(PARITY_FILE_NAME);
         int lostBlocks = result.getInt(LOST_BLOCKS);
         int lostParityBlocks = result.getInt(LOST_PARITY_BLOCKS);
-        // FIXME STEFFEN - This leads to crashed with column revoked not found.
-        // No idea why but the revoked flag is not read in this context anyway.
-//        Boolean revoked = result.getBoolean(REVOKED);
-        resultList.add(new EncodingStatus(inodeId, parityInodeId, status, codec, targetReplication,
-            statusModificationTime, parityStatus, parityStatusModificationTime, parityFileName, lostBlocks,
-            lostParityBlocks, /*revoked*/ null));
+        Boolean revoked = NdbBoolean.convert(result.getByte(REVOKED));
+
+        EncodingPolicy policy = new EncodingPolicy(codec, targetReplication);
+        resultList.add(new EncodingStatus(inodeId, parityInodeId, EncodingStatus.Status.values()[status],
+            EncodingStatus.ParityStatus.values()[parityStatus], policy, statusModificationTime,
+            parityStatusModificationTime, parityFileName, lostBlocks, lostParityBlocks, revoked));
       }
     } catch (SQLException ex) {
       throw HopsSQLExceptionHelper.wrap(ex);
