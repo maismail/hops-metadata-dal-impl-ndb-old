@@ -9,9 +9,9 @@ import io.hops.metadata.ndb.wrapper.HopsQuery;
 import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
 import io.hops.metadata.ndb.wrapper.HopsQueryDomainType;
 import io.hops.metadata.ndb.wrapper.HopsSession;
+import io.hops.metadata.yarn.TablesDef;
 import io.hops.metadata.yarn.dal.QueueMetricsDataAccess;
 import io.hops.metadata.yarn.entity.QueueMetrics;
-import io.hops.metadata.yarn.tabledef.QueueMetricsTableDef;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -19,7 +19,7 @@ import java.util.Collection;
 import java.util.List;
 
 public class QueueMetricsClusterJ
-    implements QueueMetricsTableDef, QueueMetricsDataAccess<QueueMetrics> {
+    implements TablesDef.QueueMetricsTableDef, QueueMetricsDataAccess<QueueMetrics> {
 
   @PersistenceCapable(table = TABLE_NAME)
   public interface QueueMetricsDTO {

@@ -5,10 +5,10 @@ import com.mysql.clusterj.annotation.Index;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
 import io.hops.exception.StorageException;
+import io.hops.metadata.hdfs.TablesDef;
 import io.hops.metadata.hdfs.dal.EncodingStatusDataAccess;
 import io.hops.metadata.hdfs.entity.EncodingPolicy;
 import io.hops.metadata.hdfs.entity.EncodingStatus;
-import io.hops.metadata.hdfs.tabledef.EncodingStatusTableDef;
 import io.hops.metadata.ndb.ClusterjConnector;
 import io.hops.metadata.ndb.NdbBoolean;
 import io.hops.metadata.ndb.mysqlserver.CountHelper;
@@ -29,7 +29,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public class EncodingStatusClusterj implements EncodingStatusTableDef,
+public class EncodingStatusClusterj implements TablesDef.EncodingStatusTableDef,
     EncodingStatusDataAccess<EncodingStatus> {
 
   static final Log LOG = LogFactory.getLog(EncodingStatusClusterj.class);

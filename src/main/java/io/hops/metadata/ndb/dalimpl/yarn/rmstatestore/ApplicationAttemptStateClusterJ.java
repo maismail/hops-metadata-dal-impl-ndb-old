@@ -9,9 +9,9 @@ import io.hops.metadata.ndb.wrapper.HopsQuery;
 import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
 import io.hops.metadata.ndb.wrapper.HopsQueryDomainType;
 import io.hops.metadata.ndb.wrapper.HopsSession;
+import io.hops.metadata.yarn.TablesDef;
 import io.hops.metadata.yarn.dal.rmstatestore.ApplicationAttemptStateDataAccess;
 import io.hops.metadata.yarn.entity.rmstatestore.ApplicationAttemptState;
-import io.hops.metadata.yarn.tabledef.rmstatestore.ApplicationAttemptStateTableDef;
 import io.hops.util.CompressionUtils;
 
 import java.io.IOException;
@@ -24,7 +24,7 @@ import java.util.Map;
 import java.util.zip.DataFormatException;
 
 public class ApplicationAttemptStateClusterJ
-    implements ApplicationAttemptStateTableDef,
+    implements TablesDef.ApplicationAttemptStateTableDef,
     ApplicationAttemptStateDataAccess<ApplicationAttemptState> {
 
   @PersistenceCapable(table = TABLE_NAME)

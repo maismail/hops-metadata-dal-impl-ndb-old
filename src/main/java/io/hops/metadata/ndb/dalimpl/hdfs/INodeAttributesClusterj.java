@@ -4,10 +4,10 @@ import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
 import io.hops.exception.StorageException;
+import io.hops.metadata.hdfs.TablesDef;
 import io.hops.metadata.hdfs.dal.INodeAttributesDataAccess;
 import io.hops.metadata.hdfs.entity.INodeAttributes;
 import io.hops.metadata.hdfs.entity.INodeCandidatePrimaryKey;
-import io.hops.metadata.hdfs.tabledef.INodeAttributesTableDef;
 import io.hops.metadata.ndb.ClusterjConnector;
 import io.hops.metadata.ndb.wrapper.HopsSession;
 
@@ -15,7 +15,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public class INodeAttributesClusterj implements INodeAttributesTableDef,
+public class INodeAttributesClusterj implements
+    TablesDef.INodeAttributesTableDef,
     INodeAttributesDataAccess<INodeAttributes> {
 
   @PersistenceCapable(table = TABLE_NAME)

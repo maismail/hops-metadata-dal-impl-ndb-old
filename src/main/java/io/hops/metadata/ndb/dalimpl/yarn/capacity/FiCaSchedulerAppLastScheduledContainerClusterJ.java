@@ -6,14 +6,14 @@ import com.mysql.clusterj.annotation.PrimaryKey;
 import io.hops.exception.StorageException;
 import io.hops.metadata.ndb.ClusterjConnector;
 import io.hops.metadata.ndb.wrapper.HopsSession;
+import io.hops.metadata.yarn.TablesDef;
 import io.hops.metadata.yarn.dal.capacity.FiCaSchedulerAppLastScheduledContainerDataAccess;
 import io.hops.metadata.yarn.entity.capacity.FiCaSchedulerAppLastScheduledContainer;
-import io.hops.metadata.yarn.tabledef.capacity.FiCaSchedulerAppLastScheduledContainerTableDef;
 
 import java.util.Collection;
 
 public class FiCaSchedulerAppLastScheduledContainerClusterJ
-    implements FiCaSchedulerAppLastScheduledContainerTableDef,
+    implements TablesDef.FiCaSchedulerAppLastScheduledContainerTableDef,
     FiCaSchedulerAppLastScheduledContainerDataAccess<FiCaSchedulerAppLastScheduledContainer> {
 
 

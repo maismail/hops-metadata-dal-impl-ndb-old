@@ -6,9 +6,9 @@ import com.mysql.clusterj.annotation.PartitionKey;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
 import io.hops.exception.StorageException;
+import io.hops.metadata.hdfs.TablesDef;
 import io.hops.metadata.hdfs.dal.ReplicaUnderConstructionDataAccess;
 import io.hops.metadata.hdfs.entity.ReplicaUnderConstruction;
-import io.hops.metadata.hdfs.tabledef.ReplicaUnderConstructionTableDef;
 import io.hops.metadata.ndb.ClusterjConnector;
 import io.hops.metadata.ndb.wrapper.HopsPredicate;
 import io.hops.metadata.ndb.wrapper.HopsQuery;
@@ -21,7 +21,7 @@ import java.util.Collection;
 import java.util.List;
 
 public class ReplicaUnderConstructionClusterj
-    implements ReplicaUnderConstructionTableDef,
+    implements TablesDef.ReplicaUnderConstructionTableDef,
     ReplicaUnderConstructionDataAccess<ReplicaUnderConstruction> {
 
   @PersistenceCapable(table = TABLE_NAME)

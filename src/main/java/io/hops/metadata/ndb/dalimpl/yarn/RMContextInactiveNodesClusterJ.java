@@ -9,16 +9,16 @@ import io.hops.metadata.ndb.wrapper.HopsQuery;
 import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
 import io.hops.metadata.ndb.wrapper.HopsQueryDomainType;
 import io.hops.metadata.ndb.wrapper.HopsSession;
+import io.hops.metadata.yarn.TablesDef;
 import io.hops.metadata.yarn.dal.RMContextInactiveNodesDataAccess;
 import io.hops.metadata.yarn.entity.RMContextInactiveNodes;
-import io.hops.metadata.yarn.tabledef.RMContextInactiveNodesTableDef;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
 public class RMContextInactiveNodesClusterJ
-    implements RMContextInactiveNodesTableDef,
+    implements TablesDef.RMContextInactiveNodesTableDef,
     RMContextInactiveNodesDataAccess<RMContextInactiveNodes> {
 
   @PersistenceCapable(table = TABLE_NAME)

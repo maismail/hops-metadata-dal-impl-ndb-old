@@ -6,11 +6,11 @@ import com.mysql.clusterj.annotation.PrimaryKey;
 import io.hops.exception.StorageException;
 import io.hops.metadata.ndb.ClusterjConnector;
 import io.hops.metadata.ndb.wrapper.HopsSession;
+import io.hops.metadata.yarn.TablesDef;
 import io.hops.metadata.yarn.dal.rmstatestore.RMStateVersionDataAccess;
 import io.hops.metadata.yarn.entity.rmstatestore.RMStateVersion;
-import io.hops.metadata.yarn.tabledef.rmstatestore.RMStateVersionTableDef;
 
-public class RMStateVersionClusterJ implements RMStateVersionTableDef,
+public class RMStateVersionClusterJ implements TablesDef.RMStateVersionTableDef,
     RMStateVersionDataAccess<RMStateVersion> {
 
   @PersistenceCapable(table = TABLE_NAME)

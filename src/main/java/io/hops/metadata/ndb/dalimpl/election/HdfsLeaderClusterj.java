@@ -3,13 +3,13 @@ package io.hops.metadata.ndb.dalimpl.election;
 import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
+import io.hops.metadata.election.TablesDef;
 import io.hops.metadata.election.entity.LeDescriptor;
-import io.hops.metadata.election.tabledef.HdfsLeaderTableDef;
 
 import java.security.InvalidParameterException;
 
 public class HdfsLeaderClusterj extends LeDescriptorClusterj
-    implements HdfsLeaderTableDef {
+    implements TablesDef.HdfsLeaderTableDef {
 
   @PersistenceCapable(table = TABLE_NAME)
   public interface HdfsLeaderDTO extends LeaderDTO {

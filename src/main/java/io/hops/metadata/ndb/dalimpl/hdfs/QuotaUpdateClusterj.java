@@ -4,9 +4,9 @@ import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
 import io.hops.exception.StorageException;
+import io.hops.metadata.hdfs.TablesDef;
 import io.hops.metadata.hdfs.dal.QuotaUpdateDataAccess;
 import io.hops.metadata.hdfs.entity.QuotaUpdate;
-import io.hops.metadata.hdfs.tabledef.QuotaUpdateTableDef;
 import io.hops.metadata.ndb.ClusterjConnector;
 import io.hops.metadata.ndb.mysqlserver.HopsSQLExceptionHelper;
 import io.hops.metadata.ndb.mysqlserver.MysqlServerConnector;
@@ -25,7 +25,7 @@ import java.util.Collection;
 import java.util.List;
 
 public class QuotaUpdateClusterj
-    implements QuotaUpdateTableDef, QuotaUpdateDataAccess<QuotaUpdate> {
+    implements TablesDef.QuotaUpdateTableDef, QuotaUpdateDataAccess<QuotaUpdate> {
 
   @PersistenceCapable(table = TABLE_NAME)
   public interface QuotaUpdateDTO {

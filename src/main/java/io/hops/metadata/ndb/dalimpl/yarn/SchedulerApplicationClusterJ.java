@@ -9,9 +9,9 @@ import io.hops.metadata.ndb.wrapper.HopsQuery;
 import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
 import io.hops.metadata.ndb.wrapper.HopsQueryDomainType;
 import io.hops.metadata.ndb.wrapper.HopsSession;
+import io.hops.metadata.yarn.TablesDef;
 import io.hops.metadata.yarn.dal.SchedulerApplicationDataAccess;
 import io.hops.metadata.yarn.entity.SchedulerApplication;
-import io.hops.metadata.yarn.tabledef.SchedulerApplicationTableDef;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 public class SchedulerApplicationClusterJ
-    implements SchedulerApplicationTableDef,
+    implements TablesDef.SchedulerApplicationTableDef,
     SchedulerApplicationDataAccess<SchedulerApplication> {
 
   @PersistenceCapable(table = TABLE_NAME)

@@ -6,10 +6,10 @@ import com.mysql.clusterj.annotation.PartitionKey;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
 import io.hops.exception.StorageException;
+import io.hops.metadata.hdfs.TablesDef;
 import io.hops.metadata.hdfs.dal.BlockInfoDataAccess;
 import io.hops.metadata.hdfs.entity.BlockInfo;
 import io.hops.metadata.hdfs.entity.BlockLookUp;
-import io.hops.metadata.hdfs.tabledef.BlockInfoTableDef;
 import io.hops.metadata.ndb.ClusterjConnector;
 import io.hops.metadata.ndb.mysqlserver.MySQLQueryHelper;
 import io.hops.metadata.ndb.wrapper.HopsPredicate;
@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.Set;
 
 public class BlockInfoClusterj
-    implements BlockInfoTableDef, BlockInfoDataAccess<BlockInfo> {
+    implements TablesDef.BlockInfoTableDef, BlockInfoDataAccess<BlockInfo> {
 
   @PersistenceCapable(table = TABLE_NAME)
   @PartitionKey(column = INODE_ID)

@@ -9,9 +9,9 @@ import io.hops.metadata.ndb.wrapper.HopsQuery;
 import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
 import io.hops.metadata.ndb.wrapper.HopsQueryDomainType;
 import io.hops.metadata.ndb.wrapper.HopsSession;
+import io.hops.metadata.yarn.TablesDef;
 import io.hops.metadata.yarn.dal.NodeDataAccess;
 import io.hops.metadata.yarn.entity.Node;
-import io.hops.metadata.yarn.tabledef.NodeTableDef;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -21,7 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class NodeClusterJ implements NodeTableDef, NodeDataAccess<Node> {
+public class NodeClusterJ implements TablesDef.NodeTableDef, NodeDataAccess<Node> {
 
   private static final Log LOG = LogFactory.getLog(NodeClusterJ.class);
 

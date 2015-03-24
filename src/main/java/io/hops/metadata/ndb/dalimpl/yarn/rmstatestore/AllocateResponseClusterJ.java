@@ -9,9 +9,9 @@ import io.hops.metadata.ndb.wrapper.HopsQuery;
 import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
 import io.hops.metadata.ndb.wrapper.HopsQueryDomainType;
 import io.hops.metadata.ndb.wrapper.HopsSession;
+import io.hops.metadata.yarn.TablesDef;
 import io.hops.metadata.yarn.dal.rmstatestore.AllocateResponseDataAccess;
 import io.hops.metadata.yarn.entity.rmstatestore.AllocateResponse;
-import io.hops.metadata.yarn.tabledef.rmstatestore.AllocateResponseTableDef;
 import io.hops.util.CompressionUtils;
 
 import java.io.IOException;
@@ -20,7 +20,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.zip.DataFormatException;
 
-public class AllocateResponseClusterJ implements AllocateResponseTableDef,
+public class AllocateResponseClusterJ implements
+    TablesDef.AllocateResponseTableDef,
     AllocateResponseDataAccess<AllocateResponse> {
 
   @PersistenceCapable(table = TABLE_NAME)

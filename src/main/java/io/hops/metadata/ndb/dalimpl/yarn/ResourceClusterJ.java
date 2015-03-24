@@ -9,9 +9,9 @@ import io.hops.metadata.ndb.wrapper.HopsQuery;
 import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
 import io.hops.metadata.ndb.wrapper.HopsQueryDomainType;
 import io.hops.metadata.ndb.wrapper.HopsSession;
+import io.hops.metadata.yarn.TablesDef;
 import io.hops.metadata.yarn.dal.ResourceDataAccess;
 import io.hops.metadata.yarn.entity.Resource;
-import io.hops.metadata.yarn.tabledef.ResourceTableDef;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 public class ResourceClusterJ
-    implements ResourceTableDef, ResourceDataAccess<Resource> {
+    implements TablesDef.ResourceTableDef, ResourceDataAccess<Resource> {
 
   private static final Log LOG = LogFactory.getLog(ResourceClusterJ.class);
 

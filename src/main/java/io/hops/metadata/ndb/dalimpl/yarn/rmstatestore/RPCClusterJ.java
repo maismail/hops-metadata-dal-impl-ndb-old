@@ -10,9 +10,9 @@ import io.hops.metadata.ndb.wrapper.HopsQuery;
 import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
 import io.hops.metadata.ndb.wrapper.HopsQueryDomainType;
 import io.hops.metadata.ndb.wrapper.HopsSession;
+import io.hops.metadata.yarn.TablesDef;
 import io.hops.metadata.yarn.dal.rmstatestore.RPCDataAccess;
 import io.hops.metadata.yarn.entity.appmasterrpc.RPC;
-import io.hops.metadata.yarn.tabledef.appmasterrpc.RPCTableDef;
 import io.hops.util.CompressionUtils;
 
 import java.io.IOException;
@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.DataFormatException;
 
-public class RPCClusterJ implements RPCTableDef, RPCDataAccess<RPC> {
+public class RPCClusterJ implements TablesDef.RPCTableDef, RPCDataAccess<RPC> {
 
   @PersistenceCapable(table = TABLE_NAME)
   public interface RPCDTO {

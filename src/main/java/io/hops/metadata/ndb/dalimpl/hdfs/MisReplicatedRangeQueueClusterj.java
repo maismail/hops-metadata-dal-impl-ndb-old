@@ -4,14 +4,14 @@ import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
 import io.hops.exception.StorageException;
+import io.hops.metadata.hdfs.TablesDef;
 import io.hops.metadata.hdfs.dal.MisReplicatedRangeQueueDataAccess;
-import io.hops.metadata.hdfs.tabledef.MisReplicatedRangeQueueTableDef;
 import io.hops.metadata.ndb.ClusterjConnector;
 import io.hops.metadata.ndb.mysqlserver.MySQLQueryHelper;
 import io.hops.metadata.ndb.wrapper.HopsSession;
 
 public class MisReplicatedRangeQueueClusterj
-    implements MisReplicatedRangeQueueTableDef,
+    implements TablesDef.MisReplicatedRangeQueueTableDef,
     MisReplicatedRangeQueueDataAccess {
 
   @PersistenceCapable(table = TABLE_NAME)

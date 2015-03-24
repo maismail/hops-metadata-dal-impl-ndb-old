@@ -10,15 +10,16 @@ import io.hops.metadata.ndb.wrapper.HopsQuery;
 import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
 import io.hops.metadata.ndb.wrapper.HopsQueryDomainType;
 import io.hops.metadata.ndb.wrapper.HopsSession;
+import io.hops.metadata.yarn.TablesDef;
 import io.hops.metadata.yarn.dal.AppSchedulingInfoDataAccess;
 import io.hops.metadata.yarn.entity.AppSchedulingInfo;
-import io.hops.metadata.yarn.tabledef.AppSchedulingInfoTableDef;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AppSchedulingInfoClusterJ implements AppSchedulingInfoTableDef,
+public class AppSchedulingInfoClusterJ implements
+    TablesDef.AppSchedulingInfoTableDef,
     AppSchedulingInfoDataAccess<AppSchedulingInfo> {
 
   @PersistenceCapable(table = TABLE_NAME)

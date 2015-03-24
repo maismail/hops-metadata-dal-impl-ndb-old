@@ -7,9 +7,9 @@ import com.mysql.clusterj.annotation.PartitionKey;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
 import io.hops.exception.StorageException;
+import io.hops.metadata.hdfs.TablesDef;
 import io.hops.metadata.hdfs.dal.ExcessReplicaDataAccess;
 import io.hops.metadata.hdfs.entity.ExcessReplica;
-import io.hops.metadata.hdfs.tabledef.ExcessReplicaTableDef;
 import io.hops.metadata.ndb.ClusterjConnector;
 import io.hops.metadata.ndb.mysqlserver.MySQLQueryHelper;
 import io.hops.metadata.ndb.wrapper.HopsPredicate;
@@ -23,7 +23,7 @@ import java.util.Collection;
 import java.util.List;
 
 public class ExcessReplicaClusterj
-    implements ExcessReplicaTableDef, ExcessReplicaDataAccess<ExcessReplica> {
+    implements TablesDef.ExcessReplicaTableDef, ExcessReplicaDataAccess<ExcessReplica> {
 
 
   @PersistenceCapable(table = TABLE_NAME)

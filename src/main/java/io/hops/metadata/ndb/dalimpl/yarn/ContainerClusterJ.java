@@ -9,9 +9,9 @@ import io.hops.metadata.ndb.wrapper.HopsQuery;
 import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
 import io.hops.metadata.ndb.wrapper.HopsQueryDomainType;
 import io.hops.metadata.ndb.wrapper.HopsSession;
+import io.hops.metadata.yarn.TablesDef;
 import io.hops.metadata.yarn.dal.ContainerDataAccess;
 import io.hops.metadata.yarn.entity.Container;
-import io.hops.metadata.yarn.tabledef.ContainerTableDef;
 import io.hops.util.CompressionUtils;
 
 import java.io.IOException;
@@ -23,7 +23,7 @@ import java.util.Map;
 import java.util.zip.DataFormatException;
 
 public class ContainerClusterJ
-    implements ContainerTableDef, ContainerDataAccess<Container> {
+    implements TablesDef.ContainerTableDef, ContainerDataAccess<Container> {
 
   @PersistenceCapable(table = TABLE_NAME)
   public interface ContainerDTO {

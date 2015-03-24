@@ -6,11 +6,11 @@ import com.mysql.clusterj.annotation.PrimaryKey;
 import io.hops.exception.StorageException;
 import io.hops.metadata.ndb.ClusterjConnector;
 import io.hops.metadata.ndb.wrapper.HopsSession;
+import io.hops.metadata.yarn.TablesDef;
 import io.hops.metadata.yarn.dal.rmstatestore.SequenceNumberDataAccess;
 import io.hops.metadata.yarn.entity.rmstatestore.SequenceNumber;
-import io.hops.metadata.yarn.tabledef.rmstatestore.SequenceNumberTableDef;
 
-public class SequenceNumberClusterJ implements SequenceNumberTableDef,
+public class SequenceNumberClusterJ implements TablesDef.SequenceNumberTableDef,
     SequenceNumberDataAccess<SequenceNumber> {
 
   @PersistenceCapable(table = TABLE_NAME)

@@ -4,9 +4,9 @@ import com.mysql.clusterj.annotation.Column;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
 import io.hops.exception.StorageException;
+import io.hops.metadata.hdfs.TablesDef;
 import io.hops.metadata.hdfs.dal.StorageIdMapDataAccess;
 import io.hops.metadata.hdfs.entity.StorageId;
-import io.hops.metadata.hdfs.tabledef.StorageIdMapTableDef;
 import io.hops.metadata.ndb.ClusterjConnector;
 import io.hops.metadata.ndb.wrapper.HopsQuery;
 import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
@@ -18,7 +18,7 @@ import java.util.Collection;
 import java.util.List;
 
 public class StorageIdMapClusterj
-    implements StorageIdMapTableDef, StorageIdMapDataAccess<StorageId> {
+    implements TablesDef.StorageIdMapTableDef, StorageIdMapDataAccess<StorageId> {
 
   @PersistenceCapable(table = TABLE_NAME)
   public interface StorageIdDTO {

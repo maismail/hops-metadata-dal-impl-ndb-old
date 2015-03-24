@@ -6,9 +6,9 @@ import com.mysql.clusterj.annotation.PartitionKey;
 import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
 import io.hops.exception.StorageException;
+import io.hops.metadata.hdfs.TablesDef;
 import io.hops.metadata.hdfs.dal.PendingBlockDataAccess;
 import io.hops.metadata.hdfs.entity.PendingBlockInfo;
-import io.hops.metadata.hdfs.tabledef.PendingBlockTableDef;
 import io.hops.metadata.ndb.ClusterjConnector;
 import io.hops.metadata.ndb.mysqlserver.MySQLQueryHelper;
 import io.hops.metadata.ndb.wrapper.HopsPredicate;
@@ -23,7 +23,7 @@ import java.util.Collection;
 import java.util.List;
 
 public class PendingBlockClusterj
-    implements PendingBlockTableDef, PendingBlockDataAccess<PendingBlockInfo> {
+    implements TablesDef.PendingBlockTableDef, PendingBlockDataAccess<PendingBlockInfo> {
 
   @Override
   public int countValidPendingBlocks(long timeLimit) throws StorageException {

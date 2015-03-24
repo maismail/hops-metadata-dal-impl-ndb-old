@@ -5,8 +5,8 @@ import com.mysql.clusterj.annotation.PersistenceCapable;
 import com.mysql.clusterj.annotation.PrimaryKey;
 import io.hops.exception.StorageException;
 import io.hops.metadata.common.entity.Variable;
+import io.hops.metadata.hdfs.TablesDef;
 import io.hops.metadata.hdfs.dal.VariableDataAccess;
-import io.hops.metadata.hdfs.tabledef.VariableTableDef;
 import io.hops.metadata.ndb.ClusterjConnector;
 import io.hops.metadata.ndb.wrapper.HopsSession;
 
@@ -15,7 +15,7 @@ import java.util.Collection;
 import java.util.List;
 
 public class VariableClusterj
-    implements VariableTableDef, VariableDataAccess<Variable, Variable.Finder> {
+    implements TablesDef.VariableTableDef, VariableDataAccess<Variable, Variable.Finder> {
 
   @PersistenceCapable(table = TABLE_NAME)
   public interface VariableDTO {

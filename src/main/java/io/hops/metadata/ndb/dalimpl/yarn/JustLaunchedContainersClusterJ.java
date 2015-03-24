@@ -10,9 +10,9 @@ import io.hops.metadata.ndb.wrapper.HopsQuery;
 import io.hops.metadata.ndb.wrapper.HopsQueryBuilder;
 import io.hops.metadata.ndb.wrapper.HopsQueryDomainType;
 import io.hops.metadata.ndb.wrapper.HopsSession;
+import io.hops.metadata.yarn.TablesDef;
 import io.hops.metadata.yarn.dal.JustLaunchedContainersDataAccess;
 import io.hops.metadata.yarn.entity.JustLaunchedContainers;
-import io.hops.metadata.yarn.tabledef.JustLaunchedContainersTableDef;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.Map;
 
 public class JustLaunchedContainersClusterJ
-    implements JustLaunchedContainersTableDef,
+    implements TablesDef.JustLaunchedContainersTableDef,
     JustLaunchedContainersDataAccess<JustLaunchedContainers> {
 
   private static final Log LOG =
